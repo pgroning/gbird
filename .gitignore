@@ -1,0 +1,7 @@
+*~
+*.pyc
+*.cax
+addc*
+bin
+cax
+lib
