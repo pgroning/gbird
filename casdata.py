@@ -37,6 +37,10 @@ class casdata(object):
     be imported. If not defined all statepoints will be read."""
 
     def __init__(self,caxfile,opt='all'):
+        
+        self.datadic = {}
+        self.state = []
+
         self.data = datastruct()
         self.statepoints = []
         #self.pert = datastruct()
@@ -132,7 +136,7 @@ class casdata(object):
         iEND = self.__matchcontent('^\s*END','next')
         #Tracer()()
         iBWR = self.__matchcontent('^\s*BWR','next')
-        Tracer()()
+        #Tracer()()
         iLFU = self.__matchcontent('^\s*LFU','next')
         iLPI = self.__matchcontent('^\s*LPI','next')
         iTFU = self.__matchcontent('^\s*TFU','next')
@@ -147,42 +151,55 @@ class casdata(object):
         iSTA = self.__matchcontent('^\s*STA','next')
         print "Done."
         # Read title
+        self.datadic['title'] = flines[iTTL[0]]
         #self.title = flines[iTTL[0]]
         self.data.title = flines[iTTL[0]]
         # SIM
+        self.datadic['sim'] = flines[iSIM[0]]
         #self.sim = flines[iSIM[0]]
         self.data.sim = flines[iSIM[0]]
         # TFU
+        self.datadic['tfu'] = flines[iTFU]
         #self.tfu = flines[iTFU]
         self.data.tfu = flines[iTFU]
         # TMO
+        self.datadic['tmo'] = flines[iTMO]
         #self.tmo = flines[iTMO]
         self.data.tmo = flines[iTMO]
         # VOI
+        self.datadic['voi'] = flines[iVOI[0]]
         #self.voi = flines[iVOI[0]]
         self.data.voi = flines[iVOI[0]]
         # PDE
+        self.datadic['pde'] = flines[iPDE]
         #self.pde = flines[iPDE]
         self.data.pde = flines[iPDE]
         # BWR
+        self.datadic['bwr'] = flines[iBWR]
         #self.bwr = flines[iBWR]
         self.data.bwr = flines[iBWR]
         # SPA
+        self.datadic['spa'] = flines[iSPA[0]]
         #self.spa = flines[iSPA[0]]
         self.data.spa = flines[iSPA[0]]
         # DEP
+        self.datadic['dep'] = flines[iDEP[0]]
         #self.dep = flines[iDEP[0]]
         self.data.dep = flines[iDEP[0]]
         # GAM
+        self.datadic['gam'] = flines[iGAM[0]]
         #self.gam = flines[iGAM[0]]
         self.data.gam = flines[iGAM[0]]
         # WRI
+        self.datadic['wri'] = flines[iWRI]
         #self.wri = flines[iWRI]
         self.data.wri = flines[iWRI]
         # STA
+        self.datadic['sta'] = flines[iSTA]
         #self.sta = flines[iSTA]
         self.data.sta = flines[iSTA]
         # CRD
+        self.datadic['crd'] = flines[iCRD[0]]
         #self.crd = flines[iCRD[0]]
         self.data.crd = flines[iCRD[0]]
 
@@ -199,8 +216,9 @@ class casdata(object):
         
         # Read FUE
         #iFUE = iFUE[iFUE<iEND[0]]
+        #Tracer()()
         iFUE = [i for i in iFUE if i<iEND]
-        #iFUE = filter(lambda x,y=iEND:x<y,iFUE)
+        #iFUE = filter(lambda x, y=iEND: x < y, iFUE)
         #Nfue = iFUE.size
         Nfue = len(iFUE)
         FUE = np.zeros((Nfue,5)); FUE.fill(np.nan)
@@ -246,60 +264,58 @@ class casdata(object):
             rlen = np.size(rvec)
             PIN[i,:rlen-1] = rvec[1:ncol+1]
 
+        self.datadic['pinlines'] = flines[iPIN[0]:iPIN[0]+Npin]
         #self.pinlines = flines[iPIN[0]:iPIN[0]+Npin]
         self.data.pinlines = flines[iPIN[0]:iPIN[0]+Npin]
-
+        
         # Read SLA
         if iSLA is not None:
+            self.datadic['slalines'] = flines[iSLA]
             self.data.slaline = flines[iSLA]
         # ------Step through the state points----------
         print "Stepping through state points..."
 
-        #Tracer()()
-        #Nburnpts = iTIT.size
-        Nburnpts = len(iTIT)
-        #titcrd = []
-        burnup = np.zeros(Nburnpts); burnup.fill(np.nan)
-        voi = np.zeros(Nburnpts); voi.fill(np.nan)
-        vhi = np.zeros(Nburnpts); vhi.fill(np.nan)
-        tfu = np.zeros(Nburnpts); tfu.fill(np.nan)
-        tmo = np.zeros(Nburnpts); tmo.fill(np.nan)
-        kinf = np.zeros(Nburnpts); kinf.fill(np.nan)
-        POW = np.zeros((npst,npst,Nburnpts)); POW.fill(np.nan)
-        XFL1 = np.zeros((npst,npst,Nburnpts)); XFL1.fill(np.nan)
-        XFL2 = np.zeros((npst,npst,Nburnpts)); XFL2.fill(np.nan)
+        Nburnpoints = len(iTIT)
+        #kinf = np.zeros(Nburnpoints); kinf.fill(np.nan)
+        #POW = np.zeros((npst,npst,Nburnpoints)); POW.fill(np.nan)
+        #XFL1 = np.zeros((npst,npst,Nburnpoints)); XFL1.fill(np.nan)
+        #XFL2 = np.zeros((npst,npst,Nburnpoints)); XFL2.fill(np.nan)
 
         # Read title cards
         titcrd = [flines[i] for i in iTIT]
-        
+
         # Row vector containing burnup, voi, vhi, tfu and tmo
-        rvec = [re.split('/',flines[i+2].strip()) for i in iTIT]
+        rvec = [re.split('[/\s+]+',flines[i+2].strip()) for i in iTIT]
+        burnup = np.array([rvec[i][0] for i in xrange(Nburnpoints)]).astype(float)
+        voi = np.array([rvec[i][1] for i in xrange(Nburnpoints)]).astype(float)
+        vhi = np.array([rvec[i][2] for i in xrange(Nburnpoints)]).astype(float)
+        tfu = np.array([rvec[i][3] for i in xrange(Nburnpoints)]).astype(float)
+        tmo = np.array([rvec[i][5] for i in xrange(Nburnpoints)]).astype(float)
 
         # Row containing Kinf
         kinfstr = [flines[i+5] for i in iPOL]
- 
+        kinf = np.array([re.split('\s+',kinfstr[i].strip())[0] for i in xrange(Nburnpoints)]).astype(float)
+
         # Rows containing radial power distribution map
         powmap = [flines[i+2:i+2+npst] for i in iPOW]
+        POW = np.array([self.__symtrans(self.__map2mat(powmap[i],npst)) for i in xrange(Nburnpoints)]).swapaxes(0,2)
 
+        #Tracer()()
         # Rows containing XFL maps
         xfl1map = [flines[i+2:i+2+npst] for i in iXFL]
-        xfl2map = [flines[i+3+npst:i+3+2*npst] for i in iXFL]
+        XFL1 = np.array([self.__symtrans(self.__map2mat(xfl1map[i],npst)) for i in xrange(Nburnpoints)]).swapaxes(0,2)
 
-        #Tracer()()
-        for i in range(Nburnpts):
-            # Read burnup, voids, tfu and tmo
-            burnup[i],voi[i] = re.split('\s+',rvec[i][0].strip())
-            vhi[i],tfu[i] = re.split('\s+',rvec[i][1].strip())
-            tmo[i] = re.split('\s+',rvec[i][2].strip())[1]
-            # Read kinf
-            kinf[i] = re.split('\s+',kinfstr[i].strip())[0]
+        xfl2map = [flines[i+3+npst:i+3+2*npst] for i in iXFL]
+        XFL2 = np.array([self.__symtrans(self.__map2mat(xfl2map[i],npst)) for i in xrange(Nburnpoints)]).swapaxes(0,2)
+
+        #for i in xrange(Nburnpoints):
             # Read radial power distribution map
-            POW[:,:,i] = self.__symtrans(self.__map2mat(powmap[i],npst))
+            #POW[:,:,i] = self.__symtrans(self.__map2mat(powmap[i],npst))
             # Read XFL maps
-            XFL1[:,:,i] = self.__symtrans(self.__map2mat(xfl1map[i],npst))
-            XFL2[:,:,i] = self.__symtrans(self.__map2mat(xfl2map[i],npst))
+            #XFL1[:,:,i] = self.__symtrans(self.__map2mat(xfl1map[i],npst))
+            #XFL2[:,:,i] = self.__symtrans(self.__map2mat(xfl2map[i],npst))
         print "Done."
-        #Tracer()()
+        Tracer()()
         # -----------------------------------------------------------------------
         # Calculate radial burnup distributions
         EXP = self.__expcalc(POW,burnup)
@@ -307,7 +323,7 @@ class casdata(object):
         fint = self.__fintcalc(POW)
 
         # Append state instancies
-        for i in range(Nburnpts):
+        for i in range(Nburnpoints):
             self.statepoints.append(datastruct()) # append new instance to list
             #state = data()
             self.statepoints[i].titcrd = titcrd[i]
@@ -398,9 +414,9 @@ class casdata(object):
 
 #    #---------Calculate Fint-------------
 #    def fint(self):
-#        Nburnpts = self.POW.shape[2]
-#        fint = np.zeros(Nburnpts); fint.fill(np.nan)
-#        for i in range(Nburnpts):
+#        Nburnpoints = self.POW.shape[2]
+#        fint = np.zeros(Nburnpoints); fint.fill(np.nan)
+#        for i in range(Nburnpoints):
 #            fint[i] = self.POW[:,:,i].max()
 #        self.fint = fint
 
@@ -696,15 +712,15 @@ class casdata(object):
         npst = int(flines[iPOW[0]+1][4:6])
 
         # ------Step through the state points----------
-        Nburnpts = len(iTIT)
+        Nburnpoints = len(iTIT)
         
-        burnup = np.zeros(Nburnpts); burnup.fill(np.nan)
-        voi = np.zeros(Nburnpts); voi.fill(np.nan)
-        vhi = np.zeros(Nburnpts); vhi.fill(np.nan)
-        tfu = np.zeros(Nburnpts); tfu.fill(np.nan)
-        tmo = np.zeros(Nburnpts); tmo.fill(np.nan)
-        kinf = np.zeros(Nburnpts); kinf.fill(np.nan)
-        POW = np.zeros((npst,npst,Nburnpts)); POW.fill(np.nan)
+        burnup = np.zeros(Nburnpoints); burnup.fill(np.nan)
+        voi = np.zeros(Nburnpoints); voi.fill(np.nan)
+        vhi = np.zeros(Nburnpoints); vhi.fill(np.nan)
+        tfu = np.zeros(Nburnpoints); tfu.fill(np.nan)
+        tmo = np.zeros(Nburnpoints); tmo.fill(np.nan)
+        kinf = np.zeros(Nburnpoints); kinf.fill(np.nan)
+        POW = np.zeros((npst,npst,Nburnpoints)); POW.fill(np.nan)
         
         # Row vector containing burnup, voi, vhi, tfu and tmo
         rvec = [re.split('/',flines[i+2].strip()) for i in iTIT]
@@ -715,7 +731,7 @@ class casdata(object):
         # Rows containing radial power distribution map
         powmap = [flines[i+2:i+2+npst] for i in iPOW]
 
-        for i in range(Nburnpts):
+        for i in range(Nburnpoints):
             # Read burnup, voids, tfu and tmo
             burnup[i],voi[i] = re.split('\s+',rvec[i][0].strip())
             vhi[i],tfu[i] = re.split('\s+',rvec[i][1].strip())
@@ -735,7 +751,7 @@ class casdata(object):
         pindex = -1 # Index of last instance
         self.qcalc[pindex].model = "c3"
         self.qcalc[pindex].statepoints = []
-        for i in range(Nburnpts):
+        for i in range(Nburnpoints):
             self.qcalc[pindex].statepoints.append(datastruct()) # append new instance to list
             self.qcalc[pindex].statepoints[i].burnup = burnup[i]
             self.qcalc[pindex].statepoints[i].voi = voi[i]
@@ -759,10 +775,10 @@ class casdata(object):
         print "Done in "+str(time.time()-tic)+" seconds."
 
     def __expcalc(self,POW,burnup):
-        Nburnpts = burnup.size
+        Nburnpoints = burnup.size
         npst = POW.shape[0]
-        EXP = np.zeros((npst,npst,Nburnpts)); EXP.fill(np.nan)
-        for i in range(Nburnpts):
+        EXP = np.zeros((npst,npst,Nburnpoints)); EXP.fill(np.nan)
+        for i in range(Nburnpoints):
             if burnup[i] == 0:
                 EXP[:,:,i] = 0
             else:
@@ -774,9 +790,9 @@ class casdata(object):
         return EXP
 
     def __fintcalc(self,POW):
-        Nburnpts = POW.shape[2]
-        fint = np.zeros(Nburnpts); fint.fill(np.nan)
-        for i in range(Nburnpts):
+        Nburnpoints = POW.shape[2]
+        fint = np.zeros(Nburnpoints); fint.fill(np.nan)
+        for i in range(Nburnpoints):
             fint[i] = POW[:,:,i].max()
         return fint
 
