@@ -235,7 +235,7 @@ class casdata(object):
         
         # Read SLA
         if iSLA is not None:
-            data['slalines'] = flines[iSLA]
+            data['slaline'] = flines[iSLA]
 
         # Append data to db dictionary
         self.db['origin']['info'].update(data)
@@ -320,7 +320,8 @@ class casdata(object):
         geninfo['npst'] = npst
         # Append geninfo to db
         self.db['origin']['info'].update(geninfo)
-
+        # also append LFU to 'qcalc'
+        self.db['qcalc']['info']['LFU'] = LFU
 
 #    def btfcalc(self):
 #        btf('SVEA-96','')
@@ -529,59 +530,63 @@ class casdata(object):
         c3inp = "./c3.inp"
         print "Writing c3 input file " + c3inp
         
+        info = self.db['origin']['info']
+        LFU = self.db['qcalc']['info'].get('LFU')
+
         f = open(c3inp,'w')
 
         tit = "TIT "
-        tit = tit + self.data.tfu.split('*')[0].replace(',','=').strip() + " "
-        tit = tit + self.data.tmo.split('*')[0].replace(',','=').strip() + " "
-        voivec = self.data.voi.split('*')[0].replace(',',' ').strip().split(' ')[1:]
+        tit = tit + info.get('tfu').split('*')[0].replace(',','=').strip() + " "
+        tit = tit + info.get('tmo').split('*')[0].replace(',','=').strip() + " "
+        voivec = info.get('voi').split('*')[0].replace(',',' ').strip().split(' ')[1:]
         tit = tit + "VOI=" + voivec[0] + " "
         ide = ["'BD"+x+"'" for x in voivec]
         f.write(tit + "IDE=" + ide[0] + '\n')
-        f.write(self.data.sim.strip() + '\n')
-
-        Nfue = self.data.FUE.shape[0]
-        for i in range(Nfue):
-            f.write('FUE  %d ' % (self.data.FUE[i,0]))
-            f.write('%5.3f/%5.3f' % (self.data.FUE[i,1],self.data.FUE[i,2]))
-            if ~np.isnan(self.data.FUE[i,3]):
-                f.write(' %d=%4.2f' % (self.data.FUE[i,3],self.data.FUE[i,4]))
+        f.write(info.get('sim').strip() + '\n')
+        
+        FUE = info.get('FUE')
+        Nfue = FUE.shape[0]
+        for i in xrange(Nfue):
+            f.write('FUE  %d ' % (FUE[i,0]))
+            f.write('%5.3f/%5.3f' % (FUE[i,1],FUE[i,2]))
+            if ~np.isnan(FUE[i,3]):
+                f.write(' %d=%4.2f' % (FUE[i,3],FUE[i,4]))
             f.write('\n')
-
+        
         f.write('LFU\n')
-        for i in range(self.data.npst):
+        for i in xrange(info.get('npst')):
             for j in range(i+1):
-                f.write('%d ' % self.data.LFU[i,j])
+                f.write('%d ' % LFU[i,j])
             f.write('\n')
         
-        pde = self.data.pde.split('\'')[0]
+        pde = info.get('pde').split('\'')[0]
         f.write(pde.strip() + '\n')
-        f.write(self.data.bwr.strip() + '\n')
-
-        Npin = np.size(self.data.pinlines)
-        for i in range(Npin):
-            f.write(self.data.pinlines[i].strip() + '\n')
+        f.write(info.get('bwr').strip() + '\n')
         
-        f.write(self.data.slaline.strip() + '\n')
-
+        Npin = np.size(info.get('pinlines'))
+        for i in xrange(Npin):
+            f.write(info.get('pinlines')[i].strip() + '\n')
+        
+        f.write(info.get('slaline').strip() + '\n')
+        
         f.write('LPI\n')
-        for i in range(self.data.npst):
-            for j in range(i+1):
-                f.write('%d ' % self.data.LPI[i,j])
+        for i in xrange(info.get('npst')):
+            for j in xrange(i+1):
+                f.write('%d ' % info.get('LPI')[i,j])
             f.write('\n')
-
-        f.write(self.data.spa.strip() + '\n')
-        f.write(self.data.dep.strip() + '\n')
+        
+        f.write(info.get('spa').strip() + '\n')
+        f.write(info.get('dep').strip() + '\n')
         f.write('NLI\n')
         f.write('STA\n')
 
         N = len(ide)
-        for i in range(1,N):
+        for i in xrange(1,N):
             f.write(tit + "IDE=" + ide[i] + '\n')
             res = "RES," + ide[i-1] + ",0"
             f.write(res + '\n')
             f.write("VOI " + voivec[i] + '\n')
-            f.write(self.data.dep.strip() + '\n')
+            f.write(info.get('dep').strip() + '\n')
             f.write('STA\n')
 
         f.write('END\n')
