@@ -48,8 +48,8 @@ class casdata(object):
         self.readcax(caxfile,opt)
         self.__ave_enr()
         
-        self.qcalc = []
-        self.qcalc.append(datastruct())
+        #self.qcalc = []
+        #self.qcalc.append(datastruct())
 
         #self.writecai()
         #self.btfcalc()
@@ -277,7 +277,6 @@ class casdata(object):
             # Read XFL maps
             #XFL1[:,:,i] = self.__symtrans(self.__map2mat(xfl1map[i],npst))
             #XFL2[:,:,i] = self.__symtrans(self.__map2mat(xfl2map[i],npst))
-        print "Done."
  
         # -----------------------------------------------------------------------
         # Calculate radial burnup distributions
@@ -286,8 +285,11 @@ class casdata(object):
         fint = self.__fintcalc(POW)
 
         # Append state instancies
+        statepoints = [{'titcrd':titcrd[i],'burnup':burnup[i],'voi':voi[i],'vhi':vhi[i],'tfu':tfu[i],\
+                            'tmo':tmo[i],'kinf':kinf[i],'fint':fint[i],'EXP':EXP[:,:,i],'XFL1':XFL1[:,:,i],\
+                            'XFL2':XFL2[:,:,i],'POW':POW[:,:,i]} for i in xrange(Nburnpoints)]
+        '''
         statepoints = []
-
         for i in xrange(Nburnpoints):
             statepoints.append({}) # append new dictionary to list
             statepoints[i]['titcrd'] = titcrd[i]
@@ -302,7 +304,7 @@ class casdata(object):
             statepoints[i]['XFL1'] = XFL1[:,:,i]
             statepoints[i]['XFL2'] = XFL2[:,:,i]
             statepoints[i]['POW'] = POW[:,:,i]
-        
+        '''
         # Append statepoints to db
         self.db['origin']['statepoints'] = statepoints
 
@@ -356,30 +358,22 @@ class casdata(object):
         # Translate LFU map to density map
         npst = data.get('npst')
         DENS = np.zeros((npst,npst))
-        #DENS = np.zeros((self.data.npst,self.data.npst));
         FUE = data.get('FUE')
         LFU = data.get('LFU')
         Nfue = FUE[:,0].size
-        #Nfue = self.data.FUE[:,0].size
         
         for i in xrange(Nfue):
             ifu = int(FUE[i,0])
             DENS[LFU==ifu] = FUE[i,1]
-            #ifu = int(self.data.FUE[i,0])
-            #DENS[self.data.LFU==ifu] = self.data.FUE[i,1]
         
         # Translate LPI map to pin radius map
         RADI = np.zeros((npst,npst))
-        #RADI = np.zeros((self.data.npst,self.data.npst));
         PIN = data.get('PIN')
         LPI = data.get('LPI')
         Npin = PIN[:,0].size
-        #Npin = self.data.PIN[:,0].size
         for i in range(Npin):
             ipi = int(PIN[i,0])
             RADI[LPI==ipi] = PIN[i,1]
-            #ipi = int(self.data.PIN[i,0])
-            #RADI[self.data.LPI==ipi] = self.data.PIN[i,1]
         
         # Calculate mass
         VOLU = np.pi*RADI**2
@@ -387,11 +381,9 @@ class casdata(object):
         mass = np.sum(MASS)
         ENR = data.get('ENR')
         MASS_U235 = MASS*ENR
-        #MASS_U235 = MASS*self.data.ENR
         mass_u235 = np.sum(MASS_U235)
         ave_enr = mass_u235/mass
         self.db['origin']['info']['ave_enr'] = ave_enr
-        #self.data.ave_enr = mass_u235/mass
         
 
     # -------Write cai file------------
