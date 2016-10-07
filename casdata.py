@@ -38,12 +38,13 @@ class casdata(object):
 
     def __init__(self,caxfile,opt='all'):
         
-        self.datadic = {}
-        self.state = []
-
-        self.data = datastruct()
-        self.statepoints = []
-        #self.pert = datastruct()
+        # Initialize a 'db' attribute as a dictionary in order to hold data
+        self.db = dict()
+        self.db.update(origin={})
+        self.db['origin'] = {'info':{}, 'statepoints':[]}
+        self.db.update(qcalc={})
+        self.db['qcalc'] = {'info':{}, 'statepoints':[]}
+        
         self.readcax(caxfile,opt)
         self.__ave_enr()
         
@@ -83,12 +84,6 @@ class casdata(object):
         with open(caxfile) as f:
            #flines = f.readlines() # include \n
             flines = f.read().splitlines() #exclude \n
-
-        # Define regexps
-        #reS3C = re.compile('(^| )S3C')
-        #reITTL = re.compile('^\*I TTL')
-        #reREA = re.compile('REA\s+')
-        #reGPO = re.compile('GPO\s+')
 
         # Search for regexp matches
         self.__flines = flines
@@ -131,12 +126,9 @@ class casdata(object):
         iVOI = self.__matchcontent('^\s*VOI')
         iDEP = self.__matchcontent('^\s*DEP')
         
-
-        # Stop looping at first finding
+        # Stop looping at first match
         iEND = self.__matchcontent('^\s*END','next')
-        #Tracer()()
         iBWR = self.__matchcontent('^\s*BWR','next')
-        #Tracer()()
         iLFU = self.__matchcontent('^\s*LFU','next')
         iLPI = self.__matchcontent('^\s*LPI','next')
         iTFU = self.__matchcontent('^\s*TFU','next')
@@ -144,64 +136,40 @@ class casdata(object):
         iPDE = self.__matchcontent('^\s*PDE','next')
         try: # Card for water cross (valid for OPT2/3)
             iSLA = self.__matchcontent('^\s*SLA','next')
-        except:
-            iSLA = None
-            #print "Could not find SLA card"
+        except: iSLA = None
         iWRI = self.__matchcontent('^\s*WRI','next')
         iSTA = self.__matchcontent('^\s*STA','next')
         print "Done."
+
+        # Sort data
+        data = dict()
+
         # Read title
-        self.datadic['title'] = flines[iTTL[0]]
-        #self.title = flines[iTTL[0]]
-        self.data.title = flines[iTTL[0]]
+        data['title'] = flines[iTTL[0]]
         # SIM
-        self.datadic['sim'] = flines[iSIM[0]]
-        #self.sim = flines[iSIM[0]]
-        self.data.sim = flines[iSIM[0]]
+        data['sim'] = flines[iSIM[0]]
         # TFU
-        self.datadic['tfu'] = flines[iTFU]
-        #self.tfu = flines[iTFU]
-        self.data.tfu = flines[iTFU]
+        data['tfu'] = flines[iTFU]
         # TMO
-        self.datadic['tmo'] = flines[iTMO]
-        #self.tmo = flines[iTMO]
-        self.data.tmo = flines[iTMO]
+        data['tmo'] = flines[iTMO]
         # VOI
-        self.datadic['voi'] = flines[iVOI[0]]
-        #self.voi = flines[iVOI[0]]
-        self.data.voi = flines[iVOI[0]]
+        data['voi'] = flines[iVOI[0]]
         # PDE
-        self.datadic['pde'] = flines[iPDE]
-        #self.pde = flines[iPDE]
-        self.data.pde = flines[iPDE]
+        data['pde'] = flines[iPDE]
         # BWR
-        self.datadic['bwr'] = flines[iBWR]
-        #self.bwr = flines[iBWR]
-        self.data.bwr = flines[iBWR]
+        data['bwr'] = flines[iBWR]
         # SPA
-        self.datadic['spa'] = flines[iSPA[0]]
-        #self.spa = flines[iSPA[0]]
-        self.data.spa = flines[iSPA[0]]
+        data['spa'] = flines[iSPA[0]]
         # DEP
-        self.datadic['dep'] = flines[iDEP[0]]
-        #self.dep = flines[iDEP[0]]
-        self.data.dep = flines[iDEP[0]]
+        data['dep'] = flines[iDEP[0]]
         # GAM
-        self.datadic['gam'] = flines[iGAM[0]]
-        #self.gam = flines[iGAM[0]]
-        self.data.gam = flines[iGAM[0]]
+        data['gam'] = flines[iGAM[0]]
         # WRI
-        self.datadic['wri'] = flines[iWRI]
-        #self.wri = flines[iWRI]
-        self.data.wri = flines[iWRI]
+        data['wri'] = flines[iWRI]
         # STA
-        self.datadic['sta'] = flines[iSTA]
-        #self.sta = flines[iSTA]
-        self.data.sta = flines[iSTA]
+        data['sta'] = flines[iSTA]
         # CRD
-        self.datadic['crd'] = flines[iCRD[0]]
-        #self.crd = flines[iCRD[0]]
-        self.data.crd = flines[iCRD[0]]
+        data['crd'] = flines[iCRD[0]]
 
         # Read fuel dimension
         npst = int(flines[iBWR][5:7])
@@ -253,7 +221,6 @@ class casdata(object):
                 Nba += 1
                 
         # Read PIN (pin radius)
-        #Npin = iPIN.size
         Npin = len(iPIN)
         ncol = 4
         PIN = np.zeros((Npin,ncol)); PIN.fill(np.nan)
@@ -264,22 +231,19 @@ class casdata(object):
             rlen = np.size(rvec)
             PIN[i,:rlen-1] = rvec[1:ncol+1]
 
-        self.datadic['pinlines'] = flines[iPIN[0]:iPIN[0]+Npin]
-        #self.pinlines = flines[iPIN[0]:iPIN[0]+Npin]
-        self.data.pinlines = flines[iPIN[0]:iPIN[0]+Npin]
+        data['pinlines'] = flines[iPIN[0]:iPIN[0]+Npin]
         
         # Read SLA
         if iSLA is not None:
-            self.datadic['slalines'] = flines[iSLA]
-            self.data.slaline = flines[iSLA]
+            data['slalines'] = flines[iSLA]
+
+        # Append data to db dictionary
+        self.db['origin']['info'].update(data)
+
         # ------Step through the state points----------
         print "Stepping through state points..."
-
+        
         Nburnpoints = len(iTIT)
-        #kinf = np.zeros(Nburnpoints); kinf.fill(np.nan)
-        #POW = np.zeros((npst,npst,Nburnpoints)); POW.fill(np.nan)
-        #XFL1 = np.zeros((npst,npst,Nburnpoints)); XFL1.fill(np.nan)
-        #XFL2 = np.zeros((npst,npst,Nburnpoints)); XFL2.fill(np.nan)
 
         # Read title cards
         titcrd = [flines[i] for i in iTIT]
@@ -300,7 +264,6 @@ class casdata(object):
         powmap = [flines[i+2:i+2+npst] for i in iPOW]
         POW = np.array([self.__symtrans(self.__map2mat(powmap[i],npst)) for i in xrange(Nburnpoints)]).swapaxes(0,2)
 
-        #Tracer()()
         # Rows containing XFL maps
         xfl1map = [flines[i+2:i+2+npst] for i in iXFL]
         XFL1 = np.array([self.__symtrans(self.__map2mat(xfl1map[i],npst)) for i in xrange(Nburnpoints)]).swapaxes(0,2)
@@ -315,7 +278,7 @@ class casdata(object):
             #XFL1[:,:,i] = self.__symtrans(self.__map2mat(xfl1map[i],npst))
             #XFL2[:,:,i] = self.__symtrans(self.__map2mat(xfl2map[i],npst))
         print "Done."
-        Tracer()()
+ 
         # -----------------------------------------------------------------------
         # Calculate radial burnup distributions
         EXP = self.__expcalc(POW,burnup)
@@ -323,74 +286,39 @@ class casdata(object):
         fint = self.__fintcalc(POW)
 
         # Append state instancies
-        for i in range(Nburnpoints):
-            self.statepoints.append(datastruct()) # append new instance to list
-            #state = data()
-            self.statepoints[i].titcrd = titcrd[i]
-            self.statepoints[i].burnup = burnup[i]
-            #state.burnup = burnup[i]
-            self.statepoints[i].voi = voi[i]
-            #state.voi = voi[i]
-            self.statepoints[i].vhi = vhi[i]
-            #state.vhi = vhi[i]
-            self.statepoints[i].tfu = tfu[i]
-            #state.tfu = tfu[i]
-            self.statepoints[i].tmo = tmo[i]
-            #state.tmo = tmo[i]
-            self.statepoints[i].kinf = kinf[i]
-            #state.kinf = kinf[i]
-            self.statepoints[i].fint = fint[i]
-            #state.fint = fint[i]
-            self.statepoints[i].EXP = EXP[:,:,i]
-            #state.EXP = EXP[:,:,i]
-            self.statepoints[i].XFL1 = XFL1[:,:,i]
-            #state.XFL1 = XFL1[:,:,i]
-            self.statepoints[i].XFL2 = XFL2[:,:,i]
-            #state.XFL2 = XFL2[:,:,i]
-            self.statepoints[i].POW = POW[:,:,i]
-            #state.POW = POW[:,:,i]
-            #self.data["statepoints"].append(state)
-        
-        #Tracer()()
-        # Saving geninfo
-        #self.geninfo = data()
-        self.data.caxfile = caxfile
-        #info.caxfile = caxfile
-        self.data.ENR = ENR
-        #info.ENR = ENR
-        self.data.BA = BA
-        #info.BA = BA
-        self.data.PIN = PIN
-        #info.PIN = PIN
-        self.data.LPI = LPI
-        #info.LPI = LPI
-        self.data.FUE = FUE
-        #info.FUE = FUE
-        self.data.LFU = LFU
-        #info.LFU = LFU
-        self.data.npst = npst
-        #info.npst = npst
-        #self.data['geninfo'] = info
+        statepoints = []
 
-        #self.caxfile = caxfile
-        #self.burnvec = burnup
-        #self.voivec = voi
-        #self.vhivec = vhi
-        #self.tfuvec = tfu
-        #self.tmovec = tmo
-        #self.kinf = kinf
-        #self.fint = fint
-        #self.EXP = EXP
-        #self.ENR = ENR
-        #self.BA = BA
-        #self.PIN = PIN
-        #self.LPI = LPI
-        #self.FUE = FUE
-        #self.LFU = LFU
-        #self.npst = npst
-        #self.POW = POW
-        #self.XFL1 = XFL1
-        #self.XFL2 = XFL2
+        for i in xrange(Nburnpoints):
+            statepoints.append({}) # append new dictionary to list
+            statepoints[i]['titcrd'] = titcrd[i]
+            statepoints[i]['burnup'] = burnup[i]
+            statepoints[i]['voi'] = voi[i]
+            statepoints[i]['vhi'] = vhi[i]
+            statepoints[i]['tfu'] = tfu[i]
+            statepoints[i]['tmo'] = tmo[i]
+            statepoints[i]['kinf'] = kinf[i]
+            statepoints[i]['fint'] = fint[i]
+            statepoints[i]['EXP'] = EXP[:,:,i]
+            statepoints[i]['XFL1'] = XFL1[:,:,i]
+            statepoints[i]['XFL2'] = XFL2[:,:,i]
+            statepoints[i]['POW'] = POW[:,:,i]
+        
+        # Append statepoints to db
+        self.db['origin']['statepoints'] = statepoints
+
+        # Saving geninfo
+        geninfo = dict()
+        geninfo['caxfile'] = caxfile
+        geninfo['ENR'] = ENR
+        geninfo['BA'] = BA
+        geninfo['PIN'] = PIN
+        geninfo['LPI'] = LPI
+        geninfo['FUE'] = FUE
+        geninfo['LFU'] = LFU
+        geninfo['npst'] = npst
+        # Append geninfo to db
+        self.db['origin']['info'].update(geninfo)
+
 
 #    def btfcalc(self):
 #        btf('SVEA-96','')
@@ -423,28 +351,48 @@ class casdata(object):
     # --------Calculate average enrichment----------
     def __ave_enr(self):
         
+        data = self.db['origin']['info']
+
         # Translate LFU map to density map
-        DENS = np.zeros((self.data.npst,self.data.npst));
-        Nfue = self.data.FUE[:,0].size
-        for i in range(Nfue):
-            ifu = int(self.data.FUE[i,0])
-            DENS[self.data.LFU==ifu] = self.data.FUE[i,1]
+        npst = data.get('npst')
+        DENS = np.zeros((npst,npst))
+        #DENS = np.zeros((self.data.npst,self.data.npst));
+        FUE = data.get('FUE')
+        LFU = data.get('LFU')
+        Nfue = FUE[:,0].size
+        #Nfue = self.data.FUE[:,0].size
+        
+        for i in xrange(Nfue):
+            ifu = int(FUE[i,0])
+            DENS[LFU==ifu] = FUE[i,1]
+            #ifu = int(self.data.FUE[i,0])
+            #DENS[self.data.LFU==ifu] = self.data.FUE[i,1]
         
         # Translate LPI map to pin radius map
-        RADI = np.zeros((self.data.npst,self.data.npst));
-        Npin = self.data.PIN[:,0].size
+        RADI = np.zeros((npst,npst))
+        #RADI = np.zeros((self.data.npst,self.data.npst));
+        PIN = data.get('PIN')
+        LPI = data.get('LPI')
+        Npin = PIN[:,0].size
+        #Npin = self.data.PIN[:,0].size
         for i in range(Npin):
-            ipi = int(self.data.PIN[i,0])
-            RADI[self.data.LPI==ipi] = self.data.PIN[i,1]
+            ipi = int(PIN[i,0])
+            RADI[LPI==ipi] = PIN[i,1]
+            #ipi = int(self.data.PIN[i,0])
+            #RADI[self.data.LPI==ipi] = self.data.PIN[i,1]
         
         # Calculate mass
         VOLU = np.pi*RADI**2
         MASS = DENS*VOLU
         mass = np.sum(MASS)
-        MASS_U235 = MASS*self.data.ENR
+        ENR = data.get('ENR')
+        MASS_U235 = MASS*ENR
+        #MASS_U235 = MASS*self.data.ENR
         mass_u235 = np.sum(MASS_U235)
-        self.data.ave_enr = mass_u235/mass
-
+        ave_enr = mass_u235/mass
+        self.db['origin']['info']['ave_enr'] = ave_enr
+        #self.data.ave_enr = mass_u235/mass
+        
 
     # -------Write cai file------------
     def writecai(self,caifile):
