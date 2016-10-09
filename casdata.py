@@ -20,7 +20,7 @@ import os
 #import os.path
 import sys
 import time
-#from subprocess import call
+from subprocess import call
 #from multiprocessing import Pool
 #from btf import btf
 #from pyqt_trace import pyqt_trace
@@ -526,7 +526,7 @@ class casdata(object):
         f.close()
 
 
-    def writec3cai_multivoi(self):
+    def writec3cai(self, voi=None, maxdep=None):
         c3inp = "./c3.inp"
         print "Writing c3 input file " + c3inp
         
@@ -538,10 +538,14 @@ class casdata(object):
         tit = "TIT "
         tit = tit + info.get('tfu').split('*')[0].replace(',','=').strip() + " "
         tit = tit + info.get('tmo').split('*')[0].replace(',','=').strip() + " "
-        voivec = info.get('voi').split('*')[0].replace(',',' ').strip().split(' ')[1:]
-        tit = tit + "VOI=" + voivec[0] + " "
-        ide = ["'BD"+x+"'" for x in voivec]
-        f.write(tit + "IDE=" + ide[0] + '\n')
+        if voi == None:
+            voivec = info.get('voi').split('*')[0].replace(',',' ').strip().split(' ')[1:]
+            tit = tit + "VOI=" + voivec[0] + " "
+            ide = ["'BD"+x+"'" for x in voivec]
+            f.write(tit + "IDE=" + ide[0] + '\n')
+        else:
+            tit = tit + "VOI=" + str(voi) + " "
+            f.write(tit + '\n')
         f.write(info.get('sim').strip() + '\n')
         
         FUE = info.get('FUE')
@@ -566,29 +570,41 @@ class casdata(object):
         Npin = np.size(info.get('pinlines'))
         for i in xrange(Npin):
             f.write(info.get('pinlines')[i].strip() + '\n')
-        
-        f.write(info.get('slaline').strip() + '\n')
+
+        if info.get('slaline'): # has water cross?
+            f.write(info.get('slaline').strip() + '\n')
         
         f.write('LPI\n')
         for i in xrange(info.get('npst')):
             for j in xrange(i+1):
                 f.write('%d ' % info.get('LPI')[i,j])
             f.write('\n')
-        
+
         f.write(info.get('spa').strip() + '\n')
-        f.write(info.get('dep').strip() + '\n')
+        if maxdep == None:
+            f.write(info.get('dep').strip() + '\n')
+        else:
+            depstr = "DEP 0, 0.001, -" + str(maxdep)
+            f.write(depstr + '\n')
+            
         f.write('NLI\n')
         f.write('STA\n')
 
-        N = len(ide)
-        for i in xrange(1,N):
-            f.write(tit + "IDE=" + ide[i] + '\n')
-            res = "RES," + ide[i-1] + ",0"
-            f.write(res + '\n')
-            f.write("VOI " + voivec[i] + '\n')
-            f.write(info.get('dep').strip() + '\n')
-            f.write('STA\n')
-
+        if voi == None:
+            N = len(ide)
+            for i in xrange(1,N):
+                f.write(tit + "IDE=" + ide[i] + '\n')
+                res = "RES," + ide[i-1] + ",0"
+                f.write(res + '\n')
+                f.write("VOI " + voivec[i] + '\n')
+                if maxdep == None:
+                    f.write(info.get('dep').strip() + '\n')
+                else:
+                    depstr = "DEP 0, 0.001, -" + str(maxdep)
+                    f.write(depstr + '\n')
+                    
+                f.write('STA\n')
+        
         f.write('END\n')
         f.close()
 
@@ -620,7 +636,7 @@ class casdata(object):
         newlines = '\n' * 7
         f.write(newlines)
         f.close()
-
+        #Tracer()()
         # Run C3 executable
         #cmd = "linrsh " + c3exe + " " + c3cfg
         #cmd = c3exe + " " + c3cfg
