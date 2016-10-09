@@ -43,11 +43,17 @@ class casdata(object):
         self.db.update(origin={})
         self.db['origin'] = {'info':{}, 'statepoints':[]}
         self.db.update(qcalc={})
-        self.db['qcalc'] = {'info':{}, 'statepoints':[]}
+        #self.db['qcalc'] = {'info':{}, 'statepoints':[]}
+        self.db['qcalc'] = []
+        self.add_qcalc()
+        #self.db['qcalc'].append({'info':{}, 'statepoints':[]})
         
         self.readcax(caxfile,opt)
         self.__ave_enr()
-        
+
+        self.writec3cai()
+        self.runc3()
+        self.readc3cax()
         #self.qcalc = []
         #self.qcalc.append(datastruct())
 
@@ -321,7 +327,7 @@ class casdata(object):
         # Append geninfo to db
         self.db['origin']['info'].update(geninfo)
         # also append LFU to 'qcalc'
-        self.db['qcalc']['info']['LFU'] = LFU
+        self.db['qcalc'][-1]['info']['LFU'] = LFU
 
 #    def btfcalc(self):
 #        btf('SVEA-96','')
@@ -525,13 +531,15 @@ class casdata(object):
 
         f.close()
 
+    def add_qcalc(self):
+        self.db['qcalc'].append({'info':{}, 'statepoints':[]})
 
     def writec3cai(self, voi=None, maxdep=None):
         c3inp = "./c3.inp"
         print "Writing c3 input file " + c3inp
         
         info = self.db['origin']['info']
-        LFU = self.db['qcalc']['info'].get('LFU')
+        LFU = self.db['qcalc'][-1]['info'].get('LFU')
 
         f = open(c3inp,'w')
 
@@ -663,44 +671,61 @@ class casdata(object):
         # Read the whole file at once
         with open(caxfile) as f:
             flines = f.read().splitlines() #exclude \n
-
+        self.__flines = flines
+        
         # ------Search for regexp matches-------
-        iTIT = self.__matchcontent(flines,'^TIT')
-        iPOW = self.__matchcontent(flines,'POW\s+')
-        iPOL = self.__matchcontent(flines,'^POL')
-
+        iTIT = self.__matchcontent('^TIT')
+        iPOW = self.__matchcontent('POW\s+')
+        iPOL = self.__matchcontent('^POL')
+        
         # Read fuel dimension
         npst = int(flines[iPOW[0]+1][4:6])
-
-        # ------Step through the state points----------
+        
+        # ------Stepping through the state points----------
         Nburnpoints = len(iTIT)
-        
-        burnup = np.zeros(Nburnpoints); burnup.fill(np.nan)
-        voi = np.zeros(Nburnpoints); voi.fill(np.nan)
-        vhi = np.zeros(Nburnpoints); vhi.fill(np.nan)
-        tfu = np.zeros(Nburnpoints); tfu.fill(np.nan)
-        tmo = np.zeros(Nburnpoints); tmo.fill(np.nan)
-        kinf = np.zeros(Nburnpoints); kinf.fill(np.nan)
-        POW = np.zeros((npst,npst,Nburnpoints)); POW.fill(np.nan)
-        
-        # Row vector containing burnup, voi, vhi, tfu and tmo
-        rvec = [re.split('/',flines[i+2].strip()) for i in iTIT]
+        rvec = [re.split('[/\s+]+',flines[i+2].strip()) for i in iTIT]
+        burnup = np.array([rvec[i][0] for i in xrange(Nburnpoints)]).astype(float)
+        voi = np.array([rvec[i][1] for i in xrange(Nburnpoints)]).astype(float)
+        vhi = np.array([rvec[i][2] for i in xrange(Nburnpoints)]).astype(float)
+        tfu = np.array([rvec[i][3] for i in xrange(Nburnpoints)]).astype(float)
+        tmo = np.array([rvec[i][5] for i in xrange(Nburnpoints)]).astype(float)
 
         # Row containing Kinf
         kinfstr = [flines[i+5] for i in iPOL]
+        kinf = np.array([re.split('\s+',kinfstr[i].strip())[0] for i in xrange(Nburnpoints)]).astype(float)
 
         # Rows containing radial power distribution map
         powmap = [flines[i+2:i+2+npst] for i in iPOW]
+        POW = np.array([self.__symtrans(self.__map2mat(powmap[i],npst)) for i in xrange(Nburnpoints)]).swapaxes(0,2)
 
-        for i in range(Nburnpoints):
-            # Read burnup, voids, tfu and tmo
-            burnup[i],voi[i] = re.split('\s+',rvec[i][0].strip())
-            vhi[i],tfu[i] = re.split('\s+',rvec[i][1].strip())
-            tmo[i] = re.split('\s+',rvec[i][2].strip())[1]
-            # Read kinf
-            kinf[i] = re.split('\s+',kinfstr[i].strip())[0]
-            # Read radial power distribution map
-            POW[:,:,i] = self.__symtrans(self.__map2mat(powmap[i],npst))
+        
+        #Tracer()()
+        #burnup = np.zeros(Nburnpoints); burnup.fill(np.nan)
+        #voi = np.zeros(Nburnpoints); voi.fill(np.nan)
+        #vhi = np.zeros(Nburnpoints); vhi.fill(np.nan)
+        #tfu = np.zeros(Nburnpoints); tfu.fill(np.nan)
+        #tmo = np.zeros(Nburnpoints); tmo.fill(np.nan)
+        #kinf = np.zeros(Nburnpoints); kinf.fill(np.nan)
+        #POW = np.zeros((npst,npst,Nburnpoints)); POW.fill(np.nan)
+        
+        # Row vector containing burnup, voi, vhi, tfu and tmo
+        #rvec = [re.split('/',flines[i+2].strip()) for i in iTIT]
+
+        # Row containing Kinf
+        #kinfstr = [flines[i+5] for i in iPOL]
+
+        # Rows containing radial power distribution map
+        #powmap = [flines[i+2:i+2+npst] for i in iPOW]
+
+        #for i in range(Nburnpoints):
+        #    # Read burnup, voids, tfu and tmo
+        #    burnup[i],voi[i] = re.split('\s+',rvec[i][0].strip())
+        #    vhi[i],tfu[i] = re.split('\s+',rvec[i][1].strip())
+        #    tmo[i] = re.split('\s+',rvec[i][2].strip())[1]
+        #    # Read kinf
+        #    kinf[i] = re.split('\s+',kinfstr[i].strip())[0]
+        #    # Read radial power distribution map
+        #    POW[:,:,i] = self.__symtrans(self.__map2mat(powmap[i],npst))
 
         # Calculate radial burnup distributions
         EXP = self.__expcalc(POW,burnup)
@@ -708,21 +733,30 @@ class casdata(object):
         fint = self.__fintcalc(POW)
 
         # Append state instancies
+        statepoints = [{'burnup':burnup[i],'voi':voi[i],'vhi':vhi[i],'tfu':tfu[i],\
+                        'tmo':tmo[i],'kinf':kinf[i],'fint':fint[i],'EXP':EXP[:,:,i],\
+                        'POW':POW[:,:,i]} for i in xrange(Nburnpoints)]
+
+        #Tracer()()
         #self.qcalc.append(datastruct())
-        pindex = -1 # Index of last instance
-        self.qcalc[pindex].model = "c3"
-        self.qcalc[pindex].statepoints = []
-        for i in range(Nburnpoints):
-            self.qcalc[pindex].statepoints.append(datastruct()) # append new instance to list
-            self.qcalc[pindex].statepoints[i].burnup = burnup[i]
-            self.qcalc[pindex].statepoints[i].voi = voi[i]
-            self.qcalc[pindex].statepoints[i].vhi = vhi[i]
-            self.qcalc[pindex].statepoints[i].tfu = tfu[i]
-            self.qcalc[pindex].statepoints[i].tmo = tmo[i]
-            self.qcalc[pindex].statepoints[i].kinf = kinf[i]
-            self.qcalc[pindex].statepoints[i].fint = fint[i]
-            self.qcalc[pindex].statepoints[i].POW = POW[:,:,i]
-            self.qcalc[pindex].statepoints[i].EXP = EXP[:,:,i]
+        #pindex = -1 # Index of last instance
+        #self.qcalc[pindex].model = "c3"
+        #self.qcalc[pindex].statepoints = []
+        #for i in range(Nburnpoints):
+        #    self.qcalc[pindex].statepoints.append(datastruct()) # append new instance to list
+        #    self.qcalc[pindex].statepoints[i].burnup = burnup[i]
+        #    self.qcalc[pindex].statepoints[i].voi = voi[i]
+        #    self.qcalc[pindex].statepoints[i].vhi = vhi[i]
+        #    self.qcalc[pindex].statepoints[i].tfu = tfu[i]
+        #    self.qcalc[pindex].statepoints[i].tmo = tmo[i]
+        #    self.qcalc[pindex].statepoints[i].kinf = kinf[i]
+        #    self.qcalc[pindex].statepoints[i].fint = fint[i]
+        #    self.qcalc[pindex].statepoints[i].POW = POW[:,:,i]
+        #    self.qcalc[pindex].statepoints[i].EXP = EXP[:,:,i]
+
+        # Append statepoints to db
+        self.db['qcalc'][-1]['statepoints'] = statepoints
+        
 
     def quickcalc(self,model='c3'):
         tic = time.time()
