@@ -42,7 +42,8 @@ class casdata(object):
         
         # Initialize a 'data' attribute as a list in order to organize data.
         # Each element in list is supposed to contain the result of a particular calculation.
-        # The first index (0) contains the imported base data and subsequent indices holds the results from quick calcs.
+        # The first index (0) contains the imported base data and subsequent indices holds the
+        # results from quick calcs.
         self.data = []
         
         # Import data from original cax file and store the result in self.data[0]
@@ -634,7 +635,14 @@ class casdata(object):
         
         Npin = np.size(info.get('pinlines'))
         for i in xrange(Npin):
-            f.write(info.get('pinlines')[i].strip() + '\n')
+            tmpstr = re.split('\*|/',info.get('pinlines')[i].strip())[0]# Remove coments etc
+            pinarr = re.split(',|\s+',tmpstr.strip()) # Split for segments
+            npinsegs = len(pinarr)-2
+            if npinsegs > 3:
+                red_pinstr = ' '.join(pinarr[0:3]+pinarr[-2:])
+            else:
+                red_pinstr = info.get('pinlines')[i].strip()
+            f.write(red_pinstr.strip() + '\n')
 
         if info.get('slaline'): # has water cross?
             f.write(info.get('slaline').strip() + '\n')
