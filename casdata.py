@@ -38,6 +38,26 @@ class casdata(object):
 
     def __init__(self,caxfile,opt='all'):
         
+        # Initialize a 'data' attribute as a list in order to organize data.
+        # Each element in list is supposed to contain the result of a particular calculation.
+        # The first index (0) contains the imported base data and subsequent indices holds the results from quick calcs.
+        self.data = []
+        
+        # Import data from original cax file and store the result in self.data[0]
+        self.add_calc() # Add an element to list
+        self.readcax(caxfile,opt)
+
+        # Calculate average enrichment for the segment
+        self.__ave_enr()
+
+        # Perform quick calc reference calculation
+        self.data[0].update(refcalc={})
+        self.writec3cai() # Create c3 input file
+        self.runc3() # run the c3 model
+        self.readc3cax('refcalc') # import the result and store the data under 'refcalc' field
+        
+
+        '''
         # Initialize a 'db' attribute as a dictionary in order to hold data
         self.db = dict()
         self.db.update(origin={})
@@ -56,7 +76,7 @@ class casdata(object):
         self.readc3cax()
         #self.qcalc = []
         #self.qcalc.append(datastruct())
-
+        '''
         #self.writecai()
         #self.btfcalc()
 
@@ -72,7 +92,7 @@ class casdata(object):
             out = (i for i,x in enumerate(self.__flines) if rec.match(x))
         return out
 
-    def readcax(self,caxfile,opt):
+    def readcax(self,caxfile,opt): # Read the from original cax file
         
         if not os.path.isfile(caxfile):
             print "Could not open file " + caxfile
@@ -243,8 +263,13 @@ class casdata(object):
         if iSLA is not None:
             data['slaline'] = flines[iSLA]
 
+        # Append to data to the last list element
+        self.data[-1]['info'].update(data)
+
+        #---OLD---
         # Append data to db dictionary
-        self.db['origin']['info'].update(data)
+        #self.db['origin']['info'].update(data)
+        #---OLD---
 
         # ------Step through the state points----------
         print "Stepping through state points..."
@@ -311,8 +336,13 @@ class casdata(object):
             statepoints[i]['XFL2'] = XFL2[:,:,i]
             statepoints[i]['POW'] = POW[:,:,i]
         '''
+        # Append statepoints to last element
+        self.data[-1]['statepoints'] = statepoints
+
+        #---OLD---
         # Append statepoints to db
-        self.db['origin']['statepoints'] = statepoints
+        #self.db['origin']['statepoints'] = statepoints
+        #---OLD---
 
         # Saving geninfo
         geninfo = dict()
@@ -324,10 +354,16 @@ class casdata(object):
         geninfo['FUE'] = FUE
         geninfo['LFU'] = LFU
         geninfo['npst'] = npst
+
+        # Append geninfo to data attribute
+        self.data[-1]['info'].update(geninfo)
+
+        #---OLD----
         # Append geninfo to db
-        self.db['origin']['info'].update(geninfo)
+        #self.db['origin']['info'].update(geninfo)
         # also append LFU to 'qcalc'
-        self.db['qcalc'][-1]['info']['LFU'] = LFU
+        #self.db['qcalc'][-1]['info']['LFU'] = LFU
+        #----OLD----
 
 #    def btfcalc(self):
 #        btf('SVEA-96','')
@@ -359,8 +395,9 @@ class casdata(object):
 
     # --------Calculate average enrichment----------
     def __ave_enr(self):
-        
-        data = self.db['origin']['info']
+        #Tracer()()
+        data = self.data[-1]['info'];
+        #data = self.db['origin']['info']
 
         # Translate LFU map to density map
         npst = data.get('npst')
@@ -390,8 +427,13 @@ class casdata(object):
         MASS_U235 = MASS*ENR
         mass_u235 = np.sum(MASS_U235)
         ave_enr = mass_u235/mass
-        self.db['origin']['info']['ave_enr'] = ave_enr
         
+        # Append the result to data
+        self.data[-1]['info']['ave_enr'] = ave_enr
+
+        #---OLD---
+        #self.db['origin']['info']['ave_enr'] = ave_enr
+        #---OLD---
 
     # -------Write cai file------------
     def writecai(self,caifile):
@@ -531,16 +573,26 @@ class casdata(object):
 
         f.close()
 
+    def add_calc(self): # Append a list element to store result of calculation
+        self.data.append({'info':{}, 'statepoints':[]})
+
     def add_qcalc(self):
         self.db['qcalc'].append({'info':{}, 'statepoints':[]})
 
     def writec3cai(self, voi=None, maxdep=None):
         c3inp = "./c3.inp"
         print "Writing c3 input file " + c3inp
-        
-        info = self.db['origin']['info']
-        LFU = self.db['qcalc'][-1]['info'].get('LFU')
+      
+        info = self.data[0]['info'] # Get info data from original import
+        if self.data[-1]['info'].has_key('LFU'):
+            LFU = self.data[-1]['info'].get('LFU') # Get LFU from last calc
+        else:
+            print "Error: LFU is missing"
+            return
 
+        #info = self.db['origin']['info']
+        #LFU = self.db['qcalc'][-1]['info'].get('LFU')
+        
         f = open(c3inp,'w')
 
         tit = "TIT "
@@ -659,7 +711,7 @@ class casdata(object):
         os.remove(c3cfg)
 
 
-    def readc3cax(self):
+    def readc3cax(self,opt=None):
         
         caxfile = "./c3.cax"
         if not os.path.isfile(caxfile):
@@ -754,8 +806,14 @@ class casdata(object):
         #    self.qcalc[pindex].statepoints[i].POW = POW[:,:,i]
         #    self.qcalc[pindex].statepoints[i].EXP = EXP[:,:,i]
 
+        # Append statepoints to data attribute
+        if opt == 'refcalc': # add to refcalc dictionary field
+            self.data[0]['refcalc']['statepoints'] = statepoints
+        else:
+            self.data[-1]['statepoints'] = statepoints
+
         # Append statepoints to db
-        self.db['qcalc'][-1]['statepoints'] = statepoints
+        #self.db['qcalc'][-1]['statepoints'] = statepoints
         
 
     def quickcalc(self,model='c3'):
