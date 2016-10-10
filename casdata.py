@@ -21,6 +21,8 @@ import os
 import sys
 import time
 from subprocess import call
+import uuid # used for random generated file names
+#import tempfile
 #from multiprocessing import Pool
 #from btf import btf
 #from pyqt_trace import pyqt_trace
@@ -52,9 +54,9 @@ class casdata(object):
 
         # Perform quick calc reference calculation
         self.data[0].update(refcalc={})
-        self.writec3cai() # Create c3 input file
-        self.runc3() # run the c3 model
-        self.readc3cax('refcalc') # import the result and store the data under 'refcalc' field
+        filebasename = self.writec3cai() # Create c3 input file and return the file name
+        self.runc3(filebasename) # run the c3 model
+        self.readc3cax(filebasename,'refcalc') # import the result and store the data under 'refcalc' field
         
 
         '''
@@ -580,9 +582,11 @@ class casdata(object):
         self.db['qcalc'].append({'info':{}, 'statepoints':[]})
 
     def writec3cai(self, voi=None, maxdep=None):
-        c3inp = "./c3.inp"
+        filebasename = "./" + str(uuid.uuid4())
+        c3inp = filebasename + ".inp"
+        #c3inp = tempfile.NamedTemporaryFile(dir='.',prefix="c3_",suffix=".inp",delete=False)
         print "Writing c3 input file " + c3inp
-      
+        
         info = self.data[0]['info'] # Get info data from original import
         if self.data[-1]['info'].has_key('LFU'):
             LFU = self.data[-1]['info'].get('LFU') # Get LFU from last calc
@@ -593,6 +597,7 @@ class casdata(object):
         #info = self.db['origin']['info']
         #LFU = self.db['qcalc'][-1]['info'].get('LFU')
         
+        #f = c3inp.file
         f = open(c3inp,'w')
 
         tit = "TIT "
@@ -666,16 +671,20 @@ class casdata(object):
                 f.write('STA\n')
         
         f.write('END\n')
+        #c3inp.close()
         f.close()
+        return filebasename
 
 
-    def runc3(self): # Running C3 perturbation model
+    def runc3(self,filebasename): # Running C3 perturbation model
         # C3 input file
-        c3inp = "./c3.inp"
+        c3inp = filebasename + ".inp"
+        #c3inp = "./c3.inp"
         # output file
-        c3out = "./c3.out"
+        #c3out = tempfile.NamedTemporaryFile(dir='.',prefix="c3_",suffix=".out",delete=False)
+        c3out = filebasename + ".out"
         # cax file
-        c3cax = "./c3.cax"
+        c3cax = filebasename + ".cax"
         # libs
         lib1 = "./lib/c3/e4lbj40"
         lib2 = "./lib/c3/bal8ab4"
@@ -684,7 +693,10 @@ class casdata(object):
         c3exe = "./bin/casmo3"
 
         # Write C3 configuration file
-        c3cfg = "./c3.txt"
+        #c3cfg = tempfile.NamedTemporaryFile(dir='.',prefix="c3_",suffix=".cfg",delete=False)
+        c3cfg = filebasename + ".cfg"
+        print c3cfg
+        #c3cfg = "./c3.txt"
         f = open(c3cfg, "w")
         f.write(c3inp + "\n")
         f.write(c3out + "\n")
@@ -695,6 +707,7 @@ class casdata(object):
         f.write(c3cax + "\n")
         newlines = '\n' * 7
         f.write(newlines)
+        #c3cfg.close()
         f.close()
         #Tracer()()
         # Run C3 executable
@@ -708,20 +721,24 @@ class casdata(object):
             call([c3exe,c3cfg])
 
         # Remove files
+        #c3cfg.unlink(c3cfg.name)
         os.remove(c3cfg)
-
-
-    def readc3cax(self,opt=None):
+        os.remove(c3inp)
+        #c3out.unlink(c3out.name)
+        os.remove(c3out)
         
-        caxfile = "./c3.cax"
-        if not os.path.isfile(caxfile):
-            print "Could not open file " + caxfile
+
+    def readc3cax(self, filebasename, opt=None):
+        
+        c3cax = filebasename + ".cax"
+        if not os.path.isfile(c3cax):
+            print "Could not open file " + c3cax
             return
         else:
-            print "Reading file " + caxfile
-        
+            print "Reading file " + c3cax
+
         # Read the whole file at once
-        with open(caxfile) as f:
+        with open(c3cax) as f:
             flines = f.read().splitlines() #exclude \n
         self.__flines = flines
         
@@ -814,7 +831,7 @@ class casdata(object):
 
         # Append statepoints to db
         #self.db['qcalc'][-1]['statepoints'] = statepoints
-        
+        os.remove(c3cax)
 
     def quickcalc(self,model='c3'):
         tic = time.time()
