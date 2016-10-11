@@ -38,26 +38,29 @@ class casdata(object):
     If opt is different from 'all' only statepoints for main voids will
     be imported. If not defined all statepoints will be read."""
 
-    def __init__(self,caxfile,opt='all'):
+    def __init__(self,caxfile=None,opt='all'):
         
         # Initialize a 'data' attribute as a list in order to organize data.
         # Each element in list is supposed to contain the result of a particular calculation.
         # The first index (0) contains the imported base data and subsequent indices holds the
         # results from quick calcs.
         self.data = []
-        
-        # Import data from original cax file and store the result in self.data[0]
         self.add_calc() # Add an element to list
-        self.readcax(caxfile,opt)
+        self.data[0].update(refcalc={}) # Add 'refcalc' dictionary
 
-        # Calculate average enrichment for the segment
-        self.__ave_enr()
+        if caxfile is not None:
+            # Import data from original cax file and store the result in self.data[0]
+            #self.add_calc() # Add an element to list
+            self.readcax(caxfile,opt)
 
-        # Perform quick calc reference calculation
-        self.data[0].update(refcalc={})
-        filebasename = self.writec3cai() # Create c3 input file and return the file name
-        self.runc3(filebasename) # run the c3 model
-        self.readc3cax(filebasename,'refcalc') # import the result and store the data under 'refcalc' field
+            # Calculate average enrichment for the segment
+            self.ave_enr()
+            
+            # Perform quick calc reference calculation
+            #self.data[0].update(refcalc={})
+            filebasename = self.writec3cai() # Create c3 input file and return the file name
+            self.runc3(filebasename) # run the c3 model
+            self.readc3cax(filebasename,'refcalc') # import the result and store the data under 'refcalc' field
         
 
         '''
@@ -361,6 +364,7 @@ class casdata(object):
         # Append geninfo to data attribute
         self.data[-1]['info'].update(geninfo)
 
+
         #---OLD----
         # Append geninfo to db
         #self.db['origin']['info'].update(geninfo)
@@ -397,7 +401,7 @@ class casdata(object):
 #        self.fint = fint
 
     # --------Calculate average enrichment----------
-    def __ave_enr(self):
+    def ave_enr(self):
         #Tracer()()
         data = self.data[-1]['info'];
         #data = self.db['origin']['info']
