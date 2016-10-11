@@ -28,9 +28,9 @@ import uuid # used for random generated file names
 #from pyqt_trace import pyqt_trace
 
 
-class datastruct(object):
-    """Initialize a class that can be used to structure data"""
-    pass
+#class datastruct(object):
+#    """Initialize a class that can be used to structure data"""
+#    pass
 
 
 class casdata(object):
