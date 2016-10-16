@@ -2,7 +2,7 @@ import unittest
 import sys,os
 
 sys.path.append('../')
-from casdata import casdata
+from casdata import CasData
 
 class UnitTest(unittest.TestCase):
 
@@ -11,7 +11,7 @@ class UnitTest(unittest.TestCase):
 
         self.testfile = "../best/cax/ATXM/10g35dom/e28ATXM-385-10g35dom-cas.cax"
         #self.testfile = "../best/cax/A10XM/10g35dom/e28ATXM-385-10g35dom-cas.cax"
-        self.cas = casdata()
+        self.cas = CasData()
         self.cas.readcax(self.testfile,0)
 
 
