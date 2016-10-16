@@ -34,7 +34,7 @@ class datastruct(object):
 '''
 
 
-class casdata(object):
+class CasData(object):
     """class that manage camso input and output data.
     If opt is different from 'all' only statepoints for main voids will
     be imported. If not defined all statepoints will be read."""
