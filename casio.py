@@ -12,7 +12,7 @@ import re
 import numpy as np
 from multiprocessing import Pool
 
-from casdata import casdata
+from casdata import CasData
 
 # from btf import btf
 
