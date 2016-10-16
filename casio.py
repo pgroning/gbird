@@ -16,13 +16,13 @@ from casdata import casdata
 
 # from btf import btf
 
-
+'''
 class datastruct(object):
     """Dummy class used to structure data"""
     pass
+'''
 
-
-class casio(object):
+class Casio(object):
     """Read, save and load cases"""
 
     def __init__(self):
