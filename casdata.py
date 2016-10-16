@@ -63,10 +63,10 @@ class casdata(object):
             # Perform quick calc reference calculation
             # self.data[0].update(refcalc={})
             # Create c3 input file and return the file name1
-            filebasename = self.writec3cai()
-            self.runc3(filebasename)  # run the c3 model
+            # filebasename = self.writec3cai()
+            # self.runc3(filebasename)  # run the c3 model
             # import the result and store the data under 'refcalc' field1
-            self.readc3cax(filebasename, 'refcalc')
+            # self.readc3cax(filebasename, 'refcalc')
 
         '''
         # Initialize a 'db' attribute as a dictionary in order to hold data
