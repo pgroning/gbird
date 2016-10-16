@@ -6,13 +6,15 @@ try:
 except:
     import pickle
 
-import sys, os.path, re
+import sys
+import os
+import re
 import numpy as np
-
 from multiprocessing import Pool
-from casdata_pts_2 import casdata
 
-from btf import btf
+from casdata import casdata
+
+# from btf import btf
 
 
 class datastruct(object):
@@ -20,47 +22,54 @@ class datastruct(object):
     pass
 
 
-class casio:
+class casio(object):
     """Read, save and load cases"""
 
     def __init__(self):
-        self.data = datastruct()
-        self.cases = []
-        
+        self.data = {}
+        # self.data = datastruct()
+        self.case = []
+
+        '''
         #self.readinpfile(inpfile)
         #self.readcas()
         #self.savecasobj()
         #self.loadcasobj(inpfile)
         #self.interp2(P1,P2,x1,x2,x)
+        '''
 
-    def readinp(self,inpfile):
+    def readinp(self, inpfile):
+        """Reading caxfiles and nodes from input file"""
+
         if not os.path.isfile(inpfile):
             print "Could not open file " + inpfile
             return
         else:
             print "Reading file " + inpfile
-        
-        with open(inpfile) as f:
-            flines = f.read().splitlines() #exclude \n
 
-        # Read fuel type
-        fuetype = flines[0].strip()
-        # Search for caxfiles
-        reCAX = re.compile('.cax\s*$')
+        with open(inpfile) as f:
+            flines = f.read().splitlines()  # exclude \n
+
+        fuetype = flines[0].strip()  # Read fuel type
+        reCAX = re.compile('.cax\s*$')  # Search for caxfiles
         caxfiles = []
-        for i,x in enumerate(flines[1:]):
+        for i, x in enumerate(flines[1:]):
             if reCAX.search(x):
                 caxfiles.append(x)
             else:
                 break
-        i+=1
-        nodes  = map(int,re.split('\s+',flines[i]))
+        i += 1
+        nodes = map(int, re.split('\s+', flines[i]))
 
+        self.data.update({'fuetype': fuetype, 'inpfile': inpfile,
+                          'caxfiles': caxfiles, 'nodes': nodes})
+
+        '''
         self.data.fuetype = fuetype
         self.data.inpfile = inpfile
         self.data.caxfiles = caxfiles
         self.data.nodes = nodes
-
+        '''
 
     def readcax(self):
         n = len(self.data.caxfiles) # Number of threads
