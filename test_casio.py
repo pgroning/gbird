@@ -11,17 +11,17 @@ class UnitTest(unittest.TestCase):
 
         self.testfile = "../best/caxfiles_a10xm.inp"
         self.cio = Casio()
-
+        self.cio.readinp(self.testfile)
 
     def tearDown(self):
         unittest.TestCase.tearDown(self)
 
 
     def test_readinp(self):
-        self.cio.readinp(self.testfile)
         f = self.cio.data.get('inpfile')
         self.assertEqual(f,self.testfile)
-
+        nodes = self.cio.data.get('nodes')
+        self.assertTrue(type(nodes) is list, "nodes is not list")
 
 
 if __name__ == '__main__':
