@@ -24,14 +24,15 @@ class UnitTest(unittest.TestCase):
         self.assertEqual(f,self.testfile)
         Nstatepoints = len(self.cas.data[0].get('statepoints'))
         self.assertTrue(Nstatepoints >= 10, "Number of statepoinst is less than 10")
-    '''
+
+    @unittest.skip("Skip test_read_all")
     def test_read_all(self):
         self.cas.readcax(self.testfile,'all')
         f = self.cas.data[0]['info'].get('caxfile')
         self.assertEqual(f,self.testfile)
         Nstatepoints = len(self.cas.data[0].get('statepoints'))
         self.assertTrue(Nstatepoints > 0)
-    '''
+    
     def test_ave_enr(self):
         self.cas.ave_enr()
         ave_enr = self.cas.data[0]['info'].get('ave_enr')
