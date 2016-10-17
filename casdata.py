@@ -647,11 +647,13 @@ class CasData(object):
 
         FUE = info.get('FUE')
         Nfue = FUE.shape[0]
+        baid_offset = 0  # BA id must not occur on more than one FUE card
         for i in xrange(Nfue):
             f.write('FUE  %d ' % (FUE[i,0]))
             f.write('%5.3f/%5.3f' % (FUE[i,1],FUE[i,2]))
             if ~np.isnan(FUE[i,3]):
-                f.write(' %d=%4.2f' % (FUE[i,3],FUE[i,4]))
+                f.write(' %d=%4.2f' % (FUE[i,3] + baid_offset, FUE[i,4]))
+                baid_offset += 1
             f.write('\n')
 
         f.write('LFU\n')

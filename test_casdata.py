@@ -9,7 +9,10 @@ class UnitTest(unittest.TestCase):
     def setUp(self):
         unittest.TestCase.setUp(self)
 
-        self.testfile = "../best/cax/ATXM/10g35dom/e28ATXM-385-10g35dom-cas.cax"
+        #self.testfile = "test/topol/OPT2/10g40bot/e29OPT2-382-10g40bot-cas.cax"
+        self.testfile = "test/topol/OPT2_2/12g30bot/e32OPT2-382-12g30bot-cas.cax"
+     
+   #self.testfile = "../best/cax/ATXM/10g35dom/e28ATXM-385-10g35dom-cas.cax"
         #self.testfile = "../best/cax/A10XM/10g35dom/e28ATXM-385-10g35dom-cas.cax"
         self.cas = CasData()
         self.cas.readcax(self.testfile,0)
@@ -24,7 +27,7 @@ class UnitTest(unittest.TestCase):
         self.assertEqual(f,self.testfile)
         Nstatepoints = len(self.cas.data[0].get('statepoints'))
         self.assertTrue(Nstatepoints >= 10, "Number of statepoinst is less than 10")
-
+    '''
     @unittest.skip("Skip test_read_all")
     def test_read_all(self):
         self.cas.readcax(self.testfile,'all')
@@ -32,7 +35,7 @@ class UnitTest(unittest.TestCase):
         self.assertEqual(f,self.testfile)
         Nstatepoints = len(self.cas.data[0].get('statepoints'))
         self.assertTrue(Nstatepoints > 0)
-    
+    '''
     def test_ave_enr(self):
         self.cas.ave_enr()
         ave_enr = self.cas.data[0]['info'].get('ave_enr')
