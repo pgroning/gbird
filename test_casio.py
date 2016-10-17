@@ -9,7 +9,7 @@ class UnitTest(unittest.TestCase):
     def setUp(self):
         unittest.TestCase.setUp(self)
 
-        self.testfile = "../best/caxfiles_a10xm.inp"
+        self.testfile = "test/caxfiles_atxm.inp"
         self.cio = Casio()
         self.cio.readinp(self.testfile)
 

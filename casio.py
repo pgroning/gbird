@@ -28,7 +28,7 @@ class Casio(object):
     def __init__(self):
         self.data = {}
         # self.data = datastruct()
-        self.case = []
+        self.cases = []
 
         '''
         #self.readinpfile(inpfile)
@@ -72,12 +72,21 @@ class Casio(object):
         '''
 
     def readcax(self):
-        n = len(self.data.caxfiles) # Number of threads
+        n = len(self.data.get('caxfiles'))
+        #n = len(self.data.caxfiles) # Number of threads
         p = Pool(n) # Make the Pool of workers
         # Start processes in their own threads and return the results
-        self.cases = p.map(casdata, self.data.caxfiles)
-        for i,node in enumerate(self.data.nodes):
-            self.cases[i].data.topnode = node
+        caxfiles = self.data.get('caxfiles')
+        self.cases = p.map(CasData, caxfiles)
+        p.join()
+        p.close()
+        print "Finished"
+        #p.close()
+        #p.join()
+        #self.case = p.map(CasData, self.data.caxfiles)
+        #Tracer()()
+        #for i,node in enumerate(self.data.nodes):
+        #    self.cases[i].data.topnode = node
 
         #for i,f in enumerate(self.data.caxfiles):
         #    case = casdata(f)

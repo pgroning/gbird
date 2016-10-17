@@ -385,6 +385,7 @@ class CasData(object):
         # Append geninfo to data attribute
         self.data[-1]['info'].update(geninfo)
 
+        print "Finished"
         # ---OLD----
         # Append geninfo to db
         # self.db['origin']['info'].update(geninfo)
