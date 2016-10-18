@@ -10,7 +10,7 @@ import sys, os.path, re
 import numpy as np
 
 from multiprocessing import Pool
-from casdata_pts_2 import casdata
+from casdata import casdata
 
 #from btf import btf
 

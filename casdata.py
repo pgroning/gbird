@@ -33,7 +33,7 @@ class datastruct(object):
 
 class casdata(object):
 
-    def __init__(self,caxfile):
+    def __init__(self,caxfile,opt=None):
         self.data = []
         self.add_calc()
         self.data[0].refcalc = datastruct
@@ -41,7 +41,7 @@ class casdata(object):
         #self.data[-1]
         #self.statepts = []
         #self.pert = datastruct()
-        self.readcax(caxfile)
+        self.readcax(caxfile,opt)
         self.__ave_enr()
         #Tracer()()
         #self.qcalc = []
@@ -62,7 +62,7 @@ class casdata(object):
             out = (i for i,x in enumerate(flines) if rec.match(x))
         return out
 
-    def readcax(self,caxfile):
+    def readcax(self,caxfile,opt):
         
         if not os.path.isfile(caxfile):
             print "Could not open file " + caxfile
@@ -87,6 +87,25 @@ class casdata(object):
         #reREA = re.compile('REA\s+')
         #reGPO = re.compile('GPO\s+')
 
+        # Search for regexp matches
+        #self.__flines = flines
+        if opt != 'all':  # Find last index containing voids voi=vhi
+            oTIT = self.__matchcontent(flines, '^TIT', 'object')
+            while True:
+                try:
+                    i = oTIT.next()
+                except:  # Reaching end of flines
+                    break
+                # split on spaces or '/'
+                rstr = re.split('[/\s+]+', flines[i+2].strip())
+                voi, vhi = rstr[1], rstr[2]
+                # print voi,vhi,i
+                if voi != vhi:
+                    break
+            flines = flines[:i]  # Reduce the number of lines in list
+            #self.__flines = flines
+
+        
         # Search for regexp matches
         print "Scanning file content..."
         
