@@ -6,87 +6,71 @@ try:
 except:
     import pickle
 
-import sys
-import os
-import re
+import sys, os.path, re
 import numpy as np
+
 from multiprocessing import Pool
+from casdata_pts_2 import casdata
 
-from casdata import CasData
+#from btf import btf
 
-# from btf import btf
 
-'''
 class datastruct(object):
     """Dummy class used to structure data"""
     pass
-'''
 
-class Casio(object):
+
+class casio:
     """Read, save and load cases"""
 
     def __init__(self):
-        self.data = {}
-        # self.data = datastruct()
+        self.data = datastruct()
         self.cases = []
-
-        '''
+        
         #self.readinpfile(inpfile)
         #self.readcas()
         #self.savecasobj()
         #self.loadcasobj(inpfile)
         #self.interp2(P1,P2,x1,x2,x)
-        '''
 
-    def readinp(self, inpfile):
-        """Reading caxfiles and nodes from input file"""
-
+    def readinp(self,inpfile):
         if not os.path.isfile(inpfile):
             print "Could not open file " + inpfile
             return
         else:
             print "Reading file " + inpfile
-
+        
         with open(inpfile) as f:
-            flines = f.read().splitlines()  # exclude \n
+            flines = f.read().splitlines() #exclude \n
 
-        fuetype = flines[0].strip()  # Read fuel type
-        reCAX = re.compile('.cax\s*$')  # Search for caxfiles
+        # Read fuel type
+        fuetype = flines[0].strip()
+        # Search for caxfiles
+        reCAX = re.compile('.cax\s*$')
         caxfiles = []
-        for i, x in enumerate(flines[1:]):
+        for i,x in enumerate(flines[1:]):
             if reCAX.search(x):
                 caxfiles.append(x)
             else:
                 break
-        i += 1
-        nodes = map(int, re.split('\s+', flines[i]))
+        i+=1
+        nodes  = map(int,re.split('\s+',flines[i]))
 
-        self.data.update({'fuetype': fuetype, 'inpfile': inpfile,
-                          'caxfiles': caxfiles, 'nodes': nodes})
-
-        '''
         self.data.fuetype = fuetype
         self.data.inpfile = inpfile
         self.data.caxfiles = caxfiles
         self.data.nodes = nodes
-        '''
+
 
     def readcax(self):
-        n = len(self.data.get('caxfiles'))
-        #n = len(self.data.caxfiles) # Number of threads
+        n = len(self.data.caxfiles) # Number of threads
         p = Pool(n) # Make the Pool of workers
         # Start processes in their own threads and return the results
-        caxfiles = self.data.get('caxfiles')
-        self.cases = p.map(CasData, caxfiles)
-        p.join()
+        self.cases = p.map(casdata, self.data.caxfiles)
         p.close()
-        print "Finished"
-        #p.close()
-        #p.join()
-        #self.case = p.map(CasData, self.data.caxfiles)
-        #Tracer()()
-        #for i,node in enumerate(self.data.nodes):
-        #    self.cases[i].data.topnode = node
+        p.join()
+        for i,node in enumerate(self.data.nodes):
+            self.cases[i].topnode = node
 
         #for i,f in enumerate(self.data.caxfiles):
         #    case = casdata(f)
