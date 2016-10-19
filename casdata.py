@@ -766,7 +766,15 @@ class casdata(object):
             self.data[-1].statepoints = statepoints
 
         os.remove(caxfile)
-            
+
+    def quickcalc(self, opt='refcalc'):
+        tic = time.time()
+        uuid = self.writec3cai()
+        self.runc3(uuid)
+        self.readc3cax(uuid, opt)
+        print "Done in "+str(time.time()-tic)+" seconds."
+        
+    '''
     def quickcalc(self,model='c3'):
         tic = time.time()
         if model == 'c3':
@@ -777,7 +785,8 @@ class casdata(object):
             self.runc3()
             self.readc3cax()
         print "Done in "+str(time.time()-tic)+" seconds."
-
+    '''
+    
     def __expcalc(self,POW,burnup):
         Nburnpts = burnup.size
         npst = POW.shape[0]
