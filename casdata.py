@@ -21,6 +21,7 @@ import os
 import sys
 import time
 from subprocess import call
+import uuid
 #from multiprocessing import Pool
 #from btf import btf
 #from pyqt_trace import pyqt_trace
@@ -505,142 +506,114 @@ class casdata(object):
         self.data.append(datastruct()) # Add an element to list
         self.data[-1].info = datastruct()
         self.data[-1].statepoints = []
-        
-    def writec3cai_singlevoi(self,voi=40,maxdep=60):
-        c3inp = "./c3.inp"
+    
+    def writec3cai(self, voi=None, maxdep=None):
+        filebasename = "./" + str(uuid.uuid4())
+        c3inp = filebasename + ".inp"
+        # c3inp = tempfile.NamedTemporaryFile(dir='.',
+        # prefix="c3_",suffix=".inp",delete=False)
         print "Writing c3 input file " + c3inp
 
-        if hasattr(self.qcalc[-1],'LFU'):
-            LFU = self.qcalc[-1].LFU
+        #info = self.data[0]['info']  # Get info data from original import
+        info = self.data[0].info
+        if hasattr(self.data[-1].info,'LFU'):
+            LFU = self.data[-1].info.LFU  # Get LFU from last calc
         else:
-            LFU = self.data.LFU
+            print "Error: LFU is missing"
+            return
         
-        #LFU = self.qcalc[-1].LFU
-        #LFU = self.data.LFU
-        #FUE = self.qcalc[-1].FUE
-        #pyqt_trace()
+        # info = self.db['origin']['info']
+        # LFU = self.db['qcalc'][-1]['info'].get('LFU')
 
-        f = open(c3inp,'w')
-        tit = "TIT "
-        tit = tit + self.data.tfu.split('*')[0].replace(',','=').strip() + " "
-        tit = tit + self.data.tmo.split('*')[0].replace(',','=').strip() + " "
-        tit = tit + "VOI=" + str(voi) + " "
-        f.write(tit + '\n')
-        f.write(self.data.sim.strip() + '\n')
+        # f = c3inp.file
+        f = open(c3inp, 'w')
 
-        Nfue = self.data.FUE.shape[0]
-        for i in range(Nfue):
-            f.write('FUE  %d ' % (self.data.FUE[i,0]))
-            f.write('%5.3f/%5.3f' % (self.data.FUE[i,1],self.data.FUE[i,2]))
-            if ~np.isnan(self.data.FUE[i,3]):
-                f.write(' %d=%4.2f' % (self.data.FUE[i,3],self.data.FUE[i,4]))
+        tit_1 = "TIT "
+        tit_2 = info.tfu.split('*')[0].replace(',', '=').strip() + " "
+        tit_3 = info.tmo.split('*')[0].replace(',', '=').strip() + " "
+        tit = tit_1 + tit_2 + tit_3
+        if voi is None:
+            voivec = info.voi.split('*')[0].replace(',', ' ')\
+                                                  .strip().split(' ')[1:]
+            tit = tit + "VOI=" + voivec[0] + " "
+            ide = ["'BD"+x+"'" for x in voivec]
+            f.write(tit + "IDE=" + ide[0] + '\n')
+        else:
+            tit = tit + "VOI=" + str(voi) + " "
+            f.write(tit + '\n')
+        f.write(info.sim.strip() + '\n')
+        
+        FUE = info.FUE
+        Nfue = FUE.shape[0]
+        baid_offset = 0  # BA id must not occur on more than one FUE card
+        for i in xrange(Nfue):
+            f.write('FUE  %d ' % (FUE[i,0]))
+            f.write('%5.3f/%5.3f' % (FUE[i,1],FUE[i,2]))
+            if ~np.isnan(FUE[i,3]):
+                f.write(' %d=%4.2f' % (FUE[i,3] + baid_offset, FUE[i,4]))
+                baid_offset += 1
             f.write('\n')
-        
+
         f.write('LFU\n')
-        for i in range(self.data.npst):
+        for i in xrange(info.npst):
             for j in range(i+1):
                 f.write('%d ' % LFU[i,j])
-                #f.write('%d ' % self.data.LFU[i,j])
             f.write('\n')
 
-        pde = self.data.pde.split('\'')[0]
+        pde = info.pde.split('\'')[0]
         f.write(pde.strip() + '\n')
-        f.write(self.data.bwr.strip() + '\n')
+        f.write(info.bwr.strip() + '\n')
 
-        Npin = np.size(self.data.pinlines)
-        for i in range(Npin):
-            tmpstr = re.split('\*|/',self.data.pinlines[i].strip())[0]# Remove coments etc
-            pinarr = re.split(',|\s+',tmpstr.strip()) # Split for segments
+        Npin = np.size(info.pinlines)
+        for i in xrange(Npin):
+            # Remove coments etc
+            tmpstr = re.split('\*|/',info.pinlines[i].strip())[0]
+            pinarr = re.split(',|\s+',tmpstr.strip())  # Split for segments
             npinsegs = len(pinarr)-2
             if npinsegs > 3:
                 red_pinstr = ' '.join(pinarr[0:3]+pinarr[-2:])
             else:
-                red_pinstr = self.data.pinlines[i].strip()
+                red_pinstr = info.pinlines[i].strip()
             f.write(red_pinstr.strip() + '\n')
-            #f.write(self.data.pinlines[i].strip() + '\n')
 
-        if hasattr(self.data,'slaline'): # Water cross?
-            f.write(self.data.slaline.strip() + '\n')
-
+        if info.slaline:  # has water cross?
+            f.write(info.slaline.strip() + '\n')
+        
         f.write('LPI\n')
-        for i in range(self.data.npst):
-            for j in range(i+1):
-                f.write('%d ' % self.data.LPI[i,j])
+        for i in xrange(info.npst):
+            for j in xrange(i+1):
+                f.write('%d ' % info.LPI[i,j])
             f.write('\n')
 
-        f.write(self.data.spa.strip() + '\n')
-        depstr = "DEP 0, 0.001, -" + str(maxdep)
-        f.write(depstr + '\n')
+        f.write(info.spa.strip() + '\n')
+        if maxdep is None:
+            f.write(info.dep.strip() + '\n')
+        else:
+            depstr = "DEP 0, 0.001, -" + str(maxdep)
+            f.write(depstr + '\n')
 
         f.write('NLI\n')
         f.write('STA\n')
-        f.write('END\n')
 
-        f.close()
+        if voi is None:
+            N = len(ide)
+            for i in xrange(1,N):
+                f.write(tit + "IDE=" + ide[i] + '\n')
+                res = "RES," + ide[i-1] + ",0"
+                f.write(res + '\n')
+                f.write("VOI " + voivec[i] + '\n')
+                if maxdep is None:
+                    f.write(info.dep.strip() + '\n')
+                else:
+                    depstr = "DEP 0, 0.001, -" + str(maxdep)
+                    f.write(depstr + '\n')
 
-
-    def writec3cai_multivoi(self):
-        c3inp = "./c3.inp"
-        print "Writing c3 input file " + c3inp
-        
-        f = open(c3inp,'w')
-
-        tit = "TIT "
-        tit = tit + self.data.tfu.split('*')[0].replace(',','=').strip() + " "
-        tit = tit + self.data.tmo.split('*')[0].replace(',','=').strip() + " "
-        voivec = self.data.voi.split('*')[0].replace(',',' ').strip().split(' ')[1:]
-        tit = tit + "VOI=" + voivec[0] + " "
-        ide = ["'BD"+x+"'" for x in voivec]
-        f.write(tit + "IDE=" + ide[0] + '\n')
-        f.write(self.data.sim.strip() + '\n')
-
-        Nfue = self.data.FUE.shape[0]
-        for i in range(Nfue):
-            f.write('FUE  %d ' % (self.data.FUE[i,0]))
-            f.write('%5.3f/%5.3f' % (self.data.FUE[i,1],self.data.FUE[i,2]))
-            if ~np.isnan(self.data.FUE[i,3]):
-                f.write(' %d=%4.2f' % (self.data.FUE[i,3],self.data.FUE[i,4]))
-            f.write('\n')
-
-        f.write('LFU\n')
-        for i in range(self.data.npst):
-            for j in range(i+1):
-                f.write('%d ' % self.data.LFU[i,j])
-            f.write('\n')
-        
-        pde = self.data.pde.split('\'')[0]
-        f.write(pde.strip() + '\n')
-        f.write(self.data.bwr.strip() + '\n')
-
-        Npin = np.size(self.data.pinlines)
-        for i in range(Npin):
-            f.write(self.data.pinlines[i].strip() + '\n')
-        
-        f.write(self.data.slaline.strip() + '\n')
-
-        f.write('LPI\n')
-        for i in range(self.data.npst):
-            for j in range(i+1):
-                f.write('%d ' % self.data.LPI[i,j])
-            f.write('\n')
-
-        f.write(self.data.spa.strip() + '\n')
-        f.write(self.data.dep.strip() + '\n')
-        f.write('NLI\n')
-        f.write('STA\n')
-
-        N = len(ide)
-        for i in range(1,N):
-            f.write(tit + "IDE=" + ide[i] + '\n')
-            res = "RES," + ide[i-1] + ",0"
-            f.write(res + '\n')
-            f.write("VOI " + voivec[i] + '\n')
-            f.write(self.data.dep.strip() + '\n')
-            f.write('STA\n')
+                f.write('STA\n')
 
         f.write('END\n')
+        # c3inp.close()
         f.close()
-
+        return filebasename
 
     def runc3(self): # Running C3 perturbation model
         # C3 input file
