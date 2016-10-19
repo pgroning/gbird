@@ -14,7 +14,10 @@ from casdata import casdata
 
 #from btf import btf
 
-
+def quickcalc_fun(obj):
+    obj.quickcalc()
+    return obj
+    
 class datastruct(object):
     """Dummy class used to structure data"""
     pass
@@ -72,6 +75,12 @@ class casio:
         for i,node in enumerate(self.data.nodes):
             self.cases[i].topnode = node
 
+        #cas = quick_fun(self.cases[0])
+        p = Pool(n)
+        self.cases = p.map(quickcalc_fun, self.cases)
+        p.close()
+        p.join()
+        #Tracer()()    
         #for i,f in enumerate(self.data.caxfiles):
         #    case = casdata(f)
         #    case.data.topnode = self.data.nodes[i]
