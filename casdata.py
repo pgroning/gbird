@@ -37,7 +37,7 @@ class casdata(object):
     def __init__(self,caxfile,opt=None):
         self.data = []
         self.add_calc()
-        self.data[0].refcalc = datastruct
+        self.data[0].refcalc = datastruct()
         #self.data.append(datastruct()) # Add an element to list
         #self.data[-1]
         #self.statepts = []
@@ -668,9 +668,13 @@ class casdata(object):
         # c3out.unlink(c3out.name)
         os.remove(c3out)
 
-    def readc3cax(self):
+
+
+    
+    def readc3cax(self, filebasename, opt=None):
         
-        caxfile = "./c3.cax"
+        #caxfile = "./c3.cax"
+        caxfile = filebasename + ".cax"
         if not os.path.isfile(caxfile):
             print "Could not open file " + caxfile
             return
@@ -723,14 +727,29 @@ class casdata(object):
         EXP = self.__expcalc(POW,burnup)
         # Calculate Fint:
         fint = self.__fintcalc(POW)
-
+        
         # Append state instancies
+        statepoints = []
+
         #self.qcalc.append(datastruct())
-        pindex = -1 # Index of last instance
-        self.qcalc[pindex].model = "c3"
-        self.qcalc[pindex].statepts = []
+        #pindex = -1 # Index of last instance
+        #self.qcalc[pindex].model = "c3"
+        #self.qcalc[pindex].statepts = []
         for i in range(Nburnpts):
-            self.qcalc[pindex].statepts.append(datastruct()) # append new instance to list
+            # append new instance to list
+            statepoints.append(datastruct())
+            statepoints[i].burnup = burnup[i]
+            statepoints[i].voi = voi[i]
+            statepoints[i].vhi = vhi[i]
+            statepoints[i].tfu = tfu[i]
+            statepoints[i].tmo = tmo[i]
+            statepoints[i].kinf = kinf[i]
+            statepoints[i].fint = fint[i]
+            statepoints[i].POW = POW[:,:,i]
+            statepoints[i].EXP = EXP[:,:,i]
+
+            '''
+            self.qcalc[pindex].statepts.append(datastruct()) 
             self.qcalc[pindex].statepts[i].burnup = burnup[i]
             self.qcalc[pindex].statepts[i].voi = voi[i]
             self.qcalc[pindex].statepts[i].vhi = vhi[i]
@@ -740,7 +759,14 @@ class casdata(object):
             self.qcalc[pindex].statepts[i].fint = fint[i]
             self.qcalc[pindex].statepts[i].POW = POW[:,:,i]
             self.qcalc[pindex].statepts[i].EXP = EXP[:,:,i]
+            '''
+        if opt == 'refcalc':
+            self.data[0].refcalc.statepoints = statepoints
+        else:
+            self.data[-1].statepoints = statepoints
 
+        os.remove(caxfile)
+            
     def quickcalc(self,model='c3'):
         tic = time.time()
         if model == 'c3':
