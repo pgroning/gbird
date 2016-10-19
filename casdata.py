@@ -615,13 +615,16 @@ class casdata(object):
         f.close()
         return filebasename
 
-    def runc3(self): # Running C3 perturbation model
+    def runc3(self,filebasename):  # Running C3 perturbation model
         # C3 input file
-        c3inp = "./c3.inp"
+        c3inp = filebasename + ".inp"
+        # c3inp = "./c3.inp"
         # output file
-        c3out = "./c3.out"
+        # c3out = tempfile.NamedTemporaryFile(
+        # dir='.',prefix="c3_",suffix=".out",delete=False)
+        c3out = filebasename + ".out"
         # cax file
-        c3cax = "./c3.cax"
+        c3cax = filebasename + ".cax"
         # libs
         lib1 = "./lib/c3/e4lbj40"
         lib2 = "./lib/c3/bal8ab4"
@@ -630,7 +633,11 @@ class casdata(object):
         c3exe = "./bin/casmo3"
 
         # Write C3 configuration file
-        c3cfg = "./c3.txt"
+        # c3cfg = tempfile.NamedTemporaryFile(
+        # dir='.',prefix="c3_",suffix=".cfg",delete=False)
+        c3cfg = filebasename + ".cfg"
+        print c3cfg
+        # c3cfg = "./c3.txt"
         f = open(c3cfg, "w")
         f.write(c3inp + "\n")
         f.write(c3out + "\n")
@@ -641,21 +648,25 @@ class casdata(object):
         f.write(c3cax + "\n")
         newlines = '\n' * 7
         f.write(newlines)
+        # c3cfg.close()
         f.close()
-
+        # Tracer()()
         # Run C3 executable
-        #cmd = "linrsh " + c3exe + " " + c3cfg
-        #cmd = c3exe + " " + c3cfg
+        # cmd = "linrsh " + c3exe + " " + c3cfg
+        # cmd = c3exe + " " + c3cfg
         print "running c3 model"
-        #os.system(cmd)
-        try: # use linrsh if available
+        # os.system(cmd)
+        try:  # use linrsh if available
             call(['linrsh',c3exe,c3cfg])
         except:
             call([c3exe,c3cfg])
 
         # Remove files
+        # c3cfg.unlink(c3cfg.name)
         os.remove(c3cfg)
-
+        os.remove(c3inp)
+        # c3out.unlink(c3out.name)
+        os.remove(c3out)
 
     def readc3cax(self):
         
