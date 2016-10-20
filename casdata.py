@@ -274,8 +274,9 @@ class casdata(object):
         titcrd = [flines[i] for i in iTIT]
         
         # Row vector containing burnup, voi, vhi, tfu and tmo
-        rvec = [re.split('/',flines[i+2].strip()) for i in iTIT]
-
+        #rvec = [re.split('/',flines[i+2].strip()) for i in iTIT]
+        rvec = [re.split('[/\s+]+', flines[i+2].strip()) for i in iTIT]
+        
         # Row containing Kinf
         kinfstr = [flines[i+5] for i in iPOL]
  
@@ -289,9 +290,15 @@ class casdata(object):
         #Tracer()()
         for i in range(Nburnpts):
             # Read burnup, voids, tfu and tmo
-            burnup[i],voi[i] = re.split('\s+',rvec[i][0].strip())
-            vhi[i],tfu[i] = re.split('\s+',rvec[i][1].strip())
-            tmo[i] = re.split('\s+',rvec[i][2].strip())[1]
+            burnup[i] = rvec[i][0]
+            voi[i] = rvec[i][1]
+            vhi[i] = rvec[i][2]
+            tfu[i] = rvec[i][3]
+            tmo[i] = rvec[i][4]
+            #Tracer()()
+            #burnup[i],voi[i] = re.split('\s+',rvec[i][0].strip())
+            #vhi[i],tfu[i] = re.split('\s+',rvec[i][1].strip())
+            #tmo[i] = re.split('\s+',rvec[i][2].strip())[1]
             # Read kinf
             kinf[i] = re.split('\s+',kinfstr[i].strip())[0]
             # Read radial power distribution map
@@ -301,7 +308,7 @@ class casdata(object):
             XFL2[:,:,i] = self.__symtrans(self.__map2mat(xfl2map[i],npst))
         print "Done."
         #Tracer()()
-        # -----------------------------------------------------------------------
+        # --------------------------------------------------------------------
         # Calculate radial burnup distributions
         EXP = self.__expcalc(POW,burnup)
         # Calculate Fint:
@@ -667,9 +674,6 @@ class casdata(object):
         os.remove(c3inp)
         # c3out.unlink(c3out.name)
         os.remove(c3out)
-
-
-
     
     def readc3cax(self, filebasename, opt=None):
         
@@ -705,7 +709,8 @@ class casdata(object):
         POW = np.zeros((npst,npst,Nburnpts)); POW.fill(np.nan)
         
         # Row vector containing burnup, voi, vhi, tfu and tmo
-        rvec = [re.split('/',flines[i+2].strip()) for i in iTIT]
+        #rvec = [re.split('/',flines[i+2].strip()) for i in iTIT]
+        rvec = [re.split('[/\s+]+', flines[i+2].strip()) for i in iTIT]
 
         # Row containing Kinf
         kinfstr = [flines[i+5] for i in iPOL]
@@ -715,9 +720,14 @@ class casdata(object):
 
         for i in range(Nburnpts):
             # Read burnup, voids, tfu and tmo
-            burnup[i],voi[i] = re.split('\s+',rvec[i][0].strip())
-            vhi[i],tfu[i] = re.split('\s+',rvec[i][1].strip())
-            tmo[i] = re.split('\s+',rvec[i][2].strip())[1]
+            burnup[i] = rvec[i][0]
+            voi[i] = rvec[i][1]
+            vhi[i] = rvec[i][2]
+            tfu[i] = rvec[i][3]
+            tmo[i] = rvec[i][4]
+            #burnup[i],voi[i] = re.split('\s+',rvec[i][0].strip())
+            #vhi[i],tfu[i] = re.split('\s+',rvec[i][1].strip())
+            #tmo[i] = re.split('\s+',rvec[i][2].strip())[1]
             # Read kinf
             kinf[i] = re.split('\s+',kinfstr[i].strip())[0]
             # Read radial power distribution map
