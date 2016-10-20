@@ -21,14 +21,14 @@ import os
 import sys
 import time
 from subprocess import call
-import uuid
+import uuid  # used for random generated file names
 #from multiprocessing import Pool
 #from btf import btf
 #from pyqt_trace import pyqt_trace
 
 
 class datastruct(object):
-    """Dummy class used to structure data"""
+    """Initialize a class that can be used to structure data"""
     pass
 
 
@@ -836,4 +836,5 @@ class casdata(object):
         
 
 if __name__ == '__main__':
-    casdata(sys.argv[1])
+    cas=casdata(sys.argv[1])
+    cas.quickcalc()

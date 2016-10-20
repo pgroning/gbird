@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from __future__ import division
 from IPython.core.debugger import Tracer
 
@@ -15,11 +17,12 @@ from casdata import casdata
 #from btf import btf
 
 def quickcalc_fun(obj):
+    """Help function used for multithreaded quickcalc"""
     obj.quickcalc()
     return obj
 
 class datastruct(object):
-    """Dummy class used to structure data"""
+    """Initialize a class that can be used to structure data"""
     pass
 
 
@@ -119,10 +122,10 @@ class casio(object):
 
     def pow3(self,POW):
     #def pow3(self,*args):
-        """Expanding a number of 2D pin power distributions into a 3D distribution.
+        """Expanding a number of 2D pin power distributions into a 3D
+        distribution.
         Syntax: POW3D = pow3(POW1,POW2,POW3,...)"""
-        #print "Expanding a number of 2D pin power distributions into a 3D distribution"
-   
+       
         xdim = POW.shape[1]
         ydim = POW.shape[2]
         #powlist = [arg for arg in args]
@@ -187,9 +190,16 @@ class casio(object):
 
 
 if __name__ == '__main__':
+    cio = casio()
+    cio.readinp(sys.argv[1])
+    cio.readcax()
+    cio.runc3()
+
+    '''
     P1 = sys.argv[1]
     P2 = sys.argv[2]
     x1 = sys.argv[3]
     x2 = sys.argv[4]
     x = sys.argv[5]
     casio(P1,P2,x1,x2,x)
+    '''
