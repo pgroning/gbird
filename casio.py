@@ -16,10 +16,14 @@ from casdata import casdata
 
 #from btf import btf
 
+def readcax_fun(tup):
+    """Unpack input arguments for use with casdata class"""
+    caxfile, opt = tup
+    return casdata(caxfile, opt)
+
 def quickcalc_fun(obj):
     """Help function used for multithreaded quickcalc"""
-    obj.quickcalc()
-    return obj
+    return obj.quickcalc()
 
 class datastruct(object):
     """Initialize a class that can be used to structure data"""
@@ -67,12 +71,21 @@ class casio(object):
         self.data.caxfiles = caxfiles
         self.data.nodes = nodes
 
+    def readcax(self, opt=None):
+        """Read multiple caxfiles using multithreading.
+        Syntax:
+        readcax() reads the first part of the file (where voi=vhi)
+        readcax('all') reads the whole file."""
 
-    def readcax(self):
+        inlist = []  # Bundle input args
+        for caxfile in self.data.caxfiles:
+            inlist.append((caxfile, opt))
+        
         n = len(self.data.caxfiles) # Number of threads
         p = Pool(n) # Make the Pool of workers
         # Start processes in their own threads and return the results
-        self.cases = p.map(casdata, self.data.caxfiles)
+        self.cases = p.map(readcax_fun, inlist)
+        #self.cases = p.map(casdata, self.data.caxfiles)
         p.close()
         p.join()
         for i,node in enumerate(self.data.nodes):
@@ -84,6 +97,7 @@ class casio(object):
         #    self.cases.append(case)
 
     def runc3(self):
+        
         n = len(self.data.caxfiles) # Number of threads
         p = Pool(n) # Make the Pool of workers
         cases = p.map(quickcalc_fun, self.cases)
