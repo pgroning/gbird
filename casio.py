@@ -17,13 +17,13 @@ from casdata import casdata
 def quickcalc_fun(obj):
     obj.quickcalc()
     return obj
-    
+
 class datastruct(object):
     """Dummy class used to structure data"""
     pass
 
 
-class casio:
+class casio(object):
     """Read, save and load cases"""
 
     def __init__(self):
@@ -74,18 +74,18 @@ class casio:
         p.join()
         for i,node in enumerate(self.data.nodes):
             self.cases[i].topnode = node
-
-        #cas = quick_fun(self.cases[0])
-        p = Pool(n)
-        self.cases = p.map(quickcalc_fun, self.cases)
-        p.close()
-        p.join()
-        #Tracer()()    
+        
         #for i,f in enumerate(self.data.caxfiles):
         #    case = casdata(f)
         #    case.data.topnode = self.data.nodes[i]
         #    self.cases.append(case)
 
+    def runc3(self):
+        n = len(self.data.caxfiles) # Number of threads
+        p = Pool(n) # Make the Pool of workers
+        cases = p.map(quickcalc_fun, self.cases)
+        p.close()
+        p.join()
 
     def savepic(self,pfile):
         #pfile = os.path.splitext(self.data.inpfile)[0] + '.p'
