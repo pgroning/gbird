@@ -43,7 +43,7 @@ class casdata(object):
         #self.statepts = []
         #self.pert = datastruct()
         self.readcax(caxfile,opt)
-        self.__ave_enr()
+        self.ave_enr()
         #Tracer()()
         #self.qcalc = []
         #self.qcalc.append(datastruct())
@@ -414,7 +414,7 @@ class casdata(object):
 #        self.fint = fint
 
     # --------Calculate average enrichment----------
-    def __ave_enr(self):
+    def ave_enr(self):
         
         # Translate LFU map to density map
         data = self.data[-1].info
