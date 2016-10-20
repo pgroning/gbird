@@ -99,11 +99,18 @@ class casio(object):
         #    self.cases.append(case)
 
     def runc3(self, voi=None, maxdep=None, opt='refcalc'):
-        
+
+        # ----Code block only for testing purpose-----
+        if opt != 'refcalc':
+            for i in range(len(self.cases)):
+                self.cases[i].add_calc()
+                self.cases[i].data[-1].info.LFU = self.cases[i].data[0].info.LFU
+        # --------------------------------------------
+
         inlist = []  # Bundle input args
         for case in self.cases:
             inlist.append((case, voi, maxdep, opt))
-        
+
         #quickcalc_fun(inlist[1])
         #Tracer()()
         n = len(self.cases)  # Number of threads

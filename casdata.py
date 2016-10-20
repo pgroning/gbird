@@ -779,8 +779,8 @@ class casdata(object):
 
     def quickcalc(self, voi=None, maxdep=None, opt='refcalc'):
         tic = time.time()
-        if opt != 'refcalc':
-            self.add_calc()  # Append element to hold a new calculation
+        #if opt != 'refcalc':
+        #    self.add_calc()  # Append element to hold a new calculation
             #self.data[-1].info.LFU = self.data[0].info.LFU
         uuid = self.writec3cai(voi, maxdep)
         self.runc3(uuid)
