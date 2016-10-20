@@ -21,9 +21,11 @@ def readcax_fun(tup):
     caxfile, opt = tup
     return casdata(caxfile, opt)
 
-def quickcalc_fun(obj):
+def quickcalc_fun(tup):
     """Help function used for multithreaded quickcalc"""
-    return obj.quickcalc()
+    case, voi, maxdep, opt = tup
+    case.quickcalc(voi, maxdep, opt)
+    return case
 
 class datastruct(object):
     """Initialize a class that can be used to structure data"""
@@ -96,11 +98,18 @@ class casio(object):
         #    case.data.topnode = self.data.nodes[i]
         #    self.cases.append(case)
 
-    def runc3(self):
+    def runc3(self, voi=None, maxdep=None, opt='refcalc'):
         
-        n = len(self.data.caxfiles) # Number of threads
-        p = Pool(n) # Make the Pool of workers
-        cases = p.map(quickcalc_fun, self.cases)
+        inlist = []  # Bundle input args
+        for case in self.cases:
+            inlist.append((case, voi, maxdep, opt))
+        
+        #quickcalc_fun(inlist[1])
+        #Tracer()()
+        n = len(self.cases)  # Number of threads
+        p = Pool(n)  # Make the Pool of workers
+        self.cases = p.map(quickcalc_fun, inlist)
+        #cases = p.map(quickcalc_fun, self.cases)
         p.close()
         p.join()
 

@@ -526,7 +526,7 @@ class casdata(object):
         if hasattr(self.data[-1].info,'LFU'):
             LFU = self.data[-1].info.LFU  # Get LFU from last calc
         else:
-            print "Error: LFU is missing"
+            print "Error: LFU is missing."
             return
         
         # info = self.db['origin']['info']
@@ -777,9 +777,12 @@ class casdata(object):
 
         os.remove(caxfile)
 
-    def quickcalc(self, opt='refcalc'):
+    def quickcalc(self, voi=None, maxdep=None, opt='refcalc'):
         tic = time.time()
-        uuid = self.writec3cai()
+        if opt != 'refcalc':
+            self.add_calc()  # Append element to hold a new calculation
+            #self.data[-1].info.LFU = self.data[0].info.LFU
+        uuid = self.writec3cai(voi, maxdep)
         self.runc3(uuid)
         self.readc3cax(uuid, opt)
         print "Done in "+str(time.time()-tic)+" seconds."
