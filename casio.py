@@ -1,7 +1,16 @@
 #!/usr/bin/env python
 
 from __future__ import division
-from IPython.core.debugger import Tracer
+from IPython.core.debugger import Tracer # Debugging
+''' ipy example:
+import casio
+: obj = casio.casio()
+: obj.readinp("file.inp")
+: obj.readcax()
+After some code modification:
+: reload(casio)
+: obj.readcax()
+'''
 
 try:
     import cPickle as pickle
@@ -17,15 +26,19 @@ from casdata import casdata
 #from btf import btf
 
 def readcax_fun(tup):
-    """Unpack input arguments for use with casdata class"""
-    caxfile, opt = tup
-    return casdata(caxfile, opt)
+    """Unpack input arguments for use with the casdata class"""
+    return casdata(*tup)
+    #caxfile, opt = tup
+    #return casdata(caxfile, opt)
 
 def quickcalc_fun(tup):
-    """Help function used for multithreaded quickcalc"""
-    case, voi, maxdep, opt = tup
-    case.quickcalc(voi, maxdep, opt)
+    """Wrapper function used for multithreaded quickcalc"""
+    case = tup[0] # First arg should always be the object
+    case.quickcalc(*tup[1:])
     return case
+    #case, voi, maxdep, opt = tup
+    #case.quickcalc(voi, maxdep, opt)
+    #return case
 
 class datastruct(object):
     """Initialize a class that can be used to structure data"""
