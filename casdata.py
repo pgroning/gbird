@@ -822,11 +822,9 @@ class casdata(object):
             fint[i] = POW[:,:,i].max()
         return fint
 
-    def findpoint(self,burnup=None,vhi=None,voi=None,tfu=None,calcindex=0):
+    def findpoint(self, statepoints, burnup=None, vhi=None, voi=None, tfu=None):
         """Return statepoint index that correspond to specific burnup, void and void history
         Syntax: pt = findpoint(burnup=burnup_val,vhi=vhi_val,voi=voi_val,tfu=tfu_val)"""
-
-        statepoints = self.data[calcindex].statepoints
         
         if tfu is not None:
             pindex = next(i for i, p in enumerate(statepoints) if p.tfu==tfu)
@@ -838,16 +836,16 @@ class casdata(object):
                           if p.vhi==vhi and p.voi==voi)    
         return pindex
 
-    def burnpoints(self,voi=None,vhi=None,calcindex=0):
-
-        i = self.findpoint(voi=80, vhi=80, calcindex=0)
-        statepoints = self.data[0].statepoints
-        Nstatepoints = len(statepoints)
+    def burnpoints(self, voi=None, vhi=None, calcindex=0):
+        """Return depletion vector for given voi"""
+        
+        statepoints = self.data[calcindex].statepoints
+        i = self.findpoint(statepoints, voi=voi, vhi=vhi)
         burnlist = [statepoints[i].burnup]
+        Nstatepoints = len(statepoints)
         while (i < Nstatepoints-1) and (statepoints[i].burnup <= statepoints[i+1].burnup):
             burnlist.append(statepoints[i+1].burnup)
             i+=1
-        
         return burnlist
         
 if __name__ == '__main__':
