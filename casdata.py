@@ -822,25 +822,33 @@ class casdata(object):
             fint[i] = POW[:,:,i].max()
         return fint
 
-    def findpoint(self,burnup=None,vhi=None,voi=None,tfu=None):
+    def findpoint(self,burnup=None,vhi=None,voi=None,tfu=None,calcindex=0):
         """Return statepoint index that correspond to specific burnup, void and void history
         Syntax: pt = findpoint(burnup=burnup_val,vhi=vhi_val,voi=voi_val,tfu=tfu_val)"""
 
+        statepoints = self.data[calcindex].statepoints
+        
         if tfu is not None:
-            pindex = next(i for i,p in enumerate(self.statepts) if p.tfu==tfu)
+            pindex = next(i for i, p in enumerate(statepoints) if p.tfu==tfu)
         elif burnup is not None:
-            pindex = next(i for i,p in enumerate(self.statepts)
+            pindex = next(i for i,p in enumerate(statepoints)
                           if p.burnup==burnup and p.vhi==vhi and p.voi==voi)
         else:
-            pindex = next(i for i,p in enumerate(self.statepts)
+            pindex = next(i for i,p in enumerate(statepoints)
                           if p.vhi==vhi and p.voi==voi)    
         return pindex
 
-    def burnpoints(self):
-        statepoints = self.data[0].statepoints
+    def burnpoints(self,voi=None,vhi=None,calcindex=0):
 
-        burnvec = [sp.burnup for sp in statepoints]
-        Tracer()()
+        i = self.findpoint(voi=80, vhi=80, calcindex=0)
+        statepoints = self.data[0].statepoints
+        Nstatepoints = len(statepoints)
+        burnlist = [statepoints[i].burnup]
+        while (i < Nstatepoints-1) and (statepoints[i].burnup <= statepoints[i+1].burnup):
+            burnlist.append(statepoints[i+1].burnup)
+            i+=1
+        
+        return burnlist
         
 if __name__ == '__main__':
     cas=casdata(sys.argv[1])
