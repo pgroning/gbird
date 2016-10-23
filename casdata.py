@@ -836,8 +836,12 @@ class casdata(object):
                           if p.vhi==vhi and p.voi==voi)    
         return pindex
 
-        
+    def burnpoints(self):
+        statepoints = self.data[0].statepoints
 
+        burnvec = [sp.burnup for sp in statepoints]
+        Tracer()()
+        
 if __name__ == '__main__':
     cas=casdata(sys.argv[1])
     cas.quickcalc()
