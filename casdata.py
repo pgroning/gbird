@@ -800,6 +800,17 @@ class casdata(object):
         print "Done in "+str(time.time()-tic)+" seconds."
     '''
     
+    def boxbow(self, offset=0.0):
+        """Updating the BWR card to account for box bowing."""
+        bwr = self.data[-1].info.bwr
+        bwr_arr = bwr.split()
+        gaw = float(bwr_arr[5]) + offset
+        gan = float(bwr_arr[6]) - offset  # gaw + gan = constant
+        bwr_arr[5] = str(gaw)
+        bwr_arr[6] = str(gan)
+        bwr_offset = ' '.join(bwr_arr)
+        return bwr_offset
+
     def __expcalc(self,POW,burnup):
         Nburnpts = burnup.size
         npst = POW.shape[0]
@@ -843,7 +854,8 @@ class casdata(object):
         i = self.findpoint(statepoints, voi=voi, vhi=vhi)
         burnlist = [statepoints[i].burnup]
         Nstatepoints = len(statepoints)
-        while (i < Nstatepoints-1) and (statepoints[i].burnup <= statepoints[i+1].burnup):
+        while ((i < Nstatepoints-1) and
+        (statepoints[i].burnup <= statepoints[i+1].burnup)):
             burnlist.append(statepoints[i+1].burnup)
             i+=1
         return burnlist
