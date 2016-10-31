@@ -514,9 +514,9 @@ class casdata(object):
         self.data[-1].info = datastruct()
         self.data[-1].statepoints = []
     
-    def writec3cai(self, voi=None, maxdep=None):
-        filebasename = "./" + str(uuid.uuid4())
-        c3inp = filebasename + ".inp"
+    def writec3cai(self, file_base_name, voi=None, maxdep=None, box_offset=None):
+        #filebasename = "./" + str(uuid.uuid4())
+        c3inp = file_base_name + ".inp"
         # c3inp = tempfile.NamedTemporaryFile(dir='.',
         # prefix="c3_",suffix=".inp",delete=False)
         print "Writing c3 input file " + c3inp
@@ -552,7 +552,7 @@ class casdata(object):
         
         FUE = info.FUE
         Nfue = FUE.shape[0]
-        baid_offset = 0  # BA id must not occur on more than one FUE card
+        baid_offset = 0  # The same BA id must not occur more than once
         for i in xrange(Nfue):
             f.write('FUE  %d ' % (FUE[i,0]))
             f.write('%5.3f/%5.3f' % (FUE[i,1],FUE[i,2]))
@@ -569,7 +569,11 @@ class casdata(object):
 
         pde = info.pde.split('\'')[0]
         f.write(pde.strip() + '\n')
-        f.write(info.bwr.strip() + '\n')
+        if box_offset:
+            bwr = self.boxbow(box_offset)
+            Tracer()()
+        else:
+            f.write(info.bwr.strip() + '\n')
 
         Npin = np.size(info.pinlines)
         for i in xrange(Npin):
@@ -620,7 +624,7 @@ class casdata(object):
         f.write('END\n')
         # c3inp.close()
         f.close()
-        return filebasename
+        #return filebasename
 
     def runc3(self,filebasename):  # Running C3 perturbation model
         # C3 input file
@@ -671,14 +675,14 @@ class casdata(object):
         # Remove files
         # c3cfg.unlink(c3cfg.name)
         os.remove(c3cfg)
-        os.remove(c3inp)
+        #os.remove(c3inp)
         # c3out.unlink(c3out.name)
-        os.remove(c3out)
+        #os.remove(c3out)
     
-    def readc3cax(self, filebasename, opt=None):
+    def readc3cax(self, file_base_name, opt=None):
         
         #caxfile = "./c3.cax"
-        caxfile = filebasename + ".cax"
+        caxfile = file_base_name + ".cax"
         if not os.path.isfile(caxfile):
             print "Could not open file " + caxfile
             return
@@ -775,16 +779,20 @@ class casdata(object):
         else:
             self.data[-1].statepoints = statepoints
 
-        os.remove(caxfile)
+        #os.remove(caxfile)
 
     def quickcalc(self, voi=None, maxdep=None, opt='refcalc'):
         tic = time.time()
         #if opt != 'refcalc':
         #    self.add_calc()  # Append element to hold a new calculation
             #self.data[-1].info.LFU = self.data[0].info.LFU
-        uuid = self.writec3cai(voi, maxdep)
-        self.runc3(uuid)
-        self.readc3cax(uuid, opt)
+        file_base_name = "./" + str(uuid.uuid4())
+        self.writec3cai(file_base_name, voi, maxdep,box_offset=0.1)
+        self.runc3(file_base_name)
+        self.readc3cax(file_base_name, opt)
+        os.remove(file_base_name + ".inp")
+        os.remove(file_base_name + ".out")
+        os.remove(file_base_name + ".cax")
         print "Done in "+str(time.time()-tic)+" seconds."
         
     '''
