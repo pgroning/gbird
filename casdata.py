@@ -509,12 +509,13 @@ class casdata(object):
         #Tracer()()
 
     def add_calc(self):
-        """Append a list element to store result of calculation"""
+        """Append a list element to store result of new calculation"""
         self.data.append(datastruct()) # Add an element to list
         self.data[-1].info = datastruct()
         self.data[-1].statepoints = []
     
-    def writec3cai(self, file_base_name, voi=None, maxdep=None, box_offset=None):
+    def writec3cai(self, file_base_name, voi=None, maxdep=None,
+                   box_offset=None):
         #filebasename = "./" + str(uuid.uuid4())
         c3inp = file_base_name + ".inp"
         # c3inp = tempfile.NamedTemporaryFile(dir='.',
@@ -571,7 +572,7 @@ class casdata(object):
         f.write(pde.strip() + '\n')
         if box_offset:
             bwr = self.boxbow(box_offset)
-            Tracer()()
+            f.write(bwr + '\n')
         else:
             f.write(info.bwr.strip() + '\n')
 
