@@ -19,10 +19,16 @@ class UnitTest(unittest.TestCase):
         #self.testfile = "../best/cax/A10XM/10g35dom/e28ATXM-385-10g35dom-cas.cax"
         self.cas = casdata(self.testfile)
         #self.cas.readcax(self.testfile,0)
-
+        self.file_base_name = "test_file_base_name"
 
     def tearDown(self):
         unittest.TestCase.tearDown(self)
+        try: os.remove(self.file_base_name + ".inp")
+        except: pass
+        try: os.remove(self.file_base_name + ".out")
+        except: pass
+        try: os.remove(self.file_base_name + ".cax")
+        except: pass
 
 
     def test_readcax(self):
@@ -47,35 +53,33 @@ class UnitTest(unittest.TestCase):
         self.assertTrue(ave_enr > 0)
     
     def test_writec3cai(self):
-        filebasename = self.cas.writec3cai()
-        self.assertTrue(type(filebasename) == str, "filebasename is not a string")
-        os.remove(filebasename + ".inp")
+        self.cas.writec3cai(self.file_base_name)
+        caifile = self.file_base_name + ".inp"
+        with open(caifile) as f:  # check file content
+            flines = f.read().splitlines()
+        self.assertTrue(len(flines) >= 10, "file content is less than 10 lines")
     
     def test_runc3(self):
-        filebasename = self.cas.writec3cai()
-        self.cas.runc3(filebasename)
-        caxfile = filebasename + ".cax"
+        self.cas.writec3cai(self.file_base_name)
+        self.cas.runc3(self.file_base_name)
+        caxfile = self.file_base_name + ".cax"
         self.assertTrue(os.path.isfile(caxfile), "cax file was not created")
-        # check file content
-        with open(caxfile) as f:
+        with open(caxfile) as f:  # check file content
             flines = f.read().splitlines()
-        print len(flines)
-        self.assertTrue(len(flines) > 100,"file content is not complete")
-        try: os.remove(caxfile)
-        except: pass
+        self.assertTrue(len(flines) >= 100,"file content is less than 100 lines")
 
     def test_readc3cax_ref(self):
-        filebasename = self.cas.writec3cai()
-        self.cas.runc3(filebasename)
-        self.cas.readc3cax(filebasename,'refcalc')
+        self.cas.writec3cai(self.file_base_name)
+        self.cas.runc3(self.file_base_name)
+        self.cas.readc3cax(self.file_base_name,'refcalc')
         Nstatepoints = len(self.cas.data[0].refcalc.statepoints)
         self.assertTrue(Nstatepoints >= 10, "Number of statepoints is less than 10")
     
     def test_readc3cax_add(self):
-        filebasename = self.cas.writec3cai()
-        self.cas.runc3(filebasename)
+        self.cas.writec3cai(self.file_base_name)
+        self.cas.runc3(self.file_base_name)
         self.cas.add_calc()
-        self.cas.readc3cax(filebasename)
+        self.cas.readc3cax(self.file_base_name)
         Nstatepoints = len(self.cas.data[1].statepoints)
         self.assertTrue(Nstatepoints >= 10, "Number of statepoints is less than 10")
     

@@ -523,7 +523,7 @@ class casdata(object):
         self.data[-1].statepoints = []
 
     def writec3cai(self, file_base_name, voi=None, maxdep=None,
-                   box_offset=None):
+                   box_offset=False):
         # filebasename = "./" + str(uuid.uuid4())
         c3inp = file_base_name + ".inp"
         # c3inp = tempfile.NamedTemporaryFile(dir='.',
@@ -805,7 +805,7 @@ class casdata(object):
         #    self.add_calc()  # Append element to hold a new calculation
         # self.data[-1].info.LFU = self.data[0].info.LFU
         file_base_name = "./" + str(uuid.uuid4())
-        self.writec3cai(file_base_name, voi, maxdep, box_offset=0.1)
+        self.writec3cai(file_base_name, voi, maxdep, box_offset=False)
         self.runc3(file_base_name, grid)
         self.readc3cax(file_base_name, opt)
         os.remove(file_base_name + ".inp")
@@ -826,12 +826,12 @@ class casdata(object):
         print "Done in "+str(time.time()-tic)+" seconds."
     '''
 
-    def boxbow(self, offset=0.0):
+    def boxbow(self, box_offset=0.0):
         """Updating the BWR card to account for box bowing."""
         bwr = self.data[-1].info.bwr
         bwr_arr = bwr.split()
-        gaw = float(bwr_arr[5]) + offset
-        gan = float(bwr_arr[6]) - offset  # gaw + gan = constant
+        gaw = float(bwr_arr[5]) + box_offset
+        gan = float(bwr_arr[6]) - box_offset  # gaw + gan = constant
         bwr_arr[5] = str(gaw)
         bwr_arr[6] = str(gan)
         bwr_offset = ' '.join(bwr_arr)
