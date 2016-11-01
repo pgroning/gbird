@@ -122,7 +122,7 @@ class bundle(object):
         if opt != 'refcalc':
             for i in range(len(self.cases)):
                 self.cases[i].add_calc()
-                self.cases[i].data[-1].info.LFU = /
+                self.cases[i].data[-1].info.LFU = \
                 self.cases[i].data[0].info.LFU
         # --------------------------------------------
 
