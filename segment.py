@@ -97,7 +97,7 @@ class segment(object):
         # self.__flines = flines
         
         # Find last index containing voids voi=vhi
-        if read_content is not 'all':
+        if read_content != 'all':
             oTIT = self.__matchcontent(flines, '^TIT', 'object')
             while True:
                 try:

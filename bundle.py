@@ -3,12 +3,12 @@
 from __future__ import division
 from IPython.core.debugger import Tracer # Debugging
 ''' ipy example:
-import casio
-: obj = casio.casio()
+import bundle
+: obj = bundle.bundle()
 : obj.readinp("file.inp")
 : obj.readcax()
 After some code modification:
-: reload(casio)
+: reload(bundle)
 : obj.readcax()
 '''
 
@@ -17,7 +17,9 @@ try:
 except:
     import pickle
 
-import sys, os.path, re
+import sys
+import os.path
+import re
 import numpy as np
 
 from multiprocessing import Pool
@@ -58,7 +60,7 @@ class bundle(object):
         #self.loadcasobj(inpfile)
         #self.interp2(P1,P2,x1,x2,x)
 
-    def readinp(self,inpfile):
+    def readinp(self, inpfile):
         if not os.path.isfile(inpfile):
             print "Could not open file " + inpfile
             return
@@ -66,27 +68,27 @@ class bundle(object):
             print "Reading file " + inpfile
         
         with open(inpfile) as f:
-            flines = f.read().splitlines() #exclude \n
+            flines = f.read().splitlines()  # exclude \n
 
         # Read fuel type
         fuetype = flines[0].strip()
         # Search for caxfiles
         reCAX = re.compile('.cax\s*$')
         caxfiles = []
-        for i,x in enumerate(flines[1:]):
+        for i, x in enumerate(flines[1:]):
             if reCAX.search(x):
                 caxfiles.append(x)
             else:
                 break
-        i+=1
-        nodes  = map(int,re.split('\s+',flines[i]))
+        i += 1
+        nodes  = map(int, re.split('\s+', flines[i]))
 
         self.data.fuetype = fuetype
         self.data.inpfile = inpfile
         self.data.caxfiles = caxfiles
         self.data.nodes = nodes
 
-    def readcax(self, opt=None):
+    def readcax(self, read_content=None):
         """Read multiple caxfiles using multithreading.
         Syntax:
         readcax() reads the first part of the file (where voi=vhi)
@@ -94,7 +96,7 @@ class bundle(object):
 
         inlist = []  # Bundle input args
         for caxfile in self.data.caxfiles:
-            inlist.append((caxfile, opt))
+            inlist.append((caxfile, read_content))
         
         n = len(self.data.caxfiles) # Number of threads
         p = Pool(n) # Make the Pool of workers
@@ -103,7 +105,7 @@ class bundle(object):
         #self.cases = p.map(casdata, self.data.caxfiles)
         p.close()
         p.join()
-        for i,node in enumerate(self.data.nodes):
+        for i, node in enumerate(self.data.nodes):
             self.cases[i].topnode = node
         
         #for i,f in enumerate(self.data.caxfiles):
@@ -162,6 +164,20 @@ class bundle(object):
         #fuetype = 'SVEA-96'
         #self.btf = btf(self,fuetype)
 
+    def bundle_ave_enr(self):
+        """The method calculates the average enrichment of the bundle.
+        This algorithm is likely naive and needs to be updated in the future"""
+        
+        nodelist=self.data.nodes
+        nodelist.insert(0,0)  # prepend 0
+        nodes = np.array(nodelist)
+        dn = np.diff(nodes)
+
+        enrlist = [case.data[-1].info.ave_enr for case in self.cases]
+        seg_enr = np.array(enrlist)
+
+        ave_enr = sum(seg_enr*dn) / sum(dn)
+        self.data.ave_enr = ave_enr
 
     def pow3(self,POW):
     #def pow3(self,*args):
