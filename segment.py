@@ -33,7 +33,7 @@ class datastruct(object):
     pass
 
 
-class casdata(object):
+class segment(object):
 
     def __init__(self, caxfile, opt=None):
         self.data = []

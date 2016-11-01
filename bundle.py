@@ -21,13 +21,13 @@ import sys, os.path, re
 import numpy as np
 
 from multiprocessing import Pool
-from casdata import casdata
+from segment import segment
 
 #from btf import btf
 
 def readcax_fun(tup):
     """Unpack input arguments for use with the casdata class"""
-    return casdata(*tup)
+    return segment(*tup)
     #caxfile, opt = tup
     #return casdata(caxfile, opt)
 
