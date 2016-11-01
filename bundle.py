@@ -45,7 +45,7 @@ class datastruct(object):
     pass
 
 
-class casio(object):
+class bundle(object):
     """Read, save and load cases"""
 
     def __init__(self):
