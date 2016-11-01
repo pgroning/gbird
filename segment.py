@@ -95,7 +95,7 @@ class segment(object):
         '''
         # Search for regexp matches
         # self.__flines = flines
-        
+
         # Find last index containing voids voi=vhi
         if read_content != 'all':
             oTIT = self.__matchcontent(flines, '^TIT', 'object')
@@ -695,7 +695,7 @@ class segment(object):
                 pass
         else:
             call([c3exe, c3cfg])
-            
+
         # Remove files
         # c3cfg.unlink(c3cfg.name)
         os.remove(c3cfg)

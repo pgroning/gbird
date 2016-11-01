@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from __future__ import division
-from IPython.core.debugger import Tracer # Debugging
+from IPython.core.debugger import Tracer  # Debugging
 ''' ipy example:
 import bundle
 : obj = bundle.bundle()
@@ -25,22 +25,25 @@ import numpy as np
 from multiprocessing import Pool
 from segment import segment
 
-#from btf import btf
+# from btf import btf
+
 
 def readcax_fun(tup):
     """Unpack input arguments for use with the casdata class"""
     return segment(*tup)
-    #caxfile, opt = tup
-    #return casdata(caxfile, opt)
+    # caxfile, opt = tup
+    # return casdata(caxfile, opt)
+
 
 def quickcalc_fun(tup):
     """Wrapper function used for multithreaded quickcalc"""
-    case = tup[0] # First arg should always be the object
+    case = tup[0]  # First arg should always be the object
     case.quickcalc(*tup[1:])
     return case
-    #case, voi, maxdep, opt = tup
-    #case.quickcalc(voi, maxdep, opt)
-    #return case
+    # case, voi, maxdep, opt = tup
+    # case.quickcalc(voi, maxdep, opt)
+    # return case
+
 
 class datastruct(object):
     """Initialize a class that can be used to structure data"""
@@ -53,12 +56,12 @@ class bundle(object):
     def __init__(self):
         self.data = datastruct()
         self.cases = []
-        
-        #self.readinpfile(inpfile)
-        #self.readcas()
-        #self.savecasobj()
-        #self.loadcasobj(inpfile)
-        #self.interp2(P1,P2,x1,x2,x)
+
+        # self.readinpfile(inpfile)
+        # self.readcas()
+        # self.savecasobj()
+        # self.loadcasobj(inpfile)
+        # self.interp2(P1,P2,x1,x2,x)
 
     def readinp(self, inpfile):
         if not os.path.isfile(inpfile):
@@ -66,7 +69,7 @@ class bundle(object):
             return
         else:
             print "Reading file " + inpfile
-        
+
         with open(inpfile) as f:
             flines = f.read().splitlines()  # exclude \n
 
@@ -81,7 +84,7 @@ class bundle(object):
             else:
                 break
         i += 1
-        nodes  = map(int, re.split('\s+', flines[i]))
+        nodes = map(int, re.split('\s+', flines[i]))
 
         self.data.fuetype = fuetype
         self.data.inpfile = inpfile
@@ -97,21 +100,21 @@ class bundle(object):
         inlist = []  # Bundle input args
         for caxfile in self.data.caxfiles:
             inlist.append((caxfile, read_content))
-        
-        n = len(self.data.caxfiles) # Number of threads
-        p = Pool(n) # Make the Pool of workers
+
+        n = len(self.data.caxfiles)  # Number of threads
+        p = Pool(n)  # Make the Pool of workers
         # Start processes in their own threads and return the results
         self.cases = p.map(readcax_fun, inlist)
-        #self.cases = p.map(casdata, self.data.caxfiles)
+        # self.cases = p.map(casdata, self.data.caxfiles)
         p.close()
         p.join()
         for i, node in enumerate(self.data.nodes):
             self.cases[i].topnode = node
-        
-        #for i,f in enumerate(self.data.caxfiles):
-        #    case = casdata(f)
-        #    case.data.topnode = self.data.nodes[i]
-        #    self.cases.append(case)
+
+        # for i,f in enumerate(self.data.caxfiles):
+        #     case = casdata(f)
+        #     case.data.topnode = self.data.nodes[i]
+        #     self.cases.append(case)
 
     def runc3(self, voi=None, maxdep=None, opt='refcalc'):
 
@@ -119,37 +122,36 @@ class bundle(object):
         if opt != 'refcalc':
             for i in range(len(self.cases)):
                 self.cases[i].add_calc()
-                self.cases[i].data[-1].info.LFU = self.cases[i].data[0].info.LFU
+                self.cases[i].data[-1].info.LFU = /
+                self.cases[i].data[0].info.LFU
         # --------------------------------------------
 
         inlist = []  # Bundle input args
         for case in self.cases:
             inlist.append((case, voi, maxdep, opt))
 
-        #quickcalc_fun(inlist[1])
-        #Tracer()()
+        # quickcalc_fun(inlist[1])
         n = len(self.cases)  # Number of threads
         p = Pool(n)  # Make the Pool of workers
         self.cases = p.map(quickcalc_fun, inlist)
-        #cases = p.map(quickcalc_fun, self.cases)
+        # cases = p.map(quickcalc_fun, self.cases)
         p.close()
         p.join()
 
-    def savepic(self,pfile):
-        #pfile = os.path.splitext(self.data.inpfile)[0] + '.p'
-        with open(pfile,'wb') as fp:
-            pickle.dump(self.data,fp,1)
-            pickle.dump(self.cases,fp,1)
+    def savepic(self, pfile):
+        # pfile = os.path.splitext(self.data.inpfile)[0] + '.p'
+        with open(pfile, 'wb') as fp:
+            pickle.dump(self.data, fp, 1)
+            pickle.dump(self.cases, fp, 1)
             try:
-                pickle.dump(self.btf,fp,1)
+                pickle.dump(self.btf, fp, 1)
             except:
                 print "Warning: Could not save BTF"
         print "Saved data to file " + pfile
-        
 
-    def loadpic(self,pfile):
+    def loadpic(self, pfile):
         print "Loading data from file " + pfile
-        with open(pfile,'rb') as fp:
+        with open(pfile, 'rb') as fp:
             self.data = pickle.load(fp)
             self.cases = pickle.load(fp)
             try:
@@ -158,18 +160,17 @@ class bundle(object):
                 print "Warning: Could not load BTF"
         self.data.pfile = pfile
 
-
     def calcbtf(self):
         self.btf = btf(self)
-        #fuetype = 'SVEA-96'
-        #self.btf = btf(self,fuetype)
+        # fuetype = 'SVEA-96'
+        # self.btf = btf(self,fuetype)
 
     def bundle_ave_enr(self):
         """The method calculates the average enrichment of the bundle.
         This algorithm is likely naive and needs to be updated in the future"""
-        
-        nodelist=self.data.nodes
-        nodelist.insert(0,0)  # prepend 0
+
+        nodelist = self.data.nodes
+        nodelist.insert(0, 0)  # prepend 0
         nodes = np.array(nodelist)
         dn = np.diff(nodes)
 
@@ -179,34 +180,31 @@ class bundle(object):
         ave_enr = sum(seg_enr*dn) / sum(dn)
         self.data.ave_enr = ave_enr
 
-    def pow3(self,POW):
-    #def pow3(self,*args):
+    def pow3(self, POW):
         """Expanding a number of 2D pin power distributions into a 3D
         distribution.
         Syntax: POW3D = pow3(POW1,POW2,POW3,...)"""
-       
+
         xdim = POW.shape[1]
         ydim = POW.shape[2]
-        #powlist = [arg for arg in args]
-        #xdim = powlist[0].shape[0]
-        #ydim = powlist[0].shape[1]
+        # powlist = [arg for arg in args]
+        # xdim = powlist[0].shape[0]
+        # ydim = powlist[0].shape[1]
         nodes = self.data.nodes
         zdim = max(nodes)
-        POW3 = np.zeros((zdim,xdim,ydim))
+        POW3 = np.zeros((zdim, xdim, ydim))
         z0 = 0
-        for i,P in enumerate(POW):
-        #for i,POW in enumerate(powlist):
+        for i, P in enumerate(POW):
             z1 = nodes[i]
-            for z in range(z0,z1):
-                POW3[z,:,:] = P 
+            for z in range(z0, z1):
+                POW3[z, :, :] = P
             z0 = z1
 
         return POW3
-        
 
-    def interp2(self,P1,P2,x1,x2,x):
+    def interp2(self, P1, P2, x1, x2, x):
         """Lagrange two point (P2) interpolation
-        Syntax: Pi = interp2(P1,P2,x1,x2,x)"""
+        Syntax: Pi = interp2(P1, P2, x1, x2, x)"""
 
         # Lagrange P2 polynomial
         L1 = (x-x2)/(x1-x2)
@@ -214,10 +212,9 @@ class bundle(object):
         Pi = L1*P1 + L2*P2
         return Pi
 
-
-    def interp3(self,P1,P2,P3,x1,x2,x3,x):
+    def interp3(self, P1, P2, P3, x1, x2, x3, x):
         """Lagrange three point (P3) interpolation
-        Syntax: Pi = interp3(P1,P2,P2,x1,x2,x3,x)"""
+        Syntax: Pi = interp3(P1, P2, P3, x1, x2, x3, x)"""
 
         # Lagrange P3 polynomial
         L1 = ((x-x2)*(x-x3))/((x1-x2)*(x1-x3))
@@ -225,27 +222,6 @@ class bundle(object):
         L3 = ((x-x1)*(x-x2))/((x3-x1)*(x3-x2))
         Pi = L1*P1 + L2*P2 + L3*P3
         return Pi
-
-
-#    def findpoint(self,case,burnup=None,vhi=None,voi=None):
-#        """Return statepoint index that correspond to specific burnup, void and void history
-#        Syntax: pt = findpoint(case,burnup,vhi,voi)"""
-#
-#        #print "Finding statepoints"
-#
-#        #for i,p in enumerate(self.cases[case].statepts):
-#        #    if p.burnup==burnup and p.vhi==vhi and p.voi==voi:
-#        #        pindex = i
-#        #        break
-#        #Tracer()()
-#        
-#        if burnup is not None:
-#            pindex = next(i for i,p in enumerate(self.cases[case].statepts)
-#                          if p.burnup==burnup and p.vhi==vhi and p.voi==voi)
-#        else:
-#            pindex = next(i for i,p in enumerate(self.cases[case].statepts)
-#                          if p.vhi==vhi and p.voi==voi)    
-#        return pindex
 
 
 if __name__ == '__main__':
