@@ -35,7 +35,7 @@ class datastruct(object):
 
 class segment(object):
 
-    def __init__(self, caxfile, opt=None):
+    def __init__(self, caxfile=None, read_content=None):
         self.data = []
         self.add_calc()
         self.data[0].refcalc = datastruct()
@@ -45,8 +45,9 @@ class segment(object):
         #self.statepts = []
         #self.pert = datastruct()
         '''
-        self.readcax(caxfile, opt)
-        self.ave_enr()
+        if caxfile:
+            self.readcax(caxfile, read_content)
+            self.ave_enr()
         '''
         #Tracer()()
         #self.qcalc = []
@@ -67,7 +68,7 @@ class segment(object):
             out = (i for i, x in enumerate(flines) if rec.match(x))
         return out
 
-    def readcax(self, caxfile, opt):
+    def readcax(self, caxfile, read_content=None):
 
         if not os.path.isfile(caxfile):
             print "Could not open file " + caxfile
@@ -94,7 +95,9 @@ class segment(object):
         '''
         # Search for regexp matches
         # self.__flines = flines
-        if opt != 'all':  # Find last index containing voids voi=vhi
+        
+        # Find last index containing voids voi=vhi
+        if read_content is not 'all':
             oTIT = self.__matchcontent(flines, '^TIT', 'object')
             while True:
                 try:
