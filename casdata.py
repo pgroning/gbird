@@ -635,7 +635,7 @@ class casdata(object):
         f.close()
         # return filebasename
 
-    def runc3(self, filebasename):  # Running C3 perturbation model
+    def runc3(self, filebasename, grid=False):  # Running C3 perturbation model
         # C3 input file
         c3inp = filebasename + ".inp"
         # c3inp = "./c3.inp"
@@ -675,12 +675,14 @@ class casdata(object):
         # cmd = "linrsh " + c3exe + " " + c3cfg
         # cmd = c3exe + " " + c3cfg
         print "running c3 model"
-        # os.system(cmd)
-        try:  # use linrsh if available
-            call(['linrsh', c3exe, c3cfg])
-        except:
+        if grid:
+            try:  # use linrsh if available
+                call(['linrsh', c3exe, c3cfg])
+            except:
+                pass
+        else:
             call([c3exe, c3cfg])
-
+            
         # Remove files
         # c3cfg.unlink(c3cfg.name)
         os.remove(c3cfg)
@@ -797,14 +799,14 @@ class casdata(object):
 
         # os.remove(caxfile)
 
-    def quickcalc(self, voi=None, maxdep=None, opt='refcalc'):
+    def quickcalc(self, voi=None, maxdep=None, opt='refcalc', grid=False):
         tic = time.time()
         # if opt != 'refcalc':
         #    self.add_calc()  # Append element to hold a new calculation
         # self.data[-1].info.LFU = self.data[0].info.LFU
         file_base_name = "./" + str(uuid.uuid4())
         self.writec3cai(file_base_name, voi, maxdep, box_offset=0.1)
-        self.runc3(file_base_name)
+        self.runc3(file_base_name, grid)
         self.readc3cax(file_base_name, opt)
         os.remove(file_base_name + ".inp")
         os.remove(file_base_name + ".out")
