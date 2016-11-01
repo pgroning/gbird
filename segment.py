@@ -648,12 +648,22 @@ class segment(object):
         c3out = filebasename + ".out"
         # cax file
         c3cax = filebasename + ".cax"
-        # libs
+        # C3 libs
         lib1 = "./lib/c3/e4lbj40"
         lib2 = "./lib/c3/bal8ab4"
         lib3 = "./lib/c3/galb410"
         # C3 executable
         c3exe = "./bin/casmo3"
+        if os.path.isfile(c3exe):
+            pass  # no need to change the location of executable and libs
+        elif os.path.isfile("." + c3exe):
+            c3exe = "." + c3exe
+            lib1 = "." + lib1
+            lib2 = "." + lib2
+            lib3 = "." + lib3
+        else:
+            print "Could not locate C3 executable"
+            return
 
         # Write C3 configuration file
         # c3cfg = tempfile.NamedTemporaryFile(

@@ -12,7 +12,7 @@ class UnitTest(unittest.TestCase):
     def setUp(self):
         unittest.TestCase.setUp(self)
 
-        self.testfile = "test/topol/OPT2/10g40bot/e29OPT2-382-10g40bot-cas.cax"
+        self.testfile = "topol/OPT2/10g40bot/e29OPT2-382-10g40bot-cas.cax"
         #self.testfile = "test/topol/OPT2_2/12g30bot/e32OPT2-382-12g30bot-cas.cax"
      
         #self.testfile = "../best/cax/ATXM/10g35dom/e28ATXM-385-10g35dom-cas.cax"
