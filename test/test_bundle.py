@@ -1,26 +1,27 @@
 import unittest
-import sys,os
+import sys
+import os
 
 sys.path.append('../')
-from casio import casio
+from bundle import bundle
 
 class UnitTest(unittest.TestCase):
 
     def setUp(self):
         unittest.TestCase.setUp(self)
 
-        self.testfile = "test/caxfiles_opt2.inp"
-        self.cio = casio()
-        self.cio.readinp(self.testfile)
+        self.testfile = "caxfiles_opt2.inp"
+        self.bo = bundle()
+        self.bo.readinp(self.testfile)
 
     def tearDown(self):
         unittest.TestCase.tearDown(self)
 
 
     def test_readinp(self):
-        f = self.cio.data.inpfile
+        f = self.bo.data.inpfile
         self.assertEqual(f,self.testfile)
-        nodes = self.cio.data.nodes
+        nodes = self.bo.data.nodes
         self.assertTrue(type(nodes) is list, "nodes is not list")
 
 
