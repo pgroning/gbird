@@ -3,7 +3,7 @@ import sys
 import os
 
 sys.path.append('../')
-from bundle import bundle
+from bundle import Bundle
 
 class UnitTest(unittest.TestCase):
 
@@ -11,7 +11,7 @@ class UnitTest(unittest.TestCase):
         unittest.TestCase.setUp(self)
 
         self.testfile = "caxfiles_opt2.inp"
-        self.bo = bundle()
+        self.bo = Bundle()
         self.bo.readinp(self.testfile)
 
     def tearDown(self):

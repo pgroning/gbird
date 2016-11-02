@@ -5,7 +5,7 @@ import sys
 import os
 
 sys.path.append('../')
-from segment import segment
+from segment import Segment
 
 class UnitTest(unittest.TestCase):
 
@@ -17,7 +17,7 @@ class UnitTest(unittest.TestCase):
      
         #self.testfile = "../best/cax/ATXM/10g35dom/e28ATXM-385-10g35dom-cas.cax"
         #self.testfile = "../best/cax/A10XM/10g35dom/e28ATXM-385-10g35dom-cas.cax"
-        self.seg = segment(self.testfile)
+        self.seg = Segment(self.testfile)
         #self.cas.readcax(self.testfile,0)
         self.file_base_name = "test_file_base_name"
 

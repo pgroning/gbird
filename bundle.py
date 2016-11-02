@@ -23,7 +23,7 @@ import re
 import numpy as np
 
 from multiprocessing import Pool
-from segment import segment
+from segment import Segment, DataStruct
 
 # from btf import btf
 
@@ -45,16 +45,11 @@ def quickcalc_fun(tup):
     # return case
 
 
-class datastruct(object):
-    """Initialize a class that can be used to structure data"""
-    pass
-
-
-class bundle(object):
+class Bundle(object):
     """Read, save and load cases"""
 
     def __init__(self):
-        self.data = datastruct()
+        self.data = DataStruct()
         self.cases = []
 
         # self.readinpfile(inpfile)

@@ -28,22 +28,22 @@ import uuid  # used for random generated file names
 '''
 
 
-class datastruct(object):
+class DataStruct(object):
     """Initialize a class that can be used to structure data"""
     pass
 
 
-class segment(object):
+class Segment(object):
 
     def __init__(self, caxfile=None, read_content=None):
         self.data = []
         self.add_calc()
-        self.data[0].refcalc = datastruct()
+        self.data[0].refcalc = DataStruct()
         '''
-        #self.data.append(datastruct()) # Add an element to list
+        #self.data.append(DataStruct()) # Add an element to list
         #self.data[-1]
         #self.statepts = []
-        #self.pert = datastruct()
+        #self.pert = DataStruct()
         '''
         if caxfile:
             self.readcax(caxfile, read_content)
@@ -51,7 +51,7 @@ class segment(object):
         '''
         #Tracer()()
         #self.qcalc = []
-        #self.qcalc.append(datastruct())
+        #self.qcalc.append(DataStruct())
 
         #self.writecai()
         #self.btfcalc()
@@ -332,7 +332,7 @@ class segment(object):
         # Append state instancies
         for i in range(Nburnpts):
             # append new instance to list
-            self.data[-1].statepoints.append(datastruct())
+            self.data[-1].statepoints.append(DataStruct())
             # state = data()
             self.data[-1].statepoints[i].titcrd = titcrd[i]
             self.data[-1].statepoints[i].burnup = burnup[i]
@@ -521,8 +521,8 @@ class segment(object):
 
     def add_calc(self):
         """Append a list element to store result of new calculation"""
-        self.data.append(datastruct())  # Add an element to list
-        self.data[-1].info = datastruct()
+        self.data.append(DataStruct())  # Add an element to list
+        self.data[-1].info = DataStruct()
         self.data[-1].statepoints = []
 
     def writec3cai(self, file_base_name, voi=None, maxdep=None,
@@ -776,13 +776,13 @@ class segment(object):
         # Append state instancies
         statepoints = []
 
-        # self.qcalc.append(datastruct())
+        # self.qcalc.append(DataStruct())
         # pindex = -1 # Index of last instance
         # self.qcalc[pindex].model = "c3"
         # self.qcalc[pindex].statepts = []
         for i in range(Nburnpts):
             # append new instance to list
-            statepoints.append(datastruct())
+            statepoints.append(DataStruct())
             statepoints[i].burnup = burnup[i]
             statepoints[i].voi = voi[i]
             statepoints[i].vhi = vhi[i]
@@ -794,7 +794,7 @@ class segment(object):
             statepoints[i].EXP = EXP[:, :, i]
 
             '''
-            self.qcalc[pindex].statepts.append(datastruct())
+            self.qcalc[pindex].statepts.append(DataStruct())
             self.qcalc[pindex].statepts[i].burnup = burnup[i]
             self.qcalc[pindex].statepts[i].voi = voi[i]
             self.qcalc[pindex].statepts[i].vhi = vhi[i]
