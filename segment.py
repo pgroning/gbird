@@ -599,8 +599,9 @@ class Segment(object):
                 red_pinstr = info.pinlines[i].strip()
             f.write(red_pinstr.strip() + '\n')
 
-        if info.slaline:  # has water cross?
-            f.write(info.slaline.strip() + '\n')
+        if hasattr(info,'slaline'):  # has water cross?
+            if info.slaline:  # check that it is not empty
+                f.write(info.slaline.strip() + '\n')
 
         f.write('LPI\n')
         for i in xrange(info.npst):
