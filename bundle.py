@@ -30,7 +30,7 @@ from segment import Segment, DataStruct
 
 def readcax_fun(tup):
     """Unpack input arguments for use with the casdata class"""
-    return segment(*tup)
+    return Segment(*tup)
     # caxfile, opt = tup
     # return casdata(caxfile, opt)
 
@@ -49,7 +49,7 @@ class Bundle(object):
     """Read, save and load cases"""
 
     def __init__(self):
-        self.data = DataStruct()
+        self.data = DataStruct()  # TODO: change self.data to self.info
         self.cases = []
 
         # self.readinpfile(inpfile)
