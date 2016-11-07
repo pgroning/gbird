@@ -160,7 +160,7 @@ class Bundle(object):
         # fuetype = 'SVEA-96'
         # self.btf = btf(self,fuetype)
 
-    def bundle_ave_enr(self):
+    def ave_enr(self):
         """The method calculates the average enrichment of the bundle.
         This algorithm is likely naive and needs to be updated in the future"""
 
