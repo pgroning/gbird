@@ -390,27 +390,6 @@ class Segment(object):
         # Append data object to last list element
         self.states[-1] = do
 
-        '''
-        #self.caxfile = caxfile
-        #self.burnvec = burnup
-        #self.voivec = voi
-        #self.vhivec = vhi
-        #self.tfuvec = tfu
-        #self.tmovec = tmo
-        #self.kinf = kinf
-        #self.fint = fint
-        #self.EXP = EXP
-        #self.ENR = ENR
-        #self.BA = BA
-        #self.PIN = PIN
-        #self.LPI = LPI
-        #self.FUE = FUE
-        #self.LFU = LFU
-        #self.npst = npst
-        #self.POW = POW
-        #self.XFL1 = XFL1
-        #self.XFL2 = XFL2
-        '''
 
 #    def btfcalc(self):
 #        btf('SVEA-96','')
@@ -430,14 +409,6 @@ class Segment(object):
         for i in range(1, dim):
             Mt[i, 0:i] = M[i, 0:i]
         return Mt
-
-#    #---------Calculate Fint-------------
-#    def fint(self):
-#        Nburnpts = self.POW.shape[2]
-#        fint = np.zeros(Nburnpts); fint.fill(np.nan)
-#        for i in range(Nburnpts):
-#            fint[i] = self.POW[:,:,i].max()
-#        self.fint = fint
 
     # --------Calculate average enrichment----------
     def ave_enr(self):
@@ -807,18 +778,6 @@ class Segment(object):
             statepoints[i].POW = POW[:, :, i]
             statepoints[i].EXP = EXP[:, :, i]
 
-            '''
-            self.qcalc[pindex].statepts.append(DataStruct())
-            self.qcalc[pindex].statepts[i].burnup = burnup[i]
-            self.qcalc[pindex].statepts[i].voi = voi[i]
-            self.qcalc[pindex].statepts[i].vhi = vhi[i]
-            self.qcalc[pindex].statepts[i].tfu = tfu[i]
-            self.qcalc[pindex].statepts[i].tmo = tmo[i]
-            self.qcalc[pindex].statepts[i].kinf = kinf[i]
-            self.qcalc[pindex].statepts[i].fint = fint[i]
-            self.qcalc[pindex].statepts[i].POW = POW[:,:,i]
-            self.qcalc[pindex].statepts[i].EXP = EXP[:,:,i]
-            '''
         #Tracer()()
         if opt == 'refcalc':
             self.states[0].refcalc = DataStruct()
@@ -841,19 +800,6 @@ class Segment(object):
         os.remove(file_base_name + ".out")
         os.remove(file_base_name + ".cax")
         print "Done in "+str(time.time()-tic)+" seconds."
-
-    '''
-    def quickcalc(self,model='c3'):
-        tic = time.time()
-        if model == 'c3':
-            voi = 50
-            maxburn = 60
-            print "Running perturbation model for void "+str(voi)
-            self.writec3cai_singlevoi(voi,maxburn)
-            self.runc3()
-            self.readc3cax()
-        print "Done in "+str(time.time()-tic)+" seconds."
-    '''
 
     def boxbow(self, box_offset=0.0):
         """Updating the BWR card to account for box bowing."""
@@ -908,11 +854,10 @@ class Segment(object):
                           if p.vhi == vhi and p.voi == voi)
         return pindex
 
-    def burnpoints(self, voi=None, vhi=None, calcindex=0):
-        """Return depletion vector for given voi"""
-
-        statepoints = self.data[calcindex].statepoints
-        i = self.findpoint(statepoints, voi=voi, vhi=vhi)
+    def burnpoints(self, voi=40, stateindex=0):
+        """Return depletion vector for given voi (vhi=voi)"""
+        statepoints = self.states[stateindex].statepoints
+        i = self.findpoint(statepoints, voi=voi, vhi=voi)
         burnlist = [statepoints[i].burnup]
         Nstatepoints = len(statepoints)
         while ((i < Nstatepoints-1) and
