@@ -48,10 +48,13 @@ def quickcalc_fun(tup):
 class Bundle(object):
     """Read, save and load cases"""
 
-    def __init__(self):
+    def __init__(self, inpfile=None):
         self.data = DataStruct()
         self.cases = []
 
+        if inpfile:
+            self.readinp(inpfile)
+            
         # self.readinpfile(inpfile)
         # self.readcas()
         # self.savecasobj()
