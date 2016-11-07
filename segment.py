@@ -341,7 +341,7 @@ class Segment(object):
         do.statepoints = []
         for i in range(Nburnpts):
             # append new instance to list
-            do.statepoints.append(DataStruct);
+            do.statepoints.append(DataStruct());
             # self.data[-1].statepoints.append(DataStruct())
             do.statepoints[i].titcrd = titcrd[i]
             # self.data[-1].statepoints[i].titcrd = titcrd[i]
@@ -819,13 +819,13 @@ class Segment(object):
             self.qcalc[pindex].statepts[i].POW = POW[:,:,i]
             self.qcalc[pindex].statepts[i].EXP = EXP[:,:,i]
             '''
-        
+        #Tracer()()
         if opt == 'refcalc':
             self.states[0].refcalc = DataStruct()
             self.states[0].refcalc.statepoints = statepoints
         else:
             self.states[-1].statepoints = statepoints
-
+        
         # os.remove(caxfile)
 
     def quickcalc(self, voi=None, maxdep=None, opt='refcalc', grid=False):
