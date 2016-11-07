@@ -712,7 +712,7 @@ class Segment(object):
 
         # Remove files
         # c3cfg.unlink(c3cfg.name)
-        #os.remove(c3cfg)
+        os.remove(c3cfg)
         # os.remove(c3inp)
         # c3out.unlink(c3out.name)
         # os.remove(c3out)

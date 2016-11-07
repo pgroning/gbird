@@ -25,7 +25,8 @@ class UnitTest(unittest.TestCase):
         self.assertTrue(type(nodes) is list, "nodes is not list")
 
     def test_readcax(self):
-        pass
+        self.bo.readcax()
+        #f = self.bo.info.caxfile
 
 if __name__ == '__main__':
     unittest.main()

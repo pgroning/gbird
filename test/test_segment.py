@@ -24,8 +24,8 @@ class UnitTest(unittest.TestCase):
 
     def tearDown(self):
         unittest.TestCase.tearDown(self)
-        #try: os.remove(self.file_base_name + ".inp")
-        #except: pass
+        try: os.remove(self.file_base_name + ".inp")
+        except: pass
         try: os.remove(self.file_base_name + ".out")
         except: pass
         try: os.remove(self.file_base_name + ".cax")
