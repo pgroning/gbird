@@ -19,11 +19,13 @@ class UnitTest(unittest.TestCase):
 
 
     def test_readinp(self):
-        f = self.bo.data.inpfile
+        f = self.bo.info.inpfile
         self.assertEqual(f,self.testfile)
-        nodes = self.bo.data.nodes
+        nodes = self.bo.info.nodes
         self.assertTrue(type(nodes) is list, "nodes is not list")
 
+    def test_readcax(self):
+        pass
 
 if __name__ == '__main__':
     unittest.main()

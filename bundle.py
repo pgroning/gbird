@@ -49,7 +49,7 @@ class Bundle(object):
     """Read, save and load cases"""
 
     def __init__(self):
-        self.data = DataStruct()  # TODO: change self.data to self.info
+        self.info = DataStruct()
         self.cases = []
 
         # self.readinpfile(inpfile)
@@ -81,10 +81,10 @@ class Bundle(object):
         i += 1
         nodes = map(int, re.split('\s+', flines[i]))
 
-        self.data.fuetype = fuetype
-        self.data.inpfile = inpfile
-        self.data.caxfiles = caxfiles
-        self.data.nodes = nodes
+        self.info.fuetype = fuetype
+        self.info.inpfile = inpfile
+        self.info.caxfiles = caxfiles
+        self.info.nodes = nodes
 
     def readcax(self, read_content=None):
         """Read multiple caxfiles using multithreading.
@@ -93,22 +93,22 @@ class Bundle(object):
         readcax('all') reads the whole file."""
 
         inlist = []  # Bundle input args
-        for caxfile in self.data.caxfiles:
+        for caxfile in self.info.caxfiles:
             inlist.append((caxfile, read_content))
 
-        n = len(self.data.caxfiles)  # Number of threads
+        n = len(self.info.caxfiles)  # Number of threads
         p = Pool(n)  # Make the Pool of workers
         # Start processes in their own threads and return the results
         self.cases = p.map(readcax_fun, inlist)
-        # self.cases = p.map(casdata, self.data.caxfiles)
+        # self.cases = p.map(casdata, self.info.caxfiles)
         p.close()
         p.join()
-        for i, node in enumerate(self.data.nodes):
+        for i, node in enumerate(self.info.nodes):
             self.cases[i].topnode = node
 
-        # for i,f in enumerate(self.data.caxfiles):
+        # for i,f in enumerate(self.info.caxfiles):
         #     case = casdata(f)
-        #     case.data.topnode = self.data.nodes[i]
+        #     case.data.topnode = self.info.nodes[i]
         #     self.cases.append(case)
 
     def runc3(self, voi=None, maxdep=None, opt='refcalc'):
@@ -134,9 +134,9 @@ class Bundle(object):
         p.join()
 
     def savepic(self, pfile):
-        # pfile = os.path.splitext(self.data.inpfile)[0] + '.p'
+        # pfile = os.path.splitext(self.info.inpfile)[0] + '.p'
         with open(pfile, 'wb') as fp:
-            pickle.dump(self.data, fp, 1)
+            pickle.dump(self.info, fp, 1)
             pickle.dump(self.cases, fp, 1)
             try:
                 pickle.dump(self.btf, fp, 1)
@@ -147,13 +147,13 @@ class Bundle(object):
     def loadpic(self, pfile):
         print "Loading data from file " + pfile
         with open(pfile, 'rb') as fp:
-            self.data = pickle.load(fp)
+            self.info = pickle.load(fp)
             self.cases = pickle.load(fp)
             try:
                 self.btf = pickle.load(fp)
             except:
                 print "Warning: Could not load BTF"
-        self.data.pfile = pfile
+        self.info.pfile = pfile
 
     def calcbtf(self):
         self.btf = btf(self)
@@ -164,7 +164,7 @@ class Bundle(object):
         """The method calculates the average enrichment of the bundle.
         This algorithm is likely naive and needs to be updated in the future"""
 
-        nodelist = self.data.nodes
+        nodelist = self.info.nodes
         nodelist.insert(0, 0)  # prepend 0
         nodes = np.array(nodelist)
         dn = np.diff(nodes)
@@ -173,7 +173,7 @@ class Bundle(object):
         seg_enr = np.array(enrlist)
 
         ave_enr = sum(seg_enr*dn) / sum(dn)
-        self.data.ave_enr = ave_enr
+        self.info.ave_enr = ave_enr
 
     def pow3(self, POW):
         """Expanding a number of 2D pin power distributions into a 3D
@@ -185,7 +185,7 @@ class Bundle(object):
         # powlist = [arg for arg in args]
         # xdim = powlist[0].shape[0]
         # ydim = powlist[0].shape[1]
-        nodes = self.data.nodes
+        nodes = self.info.nodes
         zdim = max(nodes)
         POW3 = np.zeros((zdim, xdim, ydim))
         z0 = 0
