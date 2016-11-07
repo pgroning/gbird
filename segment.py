@@ -857,14 +857,19 @@ class Segment(object):
     def burnpoints(self, voi=40, stateindex=0):
         """Return depletion vector for given voi (vhi=voi)"""
         statepoints = self.states[stateindex].statepoints
-        i = self.findpoint(statepoints, voi=voi, vhi=voi)
-        burnlist = [statepoints[i].burnup]
-        Nstatepoints = len(statepoints)
-        while ((i < Nstatepoints-1) and
-               (statepoints[i].burnup <= statepoints[i+1].burnup)):
-            burnlist.append(statepoints[i+1].burnup)
-            i += 1
+        idx0 = self.findpoint(statepoints, voi=voi, vhi=voi)
+        statepoints = statepoints[idx0:]
+
+        burnup_old = 0.0
+        for idx,p in enumerate(statepoints):
+            if p.burnup < burnup_old:
+                break
+            burnup_old = p.burnup
+
+        burnlist = [statepoints[i].burnup for i in range(idx)]
+        Tracer()()
         return burnlist
+
 
 if __name__ == '__main__':
     cas = casdata(sys.argv[1])
