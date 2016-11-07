@@ -36,9 +36,10 @@ class DataStruct(object):
 class Segment(object):
 
     def __init__(self, caxfile=None, read_content=None):
-        self.data = []
+        self.states = []
         self.add_calc()
-        self.data[0].refcalc = DataStruct()
+        # self.states[0].refcalc = DataStruct()
+        # Tracer()()
         '''
         #self.data.append(DataStruct()) # Add an element to list
         #self.data[-1]
@@ -155,46 +156,51 @@ class Segment(object):
         iWRI = self.__matchcontent(flines, '^\s*WRI', 'next')
         iSTA = self.__matchcontent(flines, '^\s*STA', 'next')
         print "Done."
+        
+        do = DataStruct(); # Init data container object
         # Read title
-        # self.title = flines[iTTL[0]]
-        self.data[-1].info.title = flines[iTTL[0]]
-        # self.data.title = flines[iTTL[0]]
+        #self.data[-1].info.title = flines[iTTL[0]]
+        do.title = flines[iTTL[0]]
         # SIM
-        # self.sim = flines[iSIM[0]]
-        self.data[-1].info.sim = flines[iSIM[0]]
+        do.sim = flines[iSIM[0]]
+        #self.data[-1].info.sim = flines[iSIM[0]]
         # TFU
-        # self.tfu = flines[iTFU]
-        self.data[-1].info.tfu = flines[iTFU]
+        do.tfu = flines[iTFU]
+        #self.data[-1].info.tfu = flines[iTFU]
         # TMO
-        # self.tmo = flines[iTMO]
-        self.data[-1].info.tmo = flines[iTMO]
+        do.tmo = flines[iTMO]
+        #self.data[-1].info.tmo = flines[iTMO]
         # VOI
-        # self.voi = flines[iVOI[0]]
-        self.data[-1].info.voi = flines[iVOI[0]]
+        do.voi = flines[iVOI[0]]
+        #self.data[-1].info.voi = flines[iVOI[0]]
         # PDE
-        # self.pde = flines[iPDE]
-        self.data[-1].info.pde = flines[iPDE]
+        do.pde = flines[iPDE]
+        #self.data[-1].info.pde = flines[iPDE]
         # BWR
-        # self.bwr = flines[iBWR]
-        self.data[-1].info.bwr = flines[iBWR]
+        do.bwr = flines[iBWR]
+        #self.data[-1].info.bwr = flines[iBWR]
         # SPA
-        # self.spa = flines[iSPA[0]]
-        self.data[-1].info.spa = flines[iSPA[0]]
+        do.spa = flines[iSPA[0]]
+        #self.data[-1].info.spa = flines[iSPA[0]]
         # DEP
-        # self.dep = flines[iDEP[0]]
-        self.data[-1].info.dep = flines[iDEP[0]]
+        do.dep = flines[iDEP[0]]
+        #self.data[-1].info.dep = flines[iDEP[0]]
         # GAM
-        # self.gam = flines[iGAM[0]]
-        self.data[-1].info.gam = flines[iGAM[0]]
+        do.gam = flines[iGAM[0]]
+        #self.data[-1].info.gam = flines[iGAM[0]]
         # WRI
-        # self.wri = flines[iWRI]
-        self.data[-1].info.wri = flines[iWRI]
+        do.wri = flines[iWRI]
+        #self.data[-1].info.wri = flines[iWRI]
         # STA
-        # self.sta = flines[iSTA]
-        self.data[-1].info.sta = flines[iSTA]
+        do.sta = flines[iSTA]
+        #self.data[-1].info.sta = flines[iSTA]
         # CRD
-        # self.crd = flines[iCRD[0]]
-        self.data[-1].info.crd = flines[iCRD[0]]
+        do.crd = flines[iCRD[0]]
+        #self.data[-1].info.crd = flines[iCRD[0]]
+        
+        # Append dobj to last element in list
+        #self.states[-1] = dobj;
+
         # Read fuel dimension
         npst = int(flines[iBWR][5:7])
         # Read LFU map
@@ -257,11 +263,13 @@ class Segment(object):
             PIN[i, :rlen-1] = rvec[1:ncol+1]
 
         # self.pinlines = flines[iPIN[0]:iPIN[0]+Npin]
-        self.data[-1].info.pinlines = flines[iPIN[0]:iPIN[0]+Npin]
+        do.pinlines = flines[iPIN[0]:iPIN[0]+Npin]
+        #self.data[-1].info.pinlines = flines[iPIN[0]:iPIN[0]+Npin]
 
         # Read SLA
         if iSLA is not None:
-            self.data[-1].info.slaline = flines[iSLA]
+            do.slaline = flines[iSLA]
+            #self.data[-1].info.slaline = flines[iSLA]
         # ------Step through the state points----------
         print "Stepping through state points..."
 
@@ -330,54 +338,58 @@ class Segment(object):
         fint = self.__fintcalc(POW)
 
         # Append state instancies
+        do.statepoints = []
         for i in range(Nburnpts):
             # append new instance to list
-            self.data[-1].statepoints.append(DataStruct())
-            # state = data()
-            self.data[-1].statepoints[i].titcrd = titcrd[i]
-            self.data[-1].statepoints[i].burnup = burnup[i]
-            # state.burnup = burnup[i]
-            self.data[-1].statepoints[i].voi = voi[i]
-            # state.voi = voi[i]
-            self.data[-1].statepoints[i].vhi = vhi[i]
-            # state.vhi = vhi[i]
-            self.data[-1].statepoints[i].tfu = tfu[i]
-            # state.tfu = tfu[i]
-            self.data[-1].statepoints[i].tmo = tmo[i]
-            # state.tmo = tmo[i]
-            self.data[-1].statepoints[i].kinf = kinf[i]
-            # state.kinf = kinf[i]
-            self.data[-1].statepoints[i].fint = fint[i]
-            # state.fint = fint[i]
-            self.data[-1].statepoints[i].EXP = EXP[:, :, i]
-            # state.EXP = EXP[:,:,i]
-            self.data[-1].statepoints[i].XFL1 = XFL1[:, :, i]
-            # state.XFL1 = XFL1[:,:,i]
-            self.data[-1].statepoints[i].XFL2 = XFL2[:, :, i]
-            # state.XFL2 = XFL2[:,:,i]
-            self.data[-1].statepoints[i].POW = POW[:, :, i]
-            # state.POW = POW[:,:,i]
-            # self.data["statepts"].append(state)
+            do.statepoints.append(DataStruct);
+            # self.data[-1].statepoints.append(DataStruct())
+            do.statepoints[i].titcrd = titcrd[i]
+            # self.data[-1].statepoints[i].titcrd = titcrd[i]
+            do.statepoints[i].burnup = burnup[i]
+            # self.data[-1].statepoints[i].burnup = burnup[i]
+            do.statepoints[i].voi = voi[i]
+            # self.data[-1].statepoints[i].voi = voi[i]
+            do.statepoints[i].vhi = vhi[i]
+            # self.data[-1].statepoints[i].vhi = vhi[i]
+            do.statepoints[i].tfu = tfu[i]
+            # self.data[-1].statepoints[i].tfu = tfu[i]
+            do.statepoints[i].tmo = tmo[i]
+            # self.data[-1].statepoints[i].tmo = tmo[i]
+            do.statepoints[i].kinf = kinf[i]
+            # self.data[-1].statepoints[i].kinf = kinf[i]
+            do.statepoints[i].fint = fint[i]
+            # self.data[-1].statepoints[i].fint = fint[i]
+            do.statepoints[i].EXP = EXP[:, :, i]
+            # self.data[-1].statepoints[i].EXP = EXP[:, :, i]
+            do.statepoints[i].XFL1 = XFL1[:, :, i]
+            # self.data[-1].statepoints[i].XFL1 = XFL1[:, :, i]
+            do.statepoints[i].XFL2 = XFL2[:, :, i]
+            # self.data[-1].statepoints[i].XFL2 = XFL2[:, :, i]
+            do.statepoints[i].POW = POW[:, :, i]
+            # self.data[-1].statepoints[i].POW = POW[:, :, i]
+            
 
         # Saving geninfo
-        # self.geninfo = data()
-        self.data[-1].info.caxfile = caxfile
-        # info.caxfile = caxfile
-        self.data[-1].info.ENR = ENR
-        # info.ENR = ENR
-        self.data[-1].info.BA = BA
-        # info.BA = BA
-        self.data[-1].info.PIN = PIN
-        # info.PIN = PIN
-        self.data[-1].info.LPI = LPI
-        # info.LPI = LPI
-        self.data[-1].info.FUE = FUE
-        # info.FUE = FUE
-        self.data[-1].info.LFU = LFU
-        # info.LFU = LFU
-        self.data[-1].info.npst = npst
-        # info.npst = npst
-        # self.data['geninfo'] = info
+        do.caxfile = caxfile
+        # self.data[-1].info.caxfile = caxfile
+        do.ENR = ENR
+        # self.data[-1].info.ENR = ENR
+        do.BA = BA
+        # self.data[-1].info.BA = BA
+        do.PIN = PIN
+        # self.data[-1].info.PIN = PIN
+        do.LPI = LPI
+        # self.data[-1].info.LPI = LPI
+        do.FUE = FUE
+        # self.data[-1].info.FUE = FUE
+        do.LFU = LFU
+        # self.data[-1].info.LFU = LFU
+        do.npst = npst
+        # self.data[-1].info.npst = npst
+        
+        # Append data object to last list element
+        self.states[-1] = do
+
         '''
         #self.caxfile = caxfile
         #self.burnvec = burnup
@@ -429,9 +441,9 @@ class Segment(object):
 
     # --------Calculate average enrichment----------
     def ave_enr(self):
-
+        
         # Translate LFU map to density map
-        data = self.data[-1].info
+        data = self.states[-1]
         npst = data.npst
         DENS = np.zeros((npst, npst))
         Nfue = data.FUE[:, 0].size
@@ -453,7 +465,8 @@ class Segment(object):
         ENR = data.ENR
         MASS_U235 = MASS*ENR
         mass_u235 = np.sum(MASS_U235)
-        self.data[-1].info.ave_enr = mass_u235/mass
+        self.states[-1].ave_enr = mass_u235/mass
+        #self.data[-1].info.ave_enr = mass_u235/mass
 
     # -------Write cai file------------
     def writecai(self, caifile):
@@ -521,9 +534,9 @@ class Segment(object):
 
     def add_calc(self):
         """Append a list element to store result of new calculation"""
-        self.data.append(DataStruct())  # Add an element to list
-        self.data[-1].info = DataStruct()
-        self.data[-1].statepoints = []
+        self.states.append(DataStruct())  # Add an element to list
+        # self.states[-1].info = DataStruct()
+        # self.states[-1].statepoints = []
 
     def writec3cai(self, file_base_name, voi=None, maxdep=None,
                    box_offset=False):
@@ -534,9 +547,9 @@ class Segment(object):
         print "Writing c3 input file " + c3inp
 
         # info = self.data[0]['info']  # Get info data from original import
-        info = self.data[0].info
-        if hasattr(self.data[-1].info, 'LFU'):
-            LFU = self.data[-1].info.LFU  # Get LFU from last calc
+        info = self.states[0]
+        if hasattr(self.states[-1], 'LFU'):
+            LFU = self.states[-1].LFU  # Get LFU from last calc
         else:
             print "Error: LFU is missing."
             return
@@ -665,7 +678,7 @@ class Segment(object):
         else:
             print "Could not locate C3 executable"
             return
-
+        
         # Write C3 configuration file
         # c3cfg = tempfile.NamedTemporaryFile(
         # dir='.',prefix="c3_",suffix=".cfg",delete=False)
@@ -699,7 +712,7 @@ class Segment(object):
 
         # Remove files
         # c3cfg.unlink(c3cfg.name)
-        os.remove(c3cfg)
+        #os.remove(c3cfg)
         # os.remove(c3inp)
         # c3out.unlink(c3out.name)
         # os.remove(c3out)
@@ -806,10 +819,12 @@ class Segment(object):
             self.qcalc[pindex].statepts[i].POW = POW[:,:,i]
             self.qcalc[pindex].statepts[i].EXP = EXP[:,:,i]
             '''
+        
         if opt == 'refcalc':
-            self.data[0].refcalc.statepoints = statepoints
+            self.states[0].refcalc = DataStruct()
+            self.states[0].refcalc.statepoints = statepoints
         else:
-            self.data[-1].statepoints = statepoints
+            self.states[-1].statepoints = statepoints
 
         # os.remove(caxfile)
 

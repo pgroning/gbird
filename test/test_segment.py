@@ -24,8 +24,8 @@ class UnitTest(unittest.TestCase):
 
     def tearDown(self):
         unittest.TestCase.tearDown(self)
-        try: os.remove(self.file_base_name + ".inp")
-        except: pass
+        #try: os.remove(self.file_base_name + ".inp")
+        #except: pass
         try: os.remove(self.file_base_name + ".out")
         except: pass
         try: os.remove(self.file_base_name + ".cax")
@@ -33,9 +33,9 @@ class UnitTest(unittest.TestCase):
 
 
     def test_readcax(self):
-        f = self.seg.data[0].info.caxfile
+        f = self.seg.states[0].caxfile
         self.assertEqual(f,self.testfile)
-        Nstatepoints = len(self.seg.data[0].statepoints)
+        Nstatepoints = len(self.seg.states[0].statepoints)
         self.assertTrue(Nstatepoints >= 10, "Number of statepoinst is less than 10")
         
     '''
@@ -50,7 +50,7 @@ class UnitTest(unittest.TestCase):
     
     def test_ave_enr(self):
         self.seg.ave_enr()
-        ave_enr = self.seg.data[0].info.ave_enr
+        ave_enr = self.seg.states[0].ave_enr
         self.assertTrue(ave_enr > 0)
     
     def test_writec3cai(self):
@@ -71,9 +71,9 @@ class UnitTest(unittest.TestCase):
 
     def test_readc3cax_ref(self):
         self.seg.writec3cai(self.file_base_name)
-        self.seg.runc3(self.file_base_name)
+        self.seg.runc3(self.file_base_name, grid=False)
         self.seg.readc3cax(self.file_base_name,'refcalc')
-        Nstatepoints = len(self.seg.data[0].refcalc.statepoints)
+        Nstatepoints = len(self.seg.states[0].refcalc.statepoints)
         self.assertTrue(Nstatepoints >= 10, "Number of statepoints is less than 10")
     
     def test_readc3cax_add(self):
@@ -81,7 +81,7 @@ class UnitTest(unittest.TestCase):
         self.seg.runc3(self.file_base_name)
         self.seg.add_calc()
         self.seg.readc3cax(self.file_base_name)
-        Nstatepoints = len(self.seg.data[1].statepoints)
+        Nstatepoints = len(self.seg.states[1].statepoints)
         self.assertTrue(Nstatepoints >= 10, "Number of statepoints is less than 10")
     
 
