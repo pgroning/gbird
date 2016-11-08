@@ -517,8 +517,24 @@ class Segment(object):
         # prefix="c3_",suffix=".inp",delete=False)
         print "Writing c3 input file " + c3inp
 
-        # info = self.data[0]['info']  # Get info data from original import
+        # Creating dep strings
         info = self.states[0]
+        if voi is None:
+            voivec = (info.voi.split('*')[0].replace(',', ' ')
+                      .strip().split(' ')[1:])
+        else:
+            voivec = [str(voi)]
+
+        burnlist = []
+        #burnstr = []
+        for i, v in enumerate(voivec):
+            bl = self.burnpoints(voi=int(v))
+            if maxdep:
+                bl = [x for x in bl if x <= maxdep]
+            burnlist.append(bl)
+            #burnstr.append('\n'.join(map(str,burnlist)))
+        
+        # info = self.data[0]['info']  # Get info data from original import
         if hasattr(self.states[-1], 'LFU'):
             LFU = self.states[-1].LFU  # Get LFU from last calc
         else:
@@ -536,8 +552,8 @@ class Segment(object):
         tit_3 = info.tmo.split('*')[0].replace(',', '=').strip() + " "
         tit = tit_1 + tit_2 + tit_3
         if voi is None:
-            voivec = info.voi.split('*')[0].replace(',', ' ')\
-                                                  .strip().split(' ')[1:]
+            #voivec = info.voi.split('*')[0].replace(',', ' ')\
+            #                                      .strip().split(' ')[1:]
             tit = tit + "VOI=" + voivec[0] + " "
             ide = ["'BD"+x+"'" for x in voivec]
             f.write(tit + "IDE=" + ide[0] + '\n')
@@ -594,15 +610,19 @@ class Segment(object):
             f.write('\n')
 
         f.write(info.spa.strip() + '\n')
-        if maxdep is None:
-            f.write(info.dep.strip() + '\n')
-        else:
-            depstr = "DEP 0, 0.001, -" + str(maxdep)
-            f.write(depstr + '\n')
+
+        f.write("DEP" + '\n')
+        for x in burnlist[0]:
+            f.write(str(x) + '\n')
+        #if maxdep is None:
+        #    f.write(info.dep.strip() + '\n')
+        #else:
+        #    depstr = "DEP 0, 0.001, -" + str(maxdep)
+        #    f.write(depstr + '\n')
 
         f.write('NLI\n')
         f.write('STA\n')
-
+        #Tracer()()
         if voi is None:
             N = len(ide)
             for i in xrange(1, N):
@@ -610,11 +630,16 @@ class Segment(object):
                 res = "RES," + ide[i-1] + ",0"
                 f.write(res + '\n')
                 f.write("VOI " + voivec[i] + '\n')
-                if maxdep is None:
-                    f.write(info.dep.strip() + '\n')
-                else:
-                    depstr = "DEP 0, 0.001, -" + str(maxdep)
-                    f.write(depstr + '\n')
+                
+                f.write("DEP" + '\n')
+                for x in burnlist[i]:
+                    f.write(str(x) + '\n')
+
+                #if maxdep is None:
+                #    f.write(info.dep.strip() + '\n')
+                #else:
+                #    depstr = "DEP 0, 0.001, -" + str(maxdep)
+                #    f.write(depstr + '\n')
 
                 f.write('STA\n')
 
@@ -857,18 +882,31 @@ class Segment(object):
     def burnpoints(self, voi=40, stateindex=0):
         """Return depletion vector for given voi (vhi=voi)"""
         statepoints = self.states[stateindex].statepoints
-        idx0 = self.findpoint(statepoints, voi=voi, vhi=voi)
-        statepoints = statepoints[idx0:]
-
-        burnup_old = 0.0
-        for idx,p in enumerate(statepoints):
-            if p.burnup < burnup_old:
-                break
-            burnup_old = p.burnup
-
-        burnlist = [statepoints[i].burnup for i in range(idx)]
-        Tracer()()
+        i = self.findpoint(statepoints, voi=voi, vhi=voi)
+        burnlist = [statepoints[i].burnup]
+        Nstatepoints = len(statepoints)
+        while ((i < Nstatepoints-1) and
+               (statepoints[i].burnup <= statepoints[i+1].burnup)):
+            burnlist.append(statepoints[i+1].burnup)
+            i += 1
         return burnlist
+
+    #def burnpoints(self, voi=40, stateindex=0):
+    #    """Return depletion vector for given voi (vhi=voi)"""
+    #    statepoints = self.states[stateindex].statepoints
+    #    idx0 = self.findpoint(statepoints, voi=voi, vhi=voi)
+    #    statepoints = statepoints[idx0:]
+    #    Tracer()()
+    #    burnup_old = 0.0
+    #    for idx, p in enumerate(statepoints):
+    #        print p.burnup
+    #        if p.burnup <= burnup_old:
+    #            break
+    #        burnup_old = p.burnup
+    #    Tracer()()
+    #    burnlist = [statepoints[i].burnup for i in range(idx)]
+    #    #Tracer()()
+    #    return burnlist
 
 
 if __name__ == '__main__':
