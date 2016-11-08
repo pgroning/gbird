@@ -37,7 +37,8 @@ class Segment(object):
 
     def __init__(self, caxfile=None, read_content=None):
         self.states = []
-        self.add_calc()
+        self.states.append(DataStruct())
+        #self.add_calc()
         # self.states[0].refcalc = DataStruct()
         # Tracer()()
         '''
@@ -49,15 +50,9 @@ class Segment(object):
         if caxfile:
             self.readcax(caxfile, read_content)
             self.ave_enr()
-            self.quickcalc(refcalc=True)
-        '''
-        #Tracer()()
-        #self.qcalc = []
-        #self.qcalc.append(DataStruct())
-
-        #self.writecai()
-        #self.btfcalc()
-        '''
+            # self.quickcalc(refcalc=True)
+            # self.btfcalc()
+        
 
     # -------Read cax file---------
     def __matchcontent(self, flines, regexp, opt='all'):
@@ -504,12 +499,11 @@ class Segment(object):
 
         f.close()
 
-    def add_calc(self):
+    def add_calc(self, LFU):
         """Append a list element to store result of new calculation"""
         self.states.append(DataStruct())  # Add an element to list
-        # self.states[-1].info = DataStruct()
-        # self.states[-1].statepoints = []
-
+        self.states[-1].LFU = LFU
+            
     def writec3cai(self, file_base_name, voi=None, maxdep=None,
                    box_offset=False):
         # filebasename = "./" + str(uuid.uuid4())
@@ -520,20 +514,26 @@ class Segment(object):
 
         # Creating dep strings
         info = self.states[0]
-        if voi is None:
-            voivec = (info.voi.split('*')[0].replace(',', ' ')
-                      .strip().split(' ')[1:])
+        voivec = (info.voi.split('*')[0].replace(',', ' ')
+                  .strip().split(' ')[1:])
+        
+        if voi is not None:
+            if str(voi) in voivec:
+                bp_voivec = [str(voi)]
+            else:
+                bp_voivec = [voivec[0]]
         else:
-            voivec = [str(voi)]
+            bp_voivec = voivec
 
+        if voi is not None:
+            voivec = [str(voi)]
+            
         burnlist = []
-        #burnstr = []
-        for i, v in enumerate(voivec):
+        for i, v in enumerate(bp_voivec):
             bl = self.burnpoints(voi=int(v))
             if maxdep:
                 bl = [x for x in bl if x <= maxdep]
             burnlist.append(bl)
-            #burnstr.append('\n'.join(map(str,burnlist)))
         
         # info = self.data[0]['info']  # Get info data from original import
         if hasattr(self.states[-1], 'LFU'):
@@ -703,7 +703,7 @@ class Segment(object):
             try:  # use linrsh if available
                 call(['linrsh', c3exe, c3cfg])
             except:
-                pass
+                call([c3exe, c3cfg])
         else:
             call([c3exe, c3cfg])
 
@@ -808,9 +808,8 @@ class Segment(object):
             self.states[0].refcalc = DataStruct()
             self.states[0].refcalc.statepoints = statepoints
         else:
-            self.quickcalc_add(statepoints)
-            #self.add_calc()
-            #self.states[-1].statepoints = statepoints
+            #self.quickcalc_add(statepoints)
+            self.states[-1].statepoints = statepoints
         
     def quickcalc_add(self, statepoints):
         """Adds the quickcalc differencies to the initial state"""
@@ -818,20 +817,19 @@ class Segment(object):
         rsp = self.states[0].refcalc.statepoints
         sp1 = statepoints
         
-        N = len(rsp)
+        N = len(sp1)
         #kinf
         dPOW = [sp1[i].POW - rsp[i].POW for i in range(N)]
         POW = np.array([dPOW[i] + sp0[i].POW for i in range(N)]).swapaxes(0,2)
-        #fint = self.__fintcalc(POW)
-        #burnup
-        #EXP = self.__expcalc(POW, burnup)
-        Tracer()()
+        fint = self.__fintcalc(POW)
+        # burnup = 
+        # EXP = self.__expcalc(POW, burnup)
+        # Tracer()()
 
     def quickcalc(self, voi=None, maxdep=None, refcalc=False, grid=True):
         tic = time.time()
-        # if opt != 'refcalc':
-        #    self.add_calc()  # Append element to hold a new calculation
-        # self.data[-1].info.LFU = self.data[0].info.LFU
+        LFU = self.states[0].LFU
+        self.add_calc(LFU)  # Append element to hold a new calculation
         file_base_name = "tmp/" + str(uuid.uuid4())
         self.writec3cai(file_base_name, voi, maxdep, box_offset=False)
         self.runc3(file_base_name, grid)
