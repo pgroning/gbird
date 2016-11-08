@@ -49,6 +49,7 @@ class Segment(object):
         if caxfile:
             self.readcax(caxfile, read_content)
             self.ave_enr()
+            self.quickcalc(refcalc=True)
         '''
         #Tracer()()
         #self.qcalc = []
@@ -807,12 +808,26 @@ class Segment(object):
             self.states[0].refcalc = DataStruct()
             self.states[0].refcalc.statepoints = statepoints
         else:
-            self.add_calc()
-            self.states[-1].statepoints = statepoints
+            self.quickcalc_add(statepoints)
+            #self.add_calc()
+            #self.states[-1].statepoints = statepoints
         
-        # os.remove(caxfile)
+    def quickcalc_add(self, statepoints):
+        """Adds the quickcalc differencies to the initial state"""
+        sp0 = self.states[0].statepoints
+        rsp = self.states[0].refcalc.statepoints
+        sp1 = statepoints
+        
+        N = len(rsp)
+        #kinf
+        dPOW = [sp1[i].POW - rsp[i].POW for i in range(N)]
+        POW = np.array([dPOW[i] + sp0[i].POW for i in range(N)]).swapaxes(0,2)
+        #fint = self.__fintcalc(POW)
+        #burnup
+        #EXP = self.__expcalc(POW, burnup)
+        Tracer()()
 
-    def quickcalc(self, voi=None, maxdep=None, refcalc=False, grid=False):
+    def quickcalc(self, voi=None, maxdep=None, refcalc=False, grid=True):
         tic = time.time()
         # if opt != 'refcalc':
         #    self.add_calc()  # Append element to hold a new calculation
