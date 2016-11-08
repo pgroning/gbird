@@ -713,7 +713,7 @@ class Segment(object):
         # c3out.unlink(c3out.name)
         # os.remove(c3out)
 
-    def readc3cax(self, file_base_name, opt=None):
+    def readc3cax(self, file_base_name, refcalc=False):
 
         # caxfile = "./c3.cax"
         caxfile = file_base_name + ".cax"
@@ -803,16 +803,16 @@ class Segment(object):
             statepoints[i].POW = POW[:, :, i]
             statepoints[i].EXP = EXP[:, :, i]
 
-        #Tracer()()
-        if opt == 'refcalc':
+        if refcalc:
             self.states[0].refcalc = DataStruct()
             self.states[0].refcalc.statepoints = statepoints
         else:
+            self.add_calc()
             self.states[-1].statepoints = statepoints
         
         # os.remove(caxfile)
 
-    def quickcalc(self, voi=None, maxdep=None, opt='refcalc', grid=False):
+    def quickcalc(self, voi=None, maxdep=None, refcalc=False, grid=False):
         tic = time.time()
         # if opt != 'refcalc':
         #    self.add_calc()  # Append element to hold a new calculation
@@ -820,7 +820,7 @@ class Segment(object):
         file_base_name = "tmp/" + str(uuid.uuid4())
         self.writec3cai(file_base_name, voi, maxdep, box_offset=False)
         self.runc3(file_base_name, grid)
-        self.readc3cax(file_base_name, opt)
+        self.readc3cax(file_base_name, refcalc)
         os.remove(file_base_name + ".inp")
         os.remove(file_base_name + ".out")
         os.remove(file_base_name + ".cax")
