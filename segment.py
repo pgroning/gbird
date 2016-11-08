@@ -792,7 +792,7 @@ class Segment(object):
         # if opt != 'refcalc':
         #    self.add_calc()  # Append element to hold a new calculation
         # self.data[-1].info.LFU = self.data[0].info.LFU
-        file_base_name = "./" + str(uuid.uuid4())
+        file_base_name = "tmp/" + str(uuid.uuid4())
         self.writec3cai(file_base_name, voi, maxdep, box_offset=False)
         self.runc3(file_base_name, grid)
         self.readc3cax(file_base_name, opt)
