@@ -19,9 +19,9 @@ class UnitTest(unittest.TestCase):
 
 
     def test_readinp(self):
-        f = self.bo.info.inpfile
+        f = self.bo.data.inpfile
         self.assertEqual(f,self.testfile)
-        nodes = self.bo.info.nodes
+        nodes = self.bo.data.nodes
         self.assertTrue(type(nodes) is list, "nodes is not list")
 
     def test_readcax(self):

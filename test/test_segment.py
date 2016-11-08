@@ -79,7 +79,6 @@ class UnitTest(unittest.TestCase):
     def test_readc3cax_add(self):
         self.seg.writec3cai(self.file_base_name)
         self.seg.runc3(self.file_base_name)
-        self.seg.add_calc()
         self.seg.readc3cax(self.file_base_name)
         Nstatepoints = len(self.seg.states[1].statepoints)
         self.assertTrue(Nstatepoints >= 10, "Number of statepoints is less than 10")
