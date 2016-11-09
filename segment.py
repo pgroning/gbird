@@ -148,7 +148,7 @@ class Segment(object):
             iSLA = self.__matchcontent(flines, '^\s*SLA', 'next')
         except:
             iSLA = None
-            print "Could not find SLA card"
+            print "Info: Could not find SLA card"
         iWRI = self.__matchcontent(flines, '^\s*WRI', 'next')
         iSTA = self.__matchcontent(flines, '^\s*STA', 'next')
         print "Done."
@@ -436,68 +436,86 @@ class Segment(object):
         #self.data[-1].info.ave_enr = mass_u235/mass
 
     # -------Write cai file------------
-    def writecai(self, caifile):
-        print "Writing to file " + caifile
+    def writecai(self, file_base_name):
+        #print "Writing to file " + caifile
 
-        f = open(caifile, 'w')
-        f.write(self.data.title + '\n')
-        f.write(self.data.sim + '\n')
-        f.write(self.data.tfu + '\n')
-        f.write(self.data.tmo + '\n')
-        f.write(self.data.voi + '\n')
+        cainp = file_base_name + ".inp"
+        print "Writing C input file " + cainp
 
-        Nfue = self.data.FUE.shape[0]
+        info = self.states[0]
+        f = open(cainp, 'w')
+        f.write(info.title + '\n')
+        f.write(info.sim + '\n')
+        f.write(info.tfu + '\n')
+        f.write(info.tmo + '\n')
+        f.write(info.voi + '\n')
+        
+        Nfue = info.FUE.shape[0]
         for i in range(Nfue):
-            f.write(' FUE  %d ' % (self.data.FUE[i, 0]))
-            f.write('%5.3f/%5.3f' % (self.data.FUE[i, 1], self.data.FUE[i, 2]))
-            if ~np.isnan(self.data.FUE[i, 3]):
-                f.write(' %d=%4.2f' % (self.data.FUE[i, 3],
-                                       self.data.FUE[i, 4]))
+            f.write(' FUE  %d ' % (info.FUE[i, 0]))
+            f.write('%5.3f/%5.3f' % (info.FUE[i, 1], info.FUE[i, 2]))
+            if ~np.isnan(info.FUE[i, 3]):
+                f.write(' %d=%4.2f' % (info.FUE[i, 3],
+                                       info.FUE[i, 4]))
             f.write('\n')
-
+        
         f.write(' LFU\n')
-        for i in range(self.data.npst):
+        for i in range(info.npst):
             for j in range(i+1):
-                f.write(' %d' % self.data.LFU[i, j])
+                f.write(' %d' % info.LFU[i, j])
                 # if j < i: f.write(' ')
             f.write('\n')
-
-        f.write(self.data.pde + '\n')
-
-        f.write(self.data.bwr + '\n')
-
-        Npin = np.size(self.data.pinlines)
+        
+        f.write(info.pde + '\n')
+        f.write(info.bwr + '\n')
+        
+        Npin = np.size(info.pinlines)
         for i in range(Npin):
-            f.write(self.data.pinlines[i] + '\n')
-
-        f.write(self.data.slaline.strip() + '\n')
-
+            f.write(info.pinlines[i] + '\n')
+        
+        if hasattr(info, 'slaline'):
+            f.write(info.slaline.strip() + '\n')
+        
         f.write(' LPI\n')
-        for i in range(self.data.npst):
+        for i in range(info.npst):
             for j in range(i+1):
-                f.write(' %d' % self.data.LPI[i, j])
+                f.write(' %d' % info.LPI[i, j])
                 # if j < i: f.write(' ')
             f.write('\n')
-
-        f.write(self.data.spa + '\n')
-        f.write(self.data.dep + '\n')
-        f.write(self.data.gam + '\n')
-        f.write(self.data.wri + '\n')
-        f.write(self.data.sta + '\n')
+        
+        f.write(info.spa + '\n')
+        f.write(info.dep + '\n')
+        f.write(info.gam + '\n')
+        f.write(info.wri + '\n')
+        f.write(info.sta + '\n')
 
         f.write(' TTL\n')
 
-        depstr = re.split('DEP', self.data.dep)[1].replace(',', '').strip()
+        depstr = re.split('DEP', info.dep)[1].replace(',', '').strip()
         f.write(' RES,,%s\n' % (depstr))
 
         # f.write(' RES,,0 0.5 1.5 2.5 5.0 7.5 10.0 12.5 15.0 17.5 20.0 25
         # 30 40 50 60 70\n')
-        f.write(self.data.crd + '\n')
+        f.write(info.crd + '\n')
         f.write(' NLI\n')
         f.write(' STA\n')
         f.write(' END\n')
-
         f.close()
+
+    def runc4(self, filebasename, grid=False):
+        """Running C4 model"""
+        c4inp = filebasename + ".inp"
+        # C4 executable
+        c4exe = "/home/prog/prod/CMSCODES/bin/cas4"
+        # C4 version
+        c4ver = "-v2.05.12_MROD";
+        if grid:
+            try:  # use linrsh if available
+                call(['linrsh', "-o tmp", c4exe, c4ver, c4inp])
+            except:
+                call([c4exe, "-o tmp", c4ver, c4inp])
+        else:
+            call([c4exe, "-o tmp", c4ver, c4inp])
 
     def add_calc(self, LFU):
         """Append a list element to store result of new calculation"""
@@ -649,7 +667,9 @@ class Segment(object):
         f.close()
         # return filebasename
 
-    def runc3(self, filebasename, grid=False):  # Running C3 perturbation model
+    def runc3(self, filebasename, grid=False):
+        """Running C3 perturbation model"""
+
         # C3 input file
         c3inp = filebasename + ".inp"
         # c3inp = "./c3.inp"
@@ -808,7 +828,7 @@ class Segment(object):
             self.states[0].refcalc = DataStruct()
             self.states[0].refcalc.statepoints = statepoints
         else:
-            #self.quickcalc_add(statepoints)
+            # self.quickcalc_add(statepoints)
             self.states[-1].statepoints = statepoints
         
     def quickcalc_add(self, statepoints):
@@ -818,21 +838,27 @@ class Segment(object):
         sp1 = statepoints
         
         N = len(sp1)
-        #kinf
+        # kinf
         dPOW = [sp1[i].POW - rsp[i].POW for i in range(N)]
-        POW = np.array([dPOW[i] + sp0[i].POW for i in range(N)]).swapaxes(0,2)
+        POW = np.array([dPOW[i] + sp0[i].POW for i in range(N)]).swapaxes(0, 2)
         fint = self.__fintcalc(POW)
         # burnup = 
         # EXP = self.__expcalc(POW, burnup)
         # Tracer()()
 
-    def quickcalc(self, voi=None, maxdep=None, refcalc=False, grid=True):
+    def quickcalc(self, voi=None, maxdep=None, refcalc=False, grid=True, model='c3'):
         tic = time.time()
         LFU = self.states[0].LFU
         self.add_calc(LFU)  # Append element to hold a new calculation
         file_base_name = "tmp/" + str(uuid.uuid4())
         self.writec3cai(file_base_name, voi, maxdep, box_offset=False)
-        self.runc3(file_base_name, grid)
+        if model == 'c3':
+            self.runc3(file_base_name, grid)
+        elif model == 'c4':
+            self.runc4(file_base_name, grid)
+        else:
+            print "Quickcalc model is unknown"
+            return
         self.readc3cax(file_base_name, refcalc)
         os.remove(file_base_name + ".inp")
         os.remove(file_base_name + ".out")
