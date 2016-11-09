@@ -846,8 +846,11 @@ class Segment(object):
         # EXP = self.__expcalc(POW, burnup)
         # Tracer()()
 
-    def quickcalc(self, voi=None, maxdep=None, refcalc=False, grid=True, model='c3'):
+    def quickcalc(self, voi=None, maxdep=None, refcalc=False, grid=True,
+                  model='c3'):
         tic = time.time()
+        if not os.path.isdir("tmp"):
+            os.mkdir("tmp")
         LFU = self.states[0].LFU
         self.add_calc(LFU)  # Append element to hold a new calculation
         file_base_name = "tmp/" + str(uuid.uuid4())
