@@ -502,20 +502,27 @@ class Segment(object):
         f.write(' END\n')
         f.close()
 
-    def runc4(self, filebasename, grid=False):
+    def runc4(self, file_base_name, neulib=False, grid=False):
         """Running C4 model"""
-        c4inp = filebasename + ".inp"
+        c4inp = file_base_name + ".inp"
         # C4 executable
-        c4exe = "/home/prog/prod/CMSCODES/bin/cas4"
+        c4exe = "cas4 -e"
         # C4 version
-        c4ver = "-v2.05.12_MROD";
+        c4ver = "2.10.21P_VAT_1.3";
+        # lib directory
+        libdir = "/home/prog/prod/CMSCODES/CasLib/library/"
+        # neulib
+        if not neulib:
+            neulib = "e4lbl70";
+        
+        cmd = ' -V ' + c4ver + ' -N ' + libdir + neulib + ' ' + c4inp
         if grid:
             try:  # use linrsh if available
-                call(['linrsh', "-o tmp", c4exe, c4ver, c4inp])
+                call(['linrsh', c4exe, cmd])
             except:
-                call([c4exe, "-o tmp", c4ver, c4inp])
+                call([c4exe, cmd])
         else:
-            call([c4exe, "-o tmp", c4ver, c4inp])
+            call([c4exe, cmd])
 
     def add_calc(self, LFU):
         """Append a list element to store result of new calculation"""
@@ -523,7 +530,7 @@ class Segment(object):
         self.states[-1].LFU = LFU
             
     def writec3cai(self, file_base_name, voi=None, maxdep=None,
-                   box_offset=False):
+                   box_offset=0):
         # filebasename = "./" + str(uuid.uuid4())
         c3inp = file_base_name + ".inp"
         # c3inp = tempfile.NamedTemporaryFile(dir='.',
@@ -600,6 +607,7 @@ class Segment(object):
 
         pde = info.pde.split('\'')[0]
         f.write(pde.strip() + '\n')
+
         if box_offset:
             bwr = self.boxbow(box_offset)
             f.write(bwr + '\n')
@@ -847,18 +855,16 @@ class Segment(object):
         # Tracer()()
 
     def quickcalc(self, voi=None, maxdep=None, refcalc=False, grid=True,
-                  model='c3'):
+                  model='c3', box_offset=0, neulib=False):
         tic = time.time()
-        if not os.path.isdir("tmp"):
-            os.mkdir("tmp")
         LFU = self.states[0].LFU
         self.add_calc(LFU)  # Append element to hold a new calculation
-        file_base_name = "tmp/" + str(uuid.uuid4())
-        self.writec3cai(file_base_name, voi, maxdep, box_offset=False)
+        file_base_name = "./" + str(uuid.uuid4())
+        self.writec3cai(file_base_name, voi, maxdep, box_offset)
         if model == 'c3':
             self.runc3(file_base_name, grid)
         elif model == 'c4':
-            self.runc4(file_base_name, grid)
+            self.runc4(file_base_name, neulib, grid)
         else:
             print "Quickcalc model is unknown"
             return
@@ -866,17 +872,22 @@ class Segment(object):
         os.remove(file_base_name + ".inp")
         os.remove(file_base_name + ".out")
         os.remove(file_base_name + ".cax")
+        try:
+            os.remove(file_base_name + ".log")
+        except:
+            pass
         print "Done in "+str(time.time()-tic)+" seconds."
 
     def boxbow(self, box_offset=0.0):
         """Updating the BWR card to account for box bowing."""
-        bwr = self.data[-1].info.bwr
+        bwr = self.states[0].bwr
         bwr_arr = bwr.split()
         gaw = float(bwr_arr[5]) + box_offset
         gan = float(bwr_arr[6]) - box_offset  # gaw + gan = constant
         bwr_arr[5] = str(gaw)
         bwr_arr[6] = str(gan)
         bwr_offset = ' '.join(bwr_arr)
+        self.states[-1].box_offset = box_offset
         return bwr_offset
 
     def __expcalc(self, POW, burnup):
