@@ -24,8 +24,7 @@ import numpy as np
 
 from multiprocessing import Pool
 from segment import Segment, DataStruct
-
-# from btf import btf
+from btf import Btf
 
 
 def readcax_fun(tup):
@@ -158,8 +157,8 @@ class Bundle(object):
                 print "Warning: Could not load BTF"
         self.data.pfile = pfile
 
-    def calcbtf(self):
-        self.btf = btf(self)
+    def calc_btf(self):
+        self.btf = Btf(self)
         # fuetype = 'SVEA-96'
         # self.btf = btf(self,fuetype)
 
