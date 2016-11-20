@@ -382,6 +382,8 @@ class Segment(object):
         # self.data[-1].info.LFU = LFU
         do.npst = npst
         # self.data[-1].info.npst = npst
+        do.voivec = (do.voi.split('*')[0].replace(',', ' ')
+                     .strip().split(' ')[1:])
         
         # Append data object to last list element
         self.states[-1] = do
@@ -524,11 +526,22 @@ class Segment(object):
         else:
             call([c4exe, cmd])
 
-    def add_calc(self, LFU):
+    def add_calc(self, LFU, voi=None):
         """Append a list element to store result of new calculation"""
         self.states.append(DataStruct())  # Add an element to list
         self.states[-1].LFU = LFU
+        if voi is None:
+            voivec = self.states[0].voivec
+        else:
+            voivec = [str(voi)]
+        self.states[-1].voivec = voivec
             
+    #def voivec(self):
+    #    info = self.states[0]
+    #    voids = (info.voi.split('*')[0].replace(',', ' ')
+    #              .strip().split(' ')[1:])
+    #    return voids
+        
     def writec3cai(self, file_base_name, voi=None, maxdep=None,
                    box_offset=0):
         # filebasename = "./" + str(uuid.uuid4())
@@ -539,8 +552,10 @@ class Segment(object):
 
         # Creating dep strings
         info = self.states[0]
-        voivec = (info.voi.split('*')[0].replace(',', ' ')
-                  .strip().split(' ')[1:])
+        voivec = info.voivec
+        # voivec = self.voivec()
+        # voivec = (info.voi.split('*')[0].replace(',', ' ')
+        #          .strip().split(' ')[1:])
         
         if voi is not None:
             if str(voi) in voivec:
@@ -760,7 +775,7 @@ class Segment(object):
         iTIT = self.__matchcontent(flines, '^TIT')
         iPOW = self.__matchcontent(flines, 'POW\s+')
         iPOL = self.__matchcontent(flines, '^POL')
-
+        
         # Read fuel dimension
         npst = int(flines[iPOW[0]+1][4:6])
 
@@ -858,7 +873,7 @@ class Segment(object):
                   model='c3', box_offset=0, neulib=False):
         tic = time.time()
         LFU = self.states[0].LFU
-        self.add_calc(LFU)  # Append element to hold a new calculation
+        self.add_calc(LFU, voi)  # Append element to hold a new calculation
         file_base_name = "./" + str(uuid.uuid4())
         self.writec3cai(file_base_name, voi, maxdep, box_offset)
         if model == 'c3':
@@ -914,13 +929,15 @@ class Segment(object):
             fint[i] = POW[:, :, i].max()
         return fint
 
-    def findpoint(self, statepoints,
+    def findpoint(self, stateindex=0,
                   burnup=None, vhi=None, voi=None, tfu=None):
         """Return statepoint index that correspond to specific burnup,
         void and void history
         Syntax: pt = findpoint(burnup=burnup_val,vhi=vhi_val,voi=voi_val,
         tfu=tfu_val)"""
-
+        #Tracer()()
+        statepoints = self.states[stateindex].statepoints
+        
         if tfu is not None:
             pindex = next(i for i, p in enumerate(statepoints) if p.tfu == tfu)
         elif burnup is not None:
@@ -935,7 +952,7 @@ class Segment(object):
     def burnpoints(self, voi=40, stateindex=0):
         """Return depletion vector for given voi (vhi=voi)"""
         statepoints = self.states[stateindex].statepoints
-        i = self.findpoint(statepoints, voi=voi, vhi=voi)
+        i = self.findpoint(stateindex, voi=voi, vhi=voi)
         burnlist = [statepoints[i].burnup]
         Nstatepoints = len(statepoints)
         while ((i < Nstatepoints-1) and
