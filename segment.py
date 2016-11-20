@@ -929,7 +929,7 @@ class Segment(object):
             fint[i] = POW[:, :, i].max()
         return fint
 
-    def findpoint(self, stateindex=0,
+    def findpoint(self, stateindex=-1,
                   burnup=None, vhi=None, voi=None, tfu=None):
         """Return statepoint index that correspond to specific burnup,
         void and void history
