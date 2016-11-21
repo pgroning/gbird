@@ -1,13 +1,20 @@
+#!/usr/bin/python
+
 from IPython.core.debugger import Tracer
 
+import sys
 import numpy as np
 
-class Btf:
+sys.path.append('lib/')
+import libADDC
+
+
+class Btf(object):
     """Calculate BTF values"""
     
     def __init__(self, bundleobj):
         self.bundleobj = bundleobj
-        self.rfact()
+        #self.rfact()
         #self.pow3d(voi=50,burnup=0)
 
     def lastindex(self,case_id):
@@ -76,6 +83,26 @@ class Btf:
         
         for i, burnup in enumerate(x):
             POW3 = self.pow3d(voi, burnup)
-            # self.DOX[i,:,:] = calc_btf(self.casobj.data.fuetype,POW3)
+            self.DOX[i,:,:] = self.calc_btf(self.bundleobj.data.fuetype, POW3)
+        
             
-        Tracer()()
+    def calc_btf(self, fuetype, POW3):
+        if fuetype == 'OPT2':
+            print "Calculating BTF for OPT2"
+            # AC = libADDC.addc("OPT2").addc
+            # DOX = btf_opt2(AC, POW3)
+        elif fuetype == 'ATXM':
+            print "Calculating BTF for ATXM"
+            # AC = libADDC.addc("ATXM").addc
+            # DOX = btf_atxm(AC, POW3)
+
+            
+    if __name__ == '__main__':
+        import bundle
+        import btf
+        inpfile = sys.argv[1]
+        bundleobj = bundle.Bundle(inpfile)
+        bundleobj.readcax()
+        b = btf.Btf(bundleobj)
+        b.rfact()
+        
