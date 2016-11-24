@@ -5,8 +5,9 @@ from IPython.core.debugger import Tracer
 import sys
 import numpy as np
 
-sys.path.append('lib/')
-import libADDC
+from btf_opt2 import btf_opt2
+#sys.path.append('lib/')
+#import libADDC
 
 
 class Btf(object):
@@ -84,19 +85,17 @@ class Btf(object):
         for i, burnup in enumerate(x):
             POW3 = self.pow3d(voi, burnup)
             self.DOX[i,:,:] = self.calc_btf(self.bundleobj.data.fuetype, POW3)
-        
-            
+        Tracer()()
+
     def calc_btf(self, fuetype, POW3):
         if fuetype == 'OPT2':
-            print "Calculating BTF for OPT2"
-            # AC = libADDC.addc("OPT2").addc
-            # DOX = btf_opt2(AC, POW3)
+            #print "Calculating BTF for OPT2"
+            DOX = btf_opt2(POW3)
         elif fuetype == 'ATXM':
             print "Calculating BTF for ATXM"
-            # AC = libADDC.addc("ATXM").addc
             # DOX = btf_atxm(AC, POW3)
+        return DOX
 
-            
     if __name__ == '__main__':
         import bundle
         import btf
