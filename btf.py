@@ -3,6 +3,7 @@
 from IPython.core.debugger import Tracer
 
 import sys
+import time
 import numpy as np
 
 from btf_opt2 import btf_opt2
@@ -75,7 +76,8 @@ class Btf(object):
 
     def rfact(self):
         """Calculating BTF"""
-
+        print "Calculating BTF"
+        tic = time.time()
         x = self.intersect_points()
         npst = self.bundleobj.cases[0].states[0].npst
         self.DOX = np.zeros((len(x),npst,npst))
@@ -85,7 +87,7 @@ class Btf(object):
         for i, burnup in enumerate(x):
             POW3 = self.pow3d(voi, burnup)
             self.DOX[i,:,:] = self.calc_btf(self.bundleobj.data.fuetype, POW3)
-        Tracer()()
+        print "Done in "+str(time.time()-tic)+" seconds."
 
     def calc_btf(self, fuetype, POW3):
         if fuetype == 'OPT2':

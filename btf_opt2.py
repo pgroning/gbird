@@ -6,10 +6,11 @@ import sys
 #from casio import casio
 #from casdata_pts_2 import casdata
 
+from lib.libADDC import ADDC
 #sys.path.append('lib/')
 #import libADDC
 #from addc import addc
-       
+
 
 def acc_weifun(x):
     if x <= 0.06:
@@ -30,115 +31,135 @@ def node_weight(z, naxial_nodes):
     wz = f1 - f2
     return wz
 
-def rfact_axial(fuetype,POW):
-    # Calculating axial R-factor
+def rfact_axial(POW):
+    """Calculating axial R-factors"""
+
+    ac_obj = ADDC("OPT2")
+    AC = ac_obj.ac
     
     # Import addc from shared lib
     #print fuetype
-    acObj = libADDC.addc(fuetype)
-    AC = acObj.addc
+    #acObj = libADDC.addc(fuetype)
+    #AC = acObj.addc
     #AC,dim = libADDC.addc(fuetype)
     #AC = AC[:dim,:dim]
 
-    # Define some matrices
-    nside = AC.shape[0] # Number of side pins of the assembly
-    dim = nside + 2 # Pin map storage dimension
+    # Define some matrix dimensions
+    nside = AC.shape[0]  # Number of side pins of the assembly
+    dim = nside + 2  # Pin map storage dimension
 
+    Ntotrods = 96  # Total number of rods for SVEA-96
     # Calculate number of hot rods (POW[i,j] > 0)
-    Ntotrods = 96 # Total number of rods for SVEA-96
-    Nhotrods = sum(sum(POW>0)) # Number of hot rods
-
+    Nhotrods = sum(sum(POW > 0))
+    
     # Determine total power for each sub bundle
-    FSUB = np.zeros(4)
-    FSUB[0] = sum(sum(POW[:5,:5])) # North-West quarter
-    FSUB[1] = sum(sum(POW[6:,:5])) # South-West
-    FSUB[2] = sum(sum(POW[:5,6:])) # North-East
-    FSUB[3] = sum(sum(POW[6:,6:])) # South-East
+    FSUB = np.zeros(4, dtype=float)
+    FSUB[0] = sum(sum(POW[:5, :5])) # North-West quarter
+    FSUB[1] = sum(sum(POW[6:, :5])) # South-West
+    FSUB[2] = sum(sum(POW[:5, 6:])) # North-East
+    FSUB[3] = sum(sum(POW[6:, 6:])) # South-East
     
     # Normalized sub bundle power distribution
-    POD = np.zeros(POW.shape)
-    POD[:5,:5] = POW[:5,:5]/FSUB[0] * Nhotrods/4
-    POD[6:,:5] = POW[6:,:5]/FSUB[1] * Nhotrods/4
-    POD[:5,6:] = POW[:5,6:]/FSUB[2] * Nhotrods/4
-    POD[6:,6:] = POW[6:,6:]/FSUB[3] * Nhotrods/4
-
-    #FSUB = FSUB/FSUB.mean()
-    # Calculate mismatch-factor
-    #MF = -0.14 + 1.5*FSUB - 0.36*FSUB**2
+    POD = np.zeros(POW.shape, dtype=float)
+    POD[:5, :5] = POW[:5, :5]/FSUB[0] * Nhotrods/4
+    POD[6:, :5] = POW[6:, :5]/FSUB[1] * Nhotrods/4
+    POD[:5, 6:] = POW[:5, 6:]/FSUB[2] * Nhotrods/4
+    POD[6:, 6:] = POW[6:, 6:]/FSUB[3] * Nhotrods/4
 
     # Calculate square root of power
-    RP = np.zeros((dim,dim))
-    RP[1:nside+1,1:nside+1] = np.sqrt(POD)
-    
+    RP = np.zeros((dim, dim), dtype=float)
+    RP[1:nside+1, 1:nside+1] = np.sqrt(POD)
     # Define Rod Weight factors
-    WP = np.zeros((dim,dim))
+    WP = np.zeros((dim, dim), dtype=float)
+    # Weighting factors for heated rods. WP(i,j) = 1.0 if POD > 0
+    WP[1:nside+1, 1:nside+1] = (POD > 0.0001).astype(float)
+    
+    #WP = np.zeros((dim, dim), dtype=float)
     #WP[1:nside+1,1:nside+1] = np.ones((nside,nside))
     # Water cross/channel
-    for i in range(1,nside+1):
-        for j in range(1,nside+1):
-            if POD[i-1,j-1] > 0.0001:
-                WP[i,j] = 1.0
-
+    #for i in range(1,nside+1):
+    #    for j in range(1,nside+1):
+    #        if POD[i-1,j-1] > 0.0001:
+    #            WP[i,j] = 1.0
+    
     # PLR (modeled as cold rods)
-    # For cold rods the weighting factor is 0.25 of the value of heated rod in that position
+    # For cold rods the weighting factor is 0.25 of the value of heated rod
+    # in that position
     # PLR (1/3)
-    if POD[0,0]   < 0.0001: WP[1,1]   = 0.25
-    if POD[0,10]  < 0.0001: WP[1,11]  = 0.25
-    if POD[10,0]  < 0.0001: WP[11,1]  = 0.25
-    if POD[10,10] < 0.0001: WP[11,11] = 0.25
+    if POD[0,0] < 0.0001:
+        WP[1,1] = 0.25
+    if POD[0,10] < 0.0001:
+        WP[1,11] = 0.25
+    if POD[10,0] < 0.0001:
+        WP[11,1] = 0.25
+    if POD[10,10] < 0.0001:
+        WP[11,11] = 0.25
     # PLR (2/3)
-    if POD[3,4]   < 0.0001: WP[4,5]   = 0.25
-    if POD[4,3]   < 0.0001: WP[5,4]   = 0.25
-    if POD[3,6]   < 0.0001: WP[4,7]   = 0.25
-    if POD[4,7]   < 0.0001: WP[5,8]   = 0.25   
-    if POD[6,3]   < 0.0001: WP[7,4]   = 0.25
-    if POD[7,4]   < 0.0001: WP[8,5]   = 0.25
-    if POD[6,7]   < 0.0001: WP[7,8]   = 0.25
-    if POD[7,6]   < 0.0001: WP[8,7]   = 0.25
+    if POD[3,4] < 0.0001:
+        WP[4,5] = 0.25
+    if POD[4,3] < 0.0001:
+        WP[5,4] = 0.25
+    if POD[3,6] < 0.0001:
+        WP[4,7] = 0.25
+    if POD[4,7] < 0.0001:
+        WP[5,8] = 0.25   
+    if POD[6,3] < 0.0001:
+        WP[7,4] = 0.25
+    if POD[7,4] < 0.0001:
+        WP[8,5] = 0.25
+    if POD[6,7] < 0.0001:
+        WP[7,8] = 0.25
+    if POD[7,6] < 0.0001:
+        WP[8,7] = 0.25
 
     # Calculate pinwise R-factors for fuel-rods where POW > 0
-    DOW = np.zeros((nside,nside))
+    DOW = np.zeros((nside, nside), dtype=float)
     # Side rods
     WJ = 0.25  # Weighting factor for side neighboring rods
     WK = 0.125 # Weighting factor for diagonal neighboring rods
-    for i in range(1,nside+1):
-        for j in range(1,nside+1):
+    
+    for i in xrange(1, nside+1):
+        for j in xrange(1, nside+1):
             if POD[i-1,j-1] > 0.0001:
-            #if RP[i,j] > 0:
                 # Side rods
                 SJ1 = (RP[i-1,j]*WP[i-1,j] + RP[i+1,j]*WP[i+1,j] + 
-                RP[i,j-1]*WP[i,j-1] + RP[i,j+1]*WP[i,j+1])*WJ
+                RP[i, j-1]*WP[i,j-1] + RP[i,j+1]*WP[i,j+1])*WJ
 
                 SJ2 = (WP[i-1,j] + WP[i+1,j] +
                 WP[i,j-1] + WP[i,j+1])*WJ*RP[i,j]
 
                 SJ = min([SJ1,SJ2])
+
                 # Diagonal rods
                 SK1 = (RP[i-1,j-1]*WP[i-1,j-1] + RP[i+1,j-1]*WP[i+1,j-1] +
                 RP[i-1,j+1]*WP[i-1,j+1] + RP[i+1,j+1]*WP[i+1,j+1])*WK
 
                 SK2 = (WP[i-1,j-1] + WP[i+1,j-1] +
-                WP[i-1,j+1] + WP[i+1,j+1])*WK*RP[i,j]
+                       WP[i-1,j+1] + WP[i+1,j+1])*WK*RP[i,j]
 
                 SK = min([SK1,SK2])
 
                 # Sum weighting factors
-                SWJ = (WP[i-1,j] + WP[i+1,j] + WP[i,j-1] + WP[i,j+1])*WJ # Side rods
-                SWK = (WP[i-1,j-1] + WP[i+1,j-1] + WP[i-1,j+1] + WP[i+1,j+1])*WK # Diagonal rods
-
-                DOW[i-1,j-1] = (RP[i,j] + SJ + SK)/(1.0 + SWJ + SWK)*np.sqrt(Ntotrods/float(Nhotrods)) + AC[i-1,j-1]
+                # Side rods
+                SWJ = (WP[i-1,j] + WP[i+1,j] + WP[i,j-1] + WP[i,j+1])*WJ 
+                # Diagonal rods
+                SWK = (WP[i-1,j-1] + WP[i+1,j-1] + WP[i-1,j+1] + 
+                       WP[i+1,j+1])*WK
                 
-
+                DOW[i-1,j-1] = (((RP[i,j] + SJ + SK)/(1.0 + SWJ + SWK)*
+                                 np.sqrt(Ntotrods/float(Nhotrods))) +
+                                AC[i-1,j-1])
+    
     # Apply corner rod protection.
     # The R-factor should be increased about half of the desired CPR correction
-    #crpfact = 0.02
-    #DOW[0,0] = DOW[0,0]                         * (1.0 + crpfact*0.5)
-    #DOW[0,nside-1] = DOW[0,nside-1]             * (1.0 + crpfact*0.5)
-    #DOW[nside-1,0] = DOW[nside-1,0]             * (1.0 + crpfact*0.5)
-    #DOW[nside-1,nside-1] = DOW[nside-1,nside-1] * (1.0 + crpfact*0.5)
+    # crpfact = 0.02
+    # DOW[0,0] = DOW[0,0]                         * (1.0 + crpfact*0.5)
+    # DOW[0,nside-1] = DOW[0,nside-1]             * (1.0 + crpfact*0.5)
+    # DOW[nside-1,0] = DOW[nside-1,0]             * (1.0 + crpfact*0.5)
+    # DOW[nside-1,nside-1] = DOW[nside-1,nside-1] * (1.0 + crpfact*0.5)
 
     # Calculate the max R-factor for the assembly
-    #Rfact = DOW.max()
+    # Rfact = DOW.max()
     return DOW
 
 
@@ -178,9 +199,13 @@ def btf_opt2(POW3):
     FSUB = np.zeros(nsubs, dtype=float)
     Raxw = np.zeros((nrows, ncols))
     MFpl = np.zeros(nsubs)
+    
+    #ac_obj = ADDC("OPT2")
+    #AC = ac_obj.ac
 
     # Total number of rods (POW3[0,i,j] > 0)
-    Ntotrods = sum(sum(POW3[0, :, :] > 0.0001))
+    # Ntotrods = 96  # Total number of rods for SVEA-96
+    #Ntotrods = sum(sum(POW3[0, :, :] > 0.0001))
 
     for node in xrange(naxial_nodes_flr):
         
@@ -200,18 +225,15 @@ def btf_opt2(POW3):
         # Calculate mismatch-factor for each sub-bundle
         MF[node, :] = -0.14 + 1.5*FSUB - 0.36*FSUB**2
         
+        WZ[node] = node_weight(node + 1, naxial_nodes_flr)
+
         # Calculate axial BTF
         # Check if old axial rfact calculation can be re-used 
         if (node > 0) and (POW3[node, :, :] == POW3[node-1, :, :]).all():
             DOW[node, :, :] = DOW[node-1, :, :]
         else:  # Perform new calculation
-            print node
-            DOW[node, :, :] = np.ones((nrows, ncols))  # only for testing
-            DOW[node, 5, :] = 0
-            DOW[node, :, 5] = 0
-            #DOW[z,:,:] = rfact_axial(fuetype,POW3[z,:,:])
-        WZ[node] = node_weight(node + 1, naxial_nodes_flr)
-    
+            DOW[node, :, :] = rfact_axial(POW3[node, :, :])
+        
     # Apply mismatch-factor to FLRs only (PLRs are taken care of separately)
     for node in xrange(naxial_nodes_flr):
         # North-West
