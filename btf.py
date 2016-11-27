@@ -20,14 +20,14 @@ from btf_opt2 import btf_opt2
 class Btf(object):
     """Calculate BTF values"""
     
-    def __init__(self, bundleobj):
-        self.bundleobj = bundleobj
+    def __init__(self, bundle=None):
+        self.bundle = bundle
         #self.rfact()
         #self.pow3d(voi=50,burnup=0)
 
     def lastindex(self,case_id):
         """Iterate over burnup points"""
-        statepoints = self.bundleobj.cases[case_id].states[-1].statepoints
+        statepoints = self.bundle.cases[case_id].states[-1].statepoints
         burnup_old = 0.0
         for idx,p in enumerate(statepoints):
             if p.burnup < burnup_old:
@@ -38,7 +38,7 @@ class Btf(object):
     def intersect_points(self):
         """Find intersection burnup points for all cases"""
         
-        segments = self.bundleobj.cases
+        segments = self.bundle.cases
         nsegments = len(segments)
         idx = self.lastindex(0)
         x = [segments[0].states[-1].statepoints[i].burnup for i in range(idx)]
@@ -54,7 +54,7 @@ class Btf(object):
         """Construct a 3D pin power distribution for specific void and burnup.
         Use interpolation if necessary."""
 
-        segments = self.bundleobj.cases
+        segments = self.bundle.cases
         nsegments = len(segments)
         npst = segments[0].states[0].npst
         POW = np.zeros((nsegments, npst, npst))
@@ -75,9 +75,9 @@ class Btf(object):
                                             burnup=burnup, vhi=voi2, voi=voi2))
                 P1 = segments[i].states[-1].statepoints[i1].POW
                 P2 = segments[i].states[-1].statepoints[i2].POW
-                POW[i, :, :] = self.bundleobj.interp2(P1, P2, voi1, voi2, voi)
+                POW[i, :, :] = self.bundle.interp2(P1, P2, voi1, voi2, voi)
 
-        POW3 = self.bundleobj.pow3(POW)
+        POW3 = self.bundle.pow3(POW)
         return POW3
 
     def calc_btf(self):
@@ -85,14 +85,14 @@ class Btf(object):
         print "Calculating BTF"
         tic = time.time()
         x = self.intersect_points()
-        npst = self.bundleobj.cases[0].states[0].npst
+        npst = self.bundle.cases[0].states[0].npst
         self.DOX = np.zeros((len(x),npst,npst))
         
         voi = 50
         
         for i, burnup in enumerate(x):
             POW3 = self.pow3d(voi, burnup)
-            self.DOX[i,:,:] = self.rfact(self.bundleobj.data.fuetype, POW3)
+            self.DOX[i,:,:] = self.rfact(self.bundle.data.fuetype, POW3)
         self.burnup = x
         print "Done in "+str(time.time()-tic)+" seconds."
         
@@ -109,8 +109,8 @@ class Btf(object):
         import bundle
         import btf
         inpfile = sys.argv[1]
-        bundleobj = bundle.Bundle(inpfile)
-        bundleobj.readcax()
-        b = btf.Btf(bundleobj)
+        bundle = bundle.Bundle(inpfile)
+        bundle.readcax()
+        b = btf.Btf(bundle)
         b.calc_btf()
         
