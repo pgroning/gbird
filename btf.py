@@ -83,7 +83,6 @@ class Btf(object):
     def calc_btf(self):
         """Calculating BTF"""
         print "Calculating BTF"
-        print self.data.fuetype
         tic = time.time()
         x = self.intersect_points()
         npst = self.bundleobj.cases[0].states[0].npst
