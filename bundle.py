@@ -158,9 +158,9 @@ class Bundle(object):
         self.data.pfile = pfile
 
     def calc_btf(self):
+        """Administrates btf calculation by composition of the Btf class"""
         self.btf = Btf(self)
-        # fuetype = 'SVEA-96'
-        # self.btf = btf(self,fuetype)
+        self.btf.calc_btf()
 
     def ave_enr(self):
         """The method calculates the average enrichment of the bundle.

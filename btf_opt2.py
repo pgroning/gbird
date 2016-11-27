@@ -1,4 +1,5 @@
 from IPython.core.debugger import Tracer
+import time
 
 import numpy as np
 import sys
@@ -6,7 +7,8 @@ import sys
 #from casio import casio
 #from casdata_pts_2 import casdata
 
-from lib.libADDC import ADDC
+#from lib.libADDC import ADDC
+from lib.libADDC import addc
 #sys.path.append('lib/')
 #import libADDC
 #from addc import addc
@@ -34,8 +36,10 @@ def node_weight(z, naxial_nodes):
 def rfact_axial(POW):
     """Calculating axial R-factors"""
 
-    ac_obj = ADDC("OPT2")
-    AC = ac_obj.ac
+    ac_obj = addc("SVEA-96")
+    AC = ac_obj.addc
+    #ac_obj = ADDC("OPT2")
+    #AC = ac_obj.ac
     
     # Import addc from shared lib
     #print fuetype
@@ -233,7 +237,7 @@ def btf_opt2(POW3):
             DOW[node, :, :] = DOW[node-1, :, :]
         else:  # Perform new calculation
             DOW[node, :, :] = rfact_axial(POW3[node, :, :])
-        
+            
     # Apply mismatch-factor to FLRs only (PLRs are taken care of separately)
     for node in xrange(naxial_nodes_flr):
         # North-West

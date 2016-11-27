@@ -1,5 +1,9 @@
 #!/usr/bin/python
 
+# Profiler:
+# import cProfile
+# cProfile.run('b.rfact()')
+
 from IPython.core.debugger import Tracer
 
 import sys
@@ -7,6 +11,8 @@ import time
 import numpy as np
 
 from btf_opt2 import btf_opt2
+#from lib.btf_opt2 import btf_opt2
+
 #sys.path.append('lib/')
 #import libADDC
 
@@ -74,7 +80,7 @@ class Btf(object):
         POW3 = self.bundleobj.pow3(POW)
         return POW3
 
-    def rfact(self):
+    def calc_btf(self):
         """Calculating BTF"""
         print "Calculating BTF"
         tic = time.time()
@@ -86,10 +92,11 @@ class Btf(object):
         
         for i, burnup in enumerate(x):
             POW3 = self.pow3d(voi, burnup)
-            self.DOX[i,:,:] = self.calc_btf(self.bundleobj.data.fuetype, POW3)
+            self.DOX[i,:,:] = self.rfact(self.bundleobj.data.fuetype, POW3)
+        self.burnup = x
         print "Done in "+str(time.time()-tic)+" seconds."
-
-    def calc_btf(self, fuetype, POW3):
+        
+    def rfact(self, fuetype, POW3):
         if fuetype == 'OPT2':
             #print "Calculating BTF for OPT2"
             DOX = btf_opt2(POW3)
@@ -105,5 +112,5 @@ class Btf(object):
         bundleobj = bundle.Bundle(inpfile)
         bundleobj.readcax()
         b = btf.Btf(bundleobj)
-        b.rfact()
+        b.calc_btf()
         
