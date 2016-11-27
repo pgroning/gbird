@@ -44,10 +44,11 @@ def quickcalc_fun(tup):
     # return case
 
 
-class Bundle(object):
+class Bundle(Btf):
     """Read, save and load cases"""
 
     def __init__(self, inpfile=None):
+        super(Bundle, self).__init__(self)
         self.data = DataStruct()
         self.cases = []
 
@@ -157,10 +158,10 @@ class Bundle(object):
                 print "Warning: Could not load BTF"
         self.data.pfile = pfile
 
-    def calc_btf(self):
-        """Administrates btf calculation by composition of the Btf class"""
-        self.btf = Btf(self)
-        self.btf.calc_btf()
+    #def calc_btf(self):
+    #    """Administrates btf calculation by composition of the Btf class"""
+    #    self.btf = Btf(self)
+    #    self.btf.calc_btf()
 
     def ave_enr(self):
         """The method calculates the average enrichment of the bundle.
