@@ -92,17 +92,18 @@ class Btf(object):
         
         for i, burnup in enumerate(x):
             POW3 = self.pow3d(voi, burnup)
-            self.DOX[i,:,:] = self.rfact(self.bundle.data.fuetype, POW3)
+            self.DOX[i,:,:] = self.rfact(POW3)
         self.burnup = x
         print "Done in "+str(time.time()-tic)+" seconds."
         
-    def rfact(self, fuetype, POW3):
+    def rfact(self, POW3):
+        fuetype = self.bundle.data.fuetype
         if fuetype == 'OPT2':
             #print "Calculating BTF for OPT2"
             DOX = btf_opt2(POW3)
         elif fuetype == 'ATXM':
             print "Calculating BTF for ATXM"
-            # DOX = btf_atxm(AC, POW3)
+            #DOX = btf_atxm(POW3)
         return DOX
 
     if __name__ == '__main__':
