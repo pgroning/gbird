@@ -50,8 +50,8 @@ class Bundle(object):
     def __init__(self, inpfile=None):
         self.data = DataStruct()
         self.cases = []
-        self.btf = Btf(self)
-        #self.states = []
+        #self.btf = Btf(self)
+        self.states = []
         #self.states.append(DataStruct())
 
         if inpfile:
@@ -160,12 +160,14 @@ class Bundle(object):
                 print "Warning: Could not load BTF"
         self.data.pfile = pfile
 
-    def calc_btf(self):
+    def new_btf(self):
         """Administrates btf calculation by composition of the Btf class"""
-        #self.btf = Btf(self)
-        self.btf.calc_btf()
+        nstates = len(self.cases[0].states)
+        while len(self.states) < nstates:
+            self.states.append(Btf(self))
+        if not hasattr(self.states[-1], 'DOX'):
+            self.states[-1].calc_btf()
         
-
     def ave_enr(self):
         """The method calculates the average enrichment of the bundle.
         This algorithm is likely naive and needs to be updated in the future"""
