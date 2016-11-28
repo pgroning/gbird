@@ -104,7 +104,9 @@ class Btf(object):
             DOX = btf_opt2(POW3)
         elif fuetype == 'A10XM':
             # print "Calculating BTF for ATXM"
-            DOX = btf_a10xm(POW3)
+            DOX = btf_a10xm(POW3, fuetype)
+        elif fuetype == 'A10B':
+            DOX = btf_a10xm(POW3, fuetype)
         return DOX
 
     if __name__ == '__main__':

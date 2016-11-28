@@ -10,11 +10,11 @@ from lib.libADDC import ADDC
 #from addc import addc
         
 
-def rfact_axial(POW):
+def rfact_axial(POW, fuetype):
     """Calculating axial R-factors"""
     
     # Import addc from shared lib
-    acObj = ADDC("A10XM")
+    acObj = ADDC(fuetype)
     AC = acObj.ac
     
     # Define some matrix dimensions
@@ -89,7 +89,7 @@ def rfact_axial(POW):
     return DOW
 
 
-def btf_a10xm(POW3):
+def btf_a10xm(POW3, fuetype):
     """Calculating BTF for A10XM"""
 
     naxial_nodes = POW3.shape[0]
@@ -105,7 +105,7 @@ def btf_a10xm(POW3):
         if (node > 0) and (POW3[node, :, :] == POW3[node-1, :, :]).all():
             DOW[node, :, :] = DOW[node-1, :, :]
         else:  # Perform new calculation
-            DOW[node, :, :] = rfact_axial(POW3[node, :, :])
+            DOW[node, :, :] = rfact_axial(POW3[node, :, :], fuetype)
 
     # Integrate along z-direction to get pinwise R-factors
     DOX = sum(DOW, 0)/naxial_nodes
