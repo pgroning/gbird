@@ -66,6 +66,7 @@ def rfact_axial(POW):
     # Calculate square root of power
     RP = np.zeros((dim, dim), dtype=float)
     RP[1:nside+1, 1:nside+1] = np.sqrt(POD)
+
     # Define Rod Weight factors
     WP = np.zeros((dim, dim), dtype=float)
     # Weighting factors for heated rods. WP(i,j) = 1.0 if POD > 0
@@ -163,7 +164,7 @@ def rfact_axial(POW):
 def btf_opt2(POW3):
     """Calculating BTF for OPT2"""
 
-    naxial_nodes_flr = POW3.shape[0]  # Total number of axial nodes
+    naxial_nodes = POW3.shape[0]  # Total number of axial nodes
     # Number of axial nodes for PLRs (Condition: P > 0 for a pin)
     # PLR (1/3)
     naxial_nodes_plr1 = len([1 for POW2 in POW3 if POW2[0,10] > 0.0001])
@@ -188,11 +189,11 @@ def btf_opt2(POW3):
     
     # Init arrays
     nsubs = 4  # Number of sub bundles
-    MF = np.zeros((naxial_nodes_flr, nsubs), dtype=float)
+    MF = np.zeros((naxial_nodes, nsubs), dtype=float)
     MFQ = np.zeros((nrows/2, ncols/2), dtype=float)
-    DOW = np.zeros((naxial_nodes_flr, nrows, ncols), dtype=float)
+    DOW = np.zeros((naxial_nodes, nrows, ncols), dtype=float)
     DOX = np.zeros((nrows, ncols), dtype=float)
-    WZ = np.zeros(naxial_nodes_flr, dtype=float)
+    WZ = np.zeros(naxial_nodes, dtype=float)
     FSUB = np.zeros(nsubs, dtype=float)
     Raxw = np.zeros((nrows, ncols))
     MFpl = np.zeros(nsubs)
@@ -204,7 +205,8 @@ def btf_opt2(POW3):
     # Ntotrods = 96  # Total number of rods for SVEA-96
     # Ntotrods = sum(sum(POW3[0, :, :] > 0.0001))
 
-    for node in xrange(naxial_nodes_flr):
+    # Calculate lattice Do-factors for all nodes
+    for node in xrange(naxial_nodes):
         
         # Total number of hot rods (POW[i,j] > 0)
         Nhotrods = sum(sum(POW3[node, :, :] > 0.0001))
@@ -222,17 +224,17 @@ def btf_opt2(POW3):
         # Calculate mismatch-factor for each sub-bundle
         MF[node, :] = -0.14 + 1.5*FSUB - 0.36*FSUB**2
         
-        WZ[node] = node_weight(node + 1, naxial_nodes_flr)
+        WZ[node] = node_weight(node + 1, naxial_nodes)
 
-        # Calculate axial BTF
-        # Check if old axial rfact calculation can be re-used 
+        # Calculate lattice Do-factors for all nodes
+        # Check if old axial rfact calculation can be re-used
         if (node > 0) and (POW3[node, :, :] == POW3[node-1, :, :]).all():
             DOW[node, :, :] = DOW[node-1, :, :]
         else:  # Perform new calculation
             DOW[node, :, :] = rfact_axial(POW3[node, :, :])
             
     # Apply mismatch-factor to FLRs only (PLRs are taken care of separately)
-    for node in xrange(naxial_nodes_flr):
+    for node in xrange(naxial_nodes):
         # North-West
         MFQ = M_flr[:5, :5] * (MF[node, 0] - 1) + 1
         DOW[node, :5, :5] = DOW[node, :5, :5] * MFQ
@@ -247,7 +249,7 @@ def btf_opt2(POW3):
         DOW[node, 6:, 6:] = DOW[node, 6:, 6:] * MFQ
 
     '''
-    for node in xrange(naxial_nodes_flr):
+    for node in xrange(naxial_nodes):
         for i in xrange(nrows):
             for j in xrange(ncols):
                 if M_flr[i, j]:  # check if pin at position (i,j) is FLR
@@ -273,7 +275,7 @@ def btf_opt2(POW3):
     MFQ2 = M_plr[6:, :5] * (MF_plr[1] - 1) + 1
     MFQ3 = M_plr[:5, 6:] * (MF_plr[2] - 1) + 1
     MFQ4 = M_plr[6:, 6:] * (MF_plr[3] - 1) + 1
-    for node in xrange(naxial_nodes_flr):
+    for node in xrange(naxial_nodes):
         # North-West
         DOW[node, :5, :5] = DOW[node, :5, :5] * MFQ1
         # South-West
@@ -303,7 +305,7 @@ def btf_opt2(POW3):
     
     #frac1 = 0.337*naxial_nodes - naxial_nodes_plr1
     #frac2 = 0.65*naxial_nodes - naxial_nodes_plr2
-    for node in xrange(naxial_nodes_flr):
+    for node in xrange(naxial_nodes):
         if node < (naxial_nodes_plr1 - 1):  # All rods present
             DOX += DOW[node, :, :] * WZ[node]
         elif node < (naxial_nodes_plr2 - 1):  # 2/3 PLR + FLR rods present

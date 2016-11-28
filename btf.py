@@ -12,6 +12,7 @@ import numpy as np
 
 from btf_opt2 import btf_opt2
 # from lib.btf_opt2 import btf_opt2
+from btf_a10xm import btf_a10xm
 
 # sys.path.append('lib/')
 # import libADDC
@@ -86,24 +87,24 @@ class Btf(object):
         tic = time.time()
         x = self.intersect_points()
         npst = self.bundle.cases[0].states[0].npst
-        self.DOX = np.zeros((len(x),npst,npst))
+        self.DOX = np.zeros((len(x), npst, npst))
         
         voi = 50
         
         for i, burnup in enumerate(x):
             POW3 = self.pow3d(voi, burnup)
             self.DOX[i,:,:] = self.rfact(POW3)
-        self.burnup = x
+        self.burnpoints = np.array(x).astype(float)
         print "Done in "+str(time.time()-tic)+" seconds."
         
     def rfact(self, POW3):
         fuetype = self.bundle.data.fuetype
         if fuetype == 'OPT2':
-            #print "Calculating BTF for OPT2"
+            # print "Calculating BTF for OPT2"
             DOX = btf_opt2(POW3)
-        elif fuetype == 'ATXM':
-            print "Calculating BTF for ATXM"
-            #DOX = btf_atxm(POW3)
+        elif fuetype == 'A10XM':
+            # print "Calculating BTF for ATXM"
+            DOX = btf_a10xm(POW3)
         return DOX
 
     if __name__ == '__main__':
