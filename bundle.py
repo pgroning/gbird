@@ -50,6 +50,9 @@ class Bundle(object):
     def __init__(self, inpfile=None):
         self.data = DataStruct()
         self.cases = []
+        self.btf = Btf(self)
+        #self.states = []
+        #self.states.append(DataStruct())
 
         if inpfile:
             self.readinp(inpfile)
@@ -159,8 +162,9 @@ class Bundle(object):
 
     def calc_btf(self):
         """Administrates btf calculation by composition of the Btf class"""
-        self.btf = Btf(self)
+        #self.btf = Btf(self)
         self.btf.calc_btf()
+        
 
     def ave_enr(self):
         """The method calculates the average enrichment of the bundle.
