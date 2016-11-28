@@ -7,11 +7,11 @@ import sys
 #from casio import casio
 #from casdata_pts_2 import casdata
 
-#from lib.libADDC import ADDC
-from lib.libADDC import addc
-#sys.path.append('lib/')
-#import libADDC
-#from addc import addc
+from lib.libADDC import ADDC
+# from lib.libADDC import addc
+# sys.path.append('lib/')
+# import libADDC
+# from addc import addc
 
 
 def acc_weifun(x):
@@ -36,18 +36,11 @@ def node_weight(z, naxial_nodes):
 def rfact_axial(POW):
     """Calculating axial R-factors"""
 
-    ac_obj = addc("SVEA-96")
-    AC = ac_obj.addc
-    #ac_obj = ADDC("OPT2")
-    #AC = ac_obj.ac
+    #ac_obj = addc("SVEA-96")
+    #AC = ac_obj.addc
+    acObj = ADDC("OPT2")
+    AC = acObj.ac
     
-    # Import addc from shared lib
-    #print fuetype
-    #acObj = libADDC.addc(fuetype)
-    #AC = acObj.addc
-    #AC,dim = libADDC.addc(fuetype)
-    #AC = AC[:dim,:dim]
-
     # Define some matrix dimensions
     nside = AC.shape[0]  # Number of side pins of the assembly
     dim = nside + 2  # Pin map storage dimension
@@ -204,12 +197,12 @@ def btf_opt2(POW3):
     Raxw = np.zeros((nrows, ncols))
     MFpl = np.zeros(nsubs)
     
-    #ac_obj = ADDC("OPT2")
-    #AC = ac_obj.ac
-
+    # acObj = ADDC("OPT2")
+    # AC = acObj.ac
+    
     # Total number of rods (POW3[0,i,j] > 0)
     # Ntotrods = 96  # Total number of rods for SVEA-96
-    #Ntotrods = sum(sum(POW3[0, :, :] > 0.0001))
+    # Ntotrods = sum(sum(POW3[0, :, :] > 0.0001))
 
     for node in xrange(naxial_nodes_flr):
         

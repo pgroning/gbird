@@ -11,10 +11,10 @@ import time
 import numpy as np
 
 from btf_opt2 import btf_opt2
-#from lib.btf_opt2 import btf_opt2
+# from lib.btf_opt2 import btf_opt2
 
-#sys.path.append('lib/')
-#import libADDC
+# sys.path.append('lib/')
+# import libADDC
 
 
 class Btf(object):
