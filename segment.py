@@ -66,7 +66,7 @@ class Segment(object):
         return out
 
     def readcax(self, caxfile, read_content=None):
-
+        
         if not os.path.isfile(caxfile):
             print "Could not open file " + caxfile
             return
@@ -123,7 +123,7 @@ class Segment(object):
         #p.join()
         '''
         iTIT = self.__matchcontent(flines, '^TIT')
-        iFUE = self.__matchcontent(flines, '^\s*FUE\s+')
+        iFUE = self.__matchcontent(flines, '^\s*FUE')
         iPOW = self.__matchcontent(flines, 'POW\s+')
         iSIM = self.__matchcontent(flines, '^\s*SIM')
         iSPA = self.__matchcontent(flines, '^\s*SPA')
@@ -216,14 +216,20 @@ class Segment(object):
         FUE = np.zeros((Nfue, 5))
         FUE.fill(np.nan)
         for i, idx in enumerate(iFUE):
-            rvec = re.split('\*', flines[idx].strip())
-            rstr = rvec[0]
-            rvec = re.split('\s+', rstr.strip())
-            FUE[i, 0] = rvec[1]
-            FUE[i, 1:3] = re.split('/', rvec[2])
-            if np.size(rvec) > 3:
-                FUE[i, 3:5] = re.split('=', rvec[3])
-
+            rstr = flines[idx].replace(',',' ').strip()
+            rstr = rstr.replace('/',' ').strip()
+            rstr = rstr.replace('=',' ').strip()
+            #rvec = re.split('\*', flines[idx].strip())
+            rvec = re.split('\*', rstr, 1)  # split on first occurence
+            rstr = rvec[0].strip()
+            rvec = re.split('\s+', rstr)
+            #FUE[i, 0] = rvec[1]
+            #FUE[i, 1:3] = re.split('/', rvec[2])
+            FUE[i, :len(rvec[1:])] = rvec[1:]
+            #FUE[i, 1:3] = rvec[1:]
+            #if np.size(rvec) > 3:
+            #    FUE[i, 3:5] = re.split('=', rvec[3])
+        
         # Translate LFU map to ENR map
         ENR = np.zeros((npst, npst))
         for i in range(Nfue):
@@ -246,17 +252,24 @@ class Segment(object):
                 Nba += 1
 
         # Read PIN (pin radius)
-        # Npin = iPIN.size
-        Npin = len(iPIN)
-        ncol = 4
-        PIN = np.zeros((Npin, ncol))
-        PIN.fill(np.nan)
-        for i, idx in enumerate(iPIN):
-            rvec = re.split(',|/', flines[idx].strip())
-            rstr = rvec[0]
+        plist = []
+        for idx in iPIN:
+            rstr = flines[idx].replace(',',' ').strip()
+            #rvec = re.split(',|/', flines[idx].strip())
+            rvec = re.split('/|\*', rstr)
+            rstr = rvec[0].strip()
             rvec = re.split('\s+', rstr.strip())
+            #rvec = re.split('\s+|,', rstr.strip())
             rlen = np.size(rvec)
-            PIN[i, :rlen-1] = rvec[1:ncol+1]
+            #PIN[i, :rlen-1] = rvec[1:ncol+1]
+            plist.append(rvec[1:])
+        
+        Npin = len(plist)
+        ncols = max(map(len, plist))
+        PIN = np.zeros((Npin, ncols), dtype=float)
+        PIN.fill(np.nan)
+        for i, pl in enumerate(plist):
+            PIN[i, :len(pl)] = pl
 
         # self.pinlines = flines[iPIN[0]:iPIN[0]+Npin]
         do.pinlines = flines[iPIN[0]:iPIN[0]+Npin]
@@ -426,7 +439,7 @@ class Segment(object):
         for i in range(Npin):
             ipi = int(data.PIN[i, 0])
             RADI[data.LPI == ipi] = data.PIN[i, 1]
-
+        
         # Calculate mass
         VOLU = np.pi*RADI**2
         MASS = DENS*VOLU
@@ -436,7 +449,7 @@ class Segment(object):
         mass_u235 = np.sum(MASS_U235)
         self.states[-1].ave_enr = mass_u235/mass
         #self.data[-1].info.ave_enr = mass_u235/mass
-
+        #Tracer()()
     # -------Write cai file------------
     def writecai(self, file_base_name):
         #print "Writing to file " + caifile
