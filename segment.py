@@ -321,7 +321,7 @@ class Segment(object):
         # Rows containing XFL maps
         xfl1map = [flines[i+2:i+2+npst] for i in iXFL]
         xfl2map = [flines[i+3+npst:i+3+2*npst] for i in iXFL]
-
+        
         for i in range(Nburnpts):
             # Read burnup, voids, tfu and tmo
             burnup[i] = rvec[i][0]
@@ -337,9 +337,13 @@ class Segment(object):
             # Read radial power distribution map
             POW[:, :, i] = self.__symtrans(self.__map2mat(powmap[i], npst))
             # Read XFL maps
-            XFL1[:, :, i] = self.__symtrans(self.__map2mat(xfl1map[i], npst))
-            XFL2[:, :, i] = self.__symtrans(self.__map2mat(xfl2map[i], npst))
+            if iXFL:  # check if XFL exists
+                XFL1[:, :, i] = (self.__symtrans(
+                        self.__map2mat(xfl1map[i], npst)))
+                XFL2[:, :, i] = (self.__symtrans(
+                        self.__map2mat(xfl2map[i], npst)))
         print "Done."
+        
         # --------------------------------------------------------------------
         # Calculate radial burnup distributions
         EXP = self.__expcalc(POW, burnup)
@@ -370,14 +374,14 @@ class Segment(object):
             # self.data[-1].statepoints[i].fint = fint[i]
             do.statepoints[i].EXP = EXP[:, :, i]
             # self.data[-1].statepoints[i].EXP = EXP[:, :, i]
-            do.statepoints[i].XFL1 = XFL1[:, :, i]
-            # self.data[-1].statepoints[i].XFL1 = XFL1[:, :, i]
-            do.statepoints[i].XFL2 = XFL2[:, :, i]
-            # self.data[-1].statepoints[i].XFL2 = XFL2[:, :, i]
+            if iXFL:
+                do.statepoints[i].XFL1 = XFL1[:, :, i]
+                # self.data[-1].statepoints[i].XFL1 = XFL1[:, :, i]
+                do.statepoints[i].XFL2 = XFL2[:, :, i]
+                # self.data[-1].statepoints[i].XFL2 = XFL2[:, :, i]
             do.statepoints[i].POW = POW[:, :, i]
             # self.data[-1].statepoints[i].POW = POW[:, :, i]
-            
-
+        
         # Saving geninfo
         do.caxfile = caxfile
         # self.data[-1].info.caxfile = caxfile
