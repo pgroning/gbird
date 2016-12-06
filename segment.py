@@ -94,22 +94,27 @@ class Segment(object):
         # self.__flines = flines
 
         # Find last index containing voids voi=vhi
-        if read_content != 'all':
-            oTIT = self.__matchcontent(flines, '^TIT', 'object')
-            while True:
-                try:
-                    i = oTIT.next()
-                except:  # Reaching end of flines
-                    break
+        voiset = set()  # store unique set of voids
+        #if read_content != 'all':
+        oTIT = self.__matchcontent(flines, '^TIT', 'object')
+        while True:
+            try:
+                i = oTIT.next()
+            except:  # Reaching end of flines
+                break
                 # split on spaces or '/'
-                rstr = re.split('[/\s+]+', flines[i+2].strip())
-                voi, vhi = rstr[1], rstr[2]
+            rstr = re.split('[/\s+]+', flines[i+2].strip())
+            voi, vhi = rstr[1], rstr[2]
+            if voi != vhi:
+                break
+            voiset.add(voi)
                 # print voi,vhi,i
-                if voi != vhi:
-                    break
+        voivec = list(voiset)
+        
+        if read_content != 'all':
             flines = flines[:i]  # Reduce the number of lines in list
             # self.__flines = flines
-
+        
         # Search for regexp matches
         print "Scanning file content..."
         '''
@@ -135,7 +140,7 @@ class Segment(object):
         iTTL = self.__matchcontent(flines, '^\s*TTL')
         iVOI = self.__matchcontent(flines, '^\s*VOI')
         iDEP = self.__matchcontent(flines, '^\s*DEP')
-
+        
         # Stop looping at first finding
         iEND = self.__matchcontent(flines, '^\s*END', 'next')
         iBWR = self.__matchcontent(flines, '^\s*BWR', 'next')
@@ -399,9 +404,9 @@ class Segment(object):
         # self.data[-1].info.LFU = LFU
         do.npst = npst
         # self.data[-1].info.npst = npst
-        do.voivec = (do.voi.split('*')[0].replace(',', ' ')
-                     .strip().split(' ')[1:])
-        
+        #do.voivec = (do.voi.split('*')[0].replace(',', ' ')
+        #             .strip().split(' ')[1:])
+        do.voivec = voivec
         # Append data object to last list element
         self.states[-1] = do
 
