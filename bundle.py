@@ -75,17 +75,26 @@ class Bundle(object):
 
         # Read fuel type
         fuetype = flines[0].strip()
+        if fuetype not in ('A10XM', 'A10B', 'AT11', 'OPT2', 'OPT3'):
+            print("Error: Unknown fuel type.")
+            return
         # Search for caxfiles
         reCAX = re.compile('.cax\s*$')
         caxfiles = []
         for i, x in enumerate(flines[1:]):
             if reCAX.search(x):
-                caxfiles.append(x)
+                if os.path.isfile(x):
+                    caxfiles.append(x)
+                else:
+                    print x + "\nError: File does not exists."
+                    return
             else:
                 break
-        i += 1
-        nodes = map(int, re.split('\s+', flines[i]))
-
+        
+        nodes = map(int, re.split('\s+', flines[i+1]))
+        if i != len(nodes):
+            print "Error: Invalid node list."
+            return
         self.data.fuetype = fuetype
         self.data.inpfile = inpfile
         self.data.caxfiles = caxfiles
