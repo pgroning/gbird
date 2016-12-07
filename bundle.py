@@ -125,20 +125,20 @@ class Bundle(object):
         #     case.data.topnode = self.data.nodes[i]
         #     self.cases.append(case)
 
-    def runc3(self, voi=None, maxdep=None, opt='refcalc'):
+    def runc3(self, voi=None, maxdep=None, opt=0):
 
         # ----Code block only for testing purpose-----
-        if opt != 'refcalc':
-            for i in range(len(self.cases)):
-                self.cases[i].add_calc()
-                self.cases[i].data[-1].data.LFU = \
-                self.cases[i].data[0].data.LFU
+        #if opt != 'refcalc':
+        #    for i in range(len(self.cases)):
+        #        LFU = self.cases[i].states[0].LFU
+        #        self.cases[i].add_calc(LFU)
+        #        #self.cases[i].data[-1].data.LFU = \
+        #        #self.cases[i].data[0].data.LFU
         # --------------------------------------------
-
         inlist = []  # Bundle input args
         for case in self.cases:
             inlist.append((case, voi, maxdep, opt))
-
+        
         # quickcalc_fun(inlist[1])
         n = len(self.cases)  # Number of threads
         p = Pool(n)  # Make the Pool of workers

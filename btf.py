@@ -63,16 +63,15 @@ class Btf(object):
         # determine which voids are present in data
         for i in range(nsegments):
             voivec = segments[i].states[-1].voivec
-            if str(voi) in voivec:
+            if int(voi) in voivec:
                 i1 = (segments[i].findpoint(stateindex=-1,
                                             burnup=burnup, vhi=voi, voi=voi))
                 POW[i, :, :] = segments[i].states[-1].statepoints[i1].POW
             else:
-                #Tracer()()
-                voi1 = max([x for x in map(float,voivec) if x < voi])
+                voi1 = max([x for x in voivec if x < voi])
                 i1 = (segments[i].findpoint(stateindex=-1,
                                             burnup=burnup, vhi=voi1, voi=voi1))
-                voi2 = min([x for x in map(float,voivec) if x > voi])
+                voi2 = min([x for x in voivec if x > voi])
                 i2 = (segments[i].findpoint(stateindex=-1,
                                             burnup=burnup, vhi=voi2, voi=voi2))
                 P1 = segments[i].states[-1].statepoints[i1].POW
@@ -80,7 +79,6 @@ class Btf(object):
                 POW[i, :, :] = self.bundle.interp2(P1, P2, voi1, voi2, voi)
 
         POW3 = self.bundle.pow3(POW)
-        
         return POW3
 
     def calc_btf(self):

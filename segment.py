@@ -94,7 +94,7 @@ class Segment(object):
         # self.__flines = flines
 
         # Find last index containing voids voi=vhi
-        voiset = set()  # store unique set of voids
+        voilist = []  # temporary list of voids
         #if read_content != 'all':
         oTIT = self.__matchcontent(flines, '^TIT', 'object')
         while True:
@@ -107,13 +107,15 @@ class Segment(object):
             voi, vhi = rstr[1], rstr[2]
             if voi != vhi:
                 break
-            voiset.add(voi)
-                # print voi,vhi,i
-        voivec = list(voiset)
+            voilist.append(voi)
+        # Reduce to a unique list and also keep the order
+        tmp = []
+        voilist = [x for x in voilist if x not in tmp and (tmp.append(x) 
+                                                           or True)]
+        voivec = map(int, map(float, voilist))
         
         if read_content != 'all':
             flines = flines[:i]  # Reduce the number of lines in list
-            # self.__flines = flines
         
         # Search for regexp matches
         print "Scanning file content..."
@@ -555,7 +557,7 @@ class Segment(object):
         if voi is None:
             voivec = self.states[0].voivec
         else:
-            voivec = [str(voi)]
+            voivec = [int(voi)]
         self.states[-1].voivec = voivec
             
     #def voivec(self):
@@ -580,15 +582,15 @@ class Segment(object):
         #          .strip().split(' ')[1:])
         
         if voi is not None:
-            if str(voi) in voivec:
-                bp_voivec = [str(voi)]
+            if int(voi) in voivec:
+                bp_voivec = [int(voi)]
             else:
                 bp_voivec = [voivec[0]]
         else:
             bp_voivec = voivec
 
         if voi is not None:
-            voivec = [str(voi)]
+            voivec = [int(voi)]
             
         burnlist = []
         for i, v in enumerate(bp_voivec):
@@ -606,10 +608,10 @@ class Segment(object):
 
         # info = self.db['origin']['info']
         # LFU = self.db['qcalc'][-1]['info'].get('LFU')
-
+        
         # f = c3inp.file
         f = open(c3inp, 'w')
-
+        
         tit_1 = "TIT "
         tit_2 = info.tfu.split('*')[0].replace(',', '=').strip() + " "
         tit_3 = info.tmo.split('*')[0].replace(',', '=').strip() + " "
@@ -617,14 +619,14 @@ class Segment(object):
         if voi is None:
             #voivec = info.voi.split('*')[0].replace(',', ' ')\
             #                                      .strip().split(' ')[1:]
-            tit = tit + "VOI=" + voivec[0] + " "
-            ide = ["'BD"+x+"'" for x in voivec]
+            tit = tit + "VOI=" + str(voivec[0]) + " "
+            ide = ["'BD" + str(x) + "'" for x in voivec]
             f.write(tit + "IDE=" + ide[0] + '\n')
         else:
             tit = tit + "VOI=" + str(voi) + " "
             f.write(tit + '\n')
         f.write(info.sim.strip() + '\n')
-
+        
         FUE = info.FUE
         Nfue = FUE.shape[0]
         baid_offset = 0  # The same BA id must not occur more than once
@@ -686,14 +688,14 @@ class Segment(object):
 
         f.write('NLI\n')
         f.write('STA\n')
-        #Tracer()()
+        
         if voi is None:
             N = len(ide)
             for i in xrange(1, N):
                 f.write(tit + "IDE=" + ide[i] + '\n')
                 res = "RES," + ide[i-1] + ",0"
                 f.write(res + '\n')
-                f.write("VOI " + voivec[i] + '\n')
+                f.write("VOI " + str(voivec[i]) + '\n')
                 
                 f.write("DEP" + '\n')
                 for x in burnlist[i]:
@@ -792,7 +794,7 @@ class Segment(object):
         # Read the whole file at once
         with open(caxfile) as f:
             flines = f.read().splitlines()  # exclude \n
-
+        
         # ------Search for regexp matches-------
         iTIT = self.__matchcontent(flines, '^TIT')
         iPOW = self.__matchcontent(flines, 'POW\s+')
@@ -800,7 +802,7 @@ class Segment(object):
         
         # Read fuel dimension
         npst = int(flines[iPOW[0]+1][4:6])
-
+        
         # ------Step through the state points----------
         Nburnpts = len(iTIT)
 
@@ -828,8 +830,8 @@ class Segment(object):
 
         # Rows containing radial power distribution map
         powmap = [flines[i+2:i+2+npst] for i in iPOW]
-
-        for i in range(Nburnpts):
+        
+        for i in xrange(Nburnpts):
             # Read burnup, voids, tfu and tmo
             burnup[i] = rvec[i][0]
             voi[i] = rvec[i][1]
@@ -856,7 +858,7 @@ class Segment(object):
         # pindex = -1 # Index of last instance
         # self.qcalc[pindex].model = "c3"
         # self.qcalc[pindex].statepts = []
-        for i in range(Nburnpts):
+        for i in xrange(Nburnpts):
             # append new instance to list
             statepoints.append(DataStruct())
             statepoints[i].burnup = burnup[i]
@@ -875,6 +877,7 @@ class Segment(object):
         else:
             # self.quickcalc_add(statepoints)
             self.states[-1].statepoints = statepoints
+        #Tracer()()
         
     def quickcalc_add(self, statepoints):
         """Adds the quickcalc differencies to the initial state"""
@@ -893,8 +896,11 @@ class Segment(object):
 
     def quickcalc(self, voi=None, maxdep=None, refcalc=False, grid=True,
                   model='c3', box_offset=0, neulib=False):
+        
         tic = time.time()
-        LFU = self.states[0].LFU
+        LFU = self.states[0].LFU  # LFU is set to original state only
+                                  # for testing purpose
+        
         self.add_calc(LFU, voi)  # Append element to hold a new calculation
         file_base_name = "./" + str(uuid.uuid4())
         self.writec3cai(file_base_name, voi, maxdep, box_offset)
