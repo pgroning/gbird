@@ -125,10 +125,10 @@ class Bundle(object):
         #     case.data.topnode = self.data.nodes[i]
         #     self.cases.append(case)
 
-    def runc3(self, voi=None, maxdep=None, opt=0):
+    def runc3(self, voi=None, maxdep=None, refcalc=False):
 
         # ----Code block only for testing purpose-----
-        #if opt != 'refcalc':
+        #if not refcalc:
         #    for i in range(len(self.cases)):
         #        LFU = self.cases[i].states[0].LFU
         #        self.cases[i].add_calc(LFU)

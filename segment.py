@@ -646,7 +646,7 @@ class Segment(object):
 
         pde = info.pde.split('\'')[0]
         f.write(pde.strip() + '\n')
-
+        Tracer()() # Double // in bwr card if AT11
         if box_offset:
             bwr = self.boxbow(box_offset)
             f.write(bwr + '\n')
@@ -799,7 +799,7 @@ class Segment(object):
         iTIT = self.__matchcontent(flines, '^TIT')
         iPOW = self.__matchcontent(flines, 'POW\s+')
         iPOL = self.__matchcontent(flines, '^POL')
-        
+        Tracer()()
         # Read fuel dimension
         npst = int(flines[iPOW[0]+1][4:6])
         
