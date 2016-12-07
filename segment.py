@@ -647,6 +647,7 @@ class Segment(object):
         pde = info.pde.split('\'')[0]
         f.write(pde.strip() + '\n')
         Tracer()() # Double // in bwr card if AT11
+        # info.bwr.replace('/','//')
         if box_offset:
             bwr = self.boxbow(box_offset)
             f.write(bwr + '\n')
