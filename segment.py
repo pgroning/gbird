@@ -640,20 +640,31 @@ class Segment(object):
 
         f.write('LFU\n')
         for i in xrange(info.npst):
-            for j in range(i+1):
+            for j in xrange(i+1):
                 f.write('%d ' % LFU[i, j])
             f.write('\n')
 
         pde = info.pde.split('\'')[0]
         f.write(pde.strip() + '\n')
-        Tracer()() # Double // in bwr card if AT11
-        # info.bwr.replace('/','//')
+
+        # box corner radius (extra thickness). True for AT11
+        #Tracer()()
+        #if '/' in info.bwr:
+        #    bwr = info.bwr.replace('/','//')  # a // is needed for C3
+        #Tracer()()
         if box_offset:
             bwr = self.boxbow(box_offset)
-            f.write(bwr + '\n')
+            #f.write(bwr + '\n')
         else:
-            f.write(info.bwr.strip() + '\n')
+            bwr = info.bwr.strip()
+            #f.write(info.bwr.strip() + '\n')
 
+        # box corner radius (extra thickness). True for AT11
+        if '/' in bwr:
+            bwr = bwr.replace('/','//')  # a // is needed for C3
+        
+        f.write(bwr + '\n')
+    
         Npin = np.size(info.pinlines)
         for i in xrange(Npin):
             # Remove coments etc
@@ -800,7 +811,7 @@ class Segment(object):
         iTIT = self.__matchcontent(flines, '^TIT')
         iPOW = self.__matchcontent(flines, 'POW\s+')
         iPOL = self.__matchcontent(flines, '^POL')
-        Tracer()()
+        
         # Read fuel dimension
         npst = int(flines[iPOW[0]+1][4:6])
         
