@@ -566,7 +566,7 @@ class Segment(object):
     #              .strip().split(' ')[1:])
     #    return voids
         
-    def writec3cai(self, file_base_name, voi=None, maxdep=None,
+    def writec3cai(self, file_base_name, voi=None, maxdep=None, deplim=None,
                    box_offset=0):
         # filebasename = "./" + str(uuid.uuid4())
         c3inp = file_base_name + ".inp"
@@ -585,7 +585,7 @@ class Segment(object):
             if int(voi) in voivec:
                 bp_voivec = [int(voi)]
             else:
-                bp_voivec = [voivec[0]]
+                bp_voivec = [voivec[0]] #  get burn points from first void
         else:
             bp_voivec = voivec
 
@@ -594,10 +594,22 @@ class Segment(object):
             
         burnlist = []
         for i, v in enumerate(bp_voivec):
-            bl = self.burnpoints(voi=int(v))
+            all_points = self.burnpoints(voi=int(v))
             if maxdep:
-                bl = [x for x in bl if x <= maxdep]
-            burnlist.append(bl)
+                red_points = [x for x in all_points if x <= maxdep]
+                burnlist.append(red_points)
+            elif deplim:
+                lo_points = [x for x in all_points if x <= deplim]
+                # reduce number of points by taking every 5:th step in list
+                up_points = [x for x in all_points if x > deplim][5::5]
+                # concatenate lists
+                red_points = sum([lo_points, up_points], [])
+                # make sure last point is included
+                if red_points[-1] < all_points[-1]:
+                    red_points.append(all_points[-1])
+                burnlist.append(red_points)
+            else:
+                burnlist.append(all_points)
         
         # info = self.data[0]['info']  # Get info data from original import
         if hasattr(self.states[-1], 'LFU'):
