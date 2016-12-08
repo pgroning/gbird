@@ -613,8 +613,10 @@ class Segment(object):
         f = open(c3inp, 'w')
         
         tit_1 = "TIT "
-        tit_2 = info.tfu.split('*')[0].replace(',', '=').strip() + " "
-        tit_3 = info.tmo.split('*')[0].replace(',', '=').strip() + " "
+        #tit_2 = info.tfu.split('*')[0].replace(',', '=').strip() + " "
+        tit_2 = re.sub('\s+=|=\s+|,','=',info.tfu.split('*')[0].strip()) + " "
+        #tit_3 = info.tmo.split('*')[0].replace(',', '=').strip() + " "
+        tit_3 = re.sub('\s+|,','=',info.tmo.split('*')[0].strip()) + " "
         tit = tit_1 + tit_2 + tit_3
         if voi is None:
             #voivec = info.voi.split('*')[0].replace(',', ' ')\
@@ -659,7 +661,7 @@ class Segment(object):
             bwr = info.bwr.strip()
             #f.write(info.bwr.strip() + '\n')
 
-        # box corner radius (extra thickness). True for AT11
+        # box corner radius (extra thickness). Valid for AT11
         if '/' in bwr:
             bwr = bwr.replace('/','//')  # a // is needed for C3
         
@@ -704,7 +706,8 @@ class Segment(object):
         if voi is None:
             N = len(ide)
             for i in xrange(1, N):
-                f.write(tit + "IDE=" + ide[i] + '\n')
+                f.write("TIT " + "IDE=" + ide[i] + '\n')
+                # f.write(tit + "IDE=" + ide[i] + '\n')
                 res = "RES," + ide[i-1] + ",0"
                 f.write(res + '\n')
                 f.write("VOI " + str(voivec[i]) + '\n')
