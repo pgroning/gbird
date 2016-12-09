@@ -19,9 +19,9 @@ import linecache
 import os
 import sys
 import time
-import subprocess
 from subprocess import call, STDOUT
 import uuid  # used for random generated file names
+import shlex  # used for splitting subprocess call argument string into a list
 '''
 #from multiprocessing import Pool
 #from btf import btf
@@ -544,22 +544,18 @@ class Segment(object):
             neulib = "e4lbl70";
         
         cmd = '-V ' + c4ver + ' -N ' + libdir + neulib + ' ' + c4inp
-
-        fout = open('c4.stdout', 'wb')
+        arglist = shlex.split('linrsh ' + c4exe + cmd)
+        #fout = open('c4.stdout', 'wb')
+        fout = open('/dev/null', 'wb')
         print "Running c4 model"
         if grid:
             try:  # use linrsh if available
-                #call(['linrsh', c4exe, cmd, ' &>/dev/null'])
-                args = ['linrsh', c4exe, cmd]
-                call(args, stdout=fout, stderr=STDOUT)
+                call(arglist, stdout=fout, stderr=STDOUT, shell=False)
             except:
                 print "Warning: Grid is not available on the system."
-                args = c4exe + cmd
-                call(args, stdout=fout, stderr=STDOUT, shell=True)
+                call(arglist[1:], stdout=fout, stderr=STDOUT, shell=False)
         else:
-            args = c4exe + cmd
-            call(args, stdout=fout, stderr=STDOUT, shell=True)
-
+            call(arglist[1:], stdout=fout, stderr=STDOUT, shell=False)
 
     def add_calc(self, LFU, voi=None):
         """Append a list element to store result of new calculation"""
@@ -785,7 +781,7 @@ class Segment(object):
         # c3cfg = tempfile.NamedTemporaryFile(
         # dir='.',prefix="c3_",suffix=".cfg",delete=False)
         c3cfg = filebasename + ".cfg"
-        print c3cfg
+        # print c3cfg
         # c3cfg = "./c3.txt"
         f = open(c3cfg, "w")
         f.write(c3inp + "\n")
@@ -807,12 +803,12 @@ class Segment(object):
         args = ['linrsh', c3exe, c3cfg]
         if grid:
             try:  # use linrsh if available
-                call(args)
+                call(args, shell=False)
             except:
                 print "Warning: Grid is not available on the system."
-                call(args[1:])
+                call(args[1:], shell=False)
         else:
-            call(args[1:])
+            call(args[1:], shell=False)
 
         # Remove files
         # c3cfg.unlink(c3cfg.name)
