@@ -566,7 +566,7 @@ class Segment(object):
     #              .strip().split(' ')[1:])
     #    return voids
         
-    def writec3cai(self, file_base_name, voi=None, maxdep=None, deplim=None,
+    def writec3cai(self, file_base_name, voi=None, maxdep=None, depthres=None,
                    box_offset=0):
         # filebasename = "./" + str(uuid.uuid4())
         c3inp = file_base_name + ".inp"
@@ -598,10 +598,10 @@ class Segment(object):
             if maxdep:
                 red_points = [x for x in all_points if x <= maxdep]
                 burnlist.append(red_points)
-            elif deplim:
-                lo_points = [x for x in all_points if x <= deplim]
+            elif depthres:
+                lo_points = [x for x in all_points if x <= depthres]
                 # reduce number of points by taking every 5:th step in list
-                up_points = [x for x in all_points if x > deplim][5::5]
+                up_points = [x for x in all_points if x > depthres][5::5]
                 # concatenate lists
                 red_points = sum([lo_points, up_points], [])
                 # make sure last point is included
@@ -921,8 +921,8 @@ class Segment(object):
         # EXP = self.__expcalc(POW, burnup)
         # Tracer()()
 
-    def quickcalc(self, voi=None, maxdep=None, refcalc=False, grid=True,
-                  model='c3', box_offset=0, neulib=False):
+    def quickcalc(self, voi=None, maxdep=None, depthres=None, refcalc=False,
+                  grid=True, model='c3', box_offset=0, neulib=False):
         
         tic = time.time()
         LFU = self.states[0].LFU  # LFU is set to original state only
@@ -930,7 +930,7 @@ class Segment(object):
         
         self.add_calc(LFU, voi)  # Append element to hold a new calculation
         file_base_name = "./" + str(uuid.uuid4())
-        self.writec3cai(file_base_name, voi, maxdep, box_offset)
+        self.writec3cai(file_base_name, voi, maxdep, depthres, box_offset)
         if model == 'c3':
             self.runc3(file_base_name, grid)
         elif model == 'c4':
