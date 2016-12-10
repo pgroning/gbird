@@ -125,7 +125,8 @@ class Bundle(object):
         #     case.data.topnode = self.data.nodes[i]
         #     self.cases.append(case)
 
-    def runc3(self, voi=None, maxdep=None, refcalc=False):
+    def new_calc(self, voi=None, maxdep=None, depthres=None, refcalc=False,
+              grid=True, model='c3', box_offset=0, neulib=False):
 
         # ----Code block only for testing purpose-----
         #if not refcalc:
@@ -137,7 +138,8 @@ class Bundle(object):
         # --------------------------------------------
         inlist = []  # Bundle input args
         for case in self.cases:
-            inlist.append((case, voi, maxdep, opt))
+            inlist.append((case, voi, maxdep, depthres, refcalc, grid,
+                           model, box_offset, neulib))
         
         # quickcalc_fun(inlist[1])
         n = len(self.cases)  # Number of threads
