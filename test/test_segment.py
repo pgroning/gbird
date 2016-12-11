@@ -13,9 +13,11 @@ class UnitTest(unittest.TestCase):
         unittest.TestCase.setUp(self)
 
         #self.testfile = "topol/OPT2/10g40bot/e29OPT2-382-10g40bot-cas.cax"
-        self.testfile = "topol/ATXM/08g40dom/e35ATXM-396-08g40dom-cas.cax"
+        #self.testfile = "topol/ATXM/08g40dom/e35ATXM-396-08g40dom-cas.cax"
         #self.testfile = "test/topol/OPT2_2/12g30bot/e32OPT2-382-12g30bot-cas.cax"
-     
+        self.testfile = "topol/ATXM/10g40dom/e28ATXM-385-10g40dom-cas.cax"
+
+        
         #self.testfile = "../best/cax/ATXM/10g35dom/e28ATXM-385-10g35dom-cas.cax"
         #self.testfile = "../best/cax/A10XM/10g35dom/e28ATXM-385-10g35dom-cas.cax"
         self.seg = Segment(self.testfile)
