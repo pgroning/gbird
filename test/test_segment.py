@@ -3,6 +3,8 @@ import unittest
 
 import sys
 import os
+import mock
+from mock import patch
 
 sys.path.append('../')
 from segment import Segment
@@ -12,17 +14,9 @@ class UnitTest(unittest.TestCase):
     def setUp(self):
         unittest.TestCase.setUp(self)
 
-        #self.testfile = "topol/OPT2/10g40bot/e29OPT2-382-10g40bot-cas.cax"
-        #self.testfile = "topol/ATXM/08g40dom/e35ATXM-396-08g40dom-cas.cax"
-        #self.testfile = "test/topol/OPT2_2/12g30bot/e32OPT2-382-12g30bot-cas.cax"
-        self.testfile = "topol/ATXM/10g40dom/e28ATXM-385-10g40dom-cas.cax"
-
-        
-        #self.testfile = "../best/cax/ATXM/10g35dom/e28ATXM-385-10g35dom-cas.cax"
-        #self.testfile = "../best/cax/A10XM/10g35dom/e28ATXM-385-10g35dom-cas.cax"
-        self.seg = Segment(self.testfile)
+        #self.seg = Segment(self.testfile)
         #self.cas.readcax(self.testfile,0)
-        self.file_base_name = "test_file_base_name"
+        #self.file_base_name = "test_file_base_name"
 
     def tearDown(self):
         unittest.TestCase.tearDown(self)
@@ -34,27 +28,50 @@ class UnitTest(unittest.TestCase):
         except: pass
 
 
-    def test_readcax(self):
-        f = self.seg.states[0].caxfile
-        self.assertEqual(f,self.testfile)
-        Nstatepoints = len(self.seg.states[0].statepoints)
-        self.assertTrue(Nstatepoints >= 10, "Number of statepoinst is less than 10")
-        
-    '''
+    def test_readcax_topol_atxm(self):
+        testfile = "topol/ATXM/10g40dom/e28ATXM-385-10g40dom-cas.cax"
+        segObj = Segment(testfile)
+        #f = segObj.states[0].caxfile
+        #self.assertEqual(f,self.testfile)
+        Nstatepoints = len(segObj.states[0].statepoints)
+        self.assertTrue(Nstatepoints >= 100, "Number of statepoinst is less than 100")
+
     @unittest.skip("Skip test_read_all")
-    def test_read_all(self):
-        self.seg.readcax(self.testfile,'all')
-        f = self.seg.data[0]['info'].get('caxfile')
-        self.assertEqual(f,self.testfile)
-        Nstatepoints = len(self.seg.data[0].get('statepoints'))
-        self.assertTrue(Nstatepoints > 0)
-    '''
-    
+    def test_readcax_topol_atxm_all(self):
+        testfile = "topol/ATXM/10g40dom/e28ATXM-385-10g40dom-cas.cax"
+        s = Segment(testfile, 'all')
+        Nstatepoints = len(s.states[0].statepoints)
+        self.assertTrue(Nstatepoints >= 500, "Number of statepoinst is less than 500")
+
+    def test_readcax_tosim_at11(self):
+        testfile = "tosim/AT11/14g35top/exxAT11-384-14g35top-cas.cax"
+        s = Segment(testfile)
+        Nstatepoints = len(s.states[0].statepoints)
+        self.assertTrue(Nstatepoints >= 100, "Number of statepoinst is less than 100")
+        
+    def test_get_voivec(self):
+        testfile = "tosim/OPT2/12g30mid/e32OPT2-390-12g30mid-cas.cax"
+        s = Segment(testfile)
+        self.assertTrue(s.states[0].voivec, [0, 40, 80])
+
     def test_ave_enr(self):
-        self.seg.ave_enr()
-        ave_enr = self.seg.states[0].ave_enr
-        self.assertTrue(ave_enr > 0)
-    
+        testfile = "topol/AT-B/08g30van/e27AT-B-386-08g30van-cas.cax"
+        s = Segment(testfile)
+        ave_enr = s.states[0].ave_enr
+        self.assertTrue(ave_enr > 3.854 and ave_enr < 3.865)
+        
+    def test_boxbow(self):
+        s = Segment()
+        s.states[0].bwr = "BWR 11 1.300 13.580 0.14 0.762 0.753 1.27   * xyz"
+        box_offset = 0.1
+        bwr = s.boxbow(box_offset)
+        res = "11 1.300 13.580 0.14 0.862 0.653 1.27"
+        self.assertTrue(res in bwr)
+        
+
+
+        
+        '''
     def test_writec3cai(self):
         self.seg.writec3cai(self.file_base_name)
         caifile = self.file_base_name + ".inp"
@@ -86,7 +103,7 @@ class UnitTest(unittest.TestCase):
         self.seg.readc3cax(self.file_base_name)
         Nstatepoints = len(self.seg.states[1].statepoints)
         self.assertTrue(Nstatepoints >= 10, "Number of statepoints is less than 10")
-    
+   '''
 
 if __name__ == '__main__':
     unittest.main()

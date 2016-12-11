@@ -288,7 +288,7 @@ class Segment(object):
             do.slaline = flines[iSLA]
             #self.data[-1].info.slaline = flines[iSLA]
         # ------Step through the state points----------
-        print "Stepping through state points..."
+        print "Scanning state points..."
 
         # Tracer()()
         # Nburnpts = iTIT.size
