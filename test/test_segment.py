@@ -17,7 +17,7 @@ import numpy as np
 import mock
 from mock import patch
 
-#sys.path.append('../')
+sys.path.append('./')
 from segment import Segment
 
 class UnitTest(unittest.TestCase):

@@ -128,7 +128,7 @@ class Bundle(object):
     def new_calc(self, voi=None, maxdep=None, depthres=None, refcalc=False,
               grid=True, model='c3', box_offset=0, neulib=False):
 
-        #self.states.append(DataStruct)
+        self.states.append(DataStruct)
         # ----Code block only for testing purpose-----
         #if not refcalc:
         #    for i in range(len(self.cases)):
@@ -185,11 +185,13 @@ class Bundle(object):
         This algorithm is likely naive and needs to be updated in the future"""
 
         nodelist = self.data.nodes
-        nodelist.insert(0, 0)  # prepend 0
-        nodes = np.array(nodelist)
+        #nodelist.insert(0, 0)  # prepend 0
+        #nodes = np.array(nodelist)
+        nodes = np.array([0]+nodelist)  # prepend 0
         dn = np.diff(nodes)
-
+        #Tracer()()
         enrlist = [case.states[-1].ave_enr for case in self.cases]
+        #Tracer()()
         seg_enr = np.array(enrlist)
 
         ave_enr = sum(seg_enr*dn) / sum(dn)

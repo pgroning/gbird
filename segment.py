@@ -436,27 +436,36 @@ class Segment(object):
     # --------Calculate average enrichment----------
     def ave_enr(self):
         
-        # Translate LFU map to density map
-        data = self.states[-1]
-        npst = data.npst
+        # Translate LFU map to DENS and ENR map
+        #data = self.states[-1]
+        # npst = data.npst
+        npst = self.states[0].npst
         DENS = np.zeros((npst, npst))
-        Nfue = data.FUE[:, 0].size
+        ENR = np.zeros((npst, npst))
+        Nfue = self.states[-1].FUE[:, 0].size
+        LFU = self.states[-1].LFU
+        FUE = self.states[-1].FUE
         for i in range(Nfue):
-            ifu = int(data.FUE[i, 0])
-            DENS[data.LFU == ifu] = data.FUE[i, 1]
+            ifu = int(FUE[i, 0])
+            DENS[LFU == ifu] = FUE[i, 1]
+            ENR[LFU == ifu] = FUE[i, 2]
 
         # Translate LPI map to pin radius map
         RADI = np.zeros((npst, npst))
-        Npin = data.PIN[:, 0].size
+        # Npin = data.PIN[:, 0].size
+        Npin = self.states[0].PIN[:, 0].size
+        LPI = self.states[0].LPI
+        PIN = self.states[0].PIN
         for i in range(Npin):
-            ipi = int(data.PIN[i, 0])
-            RADI[data.LPI == ipi] = data.PIN[i, 1]
+            ipi = int(PIN[i, 0])
+            RADI[LPI == ipi] = PIN[i, 1]
         
         # Calculate mass
         VOLU = np.pi*RADI**2
         MASS = DENS*VOLU
         mass = np.sum(MASS)
-        ENR = data.ENR
+        #Tracer()()
+        #ENR = data.ENR
         MASS_U235 = MASS*ENR
         mass_u235 = np.sum(MASS_U235)
         self.states[-1].ave_enr = mass_u235/mass
@@ -557,10 +566,11 @@ class Segment(object):
         else:
             call(arglist[1:], stdout=fout, stderr=STDOUT, shell=False)
 
-    def add_state(self, LFU, voi=None):
+    def add_state(self, LFU, FUE, voi=None):
         """Append a list element to store result of new calculation"""
         self.states.append(DataStruct())  # Add an element to list
         self.states[-1].LFU = LFU
+        self.states[-1].FUE = FUE
         if voi is None:
             voivec = self.states[0].voivec
         else:
@@ -838,6 +848,7 @@ class Segment(object):
         
         # Read fuel dimension
         npst = int(flines[iPOW[0]+1][4:6])
+
         
         # ------Step through the state points----------
         Nburnpts = len(iTIT)
@@ -935,9 +946,10 @@ class Segment(object):
         
         tic = time.time()
         LFU = self.states[0].LFU  # LFU is set to original state only
-                                  # for testing purpose
-        
-        self.add_state(LFU, voi)  # Append element to hold a new calculation
+        FUE = self.states[0].FUE  # for testing purpose
+
+        # Append element to hold a new calculation
+        self.add_state(LFU, FUE, voi)
         file_base_name = "./tmp." + str(uuid.uuid4()).split('-')[0]
         # file_base_name = "./" + str(uuid.uuid4())
         self.writec3cai(file_base_name, voi, maxdep, depthres, box_offset)
@@ -949,7 +961,7 @@ class Segment(object):
             print "Quickcalc model is unknown"
             return
         self.readc3cax(file_base_name, refcalc)
-        #self.ave_enr()
+        self.ave_enr()
 
         os.remove(file_base_name + ".inp")
         os.remove(file_base_name + ".out")

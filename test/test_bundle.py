@@ -8,7 +8,7 @@ else:
     import unittest
 import os
 
-#sys.path.append('../')
+sys.path.append('./')
 from bundle import Bundle
 
 class UnitTest(unittest.TestCase):
@@ -44,7 +44,7 @@ class UnitTest(unittest.TestCase):
         b.ave_enr()
         self.assertTrue(b.states[0].ave_enr > 0, 
                         "bundle enrichment is invalid")
-
+    #@unittest.skip("skip this test")
     def test_new_calc(self):
         testfile = "test/tosim/bundle_at11.inp"
         b = Bundle(testfile)
@@ -52,14 +52,15 @@ class UnitTest(unittest.TestCase):
         b.new_calc(grid=True)
         self.assertTrue(len(b.cases[0].states[1].statepoints) > 10, 
                         "new calculation failed")
-    
+    #@unittest.skip("skip this test")
     def test_new_ave_enr_calc(self):
         testfile = "test/tosim/bundle_at11.inp"
         b = Bundle(testfile)
         b.readcax()
         b.new_calc(grid=True)
-        #b.ave_enr()
-
+        b.ave_enr()
+        self.assertTrue(b.states[1].ave_enr > 0, 
+                        "bundle enrichment is invalid")
 
 if __name__ == '__main__':
     unittest.main()
