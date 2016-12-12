@@ -56,7 +56,7 @@ class Segment(object):
         
 
     # -------Read cax file---------
-    def __matchcontent(self, flines, regexp, opt='all'):
+    def matchcontent(self, flines, regexp, opt='all'):
         rec = re.compile(regexp)
         if opt == 'all':
             out = [i for i, x in enumerate(flines) if rec.match(x)]
@@ -97,7 +97,7 @@ class Segment(object):
         # Find last index containing voids voi=vhi
         voilist = []  # temporary list of voids
         #if read_content != 'all':
-        oTIT = self.__matchcontent(flines, '^TIT', 'object')
+        oTIT = self.matchcontent(flines, '^TIT', 'object')
         while True:
             try:
                 i = oTIT.next()
@@ -130,35 +130,35 @@ class Segment(object):
         #p.close()
         #p.join()
         '''
-        iTIT = self.__matchcontent(flines, '^TIT')
-        iFUE = self.__matchcontent(flines, '^\s*FUE')
-        iPOW = self.__matchcontent(flines, 'POW\s+')
-        iSIM = self.__matchcontent(flines, '^\s*SIM')
-        iSPA = self.__matchcontent(flines, '^\s*SPA')
-        iGAM = self.__matchcontent(flines, '^\s*GAM')
-        iCRD = self.__matchcontent(flines, '^\s*CRD')
-        iPOL = self.__matchcontent(flines, '^POL')
-        iXFL = self.__matchcontent(flines, '^XFL')
-        iPIN = self.__matchcontent(flines, '^\s*PIN')
-        iTTL = self.__matchcontent(flines, '^\s*TTL')
-        iVOI = self.__matchcontent(flines, '^\s*VOI')
-        iDEP = self.__matchcontent(flines, '^\s*DEP')
+        iTIT = self.matchcontent(flines, '^TIT')
+        iFUE = self.matchcontent(flines, '^\s*FUE')
+        iPOW = self.matchcontent(flines, 'POW\s+')
+        iSIM = self.matchcontent(flines, '^\s*SIM')
+        iSPA = self.matchcontent(flines, '^\s*SPA')
+        iGAM = self.matchcontent(flines, '^\s*GAM')
+        iCRD = self.matchcontent(flines, '^\s*CRD')
+        iPOL = self.matchcontent(flines, '^POL')
+        iXFL = self.matchcontent(flines, '^XFL')
+        iPIN = self.matchcontent(flines, '^\s*PIN')
+        iTTL = self.matchcontent(flines, '^\s*TTL')
+        iVOI = self.matchcontent(flines, '^\s*VOI')
+        iDEP = self.matchcontent(flines, '^\s*DEP')
         
         # Stop looping at first finding
-        iEND = self.__matchcontent(flines, '^\s*END', 'next')
-        iBWR = self.__matchcontent(flines, '^\s*BWR', 'next')
-        iLFU = self.__matchcontent(flines, '^\s*LFU', 'next')
-        iLPI = self.__matchcontent(flines, '^\s*LPI', 'next')
-        iTFU = self.__matchcontent(flines, '^\s*TFU', 'next')
-        iTMO = self.__matchcontent(flines, '^\s*TMO', 'next')
-        iPDE = self.__matchcontent(flines, '^\s*PDE', 'next')
+        iEND = self.matchcontent(flines, '^\s*END', 'next')
+        iBWR = self.matchcontent(flines, '^\s*BWR', 'next')
+        iLFU = self.matchcontent(flines, '^\s*LFU', 'next')
+        iLPI = self.matchcontent(flines, '^\s*LPI', 'next')
+        iTFU = self.matchcontent(flines, '^\s*TFU', 'next')
+        iTMO = self.matchcontent(flines, '^\s*TMO', 'next')
+        iPDE = self.matchcontent(flines, '^\s*PDE', 'next')
         try:  # Card for water cross (valid for OPT2/3)
-            iSLA = self.__matchcontent(flines, '^\s*SLA', 'next')
+            iSLA = self.matchcontent(flines, '^\s*SLA', 'next')
         except:
             iSLA = None
             print "Info: Could not find SLA card"
-        iWRI = self.__matchcontent(flines, '^\s*WRI', 'next')
-        iSTA = self.__matchcontent(flines, '^\s*STA', 'next')
+        iWRI = self.matchcontent(flines, '^\s*WRI', 'next')
+        iSTA = self.matchcontent(flines, '^\s*STA', 'next')
         print "Done."
         
         do = DataStruct(); # Init data container object
@@ -557,7 +557,7 @@ class Segment(object):
         else:
             call(arglist[1:], stdout=fout, stderr=STDOUT, shell=False)
 
-    def add_calc(self, LFU, voi=None):
+    def add_state(self, LFU, voi=None):
         """Append a list element to store result of new calculation"""
         self.states.append(DataStruct())  # Add an element to list
         self.states[-1].LFU = LFU
@@ -832,9 +832,9 @@ class Segment(object):
             flines = f.read().splitlines()  # exclude \n
         
         # ------Search for regexp matches-------
-        iTIT = self.__matchcontent(flines, '^TIT')
-        iPOW = self.__matchcontent(flines, 'POW\s+')
-        iPOL = self.__matchcontent(flines, '^POL')
+        iTIT = self.matchcontent(flines, '^TIT')
+        iPOW = self.matchcontent(flines, 'POW\s+')
+        iPOL = self.matchcontent(flines, '^POL')
         
         # Read fuel dimension
         npst = int(flines[iPOW[0]+1][4:6])
@@ -937,7 +937,7 @@ class Segment(object):
         LFU = self.states[0].LFU  # LFU is set to original state only
                                   # for testing purpose
         
-        self.add_calc(LFU, voi)  # Append element to hold a new calculation
+        self.add_state(LFU, voi)  # Append element to hold a new calculation
         file_base_name = "./" + str(uuid.uuid4())
         self.writec3cai(file_base_name, voi, maxdep, depthres, box_offset)
         if model == 'c3':
