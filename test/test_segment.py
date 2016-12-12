@@ -1,3 +1,4 @@
+# python test/test_segment.py
 #
 # Output status:
 # OK (skipped=1)
@@ -16,7 +17,7 @@ import numpy as np
 import mock
 from mock import patch
 
-sys.path.append('../')
+#sys.path.append('../')
 from segment import Segment
 
 class UnitTest(unittest.TestCase):
@@ -38,7 +39,7 @@ class UnitTest(unittest.TestCase):
         except: pass
 
     def test_readcax_topol_atxm(self):
-        testfile = "topol/ATXM/10g40dom/e28ATXM-385-10g40dom-cas.cax"
+        testfile = "test/topol/ATXM/10g40dom/e28ATXM-385-10g40dom-cas.cax"
         segObj = Segment(testfile)
         #f = segObj.states[0].caxfile
         #self.assertEqual(f,self.testfile)
@@ -48,26 +49,26 @@ class UnitTest(unittest.TestCase):
 
     @unittest.skip("test_readcax_topol_atxm_all")
     def test_readcax_topol_atxm_all(self):
-        testfile = "topol/ATXM/10g40dom/e28ATXM-385-10g40dom-cas.cax"
+        testfile = "test/topol/ATXM/10g40dom/e28ATXM-385-10g40dom-cas.cax"
         s = Segment(testfile, 'all')
         Nstatepoints = len(s.states[0].statepoints)
         self.assertTrue(Nstatepoints > 499, 
                         "Number of statepoinst is less than 500")
 
     def test_readcax_tosim_at11(self):
-        testfile = "tosim/AT11/14g35top/exxAT11-384-14g35top-cas.cax"
+        testfile = "test/tosim/AT11/14g35top/exxAT11-384-14g35top-cas.cax"
         s = Segment(testfile)
         Nstatepoints = len(s.states[0].statepoints)
         self.assertTrue(Nstatepoints > 99, 
                         "Number of statepoinst is less than 100")
         
     def test_get_voivec(self):
-        testfile = "tosim/OPT2/12g30mid/e32OPT2-390-12g30mid-cas.cax"
+        testfile = "test/tosim/OPT2/12g30mid/e32OPT2-390-12g30mid-cas.cax"
         s = Segment(testfile)
-        self.assertTrue(s.states[0].voivec, [0, 40, 80])
-
+        self.assertEqual(s.states[0].voivec, [0, 40, 80])
+        
     def test_ave_enr(self):
-        testfile = "topol/AT-B/08g30van/e27AT-B-386-08g30van-cas.cax"
+        testfile = "test/topol/AT-B/08g30van/e27AT-B-386-08g30van-cas.cax"
         s = Segment(testfile)
         ave_enr = s.states[0].ave_enr
         self.assertTrue(ave_enr > 3.854 and ave_enr < 3.865)
@@ -88,7 +89,7 @@ class UnitTest(unittest.TestCase):
         self.assertTrue((s.states[1].LFU == LFU).all())
     
     def test_writec3cai_at11(self):
-        testfile = "tosim/AT11/14g35top/exxAT11-384-14g35top-cas.cax"
+        testfile = "test/tosim/AT11/14g35top/exxAT11-384-14g35top-cas.cax"
         s = Segment(testfile)
         s.writec3cai(self.file_base_name)
         caifile = self.file_base_name + ".inp"
@@ -101,7 +102,7 @@ class UnitTest(unittest.TestCase):
                         "double // is missing in BWR card for AT11 fuel")
 
     def test_runc3(self):
-        testfile = "tosim/AT11/14g35top/exxAT11-384-14g35top-cas.cax"
+        testfile = "test/tosim/AT11/14g35top/exxAT11-384-14g35top-cas.cax"
         s = Segment(testfile)
         s.writec3cai(self.file_base_name)
         s.runc3(self.file_base_name, grid=True)
@@ -112,8 +113,9 @@ class UnitTest(unittest.TestCase):
         self.assertTrue(len(flines) > 99,
                         "file content is less than 100 lines")
 
+    @unittest.skip('skip test_runc4')
     def test_runc4(self):
-        testfile = "topol/ATXM/10g40dom/e28ATXM-385-10g40dom-cas.cax"
+        testfile = "test/topol/ATXM/10g40dom/e28ATXM-385-10g40dom-cas.cax"
         s = Segment(testfile)
         s.writec3cai(self.file_base_name, voi=60, depthres=20, box_offset=-0.1)
         s.runc4(self.file_base_name, grid=True)
@@ -124,7 +126,7 @@ class UnitTest(unittest.TestCase):
                         "file content is less than 100 lines")
     
     def test_readc3cax(self):
-        testfile = "tosim/OPT3/11g50bot/e33OPT3-383-11g50bot-cas.cax"
+        testfile = "test/tosim/OPT3/11g50bot/e33OPT3-383-11g50bot-cas.cax"
         s = Segment(testfile)
         s.writec3cai(self.file_base_name, voi=50, maxdep=20, box_offset=0.1)
         s.runc3(self.file_base_name, grid=False)
@@ -134,7 +136,7 @@ class UnitTest(unittest.TestCase):
                         "Number of statepoints is less than 20")
     
     def test_quickcalc(self):
-        testfile = "tosim/OPT3/11g50bot/e33OPT3-383-11g50bot-cas.cax"
+        testfile = "test/tosim/OPT3/11g50bot/e33OPT3-383-11g50bot-cas.cax"
         s = Segment(testfile)
         s.quickcalc()
         Nstatepoints = len(s.states[1].statepoints)

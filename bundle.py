@@ -86,7 +86,7 @@ class Bundle(object):
                 if os.path.isfile(x):
                     caxfiles.append(x)
                 else:
-                    print x + "\nError: File does not exists."
+                    print x + "\nError: File does not exist."
                     return
             else:
                 break
