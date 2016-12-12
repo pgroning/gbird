@@ -441,14 +441,14 @@ class Segment(object):
         # npst = data.npst
         npst = self.states[0].npst
         DENS = np.zeros((npst, npst))
-        ENR = np.zeros((npst, npst))
+        #ENR = np.zeros((npst, npst))
         Nfue = self.states[-1].FUE[:, 0].size
         LFU = self.states[-1].LFU
         FUE = self.states[-1].FUE
         for i in range(Nfue):
             ifu = int(FUE[i, 0])
             DENS[LFU == ifu] = FUE[i, 1]
-            ENR[LFU == ifu] = FUE[i, 2]
+            #ENR[LFU == ifu] = FUE[i, 2]
 
         # Translate LPI map to pin radius map
         RADI = np.zeros((npst, npst))
@@ -465,7 +465,7 @@ class Segment(object):
         MASS = DENS*VOLU
         mass = np.sum(MASS)
         #Tracer()()
-        #ENR = data.ENR
+        ENR = self.states[-1].ENR
         MASS_U235 = MASS*ENR
         mass_u235 = np.sum(MASS_U235)
         self.states[-1].ave_enr = mass_u235/mass
@@ -571,6 +571,15 @@ class Segment(object):
         self.states.append(DataStruct())  # Add an element to list
         self.states[-1].LFU = LFU
         self.states[-1].FUE = FUE
+        
+        npst = self.states[0].npst
+        ENR = np.zeros((npst, npst))
+        Nfue = FUE[:, 0].size
+        for i in range(Nfue):
+            ifu = int(FUE[i, 0])
+            ENR[LFU == ifu] = FUE[i, 2]
+        self.states[-1].ENR = ENR
+        
         if voi is None:
             voivec = self.states[0].voivec
         else:

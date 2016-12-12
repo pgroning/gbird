@@ -82,10 +82,12 @@ class UnitTest(unittest.TestCase):
         self.assertTrue(res in bwr)
     
     def test_add_state(self):
-        s = Segment()
-        LFU = np.ones((10, 10))
+        testfile = "test/tosim/OPT2/12g30mid/e32OPT2-390-12g30mid-cas.cax"
+        s = Segment(testfile)
+        LFU = s.states[0].LFU
+        FUE = s.states[0].FUE
         voi = 50
-        s.add_state(LFU, voi)
+        s.add_state(LFU, FUE, voi)
         self.assertTrue((s.states[1].LFU == LFU).all())
     
     def test_writec3cai_at11(self):
