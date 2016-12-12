@@ -938,7 +938,8 @@ class Segment(object):
                                   # for testing purpose
         
         self.add_state(LFU, voi)  # Append element to hold a new calculation
-        file_base_name = "./" + str(uuid.uuid4())
+        file_base_name = "./tmp." + str(uuid.uuid4()).split('-')[0]
+        # file_base_name = "./" + str(uuid.uuid4())
         self.writec3cai(file_base_name, voi, maxdep, depthres, box_offset)
         if model == 'c3':
             self.runc3(file_base_name, grid)
@@ -948,6 +949,8 @@ class Segment(object):
             print "Quickcalc model is unknown"
             return
         self.readc3cax(file_base_name, refcalc)
+        #self.ave_enr()
+
         os.remove(file_base_name + ".inp")
         os.remove(file_base_name + ".out")
         os.remove(file_base_name + ".cax")
@@ -955,6 +958,7 @@ class Segment(object):
             os.remove(file_base_name + ".log")
         except:
             pass
+        
         print "Done in "+str(time.time()-tic)+" seconds."
 
     def boxbow(self, box_offset=0.0):

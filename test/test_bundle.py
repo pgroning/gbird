@@ -26,16 +26,40 @@ class UnitTest(unittest.TestCase):
     def test_readinp(self):
         testfile = "test/topol/bundle_a10xm.inp"
         b = Bundle(testfile)
-        
-        nodes = b.data.nodes
-        self.assertEqual(b.data.fuetype is "A10XM")
-        #nodes = self.bo.data.nodes
-        #self.assertTrue(type(nodes) is list, "nodes is not list")
+        self.assertTrue(b.data.fuetype == "A10XM" and 
+                        type(b.data.nodes) is list,
+                        "reading inp file failed")
 
-    @unittest.skip("skip this test")
+    #@unittest.skip("skip this test")
     def test_readcax(self):
-        self.bo.readcax()
-        #f = self.bo.info.caxfile
+        testfile = "test/topol/bundle_a10xm.inp"
+        b = Bundle(testfile)
+        b.readcax()
+        self.assertTrue(len(b.cases) > 0, "reading cax files failed")
+        
+    def test_bundle_ave_enr(self):
+        testfile = "test/topol/bundle_a10xm.inp"
+        b = Bundle(testfile)
+        b.readcax()
+        b.ave_enr()
+        self.assertTrue(b.states[0].ave_enr > 0, 
+                        "bundle enrichment is invalid")
+
+    def test_new_calc(self):
+        testfile = "test/tosim/bundle_at11.inp"
+        b = Bundle(testfile)
+        b.readcax()
+        b.new_calc(grid=True)
+        self.assertTrue(len(b.cases[0].states[1].statepoints) > 10, 
+                        "new calculation failed")
+    
+    def test_new_ave_enr_calc(self):
+        testfile = "test/tosim/bundle_at11.inp"
+        b = Bundle(testfile)
+        b.readcax()
+        b.new_calc(grid=True)
+        #b.ave_enr()
+
 
 if __name__ == '__main__':
     unittest.main()

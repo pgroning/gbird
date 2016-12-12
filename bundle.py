@@ -52,7 +52,7 @@ class Bundle(object):
         self.cases = []
         #self.btf = Btf(self)
         self.states = []
-        #self.states.append(DataStruct())
+        self.states.append(DataStruct())
 
         if inpfile:
             self.readinp(inpfile)
@@ -128,6 +128,7 @@ class Bundle(object):
     def new_calc(self, voi=None, maxdep=None, depthres=None, refcalc=False,
               grid=True, model='c3', box_offset=0, neulib=False):
 
+        #self.states.append(DataStruct)
         # ----Code block only for testing purpose-----
         #if not refcalc:
         #    for i in range(len(self.cases)):
@@ -188,11 +189,11 @@ class Bundle(object):
         nodes = np.array(nodelist)
         dn = np.diff(nodes)
 
-        enrlist = [case.data[-1].data.ave_enr for case in self.cases]
+        enrlist = [case.states[-1].ave_enr for case in self.cases]
         seg_enr = np.array(enrlist)
 
         ave_enr = sum(seg_enr*dn) / sum(dn)
-        self.data.ave_enr = ave_enr
+        self.states[-1].ave_enr = ave_enr
 
     def pow3(self, POW):
         """Expanding a number of 2D pin power distributions into a 3D
