@@ -56,6 +56,10 @@ class Btf(object):
         Use interpolation if necessary."""
 
         segments = self.bundle.cases
+
+        #btf_cases = self.bundle.data.btf_cases
+        #segs = [s for i, s in enumerate(segments) if btf_cases[i]]
+        #Tracer()()
         nsegments = len(segments)
         npst = segments[0].states[0].npst
         POW = np.zeros((nsegments, npst, npst))

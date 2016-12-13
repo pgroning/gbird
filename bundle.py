@@ -21,6 +21,7 @@ import sys
 import os.path
 import re
 import numpy as np
+import ConfigParser
 
 from multiprocessing import Pool
 from segment import Segment, DataStruct
@@ -63,6 +64,38 @@ class Bundle(object):
         # self.loadcasobj(inpfile)
         # self.interp2(P1,P2,x1,x2,x)
 
+    def readinp_cfg(self, cfgfile):
+ 
+        config = ConfigParser.ConfigParser()
+        if not config.read(cfgfile):
+            print "Could not open file '" + cfgfile + "'"
+            return
+
+        # Get fuel type
+        self.data.fuetype = config.get("Bundle", "fuetype")
+        if self.data.fuetype not in ('A10XM', 'A10B', 'AT11', 'OPT2', 'OPT3'):
+            print("Error: Unknown fuel type.")
+            return
+        
+        # cax files
+        files = config.get("Bundle", "files")
+        self.data.caxfiles = filter(None, re.split("\n", files))
+
+        # node list
+        nodes = re.split("\s+|,", config.get("Bundle", "nodes"))
+        self.data.nodes = map(int, nodes)
+        if len(self.data.nodes) != len(self.data.caxfiles):
+            print "Error: Invalid node list."
+            return
+
+        # BTF case vector
+        btf_cases = re.split("\s+|,", config.get("BTF", "files"))
+        self.data.btf_cases = map(int, btf_cases)
+
+        # BTF nodes
+        btf_nodes = re.split("\s+|,", config.get("BTF", "nodes"))
+        self.data.btf_nodes = map(int, btf_nodes)
+
     def readinp(self, inpfile):
         if not os.path.isfile(inpfile):
             print "Could not open file " + inpfile
@@ -95,10 +128,17 @@ class Bundle(object):
         if i != len(nodes):
             print "Error: Invalid node list."
             return
+
+        btf_cases = map(int, re.split('\s+', flines[i+2]))
+        if i != len(btf_cases):
+            print "Error: Invalid node list."
+            return
+
         self.data.fuetype = fuetype
         self.data.inpfile = inpfile
         self.data.caxfiles = caxfiles
         self.data.nodes = nodes
+        self.data.btf_cases = btf_cases
 
     def readcax(self, read_content=None):
         """Read multiple caxfiles using multithreading.
