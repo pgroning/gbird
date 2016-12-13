@@ -67,10 +67,14 @@ class Bundle(object):
     def readinp(self, cfgfile):
  
         config = ConfigParser.ConfigParser()
-        if not config.read(cfgfile):
-            print "Could not open file '" + cfgfile + "'"
+        try:
+            if not config.read(cfgfile):
+                print "Could not open file '" + cfgfile + "'"
+                return
+        except:
+            print "An error occured trying to read the file '" + cfgfile + "'"
             return
-
+            
         # Get fuel type
         self.data.fuetype = config.get("Bundle", "fuetype")
         if self.data.fuetype not in ('A10XM', 'A10B', 'AT11', 'OPT2', 'OPT3'):
