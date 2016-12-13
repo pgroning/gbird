@@ -89,15 +89,19 @@ class Bundle(object):
             print "Error: Invalid node list."
             return
 
-        # BTF case vector
-        btf_cases = re.split("\s+|,\s*", config.get("BTF", "files"))
-        btf_cases = filter(None, btf_cases)
-        self.data.btf_cases = map(int, btf_cases)
-
-        # BTF nodes
-        btf_nodes = re.split("\s+|,\s*", config.get("BTF", "nodes"))
-        btf_nodes = filter(None, btf_nodes)
-        self.data.btf_nodes = map(int, btf_nodes)
+        if config.has_section("BTF"):
+            # BTF case vector
+            btf_cases = re.split("\s+|,\s*", config.get("BTF", "files"))
+            btf_cases = filter(None, btf_cases)
+            self.data.btf_cases = map(int, btf_cases)
+            # BTF nodes
+            btf_nodes = re.split("\s+|,\s*", config.get("BTF", "nodes"))
+            btf_nodes = filter(None, btf_nodes)
+            self.data.btf_nodes = map(int, btf_nodes)
+        else:
+            self.data.btf_cases = [1] * len(self.data.nodes)
+            self.data.btf_nodes = self.data.nodes
+    
     '''
     def readinp(self, inpfile):
         if not os.path.isfile(inpfile):
