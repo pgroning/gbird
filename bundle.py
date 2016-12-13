@@ -64,7 +64,7 @@ class Bundle(object):
         # self.loadcasobj(inpfile)
         # self.interp2(P1,P2,x1,x2,x)
 
-    def readinp_cfg(self, cfgfile):
+    def readinp(self, cfgfile):
  
         config = ConfigParser.ConfigParser()
         if not config.read(cfgfile):
@@ -82,20 +82,23 @@ class Bundle(object):
         self.data.caxfiles = filter(None, re.split("\n", files))
 
         # node list
-        nodes = re.split("\s+|,", config.get("Bundle", "nodes"))
+        nodes = re.split("\s+|,\s*", config.get("Bundle", "nodes"))
+        nodes = filter(None, nodes)
         self.data.nodes = map(int, nodes)
         if len(self.data.nodes) != len(self.data.caxfiles):
             print "Error: Invalid node list."
             return
 
         # BTF case vector
-        btf_cases = re.split("\s+|,", config.get("BTF", "files"))
+        btf_cases = re.split("\s+|,\s*", config.get("BTF", "files"))
+        btf_cases = filter(None, btf_cases)
         self.data.btf_cases = map(int, btf_cases)
 
         # BTF nodes
-        btf_nodes = re.split("\s+|,", config.get("BTF", "nodes"))
+        btf_nodes = re.split("\s+|,\s*", config.get("BTF", "nodes"))
+        btf_nodes = filter(None, btf_nodes)
         self.data.btf_nodes = map(int, btf_nodes)
-
+    '''
     def readinp(self, inpfile):
         if not os.path.isfile(inpfile):
             print "Could not open file " + inpfile
@@ -139,7 +142,7 @@ class Bundle(object):
         self.data.caxfiles = caxfiles
         self.data.nodes = nodes
         self.data.btf_cases = btf_cases
-
+    '''
     def readcax(self, read_content=None):
         """Read multiple caxfiles using multithreading.
         Syntax:
