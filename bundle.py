@@ -174,11 +174,13 @@ class Bundle(object):
 
     def new_btf(self):
         """Administrates btf calculation by composition of the Btf class"""
+
         nstates = len(self.cases[0].states)
         while len(self.states) < nstates:
-            self.states.append(Btf(self))
-        if not hasattr(self.states[-1], 'DOX'):
-            self.states[-1].calc_btf()
+            self.states.append(DataStruct())
+        
+        self.states[-1].btf = Btf(self)
+        self.states[-1].btf.calc_btf()
         
     def ave_enr(self):
         """The method calculates the average enrichment of the bundle.
