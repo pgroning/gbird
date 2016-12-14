@@ -250,7 +250,7 @@ class Bundle(object):
         ave_enr = sum(seg_enr*dn) / sum(dn)
         self.states[-1].ave_enr = ave_enr
 
-    def pow3(self, POW):
+    def pow3(self, POW, nodes):
         """Expanding a number of 2D pin power distributions into a 3D
         distribution.
         Syntax: POW3D = pow3(POW1,POW2,POW3,...)"""
@@ -260,7 +260,7 @@ class Bundle(object):
         # powlist = [arg for arg in args]
         # xdim = powlist[0].shape[0]
         # ydim = powlist[0].shape[1]
-        nodes = self.data.nodes
+        #nodes = self.data.nodes
         zdim = max(nodes)
         POW3 = np.zeros((zdim, xdim, ydim))
         z0 = 0

@@ -55,11 +55,12 @@ class Btf(object):
         """Construct a 3D pin power distribution for specific void and burnup.
         Use interpolation if necessary."""
 
-        segments = self.bundle.cases
+        all_segments = self.bundle.cases
 
-        #btf_cases = self.bundle.data.btf_cases
-        #segs = [s for i, s in enumerate(segments) if btf_cases[i]]
-        Tracer()()
+        btf_zones = self.bundle.data.btf_zones
+        segments = [s for i, s in enumerate(all_segments) if btf_zones[i]]
+        nodes = self.bundle.data.btf_nodes
+        
         nsegments = len(segments)
         npst = segments[0].states[0].npst
         POW = np.zeros((nsegments, npst, npst))
@@ -81,8 +82,8 @@ class Btf(object):
                 P1 = segments[i].states[-1].statepoints[i1].POW
                 P2 = segments[i].states[-1].statepoints[i2].POW
                 POW[i, :, :] = self.bundle.interp2(P1, P2, voi1, voi2, voi)
-
-        POW3 = self.bundle.pow3(POW)
+        #Tracer()()
+        POW3 = self.bundle.pow3(POW, nodes)
         return POW3
 
     def calc_btf(self):
