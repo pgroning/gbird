@@ -78,8 +78,8 @@ class UnitTest(unittest.TestCase):
         s.states[0].bwr = "BWR 11 1.300 13.580 0.14 0.762 0.753 1.27   * xyz"
         box_offset = 0.1
         bwr = s.boxbow(box_offset)
-        res = "11 1.300 13.580 0.14 0.862 0.653 1.27"
-        self.assertTrue(res in bwr)
+        result = "11 1.300 13.580 0.14 0.862 0.653 1.27"
+        self.assertTrue(result in bwr)
     
     def test_add_state(self):
         testfile = "test/tosim/OPT2/12g30mid/e32OPT2-390-12g30mid-cas.cax"

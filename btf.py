@@ -59,7 +59,7 @@ class Btf(object):
 
         #btf_cases = self.bundle.data.btf_cases
         #segs = [s for i, s in enumerate(segments) if btf_cases[i]]
-        #Tracer()()
+        Tracer()()
         nsegments = len(segments)
         npst = segments[0].states[0].npst
         POW = np.zeros((nsegments, npst, npst))
