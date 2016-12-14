@@ -94,10 +94,10 @@ class Bundle(object):
             return
 
         if config.has_section("BTF"):
-            # BTF case vector
-            btf_cases = re.split("\s+|,\s*", config.get("BTF", "files"))
-            btf_cases = filter(None, btf_cases)
-            self.data.btf_cases = map(int, btf_cases)
+            # BTF zone vector
+            btf_zones = re.split("\s+|,\s*", config.get("BTF", "zones"))
+            btf_zones = filter(None, btf_zones)
+            self.data.btf_zones = map(int, btf_zones)
             # BTF nodes
             btf_nodes = re.split("\s+|,\s*", config.get("BTF", "nodes"))
             btf_nodes = filter(None, btf_nodes)
