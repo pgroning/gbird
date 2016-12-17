@@ -103,7 +103,7 @@ class Bundle(object):
             btf_nodes = filter(None, btf_nodes)
             self.data.btf_nodes = map(int, btf_nodes)
         else:
-            self.data.btf_cases = [1] * len(self.data.nodes)
+            self.data.btf_zones = [1] * len(self.data.nodes)
             self.data.btf_nodes = self.data.nodes
     
     '''

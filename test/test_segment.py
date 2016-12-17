@@ -40,12 +40,9 @@ class UnitTest(unittest.TestCase):
 
     def test_readcax_topol_atxm(self):
         testfile = "test/topol/ATXM/10g40dom/e28ATXM-385-10g40dom-cas.cax"
-        segObj = Segment(testfile)
-        #f = segObj.states[0].caxfile
-        #self.assertEqual(f,self.testfile)
-        Nstatepoints = len(segObj.states[0].statepoints)
-        self.assertTrue(Nstatepoints > 99, 
-                        "Number of statepoinst is less than 100")
+        s = Segment(testfile)
+        Nstatepoints = len(s.states[0].statepoints)
+        self.assertEqual(Nstatepoints, 153, "Number of statepoints is incorrect")
 
     @unittest.skip("test_readcax_topol_atxm_all")
     def test_readcax_topol_atxm_all(self):
