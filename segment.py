@@ -7,6 +7,9 @@
 # or:
 # run casdata "caxfile"
 #
+# How to reach name mangling ("private") methods:
+# self._Segment__matchcontent()
+#
 
 # For debugging. Add Tracer()() inside the code to break at that line
 from IPython.core.debugger import Tracer
@@ -56,7 +59,7 @@ class Segment(object):
         
 
     # -------Read cax file---------
-    def matchcontent(self, flines, regexp, opt='all'):
+    def __matchcontent(self, flines, regexp, opt='all'):
         rec = re.compile(regexp)
         if opt == 'all':
             out = [i for i, x in enumerate(flines) if rec.match(x)]
@@ -97,7 +100,7 @@ class Segment(object):
         # Find last index containing voids voi=vhi
         voilist = []  # temporary list of voids
         #if read_content != 'all':
-        oTIT = self.matchcontent(flines, '^TIT', 'object')
+        oTIT = self.__matchcontent(flines, '^TIT', 'object')
         while True:
             try:
                 i = oTIT.next()
@@ -126,39 +129,39 @@ class Segment(object):
         #self.__flines = flines
         #n = 2
         #p = Pool(n)
-        #ilist = p.map(self.matchcontent, reglist)
+        #ilist = p.map(self.__matchcontent, reglist)
         #p.close()
         #p.join()
         '''
-        iTIT = self.matchcontent(flines, '^TIT')
-        iFUE = self.matchcontent(flines, '^\s*FUE')
-        iPOW = self.matchcontent(flines, 'POW\s+')
-        iSIM = self.matchcontent(flines, '^\s*SIM')
-        iSPA = self.matchcontent(flines, '^\s*SPA')
-        iGAM = self.matchcontent(flines, '^\s*GAM')
-        iCRD = self.matchcontent(flines, '^\s*CRD')
-        iPOL = self.matchcontent(flines, '^POL')
-        iXFL = self.matchcontent(flines, '^XFL')
-        iPIN = self.matchcontent(flines, '^\s*PIN')
-        iTTL = self.matchcontent(flines, '^\s*TTL')
-        iVOI = self.matchcontent(flines, '^\s*VOI')
-        iDEP = self.matchcontent(flines, '^\s*DEP')
+        iTIT = self.__matchcontent(flines, '^TIT')
+        iFUE = self.__matchcontent(flines, '^\s*FUE')
+        iPOW = self.__matchcontent(flines, 'POW\s+')
+        iSIM = self.__matchcontent(flines, '^\s*SIM')
+        iSPA = self.__matchcontent(flines, '^\s*SPA')
+        iGAM = self.__matchcontent(flines, '^\s*GAM')
+        iCRD = self.__matchcontent(flines, '^\s*CRD')
+        iPOL = self.__matchcontent(flines, '^POL')
+        iXFL = self.__matchcontent(flines, '^XFL')
+        iPIN = self.__matchcontent(flines, '^\s*PIN')
+        iTTL = self.__matchcontent(flines, '^\s*TTL')
+        iVOI = self.__matchcontent(flines, '^\s*VOI')
+        iDEP = self.__matchcontent(flines, '^\s*DEP')
         
         # Stop looping at first finding
-        iEND = self.matchcontent(flines, '^\s*END', 'next')
-        iBWR = self.matchcontent(flines, '^\s*BWR', 'next')
-        iLFU = self.matchcontent(flines, '^\s*LFU', 'next')
-        iLPI = self.matchcontent(flines, '^\s*LPI', 'next')
-        iTFU = self.matchcontent(flines, '^\s*TFU', 'next')
-        iTMO = self.matchcontent(flines, '^\s*TMO', 'next')
-        iPDE = self.matchcontent(flines, '^\s*PDE', 'next')
+        iEND = self.__matchcontent(flines, '^\s*END', 'next')
+        iBWR = self.__matchcontent(flines, '^\s*BWR', 'next')
+        iLFU = self.__matchcontent(flines, '^\s*LFU', 'next')
+        iLPI = self.__matchcontent(flines, '^\s*LPI', 'next')
+        iTFU = self.__matchcontent(flines, '^\s*TFU', 'next')
+        iTMO = self.__matchcontent(flines, '^\s*TMO', 'next')
+        iPDE = self.__matchcontent(flines, '^\s*PDE', 'next')
         try:  # Card for water cross (valid for OPT2/3)
-            iSLA = self.matchcontent(flines, '^\s*SLA', 'next')
+            iSLA = self.__matchcontent(flines, '^\s*SLA', 'next')
         except:
             iSLA = None
             print "Info: Could not find SLA card"
-        iWRI = self.matchcontent(flines, '^\s*WRI', 'next')
-        iSTA = self.matchcontent(flines, '^\s*STA', 'next')
+        iWRI = self.__matchcontent(flines, '^\s*WRI', 'next')
+        iSTA = self.__matchcontent(flines, '^\s*STA', 'next')
         print "Done."
         
         do = DataStruct(); # Init data container object
@@ -851,9 +854,9 @@ class Segment(object):
             flines = f.read().splitlines()  # exclude \n
         
         # ------Search for regexp matches-------
-        iTIT = self.matchcontent(flines, '^TIT')
-        iPOW = self.matchcontent(flines, 'POW\s+')
-        iPOL = self.matchcontent(flines, '^POL')
+        iTIT = self.__matchcontent(flines, '^TIT')
+        iPOW = self.__matchcontent(flines, 'POW\s+')
+        iPOL = self.__matchcontent(flines, '^POL')
         
         # Read fuel dimension
         npst = int(flines[iPOW[0]+1][4:6])
