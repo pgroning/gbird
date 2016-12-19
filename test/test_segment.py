@@ -74,7 +74,7 @@ class UnitTest(unittest.TestCase):
         s = Segment()
         s.states[0].bwr = "BWR 11 1.300 13.580 0.14 0.762 0.753 1.27   * xyz"
         box_offset = 0.1
-        bwr = s.boxbow(box_offset)
+        bwr = s._Segment__boxbow(box_offset)  # reaching "private" method
         result = "11 1.300 13.580 0.14 0.862 0.653 1.27"
         self.assertTrue(result in bwr)
     

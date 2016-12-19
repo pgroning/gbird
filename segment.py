@@ -693,7 +693,7 @@ class Segment(object):
         #    bwr = info.bwr.replace('/','//')  # a // is needed for C3
         #Tracer()()
         if box_offset:
-            bwr = self.boxbow(box_offset)
+            bwr = self.__boxbow(box_offset)
             #f.write(bwr + '\n')
         else:
             bwr = info.bwr.strip()
@@ -982,7 +982,7 @@ class Segment(object):
         
         print "Done in "+str(time.time()-tic)+" seconds."
 
-    def boxbow(self, box_offset=0.0):
+    def __boxbow(self, box_offset=0.0):
         """Updating the BWR card to account for box bowing."""
         bwr = self.states[0].bwr
         bwr_arr = bwr.split()
