@@ -231,7 +231,7 @@ class Segment(object):
             #FUE[i, 1:3] = rvec[1:]
             #if np.size(rvec) > 3:
             #    FUE[i, 3:5] = re.split('=', rvec[3])
-        
+        Tracer()()
         # Translate LFU map to ENR map
         ENR = np.zeros((npst, npst))
         for i in range(Nfue):
