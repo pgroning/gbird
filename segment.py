@@ -95,7 +95,18 @@ class Segment(object):
             ifu = int(FUE[i, 0])
             ENR[LFU == ifu] = FUE[i, 2]
         return ENR
-        
+
+    def __lfu2ba(self, LFU, FUE):
+        BA = np.zeros(LFU.shape)
+        Nfue = FUE.shape[0]
+        for i in range(Nfue):
+            ifu = int(FUE[i, 0])
+            if np.isnan(FUE[i, 3]):
+                BA[LFU == ifu] = 0.0
+            else:
+                BA[LFU == ifu] = FUE[i, 4]
+        return BA
+    
     def readcax(self, caxfile, read_content=None):
         
         if not os.path.isfile(caxfile):
@@ -239,15 +250,8 @@ class Segment(object):
         ENR = self.__lfu2enr(LFU, FUE)
         
         # Translate LFU map to BA map
-        BA = np.zeros((npst, npst))
-        Nfue = len(iFUE)
-        for i in range(Nfue):
-            ifu = int(FUE[i, 0])
-            if np.isnan(FUE[i, 3]):
-                BA[LFU == ifu] = 0.0
-            else:
-                BA[LFU == ifu] = FUE[i, 4]
-
+        BA = self.__lfu2ba(LFU, FUE)
+        
         # Determine number of BA rods types
         Nba = 0
         for content in FUE[:, 4]:
