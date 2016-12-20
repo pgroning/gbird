@@ -69,6 +69,11 @@ class Segment(object):
             out = (i for i, x in enumerate(flines) if rec.match(x))
         return out
 
+    def __symmetry_map(self, flines, line_idx, npst):
+        filemap = flines[line_idx+1:line_idx+1+npst]
+        M = self.__symtrans(self.__map2mat(filemap, npst)).astype(int)
+        return M
+        
     def readcax(self, caxfile, read_content=None):
         
         if not os.path.isfile(caxfile):
@@ -159,65 +164,51 @@ class Segment(object):
             iSLA = self.__matchcontent(flines, '^\s*SLA', 'next')
         except:
             iSLA = None
-            print "Info: Could not find SLA card"
+            #print "Info: Could not find SLA card"
         iWRI = self.__matchcontent(flines, '^\s*WRI', 'next')
         iSTA = self.__matchcontent(flines, '^\s*STA', 'next')
         print "Done."
         
         do = DataStruct(); # Init data container object
         # Read title
-        #self.data[-1].info.title = flines[iTTL[0]]
         do.title = flines[iTTL[0]]
         # SIM
         do.sim = flines[iSIM[0]]
-        #self.data[-1].info.sim = flines[iSIM[0]]
         # TFU
         do.tfu = flines[iTFU]
-        #self.data[-1].info.tfu = flines[iTFU]
         # TMO
         do.tmo = flines[iTMO]
-        #self.data[-1].info.tmo = flines[iTMO]
         # VOI
         do.voi = flines[iVOI[0]]
-        #self.data[-1].info.voi = flines[iVOI[0]]
         # PDE
         do.pde = flines[iPDE]
-        #self.data[-1].info.pde = flines[iPDE]
         # BWR
         do.bwr = flines[iBWR]
-        #self.data[-1].info.bwr = flines[iBWR]
         # SPA
         do.spa = flines[iSPA[0]]
-        #self.data[-1].info.spa = flines[iSPA[0]]
         # DEP
         do.dep = flines[iDEP[0]]
-        #self.data[-1].info.dep = flines[iDEP[0]]
         # GAM
         do.gam = flines[iGAM[0]]
-        #self.data[-1].info.gam = flines[iGAM[0]]
         # WRI
         do.wri = flines[iWRI]
-        #self.data[-1].info.wri = flines[iWRI]
         # STA
         do.sta = flines[iSTA]
-        #self.data[-1].info.sta = flines[iSTA]
         # CRD
         do.crd = flines[iCRD[0]]
-        #self.data[-1].info.crd = flines[iCRD[0]]
         
-        # Append dobj to last element in list
-        #self.states[-1] = dobj;
-
-        # Read fuel dimension
+        # get fuel dimension
         npst = int(flines[iBWR][5:7])
         # Read LFU map
-        caxmap = flines[iLFU+1:iLFU+1+npst]
-        LFU = self.__symtrans(self.__map2mat(caxmap, npst)).astype(int)
-
+        #caxmap = flines[iLFU+1:iLFU+1+npst]
+        #LFU = self.__symtrans(self.__map2mat(caxmap, npst)).astype(int)
+        LFU = self.__symmetry_map(flines, iLFU, npst)
+        
         # Read LPI map
-        caxmap = flines[iLPI+1:iLPI+1+npst]
-        LPI = self.__symtrans(self.__map2mat(caxmap, npst)).astype(int)
-
+        #caxmap = flines[iLPI+1:iLPI+1+npst]
+        #LPI = self.__symtrans(self.__map2mat(caxmap, npst)).astype(int)
+        LPI = self.__symmetry_map(flines, iLPI, npst)
+        
         # Read FUE
         # iFUE = iFUE[iFUE<iEND[0]]
         iFUE = [i for i in iFUE if i < iEND]
