@@ -73,7 +73,21 @@ class Segment(object):
         filemap = flines[line_idx+1:line_idx+1+npst]
         M = self.__symtrans(self.__map2mat(filemap, npst)).astype(int)
         return M
-        
+    
+    def __get_FUE(self, flines, iFUE):
+        Nfue = len(iFUE)
+        FUE = np.zeros((Nfue, 5))
+        FUE.fill(np.nan)
+        for i, idx in enumerate(iFUE):
+            rstr = flines[idx].replace(',',' ').strip()
+            rstr = rstr.replace('/',' ').strip()
+            rstr = rstr.replace('=',' ').strip()
+            rvec = re.split('\*', rstr, 1)  # split on first occurence
+            rstr = rvec[0].strip()
+            rvec = re.split('\s+', rstr)
+            FUE[i, :len(rvec[1:])] = rvec[1:]
+        return FUE
+    
     def readcax(self, caxfile, read_content=None):
         
         if not os.path.isfile(caxfile):
@@ -209,31 +223,13 @@ class Segment(object):
         #LPI = self.__symtrans(self.__map2mat(caxmap, npst)).astype(int)
         LPI = self.__symmetry_map(flines, iLPI, npst)
         
-        # Read FUE
-        # iFUE = iFUE[iFUE<iEND[0]]
+        # Get FUE array
         iFUE = [i for i in iFUE if i < iEND]
-        # iFUE = filter(lambda x,y=iEND:x<y,iFUE)
-        # Nfue = iFUE.size
-        Nfue = len(iFUE)
-        FUE = np.zeros((Nfue, 5))
-        FUE.fill(np.nan)
-        for i, idx in enumerate(iFUE):
-            rstr = flines[idx].replace(',',' ').strip()
-            rstr = rstr.replace('/',' ').strip()
-            rstr = rstr.replace('=',' ').strip()
-            #rvec = re.split('\*', flines[idx].strip())
-            rvec = re.split('\*', rstr, 1)  # split on first occurence
-            rstr = rvec[0].strip()
-            rvec = re.split('\s+', rstr)
-            #FUE[i, 0] = rvec[1]
-            #FUE[i, 1:3] = re.split('/', rvec[2])
-            FUE[i, :len(rvec[1:])] = rvec[1:]
-            #FUE[i, 1:3] = rvec[1:]
-            #if np.size(rvec) > 3:
-            #    FUE[i, 3:5] = re.split('=', rvec[3])
-        Tracer()()
+        FUE = self.__get_FUE(flines, iFUE)
+        
         # Translate LFU map to ENR map
         ENR = np.zeros((npst, npst))
+        Nfue = len(iFUE)
         for i in range(Nfue):
             ifu = int(FUE[i, 0])
             ENR[LFU == ifu] = FUE[i, 2]
