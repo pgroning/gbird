@@ -87,7 +87,15 @@ class Segment(object):
             rvec = re.split('\s+', rstr)
             FUE[i, :len(rvec[1:])] = rvec[1:]
         return FUE
-    
+
+    def __lfu2enr(self, LFU, FUE):
+        ENR = np.zeros(LFU.shape)
+        Nfue = FUE.shape[0]
+        for i in range(Nfue):
+            ifu = int(FUE[i, 0])
+            ENR[LFU == ifu] = FUE[i, 2]
+        return ENR
+        
     def readcax(self, caxfile, read_content=None):
         
         if not os.path.isfile(caxfile):
@@ -228,14 +236,11 @@ class Segment(object):
         FUE = self.__get_FUE(flines, iFUE)
         
         # Translate LFU map to ENR map
-        ENR = np.zeros((npst, npst))
-        Nfue = len(iFUE)
-        for i in range(Nfue):
-            ifu = int(FUE[i, 0])
-            ENR[LFU == ifu] = FUE[i, 2]
-
+        ENR = self.__lfu2enr(LFU, FUE)
+        
         # Translate LFU map to BA map
         BA = np.zeros((npst, npst))
+        Nfue = len(iFUE)
         for i in range(Nfue):
             ifu = int(FUE[i, 0])
             if np.isnan(FUE[i, 3]):
