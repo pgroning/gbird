@@ -88,6 +88,24 @@ class Segment(object):
             FUE[i, :len(rvec[1:])] = rvec[1:]
         return FUE
 
+    def __get_pin(self, flines, iPIN):
+        plist = []
+        for idx in iPIN:
+            rstr = flines[idx].replace(',',' ').strip()
+            rvec = re.split('/|\*', rstr)
+            rstr = rvec[0].strip()
+            rvec = re.split('\s+', rstr.strip())
+            rlen = np.size(rvec)
+            plist.append(rvec[1:])
+        
+        Npin = len(plist)
+        ncols = max(map(len, plist))
+        PIN = np.zeros((Npin, ncols), dtype=float)
+        PIN.fill(np.nan)
+        for i, pl in enumerate(plist):
+            PIN[i, :len(pl)] = pl
+        return PIN
+    
     def __lfu2enr(self, LFU, FUE):
         ENR = np.zeros(LFU.shape)
         Nfue = FUE.shape[0]
@@ -259,33 +277,16 @@ class Segment(object):
                 Nba += 1
 
         # Read PIN (pin radius)
-        plist = []
-        for idx in iPIN:
-            rstr = flines[idx].replace(',',' ').strip()
-            #rvec = re.split(',|/', flines[idx].strip())
-            rvec = re.split('/|\*', rstr)
-            rstr = rvec[0].strip()
-            rvec = re.split('\s+', rstr.strip())
-            #rvec = re.split('\s+|,', rstr.strip())
-            rlen = np.size(rvec)
-            #PIN[i, :rlen-1] = rvec[1:ncol+1]
-            plist.append(rvec[1:])
-        
-        Npin = len(plist)
-        ncols = max(map(len, plist))
-        PIN = np.zeros((Npin, ncols), dtype=float)
-        PIN.fill(np.nan)
-        for i, pl in enumerate(plist):
-            PIN[i, :len(pl)] = pl
+        PIN = self.__get_pin(flines, iPIN)
 
+        Npin = PIN.shape[0]
         # self.pinlines = flines[iPIN[0]:iPIN[0]+Npin]
         do.pinlines = flines[iPIN[0]:iPIN[0]+Npin]
-        #self.data[-1].info.pinlines = flines[iPIN[0]:iPIN[0]+Npin]
 
         # Read SLA
         if iSLA is not None:
             do.slaline = flines[iSLA]
-            #self.data[-1].info.slaline = flines[iSLA]
+            
         # ------Step through the state points----------
         print "Scanning state points..."
 
