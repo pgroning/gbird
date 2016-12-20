@@ -555,9 +555,15 @@ class Segment(object):
         if not neulib:
             neulib = "e4lbl70";
         
-        cmd = '-V ' + c4ver + ' -N ' + libdir + neulib + ' ' + c4inp
+        cmd = ' -V ' + c4ver + ' -N ' + libdir + neulib + ' ' + c4inp
+        arglist = shlex.split(c4exe + cmd)
         arglist = shlex.split('linrsh ' + c4exe + cmd)
-        #fout = open('c4.stdout', 'wb')
+        # specify grid que
+        arglist.insert(1, '-q')
+        arglist.insert(2, 'all.q@wrath,all.q@envy,all.q@pride')
+        #arglist[0] = 'linrsh -q all.q@wrath'
+        #Tracer()()
+        # fout = open('c4.stdout', 'wb')
         fout = open('/dev/null', 'wb')
         print "Running c4 model"
         if grid:
@@ -565,9 +571,9 @@ class Segment(object):
                 call(arglist, stdout=fout, stderr=STDOUT, shell=False)
             except:
                 print "Warning: Grid is not available on the system."
-                call(arglist[1:], stdout=fout, stderr=STDOUT, shell=False)
+                call(arglist[3:], stdout=fout, stderr=STDOUT, shell=False)
         else:
-            call(arglist[1:], stdout=fout, stderr=STDOUT, shell=False)
+            call(arglist[3:], stdout=fout, stderr=STDOUT, shell=False)
 
     def add_state(self, LFU, FUE, voi=None):
         """Append a list element to store result of new calculation"""
@@ -822,15 +828,19 @@ class Segment(object):
         # cmd = "linrsh " + c3exe + " " + c3cfg
         # cmd = c3exe + " " + c3cfg
         print "Running c3 model"
-        args = ['linrsh', c3exe, c3cfg]
+        #args = ['linrsh', c3exe, c3cfg]
+        arglist = ['linrsh', c3exe, c3cfg]
+        arglist.insert(1, '-q')
+        arglist.insert(2, 'all.q@wrath,all.q@envy,all.q@pride')
+        #Tracer()()
         if grid:
             try:  # use linrsh if available
-                call(args, shell=False)
+                call(arglist, shell=False)
             except:
                 print "Warning: Grid is not available on the system."
-                call(args[1:], shell=False)
+                call(arglist[3:], shell=False)
         else:
-            call(args[1:], shell=False)
+            call(arglist[3:], shell=False)
 
         # Remove files
         # c3cfg.unlink(c3cfg.name)
