@@ -54,6 +54,7 @@ class UnitTest(unittest.TestCase):
         self.assertTrue(len(b.cases[0].states[1].statepoints) > 10, 
                         "new c3 calculation failed")
 
+    @unittest.skip("skip test_new_calc_c4")
     def test_new_calc_c4(self):
         testfile = "test/tosim/bundle_at11.inp"
         b = Bundle(testfile)
