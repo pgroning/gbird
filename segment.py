@@ -69,9 +69,8 @@ class Segment(object):
             out = (i for i, x in enumerate(flines) if rec.match(x))
         return out
 
-    def __symmetry_map(self, flines, line_idx, npst):
-        filemap = flines[line_idx+1:line_idx+1+npst]
-        M = self.__symtrans(self.__map2mat(filemap, npst)).astype(int)
+    def __symmap(self, lines, npst, dtype=float):
+        M = self.__symtrans(self.__map2mat(lines, npst)).astype(dtype)
         return M
     
     def __get_FUE(self, flines, iFUE):
@@ -251,14 +250,16 @@ class Segment(object):
         # get fuel dimension
         npst = int(flines[iBWR][5:7])
         # Read LFU map
-        #caxmap = flines[iLFU+1:iLFU+1+npst]
+        maplines = flines[iLFU+1:iLFU+1+npst]
         #LFU = self.__symtrans(self.__map2mat(caxmap, npst)).astype(int)
-        LFU = self.__symmetry_map(flines, iLFU, npst)
+        LFU = self.__symmap(maplines, npst, int)
+        #LFU = self.__symmetry_map(flines, iLFU, npst)
         
         # Read LPI map
-        #caxmap = flines[iLPI+1:iLPI+1+npst]
+        maplines = flines[iLPI+1:iLPI+1+npst]
         #LPI = self.__symtrans(self.__map2mat(caxmap, npst)).astype(int)
-        LPI = self.__symmetry_map(flines, iLPI, npst)
+        LPI = self.__symmap(maplines, npst, int)
+        #LPI = self.__symmetry_map(flines, iLPI, npst)
         
         # Get FUE array
         iFUE = [i for i in iFUE if i < iEND]
@@ -318,40 +319,47 @@ class Segment(object):
 
         # Row vector containing burnup, voi, vhi, tfu and tmo
         # rvec = [re.split('/',flines[i+2].strip()) for i in iTIT]
-        rvec = [re.split('[/\s+]+', flines[i+2].strip()) for i in iTIT]
+        #rvec = [re.split('[/\s+]+', flines[i+2].strip()) for i in iTIT]
 
         # Row containing Kinf
-        kinfstr = [flines[i+5] for i in iPOL]
+        #kinfstr = [flines[i+5] for i in iPOL]
 
         # Rows containing radial power distribution map
-        powmap = [flines[i+2:i+2+npst] for i in iPOW]
+        #powmap = [flines[i+2:i+2+npst] for i in iPOW]
 
         # Rows containing XFL maps
-        xfl1map = [flines[i+2:i+2+npst] for i in iXFL]
-        xfl2map = [flines[i+3+npst:i+3+2*npst] for i in iXFL]
+        #xfl1map = [flines[i+2:i+2+npst] for i in iXFL]
+        #xfl2map = [flines[i+3+npst:i+3+2*npst] for i in iXFL]
         
         for i in range(Nburnpts):
             # Read burnup, voids, tfu and tmo
-            burnup[i] = rvec[i][0]
-            voi[i] = rvec[i][1]
-            vhi[i] = rvec[i][2]
-            tfu[i] = rvec[i][3]
-            tmo[i] = rvec[i][4]
+            rvec = re.split('[/\s+]+', flines[iTIT[i]+2].strip())
+            burnup[i] = rvec[0]
+            voi[i] = rvec[1]
+            vhi[i] = rvec[2]
+            tfu[i] = rvec[3]
+            tmo[i] = rvec[4]
             # burnup[i],voi[i] = re.split('\s+',rvec[i][0].strip())
             # vhi[i],tfu[i] = re.split('\s+',rvec[i][1].strip())
             # tmo[i] = re.split('\s+',rvec[i][2].strip())[1]
             # Read kinf
-            kinf[i] = re.split('\s+', kinfstr[i].strip())[0]
+            kinfstr = flines[iPOL[i]+5]
+            kinf[i] = re.split('\s+', kinfstr.strip())[0]
             # Read radial power distribution map
-            POW[:, :, i] = self.__symtrans(self.__map2mat(powmap[i], npst))
+            powlines = flines[iPOW[i]+2:iPOW[i]+2+npst]
+            POW[:, :, i] = self.__symmap(powlines, npst)
+            #POW[:, :, i] = self.__symtrans(self.__map2mat(powmap[i], npst))
             # Read XFL maps
             if iXFL:  # check if XFL exists
-                XFL1[:, :, i] = (self.__symtrans(
-                        self.__map2mat(xfl1map[i], npst)))
-                XFL2[:, :, i] = (self.__symtrans(
-                        self.__map2mat(xfl2map[i], npst)))
+                xfl1lines = flines[iXFL[i]+2:iXFL[i]+2+npst]
+                XFL1[:, :, i] = self.__symmap(xfl1lines, npst)
+                #XFL1[:, :, i] = (self.__symtrans(
+                #        self.__map2mat(xfl1map[i], npst)))
+                xfl2lines = flines[iXFL[i]+3+npst:iXFL[i]+3+2*npst]
+                XFL2[:, :, i] = self.__symmap(xfl2lines, npst)
+                #XFL2[:, :, i] = (self.__symtrans(
+                #        self.__map2mat(xfl2map[i], npst)))
         print "Done."
-        
         # --------------------------------------------------------------------
         # Calculate radial burnup distributions
         EXP = self.__expcalc(POW, burnup)
