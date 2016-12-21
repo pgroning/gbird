@@ -371,59 +371,32 @@ class Segment(object):
         for i in range(Nburnpts):
             # append new instance to list
             do.statepoints.append(DataStruct());
-            # self.data[-1].statepoints.append(DataStruct())
             do.statepoints[i].titcrd = titcrd[i]
-            # self.data[-1].statepoints[i].titcrd = titcrd[i]
             do.statepoints[i].burnup = burnup[i]
-            # self.data[-1].statepoints[i].burnup = burnup[i]
             do.statepoints[i].voi = voi[i]
-            # self.data[-1].statepoints[i].voi = voi[i]
             do.statepoints[i].vhi = vhi[i]
-            # self.data[-1].statepoints[i].vhi = vhi[i]
             do.statepoints[i].tfu = tfu[i]
-            # self.data[-1].statepoints[i].tfu = tfu[i]
             do.statepoints[i].tmo = tmo[i]
-            # self.data[-1].statepoints[i].tmo = tmo[i]
             do.statepoints[i].kinf = kinf[i]
-            # self.data[-1].statepoints[i].kinf = kinf[i]
             do.statepoints[i].fint = fint[i]
-            # self.data[-1].statepoints[i].fint = fint[i]
             do.statepoints[i].EXP = EXP[:, :, i]
-            # self.data[-1].statepoints[i].EXP = EXP[:, :, i]
             if iXFL:
                 do.statepoints[i].XFL1 = XFL1[:, :, i]
-                # self.data[-1].statepoints[i].XFL1 = XFL1[:, :, i]
                 do.statepoints[i].XFL2 = XFL2[:, :, i]
-                # self.data[-1].statepoints[i].XFL2 = XFL2[:, :, i]
             do.statepoints[i].POW = POW[:, :, i]
-            # self.data[-1].statepoints[i].POW = POW[:, :, i]
         
         # Saving geninfo
         do.caxfile = caxfile
-        # self.data[-1].info.caxfile = caxfile
         do.ENR = ENR
-        # self.data[-1].info.ENR = ENR
         do.BA = BA
-        # self.data[-1].info.BA = BA
         do.PIN = PIN
-        # self.data[-1].info.PIN = PIN
         do.LPI = LPI
-        # self.data[-1].info.LPI = LPI
         do.FUE = FUE
-        # self.data[-1].info.FUE = FUE
         do.LFU = LFU
-        # self.data[-1].info.LFU = LFU
         do.npst = npst
-        # self.data[-1].info.npst = npst
-        #do.voivec = (do.voi.split('*')[0].replace(',', ' ')
-        #             .strip().split(' ')[1:])
         do.voivec = voivec
         # Append data object to last list element
         self.states[-1] = do
-
-
-#    def btfcalc(self):
-#        btf('SVEA-96','')
 
     def __map2mat(self, caxmap, dim):
         M = np.zeros((dim, dim))
@@ -460,7 +433,6 @@ class Segment(object):
 
         # Translate LPI map to pin radius map
         RADI = np.zeros((npst, npst))
-        # Npin = data.PIN[:, 0].size
         Npin = self.states[0].PIN[:, 0].size
         LPI = self.states[0].LPI
         PIN = self.states[0].PIN
@@ -472,13 +444,11 @@ class Segment(object):
         VOLU = np.pi*RADI**2
         MASS = DENS*VOLU
         mass = np.sum(MASS)
-        #Tracer()()
         ENR = self.states[-1].ENR
         MASS_U235 = MASS*ENR
         mass_u235 = np.sum(MASS_U235)
         self.states[-1].ave_enr = mass_u235/mass
-        #self.data[-1].info.ave_enr = mass_u235/mass
-        #Tracer()()
+        
     # -------Write cai file------------
     def writecai(self, file_base_name):
         #print "Writing to file " + caifile
