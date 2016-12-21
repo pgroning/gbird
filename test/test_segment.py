@@ -5,7 +5,7 @@
 # FAILED (failures=1, skipped=1)
 # FAILED (errors=1, skipped=1)
 #
-
+from IPython.core.debugger import Tracer
 import sys
 if sys.version_info < (2, 7):
     import unittest2 as unittest
@@ -14,6 +14,7 @@ else:
 import os
 import re
 import numpy as np
+import shutil
 import mock
 from mock import patch
 
@@ -42,23 +43,28 @@ class UnitTest(unittest.TestCase):
         testfile = "test/topol/ATXM/10g40dom/e28ATXM-385-10g40dom-cas.cax"
         s = Segment(testfile)
         Nstatepoints = len(s.states[0].statepoints)
-        self.assertEqual(Nstatepoints, 153, "Number of statepoints is incorrect")
+        self.assertEqual(153, Nstatepoints, 
+                         "Number of state points is incorrect")
+        self.assertListEqual([40, 0, 80], s.states[0].voivec,
+                         "void list is incorrect")
 
     @unittest.skip("test_readcax_topol_atxm_all")
     def test_readcax_topol_atxm_all(self):
         testfile = "test/topol/ATXM/10g40dom/e28ATXM-385-10g40dom-cas.cax"
         s = Segment(testfile, 'all')
         Nstatepoints = len(s.states[0].statepoints)
-        self.assertTrue(Nstatepoints > 499, 
-                        "Number of statepoinst is less than 500")
+        self.assertEqual(19482, Nstatepoints,
+                        "Number of state points is incorrect")
 
     def test_readcax_tosim_at11(self):
         testfile = "test/tosim/AT11/14g35top/exxAT11-384-14g35top-cas.cax"
         s = Segment(testfile)
         Nstatepoints = len(s.states[0].statepoints)
-        self.assertTrue(Nstatepoints > 99, 
-                        "Number of statepoinst is less than 100")
-        
+        self.assertEqual(145, Nstatepoints,
+                        "Number of state points is incorrect")
+        self.assertEqual(s.states[0].voivec, [0, 40, 80])
+
+    @unittest.skip("test_get_voivec")  
     def test_get_voivec(self):
         testfile = "test/tosim/OPT2/12g30mid/e32OPT2-390-12g30mid-cas.cax"
         s = Segment(testfile)
@@ -101,16 +107,20 @@ class UnitTest(unittest.TestCase):
                         "double // is missing in BWR card for AT11 fuel")
 
     def test_runc3(self):
-        testfile = "test/tosim/AT11/14g35top/exxAT11-384-14g35top-cas.cax"
-        s = Segment(testfile)
-        s.writec3cai(self.file_base_name)
-        s.runc3(self.file_base_name, grid=True)
+        # testfile = "test/tosim/AT11/14g35top/exxAT11-384-14g35top-cas.cax"
+        # s = Segment(testfile)
+        # s.writec3cai(self.file_base_name)
+        # s.runc3(self.file_base_name, grid=True)
+        s = Segment()
         caxfile = self.file_base_name + ".cax"
+        inpfile = self.file_base_name + ".inp"
+        shutil.copy2("test/files/e33OPT3-383-11g50bot-cas_test_c3.inp", inpfile)
+        s.runc3(self.file_base_name, grid=True)
         # check file content
         with open(caxfile) as f:
             flines = f.read().splitlines()
-        self.assertTrue(len(flines) > 99,
-                        "file content is less than 100 lines")
+        self.assertEqual(13200, len(flines),
+                        "number of lines in file is wrong")
 
     @unittest.skip('skip test_runc4')
     def test_runc4(self):
@@ -125,23 +135,19 @@ class UnitTest(unittest.TestCase):
                         "file content is less than 100 lines")
     
     def test_readc3cax(self):
-        testfile = "test/tosim/OPT3/11g50bot/e33OPT3-383-11g50bot-cas.cax"
-        s = Segment(testfile)
-        s.writec3cai(self.file_base_name, voi=50, maxdep=20, box_offset=0.1)
-        s.runc3(self.file_base_name, grid=False)
-        s.readc3cax(self.file_base_name)
+        s = Segment()
+        s.readc3cax("test/files/e33OPT3-383-11g50bot-cas_test_c3")
         Nstatepoints = len(s.states[0].statepoints)
-        self.assertTrue(Nstatepoints > 19, 
+        self.assertEqual(147, Nstatepoints,
                         "Number of statepoints is less than 20")
-    
+
     def test_quickcalc(self):
         testfile = "test/tosim/OPT3/11g50bot/e33OPT3-383-11g50bot-cas.cax"
         s = Segment(testfile)
         s.quickcalc()
         Nstatepoints = len(s.states[1].statepoints)
-        self.assertTrue(Nstatepoints > 99, 
-                        "Number of statepoints is less than 100")
-
+        self.assertEqual(147, Nstatepoints, 
+                        "Number of state points is incorrect")
 
 
 if __name__ == '__main__':
