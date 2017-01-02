@@ -6,6 +6,6 @@ bin
 cax
 topol
 tosim
-files
+test/files
 lib
 tmp
