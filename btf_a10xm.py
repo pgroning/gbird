@@ -10,12 +10,12 @@ from lib.libADDC import ADDC
 # from addc import addc
 
 
-def rfact_axial(POW, fuetype):
+def rfact_axial(POW, AC):
     """Calculating axial R-factors"""
 
     # Import addc from shared lib
-    acObj = ADDC(fuetype)
-    AC = acObj.ac
+    #acObj = ADDC(fuetype)
+    #AC = acObj.ac
 
     # Define some matrix dimensions
     nside = AC.shape[0]  # Number of side pins of the assembly
@@ -89,8 +89,9 @@ def rfact_axial(POW, fuetype):
     return DOW
 
 
-def btf_a10xm(POW3, fuetype):
-    """Calculating BTF for A10XM"""
+def rfact_nodal(POW3, AC):
+#def btf_a10xm(POW3, fuetype):
+#    """Calculating BTF for A10XM"""
 
     naxial_nodes = POW3.shape[0]
     nrows = POW3.shape[1]
@@ -105,15 +106,26 @@ def btf_a10xm(POW3, fuetype):
         if (node > 0) and (POW3[node, :, :] == POW3[node-1, :, :]).all():
             DOW[node, :, :] = DOW[node-1, :, :]
         else:  # Perform new calculation
-            DOW[node, :, :] = rfact_axial(POW3[node, :, :], fuetype)
+            DOW[node, :, :] = rfact_axial(POW3[node, :, :], AC)
 
     # Integrate along z-direction to get pinwise R-factors
     DOX = sum(DOW, 0)/naxial_nodes
 
     return DOX
 
+def btf_a10xm(POW3):
+    """Calculating BTF for A10XM"""
+
+    # Import addc from shared lib
+    fuetype = "A10XM"
+    acObj = ADDC(fuetype)
+    AC = acObj.ac
+    DOX = rfact_nodal(POW3, AC)
+    return DOX
+
 
 if __name__ == '__main__':
-    casobj = casio()
-    casobj.loadpic('caxfiles_a10xm.p')
-    POW3 = casobj.pow3(casobj)
+    pass
+    # casobj = casio()
+    # casobj.loadpic('caxfiles_a10xm.p')
+    # POW3 = casobj.pow3(casobj)

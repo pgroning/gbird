@@ -73,8 +73,18 @@ class UnitTest(unittest.TestCase):
         self.assertTrue(b.states[1].ave_enr > 0, 
                         "bundle enrichment is invalid")
 
-    def test_btf_calc(self):
+    def test_btf_calc_a10xm(self):
         testfile = 'test/topol/bundle_a10xm.inp'
+        b = Bundle(testfile)
+        b.readcax()
+        b.new_btf()
+        self.assertTrue(hasattr(b.states[0].btf,"DOX") and 
+                        type(b.states[0].btf.DOX) is numpy.ndarray,
+                        "Btf calculation failed")
+        self.assertFalse(numpy.isnan(b.states[0].btf.DOX).any(), "Btf is NaN")
+
+    def test_btf_calc_a10b(self):
+        testfile = 'test/tosim/bundle_a10b.inp'
         b = Bundle(testfile)
         b.readcax()
         b.new_btf()
