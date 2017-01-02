@@ -112,6 +112,7 @@ def btf_a10xm(POW3, fuetype):
 
     return DOX
 
+
 if __name__ == '__main__':
     casobj = casio()
     casobj.loadpic('caxfiles_a10xm.p')

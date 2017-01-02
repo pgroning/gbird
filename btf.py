@@ -93,13 +93,22 @@ class Btf(object):
         npst = self.bundle.cases[0].states[0].npst
         self.DOX = np.zeros((len(x), npst, npst))
 
-        voi = 50
+        fuetype = self.bundle.data.fuetype
+        if fuetype == "OPT2":
+            voi = 50
+        elif fuetype == "A10XM":
+            voi = 60
+        elif fuetype == "A10B":
+            voi = 60
+        else:
+            print "Error: BTF is not implemented for this fuel type"
 
         for i, burnup in enumerate(x):
             POW3 = self.pow3d(voi, burnup)
             self.DOX[i, :, :] = self.rfact(POW3)
         self.burnpoints = np.array(x).astype(float)
         print "Done in "+str(time.time()-tic)+" seconds."
+        Tracer()()
 
     def rfact(self, POW3):
         fuetype = self.bundle.data.fuetype
