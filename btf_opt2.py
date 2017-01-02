@@ -35,13 +35,13 @@ def node_weight(z, naxial_nodes):
     return wz
 
 
-def rfact_axial(POW):
+def rfact_axial(POW, AC):
     """Calculating axial R-factors"""
 
     # ac_obj = addc("SVEA-96")
     # AC = ac_obj.addc
-    acObj = ADDC("OPT2")
-    AC = acObj.ac
+    # acObj = ADDC("OPT2")
+    # AC = acObj.ac
 
     # Define some matrix dimensions
     nside = AC.shape[0]  # Number of side pins of the assembly
@@ -164,7 +164,7 @@ def rfact_axial(POW):
     return DOW
 
 
-def btf_opt2(POW3):
+def rfact_nodal(POW3, AC):
     """Calculating BTF for OPT2"""
 
     naxial_nodes = POW3.shape[0]  # Total number of axial nodes
@@ -234,7 +234,7 @@ def btf_opt2(POW3):
         if (node > 0) and (POW3[node, :, :] == POW3[node-1, :, :]).all():
             DOW[node, :, :] = DOW[node-1, :, :]
         else:  # Perform new calculation
-            DOW[node, :, :] = rfact_axial(POW3[node, :, :])
+            DOW[node, :, :] = rfact_axial(POW3[node, :, :], AC)
 
     # Apply mismatch-factor to FLRs only (PLRs are taken care of separately)
     for node in xrange(naxial_nodes):
@@ -342,7 +342,19 @@ def btf_opt2(POW3):
 
     return DOX
 
+
+def btf_opt2(POW3):
+    """Calculating BTF for OPT2"""
+
+    # Import addc from shared lib
+    fuetype = "OPT2"
+    acObj = ADDC(fuetype)
+    AC = acObj.ac
+    DOX = rfact_nodal(POW3, AC)
+    return DOX
+    
+
 if __name__ == '__main__':
-    casobj = casio()
-    casobj.loadpic('caxfiles.p')
-    POW3 = pow3d(casobj)
+    POW3 = sys.argv[1]
+    btf_opt2(POW3)
+    

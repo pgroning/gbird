@@ -125,7 +125,6 @@ def btf_a10xm(POW3):
 
 
 if __name__ == '__main__':
-    pass
-    # casobj = casio()
-    # casobj.loadpic('caxfiles_a10xm.p')
-    # POW3 = casobj.pow3(casobj)
+    POW3 = sys.argv[1]
+    btf_a10xm(POW3)
+    

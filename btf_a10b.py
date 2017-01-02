@@ -20,4 +20,6 @@ def btf_a10b(POW3):
     
 
 if __name__ == '__main__':
-    pass
+    POW3 = sys.argv[1]
+    btf_a10b(POW3)
+    
