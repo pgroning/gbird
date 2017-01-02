@@ -5,18 +5,18 @@ import numpy as np
 import sys
 
 from lib.libADDC import ADDC
-#sys.path.append('lib/')
-#import libADDC
-#from addc import addc
-        
+# sys.path.append('lib/')
+# import libADDC
+# from addc import addc
+
 
 def rfact_axial(POW, fuetype):
     """Calculating axial R-factors"""
-    
+
     # Import addc from shared lib
     acObj = ADDC(fuetype)
     AC = acObj.ac
-    
+
     # Define some matrix dimensions
     nside = AC.shape[0]  # Number of side pins of the assembly
     dim = nside + 2  # Pin map storage dimension
@@ -30,62 +30,62 @@ def rfact_axial(POW, fuetype):
 
     # Calculate local peaking distribution
     POD = POW/FBUN * Nhotrods
-    
+
     # Calculate square root of power
     RP = np.zeros((dim, dim), dtype=float)
-    RP[1:nside+1,1:nside+1] = np.sqrt(POD)
-    
+    RP[1:nside+1, 1:nside+1] = np.sqrt(POD)
+
     # Define Rod Weight factors
     WP = np.zeros((dim, dim), dtype=float)
     # Considered rod: wp = 1. wp(unheated rod) = 0.25 x wp(heated rod)
-    #WP2 = np.zeros((dim, dim), dtype=float)
+    # WP2 = np.zeros((dim, dim), dtype=float)
     WP[1:nside+1, 1:nside+1] = (POD > 0.0001).astype(float)
     WP[1:nside+1, 1:nside+1] += 0.25 * (POD < 0.0001).astype(float)
-    #for i in range(1,nside+1):
+    # for i in range(1,nside+1):
     #    for j in range(1,nside+1):
     #        if POD[i-1,j-1] > 0.0001:
     #            WP[i,j] = 1.0
     #        else:
     #            WP[i,j] = 0.25
-    
+
     # Calculate pinwise R-factors for fuel-rods where POW > 0
     DOW = np.zeros((nside, nside), dtype=float)
     # Side rods
     WJ = 0.1   # Weighting factor for side neighboring rods
     WK = WJ/2  # Weighting factor for diagonal neighboring rods
 
-    for i in range(1,nside+1):
-        for j in range(1,nside+1):
-            if POD[i-1,j-1] > 0.0001:
+    for i in range(1, nside+1):
+        for j in range(1, nside+1):
+            if POD[i-1, j-1] > 0.0001:
                 # Side rods
-                SJ1 = (RP[i-1,j]*WP[i-1,j] + RP[i+1,j]*WP[i+1,j] + 
-                RP[i,j-1]*WP[i,j-1] + RP[i,j+1]*WP[i,j+1])*WJ
+                SJ1 = (RP[i-1, j]*WP[i-1, j] + RP[i+1, j]*WP[i+1, j]
+                       + RP[i, j-1]*WP[i, j-1] + RP[i, j+1]*WP[i, j+1])*WJ
 
-                SJ2 = (WP[i-1,j] + WP[i+1,j] +
-                WP[i,j-1] + WP[i,j+1])*WJ*RP[i,j]
+                SJ2 = (WP[i-1, j] + WP[i+1, j]
+                       + WP[i, j-1] + WP[i, j+1])*WJ*RP[i, j]
 
-                SJ = min([SJ1,SJ2])
+                SJ = min([SJ1, SJ2])
 
                 # Diagonal rods
-                SK1 = (RP[i-1,j-1]*WP[i-1,j-1] + RP[i+1,j-1]*WP[i+1,j-1] +
-                RP[i-1,j+1]*WP[i-1,j+1] + RP[i+1,j+1]*WP[i+1,j+1])*WK
+                SK1 = (RP[i-1, j-1]*WP[i-1, j-1] + RP[i+1, j-1]*WP[i+1, j-1]
+                       + RP[i-1, j+1]*WP[i-1, j+1] + RP[i+1, j+1]
+                       * WP[i+1, j+1])*WK
 
-                SK2 = (WP[i-1,j-1] + WP[i+1,j-1] +
-                WP[i-1,j+1] + WP[i+1,j+1])*WK*RP[i,j]
+                SK2 = (WP[i-1, j-1] + WP[i+1, j-1]
+                       + WP[i-1, j+1] + WP[i+1, j+1])*WK*RP[i, j]
 
-                SK = min([SK1,SK2])
+                SK = min([SK1, SK2])
 
                 # Sum weighting factors
                 # Side rods
-                SWJ = (WP[i-1,j] + WP[i+1,j] + WP[i,j-1] + WP[i,j+1])*WJ
+                SWJ = (WP[i-1, j] + WP[i+1, j] + WP[i, j-1] + WP[i, j+1])*WJ
                 # Diagonal rods
-                SWK = (WP[i-1,j-1] + WP[i+1,j-1] + WP[i-1,j+1] + 
-                       WP[i+1,j+1])*WK
+                SWK = (WP[i-1, j-1] + WP[i+1, j-1] + WP[i-1, j+1]
+                       + WP[i+1, j+1])*WK
 
-                DOW[i-1,j-1] = (((RP[i,j] + SJ + SK)/(1.0 + SWJ + SWK)*
-                                 np.sqrt(Ntotrods/float(Nhotrods))) + 
-                                AC[i-1,j-1])
-    
+                DOW[i-1, j-1] = (((RP[i, j] + SJ + SK)/(1.0 + SWJ + SWK)
+                                  * np.sqrt(Ntotrods/float(Nhotrods)))
+                                 + AC[i-1, j-1])
     return DOW
 
 
@@ -98,7 +98,7 @@ def btf_a10xm(POW3, fuetype):
 
     # Init array
     DOW = np.zeros((naxial_nodes, nrows, ncols), dtype=float)
-    
+
     # Calculate lattice K-factors for all nodes
     # Check if old axial rfact calculation can be re-used
     for node in xrange(naxial_nodes):
@@ -116,4 +116,3 @@ if __name__ == '__main__':
     casobj = casio()
     casobj.loadpic('caxfiles_a10xm.p')
     POW3 = casobj.pow3(casobj)
-

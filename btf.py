@@ -20,17 +20,17 @@ from btf_a10xm import btf_a10xm
 
 class Btf(object):
     """Calculate BTF values"""
-    
+
     def __init__(self, bundle=None):
         self.bundle = bundle
-        #self.rfact()
-        #self.pow3d(voi=50,burnup=0)
+        # self.rfact()
+        # self.pow3d(voi=50,burnup=0)
 
-    def lastindex(self,case_id):
+    def lastindex(self, case_id):
         """Iterate over burnup points"""
         statepoints = self.bundle.cases[case_id].states[-1].statepoints
         burnup_old = 0.0
-        for idx,p in enumerate(statepoints):
+        for idx, p in enumerate(statepoints):
             if p.burnup < burnup_old:
                 break
             burnup_old = p.burnup
@@ -38,19 +38,18 @@ class Btf(object):
 
     def intersect_points(self):
         """Find intersection burnup points for all cases"""
-        
+
         segments = self.bundle.cases
         nsegments = len(segments)
         idx = self.lastindex(0)
         x = [segments[0].states[-1].statepoints[i].burnup for i in range(idx)]
-        for j in range(1,nsegments):
+        for j in range(1, nsegments):
             idx = self.lastindex(j)
             x2 = ([segments[j].states[-1].statepoints[i].burnup
                    for i in range(idx)])
             x = [val for val in x if val in x2]
         return x
 
-    
     def pow3d(self, voi, burnup):
         """Construct a 3D pin power distribution for specific void and burnup.
         Use interpolation if necessary."""
@@ -60,11 +59,11 @@ class Btf(object):
         btf_zones = self.bundle.data.btf_zones
         segments = [s for i, s in enumerate(all_segments) if btf_zones[i]]
         nodes = self.bundle.data.btf_nodes
-        
+
         nsegments = len(segments)
         npst = segments[0].states[0].npst
         POW = np.zeros((nsegments, npst, npst))
-        
+
         # determine which voids are present in data
         for i in range(nsegments):
             voivec = segments[i].states[-1].voivec
@@ -82,7 +81,7 @@ class Btf(object):
                 P1 = segments[i].states[-1].statepoints[i1].POW
                 P2 = segments[i].states[-1].statepoints[i2].POW
                 POW[i, :, :] = self.bundle.interp2(P1, P2, voi1, voi2, voi)
-        #Tracer()()
+        # Tracer()()
         POW3 = self.bundle.pow3(POW, nodes)
         return POW3
 
@@ -93,15 +92,15 @@ class Btf(object):
         x = self.intersect_points()
         npst = self.bundle.cases[0].states[0].npst
         self.DOX = np.zeros((len(x), npst, npst))
-        
+
         voi = 50
-        
+
         for i, burnup in enumerate(x):
             POW3 = self.pow3d(voi, burnup)
-            self.DOX[i,:,:] = self.rfact(POW3)
+            self.DOX[i, :, :] = self.rfact(POW3)
         self.burnpoints = np.array(x).astype(float)
         print "Done in "+str(time.time()-tic)+" seconds."
-        
+
     def rfact(self, POW3):
         fuetype = self.bundle.data.fuetype
         if fuetype == 'OPT2':
@@ -122,4 +121,3 @@ class Btf(object):
         bundle.readcax()
         b = btf.Btf(bundle)
         b.calc_btf()
-        

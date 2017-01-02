@@ -4,8 +4,8 @@ import time
 import numpy as np
 import sys
 
-#from casio import casio
-#from casdata_pts_2 import casdata
+# from casio import casio
+# from casdata_pts_2 import casdata
 
 from lib.libADDC import ADDC
 # from lib.libADDC import addc
@@ -25,6 +25,7 @@ def acc_weifun(x):
         f = 1.0
     return f
 
+
 def node_weight(z, naxial_nodes):
     x1 = 1 - (z - 1)/float(naxial_nodes)
     x2 = 1 - z/float(naxial_nodes)
@@ -33,14 +34,15 @@ def node_weight(z, naxial_nodes):
     wz = f1 - f2
     return wz
 
+
 def rfact_axial(POW):
     """Calculating axial R-factors"""
 
-    #ac_obj = addc("SVEA-96")
-    #AC = ac_obj.addc
+    # ac_obj = addc("SVEA-96")
+    # AC = ac_obj.addc
     acObj = ADDC("OPT2")
     AC = acObj.ac
-    
+
     # Define some matrix dimensions
     nside = AC.shape[0]  # Number of side pins of the assembly
     dim = nside + 2  # Pin map storage dimension
@@ -48,14 +50,14 @@ def rfact_axial(POW):
     Ntotrods = 96  # Total number of rods for SVEA-96
     # Calculate number of hot rods (POW[i,j] > 0)
     Nhotrods = sum(sum(POW > 0))
-    
+
     # Determine total power for each sub bundle
     FSUB = np.zeros(4, dtype=float)
-    FSUB[0] = sum(sum(POW[:5, :5])) # North-West quarter
-    FSUB[1] = sum(sum(POW[6:, :5])) # South-West
-    FSUB[2] = sum(sum(POW[:5, 6:])) # North-East
-    FSUB[3] = sum(sum(POW[6:, 6:])) # South-East
-    
+    FSUB[0] = sum(sum(POW[:5, :5]))  # North-West quarter
+    FSUB[1] = sum(sum(POW[6:, :5]))  # South-West
+    FSUB[2] = sum(sum(POW[:5, 6:]))  # North-East
+    FSUB[3] = sum(sum(POW[6:, 6:]))  # South-East
+
     # Normalized sub bundle power distribution
     POD = np.zeros(POW.shape, dtype=float)
     POD[:5, :5] = POW[:5, :5]/FSUB[0] * Nhotrods/4
@@ -71,83 +73,84 @@ def rfact_axial(POW):
     WP = np.zeros((dim, dim), dtype=float)
     # Weighting factors for heated rods. WP(i,j) = 1.0 if POD > 0
     WP[1:nside+1, 1:nside+1] = (POD > 0.0001).astype(float)
-    
-    #WP = np.zeros((dim, dim), dtype=float)
-    #WP[1:nside+1,1:nside+1] = np.ones((nside,nside))
+
+    # WP = np.zeros((dim, dim), dtype=float)
+    # WP[1:nside+1,1:nside+1] = np.ones((nside,nside))
     # Water cross/channel
-    #for i in range(1,nside+1):
+    # for i in range(1,nside+1):
     #    for j in range(1,nside+1):
     #        if POD[i-1,j-1] > 0.0001:
     #            WP[i,j] = 1.0
-    
+
     # PLR (modeled as cold rods)
     # For cold rods the weighting factor is 0.25 of the value of heated rod
     # in that position
     # PLR (1/3)
-    if POD[0,0] < 0.0001:
-        WP[1,1] = 0.25
-    if POD[0,10] < 0.0001:
-        WP[1,11] = 0.25
-    if POD[10,0] < 0.0001:
-        WP[11,1] = 0.25
-    if POD[10,10] < 0.0001:
-        WP[11,11] = 0.25
+    if POD[0, 0] < 0.0001:
+        WP[1, 1] = 0.25
+    if POD[0, 10] < 0.0001:
+        WP[1, 11] = 0.25
+    if POD[10, 0] < 0.0001:
+        WP[11, 1] = 0.25
+    if POD[10, 10] < 0.0001:
+        WP[11, 11] = 0.25
     # PLR (2/3)
-    if POD[3,4] < 0.0001:
-        WP[4,5] = 0.25
-    if POD[4,3] < 0.0001:
-        WP[5,4] = 0.25
-    if POD[3,6] < 0.0001:
-        WP[4,7] = 0.25
-    if POD[4,7] < 0.0001:
-        WP[5,8] = 0.25   
-    if POD[6,3] < 0.0001:
-        WP[7,4] = 0.25
-    if POD[7,4] < 0.0001:
-        WP[8,5] = 0.25
-    if POD[6,7] < 0.0001:
-        WP[7,8] = 0.25
-    if POD[7,6] < 0.0001:
-        WP[8,7] = 0.25
+    if POD[3, 4] < 0.0001:
+        WP[4, 5] = 0.25
+    if POD[4, 3] < 0.0001:
+        WP[5, 4] = 0.25
+    if POD[3, 6] < 0.0001:
+        WP[4, 7] = 0.25
+    if POD[4, 7] < 0.0001:
+        WP[5, 8] = 0.25
+    if POD[6, 3] < 0.0001:
+        WP[7, 4] = 0.25
+    if POD[7, 4] < 0.0001:
+        WP[8, 5] = 0.25
+    if POD[6, 7] < 0.0001:
+        WP[7, 8] = 0.25
+    if POD[7, 6] < 0.0001:
+        WP[8, 7] = 0.25
 
     # Calculate pinwise R-factors for fuel-rods where POW > 0
     DOW = np.zeros((nside, nside), dtype=float)
     # Side rods
     WJ = 0.25  # Weighting factor for side neighboring rods
-    WK = 0.125 # Weighting factor for diagonal neighboring rods
-    
+    WK = 0.125  # Weighting factor for diagonal neighboring rods
+
     for i in xrange(1, nside+1):
         for j in xrange(1, nside+1):
-            if POD[i-1,j-1] > 0.0001:
+            if POD[i-1, j-1] > 0.0001:
                 # Side rods
-                SJ1 = (RP[i-1,j]*WP[i-1,j] + RP[i+1,j]*WP[i+1,j] + 
-                RP[i, j-1]*WP[i,j-1] + RP[i,j+1]*WP[i,j+1])*WJ
+                SJ1 = (RP[i-1, j]*WP[i-1, j] + RP[i+1, j]*WP[i+1, j]
+                       + RP[i, j-1]*WP[i, j-1] + RP[i, j+1]*WP[i, j+1])*WJ
 
-                SJ2 = (WP[i-1,j] + WP[i+1,j] +
-                WP[i,j-1] + WP[i,j+1])*WJ*RP[i,j]
+                SJ2 = (WP[i-1, j] + WP[i+1, j]
+                       + WP[i, j-1] + WP[i, j+1])*WJ*RP[i, j]
 
-                SJ = min([SJ1,SJ2])
+                SJ = min([SJ1, SJ2])
 
                 # Diagonal rods
-                SK1 = (RP[i-1,j-1]*WP[i-1,j-1] + RP[i+1,j-1]*WP[i+1,j-1] +
-                RP[i-1,j+1]*WP[i-1,j+1] + RP[i+1,j+1]*WP[i+1,j+1])*WK
+                SK1 = (RP[i-1, j-1]*WP[i-1, j-1] + RP[i+1, j-1]*WP[i+1, j-1]
+                       + RP[i-1, j+1]*WP[i-1, j+1] + RP[i+1, j+1]
+                       * WP[i+1, j+1])*WK
 
-                SK2 = (WP[i-1,j-1] + WP[i+1,j-1] +
-                       WP[i-1,j+1] + WP[i+1,j+1])*WK*RP[i,j]
+                SK2 = (WP[i-1, j-1] + WP[i+1, j-1]
+                       + WP[i-1, j+1] + WP[i+1, j+1])*WK*RP[i, j]
 
-                SK = min([SK1,SK2])
+                SK = min([SK1, SK2])
 
                 # Sum weighting factors
                 # Side rods
-                SWJ = (WP[i-1,j] + WP[i+1,j] + WP[i,j-1] + WP[i,j+1])*WJ 
+                SWJ = (WP[i-1, j] + WP[i+1, j] + WP[i, j-1] + WP[i, j+1])*WJ
                 # Diagonal rods
-                SWK = (WP[i-1,j-1] + WP[i+1,j-1] + WP[i-1,j+1] + 
-                       WP[i+1,j+1])*WK
-                
-                DOW[i-1,j-1] = (((RP[i,j] + SJ + SK)/(1.0 + SWJ + SWK)*
-                                 np.sqrt(Ntotrods/float(Nhotrods))) +
-                                AC[i-1,j-1])
-    
+                SWK = (WP[i-1, j-1] + WP[i+1, j-1] + WP[i-1, j+1]
+                       + WP[i+1, j+1])*WK
+
+                DOW[i-1, j-1] = (((RP[i, j] + SJ + SK)/(1.0 + SWJ + SWK)
+                                  * np.sqrt(Ntotrods/float(Nhotrods)))
+                                 + AC[i-1, j-1])
+
     # Apply corner rod protection.
     # The R-factor should be increased about half of the desired CPR correction
     # crpfact = 0.02
@@ -167,9 +170,9 @@ def btf_opt2(POW3):
     naxial_nodes = POW3.shape[0]  # Total number of axial nodes
     # Number of axial nodes for PLRs (Condition: P > 0 for a pin)
     # PLR (1/3)
-    naxial_nodes_plr1 = len([1 for POW2 in POW3 if POW2[0,10] > 0.0001])
+    naxial_nodes_plr1 = len([1 for POW2 in POW3 if POW2[0, 10] > 0.0001])
     # PLR (2/3)
-    naxial_nodes_plr2 = len([1 for POW2 in POW3 if POW2[3,4] > 0.0001])
+    naxial_nodes_plr2 = len([1 for POW2 in POW3 if POW2[3, 4] > 0.0001])
 
     # naxial_nodes = 25      # Total number of nodes
     # naxial_nodes_plr1 = 9  # number of axial_nodes for 1/3 PLRs
@@ -186,7 +189,7 @@ def btf_opt2(POW3):
     M_plr2[4, 7] = M_plr2[7, 4] = M_plr2[6, 7] = M_plr2[7, 6] = 1
 
     M_flr = 1 - M_plr1 - M_plr2  # FLR map
-    
+
     # Init arrays
     nsubs = 4  # Number of sub bundles
     MF = np.zeros((naxial_nodes, nsubs), dtype=float)
@@ -197,33 +200,33 @@ def btf_opt2(POW3):
     FSUB = np.zeros(nsubs, dtype=float)
     Raxw = np.zeros((nrows, ncols))
     MFpl = np.zeros(nsubs)
-    
+
     # acObj = ADDC("OPT2")
     # AC = acObj.ac
-    
+
     # Total number of rods (POW3[0,i,j] > 0)
     # Ntotrods = 96  # Total number of rods for SVEA-96
     # Ntotrods = sum(sum(POW3[0, :, :] > 0.0001))
 
     # Calculate lattice Do-factors for all nodes
     for node in xrange(naxial_nodes):
-        
+
         # Total number of hot rods (POW[i,j] > 0)
         Nhotrods = sum(sum(POW3[node, :, :] > 0.0001))
-        
+
         # *****Mismatch factor calculation*****
-        
+
         # Determine total power for each sub bundle
-        FSUB[0] = sum(sum(POW3[node, :5, :5])) # North-West quarter
-        FSUB[1] = sum(sum(POW3[node, 6:, :5])) # South-West
-        FSUB[2] = sum(sum(POW3[node, :5, 6:])) # North-East
-        FSUB[3] = sum(sum(POW3[node, 6:, 6:])) # South-East
+        FSUB[0] = sum(sum(POW3[node, :5, :5]))  # North-West quarter
+        FSUB[1] = sum(sum(POW3[node, 6:, :5]))  # South-West
+        FSUB[2] = sum(sum(POW3[node, :5, 6:]))  # North-East
+        FSUB[3] = sum(sum(POW3[node, 6:, 6:]))  # South-East
         # Normalize sub-bundle power
         FSUB = FSUB/FSUB.mean()
-        
+
         # Calculate mismatch-factor for each sub-bundle
         MF[node, :] = -0.14 + 1.5*FSUB - 0.36*FSUB**2
-        
+
         WZ[node] = node_weight(node + 1, naxial_nodes)
 
         # Calculate lattice Do-factors for all nodes
@@ -232,7 +235,7 @@ def btf_opt2(POW3):
             DOW[node, :, :] = DOW[node-1, :, :]
         else:  # Perform new calculation
             DOW[node, :, :] = rfact_axial(POW3[node, :, :])
-            
+
     # Apply mismatch-factor to FLRs only (PLRs are taken care of separately)
     for node in xrange(naxial_nodes):
         # North-West
@@ -263,9 +266,9 @@ def btf_opt2(POW3):
                         mf = MF[node, 3]
                     DOW[node, i, j] = DOW[node, i, j] * mf
        '''
-        # Apply axial weight function
-        # WZ[z-1] = node_weight(z,naxial_nodes)
-        # Raxw += DOW*WZ
+    # Apply axial weight function
+    # WZ[z-1] = node_weight(z,naxial_nodes)
+    # Raxw += DOW*WZ
 
     # Apply average mismatch-factor (along axial-direction) for PLRs
     MF_plr = MF.mean(0)  # Take average along axial-direction
@@ -302,37 +305,37 @@ def btf_opt2(POW3):
     # DOX = np.zeros(DOW[0].shape)
     frac1 = 0.425
     frac2 = 0.25
-    
-    #frac1 = 0.337*naxial_nodes - naxial_nodes_plr1
-    #frac2 = 0.65*naxial_nodes - naxial_nodes_plr2
+
+    # frac1 = 0.337*naxial_nodes - naxial_nodes_plr1
+    # frac2 = 0.65*naxial_nodes - naxial_nodes_plr2
     for node in xrange(naxial_nodes):
         if node < (naxial_nodes_plr1 - 1):  # All rods present
             DOX += DOW[node, :, :] * WZ[node]
         elif node < (naxial_nodes_plr2 - 1):  # 2/3 PLR + FLR rods present
             DOX += DOW[node, :, :] * WZ[node] * (1 - M_plr1)
-            #for i in range(DOX.shape[0]):
+            # for i in range(DOX.shape[0]):
             #    for j in range(DOX.shape[1]):
             #        if not Mplr1[i,j]:
             #            DOX[i,j] += DOW[node, i, j] * WZ[node]
         else:  # only FLR rods present
             DOX += DOW[node, :, :] * WZ[node] * M_flr
-            #for i in range(DOX.shape[0]):
+            # for i in range(DOX.shape[0]):
             #    for j in range(DOX.shape[1]):
             #        if Mflr[i,j]:
             #            DOX[i,j] += DOW[z,i,j]*WZ[z]
-        
+
         # Account for the fact that the heated length top part of PLRs is
         # within the node.
         if node == (naxial_nodes_plr1 - 1):  # 1/3 PLR is within the node
             DOX += DOW[node, :, :] * WZ[node] * M_plr1 * frac1
-            #for i in range(DOX.shape[0]):
+            # for i in range(DOX.shape[0]):
             #    for j in range(DOX.shape[1]):
             #        if Mplr1[i,j]:
             #            DOX[i,j] += DOW[z,i,j]*WZ[z]*frac1
-            
+
         if node == (naxial_nodes_plr2 - 1):  # 2/3 PLR is within the node
             DOX += DOW[node, :, :] * WZ[node] * M_plr2 * frac2
-            #for i in range(DOX.shape[0]):
+            # for i in range(DOX.shape[0]):
             #    for j in range(DOX.shape[1]):
             #        if Mplr2[i,j]:
             #            DOX[i,j] += DOW[z,i,j]*WZ[z]*frac2
@@ -343,4 +346,3 @@ if __name__ == '__main__':
     casobj = casio()
     casobj.loadpic('caxfiles.p')
     POW3 = pow3d(casobj)
-    #Tracer()()

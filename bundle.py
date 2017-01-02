@@ -51,13 +51,13 @@ class Bundle(object):
     def __init__(self, inpfile=None):
         self.data = DataStruct()
         self.cases = []
-        #self.btf = Btf(self)
+        # self.btf = Btf(self)
         self.states = []
         self.states.append(DataStruct())
 
         if inpfile:
             self.readinp(inpfile)
-            
+
         # self.readinpfile(inpfile)
         # self.readcas()
         # self.savecasobj()
@@ -65,7 +65,7 @@ class Bundle(object):
         # self.interp2(P1,P2,x1,x2,x)
 
     def readinp(self, cfgfile):
- 
+
         config = ConfigParser.ConfigParser()
         try:
             if not config.read(cfgfile):
@@ -74,13 +74,13 @@ class Bundle(object):
         except:
             print "An error occured trying to read the file '" + cfgfile + "'"
             return
-            
+
         # Get fuel type
         self.data.fuetype = config.get("Bundle", "fuetype")
         if self.data.fuetype not in ('A10XM', 'A10B', 'AT11', 'OPT2', 'OPT3'):
             print("Error: Unknown fuel type.")
             return
-        
+
         # cax files
         files = config.get("Bundle", "files")
         self.data.caxfiles = filter(None, re.split("\n", files))
@@ -105,7 +105,7 @@ class Bundle(object):
         else:
             self.data.btf_zones = [1] * len(self.data.nodes)
             self.data.btf_nodes = self.data.nodes
-    
+
     '''
     def readinp(self, inpfile):
         if not os.path.isfile(inpfile):
@@ -134,7 +134,7 @@ class Bundle(object):
                     return
             else:
                 break
-        
+
         nodes = map(int, re.split('\s+', flines[i+1]))
         if i != len(nodes):
             print "Error: Invalid node list."
@@ -177,11 +177,11 @@ class Bundle(object):
         #     self.cases.append(case)
 
     def new_calc(self, voi=None, maxdep=None, depthres=None, refcalc=False,
-              grid=True, model='c3', box_offset=0, neulib=False):
+                 grid=True, model='c3', box_offset=0, neulib=False):
 
         self.states.append(DataStruct)
         # ----Code block only for testing purpose-----
-        #if not refcalc:
+        # if not refcalc:
         #    for i in range(len(self.cases)):
         #        LFU = self.cases[i].states[0].LFU
         #        self.cases[i].add_calc(LFU)
@@ -192,7 +192,7 @@ class Bundle(object):
         for case in self.cases:
             inlist.append((case, voi, maxdep, depthres, refcalc, grid,
                            model, box_offset, neulib))
-        
+
         # quickcalc_fun(inlist[1])
         n = len(self.cases)  # Number of threads
         p = Pool(n)  # Make the Pool of workers
@@ -229,22 +229,22 @@ class Bundle(object):
         nstates = len(self.cases[0].states)
         while len(self.states) < nstates:
             self.states.append(DataStruct())
-        
+
         self.states[-1].btf = Btf(self)
         self.states[-1].btf.calc_btf()
-        
+
     def ave_enr(self):
         """The method calculates the average enrichment of the bundle.
         This algorithm is likely naive and needs to be updated in the future"""
 
         nodelist = self.data.nodes
-        #nodelist.insert(0, 0)  # prepend 0
-        #nodes = np.array(nodelist)
+        # nodelist.insert(0, 0)  # prepend 0
+        # nodes = np.array(nodelist)
         nodes = np.array([0]+nodelist)  # prepend 0
         dn = np.diff(nodes)
-        #Tracer()()
+        # Tracer()()
         enrlist = [case.states[-1].ave_enr for case in self.cases]
-        #Tracer()()
+        # Tracer()()
         seg_enr = np.array(enrlist)
 
         ave_enr = sum(seg_enr*dn) / sum(dn)
@@ -260,7 +260,7 @@ class Bundle(object):
         # powlist = [arg for arg in args]
         # xdim = powlist[0].shape[0]
         # ydim = powlist[0].shape[1]
-        #nodes = self.data.nodes
+        # nodes = self.data.nodes
         zdim = max(nodes)
         POW3 = np.zeros((zdim, xdim, ydim))
         z0 = 0

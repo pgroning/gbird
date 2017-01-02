@@ -1,6 +1,6 @@
 # python test/test_bundle.py
 #
-
+from IPython.core.debugger import Tracer
 import sys
 if sys.version_info < (2, 7):
     import unittest2 as unittest
@@ -81,6 +81,7 @@ class UnitTest(unittest.TestCase):
         self.assertTrue(hasattr(b.states[0].btf,"DOX") and 
                         type(b.states[0].btf.DOX) is numpy.ndarray,
                         "Btf calculation failed")
+        self.assertFalse(numpy.isnan(b.states[0].btf.DOX).any(), "Btf is NaN")
 
     def test_new_btf_calc(self):
         testfile = 'test/tosim/bundle_opt2.inp'
@@ -92,6 +93,7 @@ class UnitTest(unittest.TestCase):
         self.assertTrue(type(b.states[0].btf.DOX) is numpy.ndarray and 
                         type(b.states[1].btf.DOX) is numpy.ndarray,
                         "new btf calculation failed")
+        self.assertFalse(numpy.isnan(b.states[1].btf.DOX).any(), "Btf is NaN")
 
 if __name__ == '__main__':
     unittest.main()
