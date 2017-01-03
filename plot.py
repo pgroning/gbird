@@ -1,15 +1,18 @@
 """
-This is the plot window
+This is the 2D plot window
+This window embeds a matplotlib (mpl) plot into a PyQt4 GUI application
 """
 
-from IPython.core.debugger import Tracer
+from IPython.core.debugger import Tracer  # Set tracepoints
+from pyqt_trace import pyqt_trace  # Set a tracepoint that works with Qt
 
-import sys, os#, random
+import sys
+import os
+import numpy as np
+
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 #from PyQt4 import QtGui, QtCore
-
-import numpy as np
 
 import matplotlib
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
@@ -19,8 +22,7 @@ except:
     from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 
-
-from casio import casio
+from bundle import Bundle
 
 class PlotWin(QMainWindow):
     def __init__(self, parent=None):

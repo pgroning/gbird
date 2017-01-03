@@ -4,15 +4,17 @@ This is the main window of the program.
 This window embeds a matplotlib (mpl) plot into a PyQt4 GUI application
 """
 
-from IPython.core.debugger import Tracer
-from pyqt_trace import pyqt_trace
+from IPython.core.debugger import Tracer  # Set tracepoint (used for debugging)
+from pyqt_trace import pyqt_trace  # Set a tracepoint that works with Qt
 
-import sys, os#, random
+import sys
+import os 
+import time
+import numpy as np
+
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-#from PyQt4 import QtGui, QtCore
-
-import numpy as np
+# from PyQt4 import QtGui, QtCore
 
 import matplotlib
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
@@ -20,16 +22,16 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 #from matplotlib.patches import FancyBboxPatch
 import matplotlib.patches as mpatches
-try: import matplotlib.patheffects as path_effects
-except: pass
-import time
+try:  # patheffects not available for older versions of matplotlib
+    import matplotlib.patheffects as path_effects
+except:
+    pass
 
-from casio import casio
-from btf import btf
-
-#from pyDraw import Bundle
-from plot_gui import PlotWin
+from bundle import Bundle
+from btf import Btf
+from plot import PlotWin
 from progbar import ProgressBar
+
 
 class dataThread(QThread):
     def __init__(self,parent):
@@ -114,13 +116,14 @@ class cpin(object):
             return True
         else:
             return False
-        
-        
+
+
 class MainWin(QMainWindow):
 #class AppForm(QMainWindow):
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
         self.setWindowTitle('Main Window')
+        
         #self.resize(1100,620)
         #self.move(200,200)
         
@@ -135,10 +138,9 @@ class MainWin(QMainWindow):
         #self.resize( screenShape.width()*0.8,screenShape.width()*0.445 )
         #self.setMinimumWidth(1100)
         #self.setMinimumHeight(610)
-        #Tracer()()
 
         self.resizeEvent = self.on_resize
-
+        Tracer()()
         # Retrieve initial data
         #self.data_init()
         #self.case_id_current = 0
