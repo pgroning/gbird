@@ -5,7 +5,9 @@ This window embeds a matplotlib (mpl) plot into a PyQt4 GUI application
 """
 
 from IPython.core.debugger import Tracer  # Set tracepoint (used for debugging)
+# Usage: Tracer()()
 from pyqt_trace import pyqt_trace  # Set a tracepoint that works with Qt
+# Usage: pyqt_trace()
 
 import sys
 import os 
@@ -31,6 +33,8 @@ from bundle import Bundle
 from btf import Btf
 from plot import PlotWin
 from progbar import ProgressBar
+#from map_s96 import s96o2
+#from map_a10 import a10xm
 
 
 class dataThread(QThread):
@@ -118,8 +122,8 @@ class cpin(object):
             return False
 
 
+        
 class MainWin(QMainWindow):
-#class AppForm(QMainWindow):
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
         self.setWindowTitle('Main Window')
@@ -140,7 +144,7 @@ class MainWin(QMainWindow):
         #self.setMinimumHeight(610)
 
         self.resizeEvent = self.on_resize
-        Tracer()()
+        
         # Retrieve initial data
         #self.data_init()
         #self.case_id_current = 0
@@ -149,10 +153,10 @@ class MainWin(QMainWindow):
         self.create_toolbar()
         self.create_main_frame()
         self.create_status_bar()
-
+        
         self.on_draw() # Init plot
         #self.draw_fuelmap()
-
+        #Tracer()()
         #self.textbox.setText('1 2 3 4')
         #self.data_init()
         
@@ -800,8 +804,8 @@ class MainWin(QMainWindow):
         """ Draw fuel map
         """
         #print "draw fuel map"
-        from map_s96o2 import s96o2
-        from map_a10xm import a10xm
+        from map_s96 import s96o2
+        from map_a10 import a10xm
 
         #print "draw fuel map"
         self.fig.set_facecolor((1,1,0.8784))
@@ -1230,7 +1234,6 @@ class MainWin(QMainWindow):
 def main():
     app = QApplication(sys.argv)
     window = MainWin()
-    #window = AppForm()
     window.show()
     #app.exec_()
     sys.exit(app.exec_())

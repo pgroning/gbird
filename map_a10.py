@@ -1,7 +1,8 @@
 import matplotlib.patches as mpatches
-from main_gui import cpin
-#from main_gui import Circle
 import numpy as np
+
+from gbird import cpin
+
 
 def a10xm(self):
     
