@@ -272,6 +272,14 @@ class MainWin(QMainWindow):
             self.bundle.readinp(filename)
             self.bundle.readcax()  # readcax("all") reads the whole file content
             self.bundle.new_btf()
+
+            print "init pinobjects"
+            self.init_pinobjects()
+            
+            self.fig_update()
+            self.canvas.draw()
+            #self.axes.clear()
+            #self.draw_fuelmap()
             
             #pyqt_trace()
             
@@ -338,11 +346,11 @@ class MainWin(QMainWindow):
             
     def init_pinobjects(self):
         self.pinobjects = []
-        ncases = len(self.dataobj.cases)
+        ncases = len(self.bundle.cases)
         for case_num in range(ncases):
-            LFU = self.dataobj.cases[case_num].data.LFU
-            ENR = self.dataobj.cases[case_num].data.ENR
-            BA = self.dataobj.cases[case_num].data.BA
+            LFU = self.bundle.cases[case_num].states[-1].LFU
+            ENR = self.bundle.cases[case_num].states[-1].ENR
+            BA = self.bundle.cases[case_num].states[-1].BA
             pinlist = []
             for i in range(LFU.shape[0]):
                 for j in range(LFU.shape[1]):
@@ -768,16 +776,15 @@ class MainWin(QMainWindow):
 #        self.dataobj.cases[case_num].pertcalc()
 
         
-
         #pyqt_trace()
 
     def fig_update(self):
         """ Redraw figure and update values
         """
-        #self.on_draw()
+        ##self.on_draw()
         self.axes.clear()
         self.draw_fuelmap()
-        self.set_pinvalues()
+        #self.set_pinvalues()
 
     def on_draw(self):
         """ Setup the figure axis
@@ -862,11 +869,15 @@ class MainWin(QMainWindow):
         p_fancy.set_linewidth(4.0)
         self.axes.add_patch(p_fancy)
         
-        if self.dataobj.data.fuetype == 'SVEA-96':
+        if self.bundle.data.fuetype == 'OPT2':
             s96o2(self)
-        elif self.dataobj.data.fuetype == 'A10XM':
+        elif self.bundle.data.fuetype == 'OPT3':
+            s96o2(self)
+        elif self.bundle.data.fuetype == 'A10XM':
             a10xm(self)
- 
+        elif self.bundle.data.fuetype == 'A10B':
+            a10xm(self)
+            
         # Draw symmetry line
         #pp = [[0.035, 0.965], [0.965, 0.035]]
         #poly = mpatches.Polygon(pp)

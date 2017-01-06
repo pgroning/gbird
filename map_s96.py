@@ -1,3 +1,5 @@
+from pyqt_trace import pyqt_trace
+
 import matplotlib.patches as mpatches
 import numpy as np
 
@@ -55,7 +57,9 @@ def s96o2(self):
 
     # Draw enrichment levels
     case_num = int(self.case_cbox.currentIndex())
-    FUE = self.dataobj.cases[case_num].data.FUE
+    #pyqt_trace()
+    #FUE = self.dataobj.cases[case_num].data.FUE
+    FUE = self.bundle.cases[case_num].states[-1].FUE
     enr_levels  = FUE[:,2]
     enr_ba = FUE[:,4]
     #print enr_levels, enr_ba
@@ -115,13 +119,16 @@ def s96o2(self):
         self.enrpinlist.append(enrobj)
 
     # Print average enrichment
-    ave_enr = self.dataobj.cases[case_num].data.ave_enr
+    #ave_enr = self.dataobj.cases[case_num].data.ave_enr
+    ave_enr = self.bundle.cases[case_num].states[-1].ave_enr
     self.axes.text(1.02,0.05,"%.3f %%U-235" % ave_enr,fontsize=8)
     
     # Draw pin circles
-    npst = self.dataobj.cases[case_num].data.npst
-    LFU = self.dataobj.cases[case_num].data.LFU
-    # Remove water cross
+    #npst = self.dataobj.cases[case_num].data.npst
+    npst = self.bundle.cases[case_num].states[-1].npst
+    #LFU = self.dataobj.cases[case_num].data.LFU
+    LFU = self.bundle.cases[case_num].states[-1].LFU
+    # Remove water cross rows and columns
     LFU = np.delete(LFU, (5), axis=0) # Delete row 6
     LFU = np.delete(LFU, (5), axis=1) # Delete col 6
     #i = [i for i in range(LFU.shape[0]) if np.all(LFU[i,:]==0)][0]
