@@ -254,17 +254,28 @@ class MainWin(QMainWindow):
 #        print 'killed'
 
     def read_cax(self,filename):
-        msg = """ Click Yes to start importing data from cax files.
+        msg = """Click Yes to start importing data from cax files.
          
-         This may take a while. Continue?
+        Continue?
         """
         msgBox = QMessageBox()
-        ret = msgBox.information(self,"Importing data",msg.strip(),QMessageBox.Yes|QMessageBox.Cancel)
+        ret = msgBox.information(self, "Importing data", msg.strip(),
+                                 QMessageBox.Yes|QMessageBox.Cancel)
         #ret = msgBox.question(self,"Importing data",msg.strip(),QMessageBox.Yes|QMessageBox.Cancel)
         self.statusBar().showMessage('Importing data from %s' % filename, 2000)
         self._filename = filename
         if ret == QMessageBox.Yes:
 
+            print "importing data"
+            
+            self.bundle = Bundle()
+            self.bundle.readinp(filename)
+            self.bundle.readcax()  # readcax("all") reads the whole file content
+            self.bundle.new_btf()
+            
+            #pyqt_trace()
+            
+            '''
             #self.progressbar = ProgressBar()
 
             #self.dataobj = casio()
@@ -305,6 +316,7 @@ class MainWin(QMainWindow):
             #self.draw_fuelmap()
             #self.set_pinvalues()
             #self.dataobj.savecas()
+            '''
         else:
             return
 

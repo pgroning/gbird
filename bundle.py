@@ -295,10 +295,11 @@ class Bundle(object):
 
 
 if __name__ == '__main__':
-    cio = casio()
-    cio.readinp(sys.argv[1])
-    cio.readcax()
-    cio.runc3()
+    pass
+    #cio = casio()
+    #cio.readinp(sys.argv[1])
+    #cio.readcax()
+    #cio.runc3()
 
     '''
     P1 = sys.argv[1]
