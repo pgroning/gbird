@@ -57,9 +57,11 @@ def s96o2(self):
 
     # Draw enrichment levels
     case_num = int(self.case_cbox.currentIndex())
+    state_num = -1
+    
     #pyqt_trace()
     #FUE = self.dataobj.cases[case_num].data.FUE
-    FUE = self.bundle.cases[case_num].states[-1].FUE
+    FUE = self.bundle.cases[case_num].states[state_num].FUE
     enr_levels  = FUE[:,2]
     enr_ba = FUE[:,4]
     #print enr_levels, enr_ba
@@ -120,14 +122,14 @@ def s96o2(self):
 
     # Print average enrichment
     #ave_enr = self.dataobj.cases[case_num].data.ave_enr
-    ave_enr = self.bundle.cases[case_num].states[-1].ave_enr
+    ave_enr = self.bundle.cases[case_num].states[state_num].ave_enr
     self.axes.text(1.02,0.05,"%.3f %%U-235" % ave_enr,fontsize=8)
     
     # Draw pin circles
     #npst = self.dataobj.cases[case_num].data.npst
-    npst = self.bundle.cases[case_num].states[-1].npst
+    npst = self.bundle.cases[case_num].states[state_num].npst
     #LFU = self.dataobj.cases[case_num].data.LFU
-    LFU = self.bundle.cases[case_num].states[-1].LFU
+    LFU = self.bundle.cases[case_num].states[state_num].LFU
     # Remove water cross rows and columns
     LFU = np.delete(LFU, (5), axis=0) # Delete row 6
     LFU = np.delete(LFU, (5), axis=1) # Delete col 6

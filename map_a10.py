@@ -18,7 +18,10 @@ def a10xm(self):
 
     # Draw enrichment levels
     case_num = int(self.case_cbox.currentIndex())
-    FUE = self.dataobj.cases[case_num].data.FUE
+    state_num = -1
+
+    #FUE = self.dataobj.cases[case_num].data.FUE
+    FUE = self.bundle.cases[case_num].states[state_num].FUE
     enr_levels  = FUE[:,2]
     enr_ba = FUE[:,4]
     #print enr_levels, enr_ba
@@ -74,7 +77,8 @@ def a10xm(self):
         self.enrpinlist.append(enrobj)
 
     # Print average enrichment
-    ave_enr = self.dataobj.cases[case_num].data.ave_enr
+    #ave_enr = self.dataobj.cases[case_num].data.ave_enr
+    ave_enr = self.bundle.cases[case_num].states[state_num].ave_enr
     self.axes.text(1.02,0.05,"%.3f %%U-235" % ave_enr,fontsize=8)
 
     # List of pin coordinates
@@ -82,9 +86,11 @@ def a10xm(self):
     self.ylist  = ('A','B','C','D','E','F','G','H','I','J')
     
     # Draw pin circles
-    npst = self.dataobj.cases[case_num].data.npst
-    LFU = self.dataobj.cases[case_num].data.LFU
-
+    #npst = self.dataobj.cases[case_num].data.npst
+    npst = self.bundle.cases[case_num].states[state_num].npst
+    #LFU = self.dataobj.cases[case_num].data.LFU
+    LFU = self.bundle.cases[case_num].states[state_num].LFU
+    
     pin_radius = 0.028*1.1
     pin_delta = 0.083
 
