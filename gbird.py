@@ -369,6 +369,7 @@ class MainWin(QMainWindow):
         param_str = str(self.param_cbox.currentText())
         case_num = int(self.case_cbox.currentIndex())
         point_num = int(self.point_sbox.value())
+        state_num = -1
         #print param_str,case_num,point_num
 
         #self.table.setHorizontalHeaderItem(1,QTableWidgetItem(param_str))
@@ -380,13 +381,21 @@ class MainWin(QMainWindow):
         #    else:
         #        pinvalues = getattr(self.dataobj.cases[case_num].statepts[point_num],param_str)
         #    #print pinvalues
-
-        ENR = getattr(self.dataobj.cases[case_num].data,'ENR')
-        EXP = getattr(self.dataobj.cases[case_num].statepts[point_num],'EXP')
-        FINT = getattr(self.dataobj.cases[case_num].statepts[point_num],'POW')
+        
+        #ENR = getattr(self.dataobj.cases[case_num].data,'ENR')
+        ENR = self.bundle.cases[case_num].states[state_num].ENR
+        #EXP = getattr(self.dataobj.cases[case_num].statepts[point_num],'EXP')
+        EXP = (self.bundle.cases[case_num].states[state_num].
+               statepoints[point_num].EXP)
+        #FINT = getattr(self.dataobj.cases[case_num].statepts[point_num],'POW')
+        FINT = (self.bundle.cases[case_num].states[state_num].
+                statepoints[point_num].POW)
         #BTF = self.dataobj.btf.DOX[point_num,:,:]
-
-        burnup = self.dataobj.cases[case_num].statepts[point_num].burnup
+        
+        #burnup = self.dataobj.cases[case_num].statepts[point_num].burnup
+        burnup = (self.bundle.cases[case_num].states[state_num].
+                  statepoints[point_num].burnup)
+        pyqt_trace()
         try:
             btf_num = next(i for i,x in enumerate(self.dataobj.btf.burnpoints) if x == burnup)
             BTF = self.dataobj.btf.DOX[btf_num,:,:]
@@ -784,7 +793,7 @@ class MainWin(QMainWindow):
         ##self.on_draw()
         self.axes.clear()
         self.draw_fuelmap()
-        #self.set_pinvalues()
+        self.set_pinvalues()
 
     def on_draw(self):
         """ Setup the figure axis
