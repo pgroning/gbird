@@ -6,7 +6,8 @@ This window embeds a matplotlib (mpl) plot into a PyQt4 GUI application
 
 from IPython.core.debugger import Tracer  # Set tracepoint (used for debugging)
 # Usage: Tracer()()
-from pyqt_trace import pyqt_trace  # Set a tracepoint that works with Qt
+ # Set a tracepoint that works with Qt
+from pyqt_trace import pyqt_trace as qtrace 
 # Usage: pyqt_trace()
 
 import sys
@@ -172,15 +173,30 @@ class MainWin(QMainWindow):
         self.axes.set_ylim(0,1)
 
     def openFile(self):
+
+        # Import default path from config file
+        self.settings.beginGroup("PATH")
+        path_default = self.settings.value("path_default",
+                                           QString("")).toString()
+        self.settings.endGroup()
         #file_choices = "inp (*.inp);;pickle (*.p)"
         file_choices = "Data files (*.inp *.p)"
-        filename = unicode(QFileDialog.getOpenFileName(self, 'Open file', '', file_choices))
+        filename = unicode(QFileDialog.getOpenFileName(self, 'Open file',
+                                                       path_default,
+                                                       file_choices))
         if filename:
+            # Save default path to config file
+            path = os.path.split(filename)[0]
+            self.settings.beginGroup("PATH")
+            self.settings.setValue("path_default", QString(path))
+            self.settings.endGroup()
+            
             filext = os.path.splitext(filename)[1]
             if filext == ".p":
                 self.load_pickle(filename)
             elif filext == ".inp":
                 self.read_cax(filename)
+        
 
     def load_pickle(self,filename):
         self.statusBar().showMessage('Importing data from %s' % filename, 2000)
@@ -395,67 +411,49 @@ class MainWin(QMainWindow):
         #burnup = self.dataobj.cases[case_num].statepts[point_num].burnup
         burnup = (self.bundle.cases[case_num].states[state_num].
                   statepoints[point_num].burnup)
-        pyqt_trace()
-        try:
-            btf_num = next(i for i,x in enumerate(self.dataobj.btf.burnpoints) if x == burnup)
-            BTF = self.dataobj.btf.DOX[btf_num,:,:]
+        btf_burnpoints = self.bundle.states[state_num].btf.burnpoints
+        try:  # is BTF calculated for the specific burnup?
+            btf_num = next(i for i, x in
+                           enumerate(btf_burnpoints) if x == burnup)
+            BTF = self.bundle.states[state_num].btf.DOX[btf_num,:,:]
         except:
-            BTF = np.zeros(np.shape(self.dataobj.btf.DOX)[1:])
+            BTF = np.zeros(np.shape(self.bundle.states[state_num].btf.DOX)[1:])
             BTF.fill(np.nan)
+        
+        npst = self.bundle.cases[case_num].states[state_num].npst
+        LFU = self.bundle.cases[case_num].states[state_num].LFU
+        BA = self.bundle.cases[case_num].states[state_num].BA
 
-        npst = self.dataobj.cases[case_num].data.npst
-        LFU = self.dataobj.cases[case_num].data.LFU
-        BA = self.dataobj.cases[case_num].data.BA
-
-        self.table.sortItems(0,Qt.AscendingOrder) # Sorting column 0 in ascending order
+        # Sorting table column 0 in ascending order
+        self.table.sortItems(0,Qt.AscendingOrder)
         self.setpincoords()
- 
+        
         #pyqt_trace()
         #row = 0
         k = 0
         for i in range(npst):
             for j in range(npst):
                 if LFU[i,j] > 0:
-                #if j != 5 and i !=5:
-                #    if not ((i==4 and j==4) or (i==4 and j==6) or (i==6 and j==4) or (i==6 and j==6)):
-                        #print i,j
-                        #print self.circlelist[k].text.get_text()
+                    #print i,j
                     self.pinobjects[case_num][k].EXP = EXP[i,j]
                     self.pinobjects[case_num][k].FINT = FINT[i,j]
                     self.pinobjects[case_num][k].BTF = BTF[i,j]
-                    #self.circlelist[k].ENR = ENR[i,j]
-                    #self.circlelist[k].EXP = EXP[i,j]
-                    #self.circlelist[k].FINT = FINT[i,j]
-                    #self.circlelist[k].BA = BA[i,j]
-                    #self.circlelist[k].BTF = BTF[i,j]
-                    #k += 1
-                    #expval = QTableWidgetItem().setData(Qt.DisplayRole,EXP[i,j])
-                    #self.table.setItem(row,1,expval)
+                    
                     expItem = QTableWidgetItem()
-                    expItem.setData(Qt.EditRole, QVariant(float(np.round(EXP[i,j],3))))
+                    expItem.setData(Qt.EditRole,
+                                    QVariant(float(np.round(EXP[i,j],3))))
                     fintItem = QTableWidgetItem()
-                    fintItem.setData(Qt.EditRole, QVariant(float(np.round(FINT[i,j],3))))
+                    fintItem.setData(Qt.EditRole,
+                                     QVariant(float(np.round(FINT[i,j],3))))
                     btfItem = QTableWidgetItem()
-                    btfItem.setData(Qt.EditRole, QVariant(float(np.round(BTF[i,j],3))))    
+                    btfItem.setData(Qt.EditRole,
+                                    QVariant(float(np.round(BTF[i,j],3))))    
 
                     self.table.setItem(k,1,expItem)
                     self.table.setItem(k,2,fintItem)
                     self.table.setItem(k,3,btfItem)
                     k += 1
-                    
-                    #self.table.setItem(row,1,expItem)
-                    #self.table.setItem(row,2,fintItem)
-                    #self.table.setItem(row,3,btfItem)
-
-                        #item.setData(Qt.EditRole, QVariant(float(FINT[i,j])))
-                        #self.table.setItem(row,2,item)
-                        #self.table.setItem(row,1,QTableWidgetItem(str(EXP[i,j])))
-                        #self.table.setItem(row,2,QTableWidgetItem(str(FINT[i,j])))
-                    #self.table.setItem(row,3,QTableWidgetItem(str(0)))
-                #if j != 5 and i !=5: # Ignore water cross
-                #if not (np.all(LFU[i,:]==0) or np.all(LFU[:,j]==0)): # Ignore water cross
-                #    row += 1
-        
+        qtrace()
         burnup = self.dataobj.cases[case_num].statepts[point_num].burnup
         voi = self.dataobj.cases[case_num].statepts[point_num].voi
         vhi = self.dataobj.cases[case_num].statepts[point_num].vhi
