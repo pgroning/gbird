@@ -397,20 +397,19 @@ class MainWin(QMainWindow):
         #    else:
         #        pinvalues = getattr(self.dataobj.cases[case_num].statepts[point_num],param_str)
         #    #print pinvalues
+
+        state = self.bundle.cases[case_num].states[state_num]
         
         #ENR = getattr(self.dataobj.cases[case_num].data,'ENR')
-        ENR = self.bundle.cases[case_num].states[state_num].ENR
+        ENR = state.ENR
         #EXP = getattr(self.dataobj.cases[case_num].statepts[point_num],'EXP')
-        EXP = (self.bundle.cases[case_num].states[state_num].
-               statepoints[point_num].EXP)
+        EXP = state.statepoints[point_num].EXP
         #FINT = getattr(self.dataobj.cases[case_num].statepts[point_num],'POW')
-        FINT = (self.bundle.cases[case_num].states[state_num].
-                statepoints[point_num].POW)
+        FINT = state.statepoints[point_num].POW
         #BTF = self.dataobj.btf.DOX[point_num,:,:]
         
         #burnup = self.dataobj.cases[case_num].statepts[point_num].burnup
-        burnup = (self.bundle.cases[case_num].states[state_num].
-                  statepoints[point_num].burnup)
+        burnup = state.statepoints[point_num].burnup
         btf_burnpoints = self.bundle.states[state_num].btf.burnpoints
         try:  # is BTF calculated for the specific burnup?
             btf_num = next(i for i, x in
@@ -420,16 +419,14 @@ class MainWin(QMainWindow):
             BTF = np.zeros(np.shape(self.bundle.states[state_num].btf.DOX)[1:])
             BTF.fill(np.nan)
         
-        npst = self.bundle.cases[case_num].states[state_num].npst
-        LFU = self.bundle.cases[case_num].states[state_num].LFU
-        BA = self.bundle.cases[case_num].states[state_num].BA
+        npst = state.npst
+        LFU = state.LFU
+        BA = state.BA
 
         # Sorting table column 0 in ascending order
         self.table.sortItems(0,Qt.AscendingOrder)
         self.setpincoords()
         
-        #pyqt_trace()
-        #row = 0
         k = 0
         for i in range(npst):
             for j in range(npst):
@@ -453,23 +450,28 @@ class MainWin(QMainWindow):
                     self.table.setItem(k,2,fintItem)
                     self.table.setItem(k,3,btfItem)
                     k += 1
-        qtrace()
-        burnup = self.dataobj.cases[case_num].statepts[point_num].burnup
-        voi = self.dataobj.cases[case_num].statepts[point_num].voi
-        vhi = self.dataobj.cases[case_num].statepts[point_num].vhi
-        kinf = self.dataobj.cases[case_num].statepts[point_num].kinf
-        fint = self.dataobj.cases[case_num].statepts[point_num].fint
+        
+        statepoint = state.statepoints[point_num]
+        #burnup = self.dataobj.cases[case_num].statepts[point_num].burnup
+        burnup = statepoint.burnup
+        #voi = self.dataobj.cases[case_num].statepts[point_num].voi
+        voi = statepoint.voi
+        #vhi = self.dataobj.cases[case_num].statepts[point_num].vhi
+        vhi = statepoint.vhi
+        #kinf = self.dataobj.cases[case_num].statepts[point_num].kinf
+        kinf = statepoint.kinf
+        #fint = self.dataobj.cases[case_num].statepts[point_num].fint
+        fint = statepoint.fint
         btf = BTF.max()
-        tfu = self.dataobj.cases[case_num].statepts[point_num].tfu
-        tmo = self.dataobj.cases[case_num].statepts[point_num].tmo
-
+        #tfu = self.dataobj.cases[case_num].statepts[point_num].tfu
+        tfu = statepoint.tfu
+        #tmo = self.dataobj.cases[case_num].statepts[point_num].tmo
+        tmo = statepoint.tmo
+        
         self.statusBar().showMessage("Burnup=%.3f : VOI=%.0f : VHI=%.0f : Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f" 
                                      % (burnup,voi,vhi,kinf,fint,btf,tfu,tmo))
-
-        #if param_str == 'ENR':
-            # Print pin ENR
+        qtrace()
         npins = len(self.pinobjects[case_num])
-        #npins = len(self.circlelist)
         
         for i in range(npins):
             
