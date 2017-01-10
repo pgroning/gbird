@@ -411,13 +411,22 @@ class MainWin(QMainWindow):
         #burnup = self.dataobj.cases[case_num].statepts[point_num].burnup
         burnup = state.statepoints[point_num].burnup
         btf_burnpoints = self.bundle.states[state_num].btf.burnpoints
-        try:  # is BTF calculated for the specific burnup?
-            btf_num = next(i for i, x in
-                           enumerate(btf_burnpoints) if x == burnup)
+        
+        index_array = np.where(btf_burnpoints == burnup)[0]
+        if len(index_array) > 0:  # is BTF calculated for the specific burnup?
+            btf_num = index_array[0]
             BTF = self.bundle.states[state_num].btf.DOX[btf_num,:,:]
-        except:
+        else:
             BTF = np.zeros(np.shape(self.bundle.states[state_num].btf.DOX)[1:])
             BTF.fill(np.nan)
+
+        #try:  # is BTF calculated for the specific burnup?
+        #    btf_num = next(i for i, x in
+        #                   enumerate(btf_burnpoints) if x == burnup)
+        #    BTF = self.bundle.states[state_num].btf.DOX[btf_num,:,:]
+        #except:
+        #    BTF = np.zeros(np.shape(self.bundle.states[state_num].btf.DOX)[1:])
+        #    BTF.fill(np.nan)
         
         npst = state.npst
         LFU = state.LFU
@@ -470,49 +479,35 @@ class MainWin(QMainWindow):
         
         self.statusBar().showMessage("Burnup=%.3f : VOI=%.0f : VHI=%.0f : Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f" 
                                      % (burnup,voi,vhi,kinf,fint,btf,tfu,tmo))
-        qtrace()
+        
         npins = len(self.pinobjects[case_num])
         
-        for i in range(npins):
+        for i in xrange(npins):
             
-            if self.pinobjects[case_num][i].BA == 0:
-                j = next(j for j,cobj in enumerate(self.enrpinlist) if cobj.ENR == self.pinobjects[case_num][i].ENR)
+            if self.pinobjects[case_num][i].BA < 0.00001:
+                j = next(j for j, enrpin in enumerate(self.enrpinlist) 
+                         if enrpin.ENR == self.pinobjects[case_num][i].ENR)
             else:
-                j = next(j for j,cobj in enumerate(self.enrpinlist)
-                         if cobj.BA == self.pinobjects[case_num][i].BA and cobj.ENR == self.pinobjects[case_num][i].ENR)
+                j = next(j for j, enrpin in enumerate(self.enrpinlist)
+                         if enrpin.BA == self.pinobjects[case_num][i].BA 
+                         and enrpin.ENR == self.pinobjects[case_num][i].ENR)
             self.pinobjects[case_num][i].LFU = j+1
             fc = self.enrpinlist[j].circle.get_facecolor() 
             
-            if param_str == 'ENR':
-                #if self.pinobjects[case_num][i].BA == 0:
-                #    j = next(j for j,cobj in enumerate(self.enrpinlist) if cobj.ENR == self.pinobjects[case_num][i].ENR)
-                #else:
-                #    j = next(j for j,cobj in enumerate(self.enrpinlist)
-                #             if cobj.BA == self.pinobjects[case_num][i].BA and cobj.ENR == self.pinobjects[case_num][i].ENR)
-                
-                #if self.circlelist[i].BA == 0:
-                #    j = next(j for j,cobj in enumerate(self.enrpinlist) if cobj.ENR == self.circlelist[i].ENR)
-                #else:
-                #    j = next(j for j,cobj in enumerate(self.enrpinlist)
-                #             if cobj.BA == self.circlelist[i].BA and cobj.ENR == self.circlelist[i].ENR)
-                
-                #fc = self.enrpinlist[j].circle.get_facecolor()
+            if param_str == "ENR":
                 text = self.enrpinlist[j].text.get_text()
                 self.pinobjects[case_num][i].text.remove()
                 self.pinobjects[case_num][i].set_text(text)
-                #self.circlelist[i].set_text(text)
-                #self.circlelist[i].circle.set_facecolor(fc)
                 self.pinobjects[case_num][i].circle.set_facecolor(fc)
-
-            elif param_str == 'BTF':
-                #text =  ('%.2f' % (self.pinobjects[case_num][i].BTF))
+                
+            elif param_str == "BTF":
                 btf_ratio = self.pinobjects[case_num][i].BTF/btf*100
                 text =  ('%.0f' % (btf_ratio))
                 self.pinobjects[case_num][i].text.remove()
                 self.pinobjects[case_num][i].set_text(text)
                 self.pinobjects[case_num][i].circle.set_facecolor(fc)
                 
-            elif param_str == 'EXP':
+            elif param_str == "EXP":
                 if self.pinobjects[case_num][i].EXP < 10:
                     text =  ('%.1f' % (self.pinobjects[case_num][i].EXP))
                 else:
@@ -520,15 +515,8 @@ class MainWin(QMainWindow):
                 self.pinobjects[case_num][i].text.remove()
                 self.pinobjects[case_num][i].set_text(text)
                 self.pinobjects[case_num][i].circle.set_facecolor(fc)
-                
-            #elif param_str == 'EXP':
-            #    if self.circlelist[i].EXP < 10:
-            #        text =  ('%.1f' % (self.circlelist[i].EXP))
-            #    else:
-            #        text =  ('%.0f' % (self.circlelist[i].EXP))
-            #    self.circlelist[i].set_text(text)
 
-            elif param_str == 'FINT':
+            elif param_str == "FINT":
                 if self.pinobjects[case_num][i].FINT < 10:
                     text =  ('%.1f' % (self.pinobjects[case_num][i].FINT))
                 else:
@@ -536,19 +524,8 @@ class MainWin(QMainWindow):
                 self.pinobjects[case_num][i].text.remove()
                 self.pinobjects[case_num][i].set_text(text)
                 self.pinobjects[case_num][i].circle.set_facecolor(fc)
-            
-            #elif param_str == 'FINT':
-            #    if self.circlelist[i].FINT < 10:
-            #        text =  ('%.1f' % (self.circlelist[i].FINT))
-            #    else:
-            #        text =  ('%.0f' % (self.circlelist[i].FINT))
-            #    self.circlelist[i].set_text(text)
-                
-                
-        self.canvas.draw()
-
-        #self.circlelist[0].set_text(pinvalues[0,0])
-
+                            
+        #self.canvas.draw()
 
     def setpincoords(self):
         self.table.clearContents()
