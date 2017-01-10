@@ -215,7 +215,8 @@ class MainWin(QMainWindow):
         ncases = len(self.dataobj.cases)
         for i in range(1,ncases+1):
             self.case_cbox.addItem(str(i))
-        self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'), self.fig_update)
+        self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'), 
+                     self.fig_update)
         self.fig_update()
         
         
@@ -292,12 +293,17 @@ class MainWin(QMainWindow):
             print "init pinobjects"
             self.init_pinobjects()
             
+            # Update case number list box
+            ncases = len(self.bundle.cases)
+            for i in range(1,ncases+1):
+                self.case_cbox.addItem(str(i))
+            self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'), 
+                         self.fig_update)
+
             self.fig_update()
-            self.canvas.draw()
+            #self.canvas.draw()
             #self.axes.clear()
             #self.draw_fuelmap()
-            
-            #pyqt_trace()
             
             '''
             #self.progressbar = ProgressBar()
@@ -525,7 +531,7 @@ class MainWin(QMainWindow):
                 self.pinobjects[case_num][i].set_text(text)
                 self.pinobjects[case_num][i].circle.set_facecolor(fc)
                             
-        #self.canvas.draw()
+        self.canvas.draw()
 
     def setpincoords(self):
         self.table.clearContents()
