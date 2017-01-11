@@ -4,7 +4,8 @@ This window embeds a matplotlib (mpl) plot into a PyQt4 GUI application
 """
 
 from IPython.core.debugger import Tracer  # Set tracepoints
-from pyqt_trace import pyqt_trace  # Set a tracepoint that works with Qt
+# Set a tracepoint that works with Qt
+from pyqt_trace import pyqt_trace as qtrace
 
 import sys
 import os
@@ -37,12 +38,13 @@ class PlotWin(QMainWindow):
         self.resize(self.settings.value("size", QVariant(QSize(800, 650))).toSize());
         self.move(self.settings.value("pos", QVariant(QPoint(600, 300))).toPoint())
         self.settings.endGroup()
-
+        
         # Retrieve initial data
         #self.parent = parent
-        self.data_init()
+        #self.data_init()
+        
         self.case_id_current = int(self.parent.case_cbox.currentIndex())
-
+        
         self.create_menu()
         self.create_main_frame()
         self.create_status_bar()
@@ -57,10 +59,10 @@ class PlotWin(QMainWindow):
         #self.on_draw()
         #Tracer()()
 
-    def data_init(self):
-        self.cas = self.parent.dataobj
-        #self.cas = casio()
-        #self.cas.loadpic('caxfiles.p')
+    #def data_init(self):
+    #    self.bundle = self.parent.bundle
+    #    #self.cas = casio()
+    #    #self.cas.loadpic('caxfiles.p')
 
     def plot_kinf(self,case_id):
 
@@ -254,12 +256,13 @@ class PlotWin(QMainWindow):
 
     def create_main_frame(self):
         self.main_frame = QWidget()
-
+        
         # Create the mpl Figure and FigCanvas objects. 
         # 5x4 inches, 100 dots-per-inch
         #
         self.dpi = 100
         self.fig = Figure((7, 5), dpi=self.dpi)
+        
         self.canvas = FigureCanvas(self.fig)
         self.canvas.setParent(self.main_frame)
         self.canvas.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
@@ -299,14 +302,14 @@ class PlotWin(QMainWindow):
         self.slider.setTracking(True)
         self.slider.setTickPosition(QSlider.TicksBothSides)
         self.connect(self.slider, SIGNAL('valueChanged(int)'), self.on_draw)
- 
+        
         param_label = QLabel('Param:')
         self.param_cbox = QComboBox()
         paramlist = ['Kinf','Fint','BTF']
         for i in paramlist:
             self.param_cbox.addItem(i)
         #self.connect(self.param_cbox, SIGNAL('currentIndexChanged(int)'), self.on_plot)
-
+        
         #case_label = QLabel('All cases:')
         self.case_cb = QCheckBox("All Cases")
         self.case_cb.setChecked(False)
@@ -329,6 +332,7 @@ class PlotWin(QMainWindow):
         for i in self.voilist:
             self.voi_cbox.addItem(i)
         # Determine voi index
+        qtrace()
         voi = self.cas.cases[self.case_id_current].statepts[0].voi
         voi_index = [i for i,v in enumerate(self.voilist) if int(v) == voi]
         voi_index = voi_index[0]

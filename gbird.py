@@ -8,7 +8,7 @@ from IPython.core.debugger import Tracer  # Set tracepoint (used for debugging)
 # Usage: Tracer()()
  # Set a tracepoint that works with Qt
 from pyqt_trace import pyqt_trace as qtrace 
-# Usage: pyqt_trace()
+# Usage: qtrace()
 
 import sys
 import os 
@@ -278,7 +278,8 @@ class MainWin(QMainWindow):
         msgBox = QMessageBox()
         ret = msgBox.information(self, "Importing data", msg.strip(),
                                  QMessageBox.Yes|QMessageBox.Cancel)
-        #ret = msgBox.question(self,"Importing data",msg.strip(),QMessageBox.Yes|QMessageBox.Cancel)
+        # ret = msgBox.question(self,"Importing data",msg.strip(),
+        # QMessageBox.Yes|QMessageBox.Cancel)
         self.statusBar().showMessage('Importing data from %s' % filename, 2000)
         self._filename = filename
         if ret == QMessageBox.Yes:
@@ -357,7 +358,7 @@ class MainWin(QMainWindow):
 
     def plotWin(self):
         #print "Open plot window"
-        if hasattr(self,'dataobj'):
+        if hasattr(self,'bundle'):
             plotwin = PlotWin(self)
             plotwin.show()
         else:
@@ -562,8 +563,7 @@ class MainWin(QMainWindow):
             self.statusBar().showMessage('Saved to %s' % path, 2000)
     
     def on_about(self):
-        msg = """A design tool using PyQt with matplotlib.
-        """
+        msg = """Greenbird version X.X.X"""
         QMessageBox.about(self, "About the software", msg.strip())
 
     def tableHeaderSort(self):
