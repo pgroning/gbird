@@ -48,7 +48,7 @@ class PlotWin(QMainWindow):
         self.create_menu()
         self.create_main_frame()
         self.create_status_bar()
-
+        
         #self.textbox.setText('1 2 3 4')
         #self.data_init()
         
@@ -65,47 +65,53 @@ class PlotWin(QMainWindow):
     #    #self.cas.loadpic('caxfiles.p')
 
     def plot_kinf(self,case_id):
-
-        case = self.cas.cases[case_id]
+        
+        # case = self.cas.cases[case_id]
+        case = self.parent.bundle.cases[case_id]
         idx0 = self.startpoint(case_id)
-        statepts = case.statepts[idx0:]
-
+        #statepts = case.statepts[idx0:]
+        statepoints = case.states[-1].statepoints[idx0:]
+        
         burnup_old = 0.0
-        for idx,p in enumerate(statepts):
+        for idx, p in enumerate(statepoints):
             if p.burnup < burnup_old:
                 break
             burnup_old = p.burnup
         
-        x = [statepts[i].burnup for i in range(idx)]
-        y = [statepts[i].kinf for i in range(idx)]
-
-        labstr = self.cas.cases[case_id].data.caxfile
+        x = [statepoints[i].burnup for i in range(idx)]
+        y = [statepoints[i].kinf for i in range(idx)]
+        
+        labstr = case.states[-1].caxfile
+        #labstr = self.cas.cases[case_id].data.caxfile
         labstr = os.path.split(labstr)[1]
         labstr = os.path.splitext(labstr)[0]
-
+        
         self.axes.plot(x,y,label=labstr)
         self.axes.set_xlabel('Burnup (MWd/kgU)')
         self.axes.set_ylabel('K-inf')
         self.axes.legend(loc='best',prop={'size':8})
         self.canvas.draw()
         self.on_draw()
+        
 
     def plot_fint(self,case_id):
 
-        case = self.cas.cases[case_id]
+        #case = self.cas.cases[case_id]
+        case = self.parent.bundle.cases[case_id]
         idx0 = self.startpoint(case_id)
-        statepts = case.statepts[idx0:]
+        #statepts = case.statepts[idx0:]
+        statepoints = case.states[-1].statepoints[idx0:]
 
         burnup_old = 0.0
-        for idx,p in enumerate(statepts):
+        for idx,p in enumerate(statepoints):
             if p.burnup < burnup_old:
                 break
             burnup_old = p.burnup
 
-        x = [statepts[i].burnup for i in range(idx)]
-        y = [statepts[i].fint for i in range(idx)]
+        x = [statepoints[i].burnup for i in range(idx)]
+        y = [statepoints[i].fint for i in range(idx)]
 
-        labstr = case.data.caxfile
+        labstr = case.states[-1].caxfile
         labstr = os.path.split(labstr)[1]
         labstr = os.path.splitext(labstr)[0]
         
@@ -117,9 +123,11 @@ class PlotWin(QMainWindow):
         self.on_draw()
 
     def plot_btf(self,case_id):
-
-        x = self.cas.btf.burnpoints
-        DOX = self.cas.btf.DOX
+        
+        # x = self.cas.btf.burnpoints
+        x = self.parent.bundle.states[-1].btf.burnpoints
+        # DOX = self.cas.btf.DOX
+        DOX = self.parent.bundle.states[-1].btf.DOX
         y = [elem.max() for elem in DOX]
         self.axes.plot(x,y)
         
@@ -189,8 +197,10 @@ class PlotWin(QMainWindow):
         voi_val = int(self.voi_cbox.currentText())
         vhi_val = int(self.vhi_cbox.currentText())
         type_val = str(self.type_cbox.currentText())
-
-        case = self.cas.cases[case_id]
+        
+        #case = self.cas.cases[case_id]
+        case = self.parent.bundle.cases[case_id]
+        
         if type_val == 'CCl':
             idx0 = case.findpoint(tfu=293)
             voi = case.statepts[idx0].voi
@@ -205,9 +215,10 @@ class PlotWin(QMainWindow):
 
 
     def on_plot(self):
-
+        
         case_id = self.case_id_current
-        case_id_max = len(self.cas.cases)
+        # case_id_max = len(self.cas.cases)
+        case_id_max = len(self.parent.bundle.cases)
         param = self.param_cbox.currentText()
         
         self.axes.clear()
@@ -328,29 +339,38 @@ class PlotWin(QMainWindow):
 
         voi_label = QLabel('VOI:')
         self.voi_cbox = QComboBox()
-        self.voilist = ['0', '40', '80']
-        for i in self.voilist:
-            self.voi_cbox.addItem(i)
+        # self.voilist = ['0', '40', '80']
+        self.voilist = (self.parent.bundle.cases[self.case_id_current]
+                        .states[-1].voivec)
+        #self.voilist = map(str, self.voilist)
+        
+        for v in self.voilist:
+            self.voi_cbox.addItem(str(v))
         # Determine voi index
-        qtrace()
-        voi = self.cas.cases[self.case_id_current].statepts[0].voi
-        voi_index = [i for i,v in enumerate(self.voilist) if int(v) == voi]
+        voi = (self.parent.bundle.cases[self.case_id_current].states[-1]
+               .statepoints[0].voi)
+        # voi = self.cas.cases[self.case_id_current].statepts[0].voi
+        voi_index = [i for i, v in enumerate(self.voilist) if int(v) == voi]
+        
         voi_index = voi_index[0]
         self.voi_cbox.setCurrentIndex(voi_index)
         #self.connect(self.voi_cbox, SIGNAL('currentIndexChanged(int)'), self.on_plot)
-
         vhi_label = QLabel('VHI:')
         self.vhi_cbox = QComboBox()
-        self.vhilist = ['0', '40', '80']
-        for i in self.vhilist:
-            self.vhi_cbox.addItem(i)
+        #self.vhilist = ['0', '40', '80']
+        self.vhilist = self.voilist
+        for v in self.vhilist:
+            self.vhi_cbox.addItem(str(v))
+        
         # Determine vhi index
-        vhi = self.cas.cases[self.case_id_current].statepts[0].vhi
-        vhi_index = [i for i,v in enumerate(self.vhilist) if int(v) == vhi]
+        #vhi = self.cas.cases[self.case_id_current].statepts[0].vhi
+        vhi = (self.parent.bundle.cases[self.case_id_current].states[-1]
+               .statepoints[0].vhi)
+        vhi_index = [i for i, v in enumerate(self.vhilist) if int(v) == vhi]
         vhi_index = vhi_index[0]
         self.vhi_cbox.setCurrentIndex(vhi_index)
         #self.connect(self.vhi_cbox, SIGNAL('currentIndexChanged(int)'), self.on_plot)
-
+        
         #tfu_label = QLabel('TFU:')
         #self.tfu_cbox = QComboBox()
         #tfulist = ['293', '333', '372', '423', '483', '539']
@@ -390,7 +410,8 @@ class PlotWin(QMainWindow):
 
         self.main_frame.setLayout(vbox)
         self.setCentralWidget(self.main_frame)
-    
+        
+
     def create_status_bar(self):
         self.status_text = QLabel("Plot window")
         self.statusBar().addWidget(self.status_text, 1)
