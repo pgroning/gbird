@@ -81,10 +81,11 @@ class PlotWin(QMainWindow):
         x = [statepoints[i].burnup for i in range(idx)]
         y = [statepoints[i].kinf for i in range(idx)]
         
-        labstr = case.states[-1].caxfile
-        #labstr = self.cas.cases[case_id].data.caxfile
-        labstr = os.path.split(labstr)[1]
-        labstr = os.path.splitext(labstr)[0]
+        labstr = case.states[0].sim
+        labstr = labstr.replace("SIM", "").replace("'", "").strip()
+        #labstr = case.states[0].caxfile
+        #labstr = os.path.split(labstr)[1]
+        #labstr = os.path.splitext(labstr)[0]
         
         self.axes.plot(x,y,label=labstr)
         self.axes.set_xlabel('Burnup (MWd/kgU)')
@@ -111,9 +112,11 @@ class PlotWin(QMainWindow):
         x = [statepoints[i].burnup for i in range(idx)]
         y = [statepoints[i].fint for i in range(idx)]
 
-        labstr = case.states[-1].caxfile
-        labstr = os.path.split(labstr)[1]
-        labstr = os.path.splitext(labstr)[0]
+        labstr = case.states[0].sim
+        labstr = labstr.replace("SIM", "").replace("'", "").strip()
+        #labstr = case.states[-1].caxfile
+        #labstr = os.path.split(labstr)[1]
+        #labstr = os.path.splitext(labstr)[0]
         
         self.axes.plot(x,y,label=labstr)
         self.axes.set_xlabel('Burnup (MWd/kgU)')

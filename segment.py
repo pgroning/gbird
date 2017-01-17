@@ -549,10 +549,15 @@ class Segment(object):
         else:
             call(arglist[3:], stdout=fout, stderr=STDOUT, shell=False)
 
-    def add_state(self, LFU, FUE, voi=None):
+    def add_state(self, LFU=None, FUE=None, voi=None):
         """Append a list element to store result of new calculation"""
         self.states.append(DataStruct())  # Add an element to list
+        if LFU is None:
+            LFU = self.states[-2].LFU
         self.states[-1].LFU = LFU
+
+        if FUE is None:
+            FUE = self.states[-2].FUE
         self.states[-1].FUE = FUE
 
         npst = self.states[0].npst
@@ -941,11 +946,13 @@ class Segment(object):
                   grid=True, model='c3', box_offset=0, neulib=False):
 
         tic = time.time()
-        LFU = self.states[0].LFU  # LFU is set to original state only
-        FUE = self.states[0].FUE  # for testing purpose
+        # # LFU is set to original state only for testing purpose
+        # LFU = self.states[0].LFU
+        # FUE = self.states[0].FUE
+        # # Append element to hold a new calculation
+        # self.add_state(LFU, FUE, voi)
+        # ---------------------------------
 
-        # Append element to hold a new calculation
-        self.add_state(LFU, FUE, voi)
         file_base_name = "./tmp." + str(uuid.uuid4()).split('-')[0]
         # file_base_name = "./" + str(uuid.uuid4())
         self.writec3cai(file_base_name, voi, maxdep, depthres, box_offset)

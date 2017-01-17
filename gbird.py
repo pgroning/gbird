@@ -435,9 +435,12 @@ class MainWin(QMainWindow):
         #    BTF = np.zeros(np.shape(self.bundle.states[state_num].btf.DOX)[1:])
         #    BTF.fill(np.nan)
         
-        npst = state.npst
+        #qtrace()
+        #npst = state.npst
+        npst = self.bundle.cases[case_num].states[0].npst
         LFU = state.LFU
-        BA = state.BA
+        #BA = state.BA
+        BA = self.bundle.cases[case_num].states[0].BA  # only for testing
 
         # Sorting table column 0 in ascending order
         self.table.sortItems(0,Qt.AscendingOrder)
@@ -737,15 +740,17 @@ class MainWin(QMainWindow):
         self.canvas.draw()
 
 
-    def __lfumap(self,case_num):
+    def __lfumap(self, case_num):
+        """Creating LFU map"""
+        
         print "Creating LFU map"
         #case_num = int(self.case_cbox.currentIndex())
         
-        #pyqt_trace()
-
         # Initialize new LFU map and fill with zeros
-        LFU_old = self.dataobj.cases[case_num].data.LFU
-        LFU = np.zeros((LFU_old.shape[0],LFU_old.shape[1]));
+        LFU_old = self.bundle.cases[case_num].states[-1].LFU
+        # LFU_old = self.dataobj.cases[case_num].data.LFU
+        # LFU = np.zeros((LFU_old.shape[0],LFU_old.shape[1]));
+        LFU = np.zeros(LFU_old.shape).astype(int)
         
         k = 0
         for i in range(LFU.shape[0]):
@@ -755,20 +760,25 @@ class MainWin(QMainWindow):
                     k += 1
         return LFU
 
-    
-
-    def quick_calc(self,case_num):
+    #def quick_calc(self,case_num):
+    def quick_calc(self):
         print "Performing quick calculation..."
-        LFU = self.__lfumap(case_num)
-        self.dataobj.cases[case_num].qcalc[0].LFU = LFU
-        self.dataobj.cases[case_num].quickcalc()
-        print "Done" 
+        
+        for case_num in xrange(len(self.bundle.cases)):
+            LFU = self.__lfumap(case_num)
+            FUE = self.bundle.cases[case_num].states[-1].FUE  # Only for testing
+            voi = None
+            self.bundle.cases[case_num].add_state(LFU, FUE, voi)
 
+        self.bundle.new_calc()
+        self.bundle.new_btf()
+        #qtrace()
+        #self.dataobj.cases[case_num].qcalc[0].LFU = LFU
+        #self.dataobj.cases[case_num].quickcalc()
+        
 #       case_num = int(self.case_cbox.currentIndex())        
 #        self.dataobj.cases[case_num].pertcalc()
 
-        
-        #pyqt_trace()
 
     def fig_update(self):
         """ Redraw figure and update values

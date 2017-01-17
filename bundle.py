@@ -37,7 +37,7 @@ def readcax_fun(tup):
 
 def quickcalc_fun(tup):
     """Wrapper function used for multithreaded quickcalc"""
-    case = tup[0]  # First arg should always be the object
+    case = tup[0]  # First argument should always be an instance of the class
     case.quickcalc(*tup[1:])
     return case
     # case, voi, maxdep, opt = tup
@@ -179,7 +179,10 @@ class Bundle(object):
     def new_calc(self, voi=None, maxdep=None, depthres=None, refcalc=False,
                  grid=True, model='c3', box_offset=0, neulib=False):
 
-        self.states.append(DataStruct)
+        # For storage of new calculation
+        # self.cases[i].add_state() 
+
+        # self.states.append(DataStruct)  # For storage of new BTF calculation
         # ----Code block only for testing purpose-----
         # if not refcalc:
         #    for i in range(len(self.cases)):
