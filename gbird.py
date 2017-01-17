@@ -707,16 +707,14 @@ class MainWin(QMainWindow):
                     break
             if j > 0:
                 self.__pinenr_update(i,j-1)
-
         
         #enrArray = [x.ENR for x in self.enrpinlist][::-1] # Reverse order
         #print enrArray
 
-
-    def __pinenr_update(self,i,j):
+    def __pinenr_update(self, i, j):
         #i = self.pinselection_index
         case_num = int(self.case_cbox.currentIndex())
-        self.pinobjects[case_num][i].LFU = j+1
+        self.pinobjects[case_num][i].LFU = j + 1
         self.pinobjects[case_num][i].ENR = self.enrpinlist[j].ENR
         #self.circlelist[i].ENR = self.enrpinlist[j].ENR
         if np.isnan(self.enrpinlist[j].BA):
@@ -735,8 +733,9 @@ class MainWin(QMainWindow):
         self.pinobjects[case_num][i].circle.set_facecolor(fc)
         #self.circlelist[i].circle.set_facecolor(fc)
 
-        self.dataobj.cases[case_num].qcalc[0].LFU = self.__lfumap(case_num)
-        
+        #self.bundle.cases[case_num].states[-1].LFU = self.__lfumap(case_num)
+        #self.dataobj.cases[case_num].qcalc[0].LFU = self.__lfumap(case_num)
+        #qtrace()
         self.canvas.draw()
 
 
