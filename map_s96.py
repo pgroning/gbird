@@ -1,4 +1,4 @@
-from pyqt_trace import pyqt_trace
+from pyqt_trace import pyqt_trace as qtrace
 
 import matplotlib.patches as mpatches
 import numpy as np
@@ -100,25 +100,34 @@ def s96o2(self):
     pin_delta = 0.078
     
     # Draw enrichment level circles
-    self.enrpinlist = []
+    #self.enrpinlist = []
     x = 1.06
     for i in range(enr_levels.size):
         y = 0.9-i*pin_delta
-        enrobj = cpin(self.axes)
-        enrobj.set_circle(x,y,0.028,cmap[i])
-        enrobj.set_text(str(i+1))
+        #enrobj = cpin(self.axes)
+        #enrobj.set_circle(x,y,0.028,cmap[i])
+        self.enrpinlist[case_num][i].set_circle(x,y,0.028,cmap[i])
+        #enrobj.set_text(str(i+1))
+        self.enrpinlist[case_num][i].set_text(str(i+1))
         #enrobj.index = i+1
         #circobj = Circle(self.axes,x,y,cmap[i],str(i+1))
-        self.axes.add_patch(enrobj.circle)
+        #self.axes.add_patch(enrobj.circle)
+        self.axes.add_patch(self.enrpinlist[case_num][i].circle)
         self.axes.text(x+0.05,y,"%.2f" % enr_levels[i],fontsize=8)
-        enrobj.ENR = enr_levels[i]
-        enrobj.BA = enr_ba[i]
+        #enrobj.ENR = enr_levels[i]
+        #qtrace()
+        self.enrpinlist[case_num][i].ENR = enr_levels[i]
+        #enrobj.BA = enr_ba[i]
+        self.enrpinlist[case_num][i].BA = enr_ba[i]
+        #qtrace()
         if not np.isnan(enr_ba[i]):
-            enrobj.text.remove()
-            enrobj.set_text('Ba')
+            #enrobj.text.remove()
+            self.enrpinlist[case_num][i].text.remove()
+            #enrobj.set_text('Ba')
+            self.enrpinlist[case_num][i].set_text('Ba')
             self.axes.text(x+0.05,y-0.03,"%.2f" % enr_ba[i],fontsize=8)
             
-        self.enrpinlist.append(enrobj)
+        #self.enrpinlist.append(enrobj)
 
     # Print average enrichment
     #ave_enr = self.dataobj.cases[case_num].data.ave_enr
@@ -150,6 +159,7 @@ def s96o2(self):
             if LFU[i,j] > 0:
                 self.pinobjects[case_num][k].set_circle(x,y,0.028,(1,1,1))
                 self.pinobjects[case_num][k].coord = self.ylist[i] + self.xlist[j]
+                
                 self.pinobjects[case_num][k].set_text()
                 self.axes.add_patch(self.pinobjects[case_num][k].circle)
                 k += 1
@@ -157,18 +167,19 @@ def s96o2(self):
                 #circobj.coord = self.ylist[i] + self.xlist[j]
                 #self.circlelist.append(circobj)
 
-
     # Draw pin coordinates x-axis
     for i in range(5):
-        self.axes.text(0.13+i*pin_delta,0.015,self.xlist[i],ha='center',va='center',fontsize=9)
+        self.axes.text(0.13 + i*pin_delta, 0.015, self.xlist[i],
+                       ha='center',va='center',fontsize=9)
     for i in range(5,10):
-        self.axes.text(0.17+i*pin_delta,0.015,self.xlist[i],ha='center',va='center',fontsize=9)
+        self.axes.text(0.17 + i*pin_delta, 0.015, self.xlist[i],
+                       ha='center',va='center',fontsize=9)
         
     # Draw pin coordinates y-axis
     for i in range(5):
-        self.axes.text(0.99,0.87-i*pin_delta,self.ylist[i],ha='center',va='center',fontsize=9)
+        self.axes.text(0.99,0.87-i*pin_delta,self.ylist[i],
+                       ha='center',va='center',fontsize=9)
     for i in range(5,10):
-        self.axes.text(0.99,0.83-i*pin_delta,self.ylist[i],ha='center',va='center',fontsize=9)
+        self.axes.text(0.99,0.83-i*pin_delta,self.ylist[i],
+                       ha='center',va='center',fontsize=9)
         
-        #self.canvas.draw()
-        #Tracer()()

@@ -135,8 +135,10 @@ class MainWin(QMainWindow):
         # Initial window size/pos last saved
         self.settings = QSettings("greenbird")
         self.settings.beginGroup("MainWindow")
-        self.resize(self.settings.value("size", QVariant(QSize(1100, 620))).toSize());
-        self.move(self.settings.value("pos", QVariant(QPoint(200, 200))).toPoint())
+        self.resize(self.settings.value("size", 
+                                        QVariant(QSize(1100, 620))).toSize());
+        self.move(self.settings.value("pos", 
+                                      QVariant(QPoint(200, 200))).toPoint())
         self.settings.endGroup()
         
         #screenShape = QDesktopWidget().screenGeometry()
@@ -155,7 +157,7 @@ class MainWin(QMainWindow):
         self.create_main_frame()
         self.create_status_bar()
         
-        self.on_draw() # Init plot
+        self.on_draw()  # Init plot
         #self.draw_fuelmap()
         #Tracer()()
         #self.textbox.setText('1 2 3 4')
@@ -369,6 +371,7 @@ class MainWin(QMainWindow):
             
     def init_pinobjects(self):
         self.pinobjects = []
+        self.enrpinlist = []
         ncases = len(self.bundle.cases)
         for case_num in range(ncases):
             LFU = self.bundle.cases[case_num].states[-1].LFU
@@ -385,7 +388,19 @@ class MainWin(QMainWindow):
                         pinobj.LFU = LFU[i,j]
                         pinlist.append(pinobj)
             self.pinobjects.append(pinlist)
+        
+            enrlist = []
+            FUE = self.bundle.cases[case_num].states[-1].FUE
+            enr_levels = FUE[:,2]
+            enr_ba = FUE[:,4]
+            for i in range(enr_levels.size):
+                enrobj = cpin(self.axes)
+                enrlist.append(enrobj)
 
+            self.enrpinlist.append(enrlist)
+
+        #qtrace()
+            
             
     def set_pinvalues(self):
         #print "Set values"
@@ -495,17 +510,17 @@ class MainWin(QMainWindow):
         for i in xrange(npins):
             
             if self.pinobjects[case_num][i].BA < 0.00001:
-                j = next(j for j, enrpin in enumerate(self.enrpinlist) 
+                j = next(j for j,enrpin in enumerate(self.enrpinlist[case_num]) 
                          if enrpin.ENR == self.pinobjects[case_num][i].ENR)
             else:
-                j = next(j for j, enrpin in enumerate(self.enrpinlist)
+                j = next(j for j, enrpin in enumerate(self.enrpinlist[case_num])
                          if enrpin.BA == self.pinobjects[case_num][i].BA 
                          and enrpin.ENR == self.pinobjects[case_num][i].ENR)
             self.pinobjects[case_num][i].LFU = j+1
-            fc = self.enrpinlist[j].circle.get_facecolor() 
+            fc = self.enrpinlist[case_num][j].circle.get_facecolor() 
             
             if param_str == "ENR":
-                text = self.enrpinlist[j].text.get_text()
+                text = self.enrpinlist[case_num][j].text.get_text()
                 self.pinobjects[case_num][i].text.remove()
                 self.pinobjects[case_num][i].set_text(text)
                 self.pinobjects[case_num][i].circle.set_facecolor(fc)
@@ -679,11 +694,14 @@ class MainWin(QMainWindow):
             #pinEnr = self.circlelist[i].ENR
             #pinBA = self.circlelist[i].BA
             
-            for j,x in enumerate(self.enrpinlist):
-                if np.isnan(x.BA): x.BA = 0.0
+            for j, x in enumerate(self.enrpinlist[case_num]):
+                #qtrace()
+                if np.isnan(x.BA):
+                    x.BA = 0.0
                 if x.ENR == pinEnr and x.BA == pinBA:
                     break
-            if j < len(self.enrpinlist)-1:
+            
+            if j < len(self.enrpinlist[case_num])-1:
                 self.__pinenr_update(i,j+1)
 
     def enr_sub(self):
@@ -701,7 +719,7 @@ class MainWin(QMainWindow):
             #pinEnr = self.circlelist[i].ENR
             #pinBA = self.circlelist[i].BA
 
-            for j,x in enumerate(self.enrpinlist):
+            for j,x in enumerate(self.enrpinlist[case_num]):
                 if np.isnan(x.BA): x.BA = 0.0
                 if x.ENR == pinEnr and x.BA == pinBA:
                     break
@@ -715,17 +733,17 @@ class MainWin(QMainWindow):
         #i = self.pinselection_index
         case_num = int(self.case_cbox.currentIndex())
         self.pinobjects[case_num][i].LFU = j + 1
-        self.pinobjects[case_num][i].ENR = self.enrpinlist[j].ENR
+        self.pinobjects[case_num][i].ENR = self.enrpinlist[case_num][j].ENR
         #self.circlelist[i].ENR = self.enrpinlist[j].ENR
-        if np.isnan(self.enrpinlist[j].BA):
+        if np.isnan(self.enrpinlist[case_num][j].BA):
             self.pinobjects[case_num][i].BA = 0.0
             #self.circlelist[i].BA = 0.0
         else:
-            self.pinobjects[case_num][i].BA = self.enrpinlist[j].BA
+            self.pinobjects[case_num][i].BA = self.enrpinlist[case_num][j].BA
             #self.circlelist[i].BA = self.enrpinlist[j].BA
 
-        fc = self.enrpinlist[j].circle.get_facecolor()
-        text = self.enrpinlist[j].text.get_text()
+        fc = self.enrpinlist[case_num][j].circle.get_facecolor()
+        text = self.enrpinlist[case_num][j].text.get_text()
         if str(self.param_cbox.currentText()) == 'ENR':
             self.pinobjects[case_num][i].text.remove()
             self.pinobjects[case_num][i].set_text(text)
@@ -788,8 +806,7 @@ class MainWin(QMainWindow):
         self.set_pinvalues()
 
     def on_draw(self):
-        """ Setup the figure axis
-        """
+        """ Setup the figure axis"""
 
         # clear the axes and redraw the plot anew
         #
@@ -821,8 +838,8 @@ class MainWin(QMainWindow):
         #self.canvas.draw()
 
     def draw_fuelmap(self):
-        """ Draw fuel map
-        """
+        """Draw fuel map"""
+
         #print "draw fuel map"
         from map_s96 import s96o2
         from map_a10 import a10xm
@@ -830,11 +847,13 @@ class MainWin(QMainWindow):
         #print "draw fuel map"
         self.fig.set_facecolor((1,1,0.8784))
         # Draw outer rectangle
-        rect = mpatches.Rectangle((0.035,0.035), 0.935, 0.935, fc=(0.8,0.898,1),ec=(0.3, 0.3, 0.3))
+        rect = mpatches.Rectangle((0.035,0.035), 0.935, 0.935, 
+                                  fc=(0.8,0.898,1),ec=(0.3, 0.3, 0.3))
         self.axes.add_patch(rect)
         
         # Draw control rods
-        rodrect_v = mpatches.Rectangle((0.011,0.13), 0.045, 0.77, ec=(0.3, 0.3, 0.3))
+        rodrect_v = mpatches.Rectangle((0.011,0.13), 0.045, 0.77, 
+                                       ec=(0.3, 0.3, 0.3))
         rodrect_v.set_fill(False)
         self.axes.add_patch(rodrect_v)
         #self.axes.hlines(0.17,0.011,0.056)
@@ -847,7 +866,8 @@ class MainWin(QMainWindow):
         poly.set_closed(False)
         self.axes.add_patch(poly)
 
-        rodrect_h = mpatches.Rectangle((0.1,0.95), 0.77, 0.045, ec=(0.3, 0.3, 0.3))
+        rodrect_h = mpatches.Rectangle((0.1,0.95), 0.77, 0.045, 
+                                       ec=(0.3, 0.3, 0.3))
         rodrect_h.set_fill(False)
         self.axes.add_patch(rodrect_h)
         pp = [[0.14, 0.95], [0.14, 0.995]]
@@ -858,7 +878,6 @@ class MainWin(QMainWindow):
         poly = mpatches.Polygon(pp)
         poly.set_closed(False)
         self.axes.add_patch(poly)
-
 
         # a fancy box with round corners (pad).
         p_fancy = mpatches.FancyBboxPatch((0.12, 0.12),
