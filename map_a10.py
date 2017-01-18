@@ -57,24 +57,31 @@ def a10xm(self):
     pin_delta = 0.083*0.85
     
     # Draw enrichment level circles
-    self.enrpinlist = []
+    #self.enrpinlist = []
     x = 1.06
     for i in range(enr_levels.size):
         y = 0.95-i*pin_delta
-        enrobj = cpin(self.axes)
-        enrobj.set_circle(x,y,0.028,cmap[i])
-        enrobj.set_text(str(i+1))
+        #enrobj = cpin(self.axes)
+        #enrobj.set_circle(x,y,0.028,cmap[i])
+        self.enrpinlist[case_num][i].set_circle(x,y,0.028,cmap[i])
+        #enrobj.set_text(str(i+1))
+        self.enrpinlist[case_num][i].set_text(str(i+1))
         #circobj = Circle(self.axes,x,y,cmap[i],str(i+1),pin_radius)
-        self.axes.add_patch(enrobj.circle)
+        #self.axes.add_patch(enrobj.circle)
+        self.axes.add_patch(self.enrpinlist[case_num][i].circle)
         self.axes.text(x+0.05,y,"%.2f" % enr_levels[i],fontsize=8)
-        enrobj.ENR = enr_levels[i]
-        enrobj.BA = enr_ba[i]
+        #enrobj.ENR = enr_levels[i]
+        self.enrpinlist[case_num][i].ENR = enr_levels[i]
+        #enrobj.BA = enr_ba[i]
+        self.enrpinlist[case_num][i].BA = enr_ba[i]
         if not np.isnan(enr_ba[i]):
-            enrobj.text.remove()
-            enrobj.set_text('Ba')
+            #enrobj.text.remove()
+            self.enrpinlist[case_num][i].text.remove()
+            #enrobj.set_text('Ba')
+            self.enrpinlist[case_num][i].set_text('Ba')
             self.axes.text(x+0.05,y-0.03,"%.2f" % enr_ba[i],fontsize=8)
             
-        self.enrpinlist.append(enrobj)
+        #self.enrpinlist.append(enrobj)
 
     # Print average enrichment
     #ave_enr = self.dataobj.cases[case_num].data.ave_enr
