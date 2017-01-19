@@ -10,46 +10,55 @@ def s96o2(self):
     
     # Draw water cross
     # West
-    pp = [[0.088, 0.515], [0.1, 0.503], [0.13, 0.503], [0.15, 0.515], [0.32, 0.515], [0.34,0.503],[0.38, 0.503],
-          [0.38, 0.497], [0.34,0.497],[0.32, 0.485], [0.15, 0.485], [0.13, 0.497], [0.1, 0.497], [0.088, 0.485]]
+    pp = [[0.088, 0.515], [0.1, 0.503], [0.13, 0.503], [0.15, 0.515],
+          [0.32, 0.515], [0.34,0.503],[0.38, 0.503], [0.38, 0.497],
+          [0.34,0.497],[0.32, 0.485], [0.15, 0.485], [0.13, 0.497],
+          [0.1, 0.497], [0.088, 0.485]]
     poly = mpatches.Polygon(pp)
     poly.set_facecolor((0.8,0.898,1))
     poly.set_linewidth(1.5)
     poly.set_closed(False)
     self.axes.add_patch(poly)
     # East
-    pp = [[0.922, 0.515], [0.91, 0.503],[0.88,0.503],[0.86, 0.515], [0.69, 0.515], [0.67, 0.503], [0.63, 0.503],
-          [0.63, 0.497], [0.67, 0.497],[0.69, 0.485], [0.86, 0.485], [0.88, 0.497],[0.91, 0.497],[0.922, 0.485]]
+    pp = [[0.922, 0.515], [0.91, 0.503], [0.88,0.503], [0.86, 0.515],
+          [0.69, 0.515], [0.67, 0.503], [0.63, 0.503], [0.63, 0.497],
+          [0.67, 0.497],[0.69, 0.485], [0.86, 0.485], [0.88, 0.497],
+          [0.91, 0.497], [0.922, 0.485]]
     poly = mpatches.Polygon(pp)
-    poly.set_facecolor((0.8,0.898,1))
+    poly.set_facecolor((0.8, 0.898, 1))
     poly.set_linewidth(1.5)
     poly.set_closed(False)
     self.axes.add_patch(poly)
     # South
-    pp = [[0.485, 0.088],[0.497, 0.1],[0.497, 0.13], [0.485, 0.15], [0.485, 0.32], [0.497, 0.34], [0.497, 0.38],
-        [0.503, 0.38], [0.503, 0.34], [0.515, 0.32], [0.515, 0.15],[0.503, 0.13], [0.503, 0.1],[0.515, 0.088]]
+    pp = [[0.485, 0.088], [0.497, 0.1], [0.497, 0.13], [0.485, 0.15],
+          [0.485, 0.32], [0.497, 0.34], [0.497, 0.38], [0.503, 0.38],
+          [0.503, 0.34], [0.515, 0.32], [0.515, 0.15],[0.503, 0.13],
+          [0.503, 0.1],[0.515, 0.088]]
     poly = mpatches.Polygon(pp)
-    poly.set_facecolor((0.8,0.898,1))
+    poly.set_facecolor((0.8, 0.898, 1))
     poly.set_linewidth(1.5)
     poly.set_closed(False)
     self.axes.add_patch(poly)
     # North
-    pp = [[0.485, 0.922],[0.497, 0.91], [0.497, 0.88],[0.485, 0.86], [0.485, 0.69], [0.497, 0.67], [0.497, 0.63],
-          [0.503, 0.63], [0.503,0.67], [0.515, 0.69], [0.515, 0.86], [0.503,0.88],[0.503, 0.91],[0.515, 0.922]]
+    pp = [[0.485, 0.922], [0.497, 0.91], [0.497, 0.88], [0.485, 0.86],
+          [0.485, 0.69], [0.497, 0.67], [0.497, 0.63], [0.503, 0.63],
+          [0.503,0.67], [0.515, 0.69], [0.515, 0.86], [0.503,0.88],
+          [0.503, 0.91], [0.515, 0.922]]
     poly = mpatches.Polygon(pp)
-    poly.set_facecolor((0.8,0.898,1))
+    poly.set_facecolor((0.8, 0.898, 1))
     poly.set_linewidth(1.5)
     poly.set_closed(False)
     self.axes.add_patch(poly)
 
     # Draw water channel
     # Rectangle center at origo
-    rect = mpatches.Rectangle((-0.095,-0.095), 0.19, 0.19, fc=(0.8,0.898,1),ec=(0.3, 0.3, 0.3))
+    rect = mpatches.Rectangle((-0.095, -0.095), 0.19, 0.19, fc=(0.8, 0.898, 1),
+                              ec=(0.3, 0.3, 0.3))
     rect.set_linewidth(2.0)
     # 1. Translate rectangle along x-axis a distance 1/sqrt(2).
     # 2. Rotate 45 degrees
-    rot45=mpatches.transforms.Affine2D().rotate_deg(45) + self.axes.transData
-    transrot = mpatches.transforms.Affine2D().translate(0.70711,0.0) + rot45#self.axes.transData
+    rot45 = mpatches.transforms.Affine2D().rotate_deg(45) + self.axes.transData
+    transrot = mpatches.transforms.Affine2D().translate(0.70711, 0.0) + rot45
     rect.set_transform(transrot)
     self.axes.add_patch(rect)
 
@@ -79,6 +88,10 @@ def s96o2(self):
     # Print average enrichment
     ave_enr = self.bundle.cases[case_num].states[state_num].ave_enr
     self.axes.text(1.02,0.05,"%.3f %%U-235" % ave_enr,fontsize=8)
+
+    # List of pin coordinates
+    self.xlist = ('1','2','3','4','5','6','7','8','9','10')
+    self.ylist  = ('A','B','C','D','E','F','G','H','I','J')
     
     # Draw pin circles
     npst = self.bundle.cases[case_num].states[0].npst
@@ -86,9 +99,6 @@ def s96o2(self):
     # Remove water cross rows and columns
     LFU = np.delete(LFU, (5), axis=0) # Delete row 6
     LFU = np.delete(LFU, (5), axis=1) # Delete col 6
-
-    self.xlist = ('1','2','3','4','5','6','7','8','9','10')
-    self.ylist  = ('A','B','C','D','E','F','G','H','I','J')
 
     k = 0
     for i in range(LFU.shape[0]):
@@ -100,8 +110,8 @@ def s96o2(self):
             if LFU[i,j] > 0:
                 self.pinobjects[case_num][k].set_circle(x, y, pin_radius,
                                                         (1,1,1))
-                self.pinobjects[case_num][k].coord = self.ylist[i] + self.xlist[j]
-                
+                self.pinobjects[case_num][k].coord = (self.ylist[i]
+                                                      + self.xlist[j])
                 self.pinobjects[case_num][k].set_text()
                 self.axes.add_patch(self.pinobjects[case_num][k].circle)
                 k += 1

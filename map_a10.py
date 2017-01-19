@@ -7,12 +7,9 @@ from gbird import cpin
 def a10xm(self):
     
     # Draw water channel
-    p_fancy = mpatches.FancyBboxPatch((0.45, 0.365),
-                                          0.19, 0.19,
+    p_fancy = mpatches.FancyBboxPatch((0.45, 0.365), 0.19, 0.19,
                                           boxstyle="round,pad=0.02",
-                                          #fc=(0.85,1,1),
-                                          fc=(0.8,0.898,1),
-                                          ec=(0.3, 0.3, 0.3))
+                                          fc=(0.8,0.898,1), ec=(0.3, 0.3, 0.3))
     p_fancy.set_linewidth(2.0)
     self.axes.add_patch(p_fancy)
 
@@ -20,71 +17,26 @@ def a10xm(self):
     case_num = int(self.case_cbox.currentIndex())
     state_num = -1
 
-    #FUE = self.dataobj.cases[case_num].data.FUE
-    FUE = self.bundle.cases[case_num].states[state_num].FUE
-    enr_levels  = FUE[:,2]
-    enr_ba = FUE[:,4]
-    #print enr_levels, enr_ba
- 
-    #cmap = ["#6666FF","#B266FF","#66FFFF","#00CC00","#66FF66","#FFFF66","#FFB266","#FF9999","#FF3333","#FF3399"]
-    #cmap = [[0,0,1], [0,1,1], [0,1,0], [0.604,0.804,0.196], [1,1,0], [0.933,0.867,0.51], [1,0.549,0], [1,1,1], [1,0,0]]
-    #enr_steps = [0.71, 2.5, 3.2, 3.4, 4.0, 4.2, 4.6, 4.9, 0]
-    #enr_ba = [3.4, 5.0]
-
-    nc = enr_levels.size
-    #nc1 = np.round(nc/2)
-    #b1 = np.linspace(1,0.2,nc1)
-    #b2 = np.linspace(0,0,nc-nc1)
-    #b = np.concatenate((b1,b2),axis=0)
-    #b = np.linspace(1,0,nc)
-
-    #r1 = np.linspace(0,0,nc1)
-    #r2 = np.linspace(0.2,1,nc-nc1)
-    #r = np.concatenate((r1,r2),axis=0)
-    #r = np.linspace(0,1,nc)
-
-    #g1 = np.linspace(0,0.8,np.round(nc/2))
-    #g2 = np.linspace(1,0,nc-np.round(nc/2))
-    #g = np.concatenate((g1,g2),axis=0)
-    #cmap = np.array([r,g,b]).transpose().tolist()
-
-    cvec = ["#FF00FF","#CC00FF","#AA00FF","#0000FF","#0066FF","#00AAFF","#00CCFF","#00FFFF","#00FFCC","#00FFAA",
-             "#00FF66","#00FF00","#AAFF00","#CCFF00","#FFFF00","#FFCC00","#FFAA00","#FF9900","#FF5500","#FF0000"]
-    ic = np.linspace(0,len(cvec)-1,nc).astype(int).tolist()
-    cmap = [cvec[i] for i in ic]
-
     pin_radius = 0.028*0.9
     pin_delta = 0.083*0.85
     
     # Draw enrichment level circles
-    #self.enrpinlist = []
-    x = 1.06
-    for i in range(enr_levels.size):
-        y = 0.95-i*pin_delta
-        #enrobj = cpin(self.axes)
-        #enrobj.set_circle(x,y,0.028,cmap[i])
-        self.enrpinlist[case_num][i].set_circle(x,y,0.028,cmap[i])
-        #enrobj.set_text(str(i+1))
-        self.enrpinlist[case_num][i].set_text(str(i+1))
-        #circobj = Circle(self.axes,x,y,cmap[i],str(i+1),pin_radius)
-        #self.axes.add_patch(enrobj.circle)
-        self.axes.add_patch(self.enrpinlist[case_num][i].circle)
-        self.axes.text(x+0.05,y,"%.2f" % enr_levels[i],fontsize=8)
-        #enrobj.ENR = enr_levels[i]
-        self.enrpinlist[case_num][i].ENR = enr_levels[i]
-        #enrobj.BA = enr_ba[i]
-        self.enrpinlist[case_num][i].BA = enr_ba[i]
-        if not np.isnan(enr_ba[i]):
-            #enrobj.text.remove()
-            self.enrpinlist[case_num][i].text.remove()
-            #enrobj.set_text('Ba')
+    x = 1.06  # horizontal position of the circles
+    num_levels = len(self.enrpinlist[case_num])
+    for i in range(num_levels):
+        y = 0.95 - i*pin_delta  # vertical positions
+        self.enrpinlist[case_num][i].set_circle(x, y, pin_radius)
+        enr = self.enrpinlist[case_num][i].ENR
+        self.axes.text(x + 0.05, y, "%.2f" % enr, fontsize=8)
+        ba = self.enrpinlist[case_num][i].BA
+        if np.isnan(ba) or ba < 0.00001:  # no BA pin
+            self.enrpinlist[case_num][i].set_text(str(i+1))
+        else:
             self.enrpinlist[case_num][i].set_text('Ba')
-            self.axes.text(x+0.05,y-0.03,"%.2f" % enr_ba[i],fontsize=8)
-            
-        #self.enrpinlist.append(enrobj)
-
+            self.axes.text(x + 0.05, y - 0.03, "%.2f" % ba, fontsize=8)
+        self.axes.add_patch(self.enrpinlist[case_num][i].circle)
+                
     # Print average enrichment
-    #ave_enr = self.dataobj.cases[case_num].data.ave_enr
     ave_enr = self.bundle.cases[case_num].states[state_num].ave_enr
     self.axes.text(1.02,0.05,"%.3f %%U-235" % ave_enr,fontsize=8)
 
@@ -93,15 +45,12 @@ def a10xm(self):
     self.ylist  = ('A','B','C','D','E','F','G','H','I','J')
     
     # Draw pin circles
-    #npst = self.dataobj.cases[case_num].data.npst
     npst = self.bundle.cases[case_num].states[0].npst
-    #LFU = self.dataobj.cases[case_num].data.LFU
     LFU = self.bundle.cases[case_num].states[state_num].LFU
     
     pin_radius = 0.028*1.1
     pin_delta = 0.083
 
-    #self.circlelist = []
     k = 0
     for i in range(LFU.shape[0]):
         for j in range(LFU.shape[1]):
@@ -109,26 +58,18 @@ def a10xm(self):
             y = 0.875-i*pin_delta
             if LFU[i,j] > 0:
                 self.pinobjects[case_num][k].set_circle(x,y,pin_radius,(1,1,1))
-                self.pinobjects[case_num][k].coord = self.ylist[i] + self.xlist[j]
+                self.pinobjects[case_num][k].coord = (self.ylist[i]
+                                                      + self.xlist[j])
                 self.pinobjects[case_num][k].set_text()
                 self.axes.add_patch(self.pinobjects[case_num][k].circle)
                 k += 1
-                #circobj = Circle(self.axes,x,y,(1,1,1),'',pin_radius)
-                #circobj.coord = self.ylist[i] + self.xlist[j]
-                #self.circlelist.append(circobj)
 
-    # Draw pin coordinates                
-    # x-axis
+    # Draw pin coordinates x-axis
     for i in range(10):
-        self.axes.text(0.13+i*pin_delta,0.015,self.xlist[i],ha='center',va='center',fontsize=9)
-    #for i in range(5,10):
-    #    self.axes.text(0.17+i*pin_delta,0.015,self.xlist[i],ha='center',va='center',fontsize=9)
-        
-    # y-axis
+        self.axes.text(0.13 + i*pin_delta, 0.015, self.xlist[i],
+                       ha='center',va='center',fontsize=9)
+    
+    # Draw pin coordinates y-axis
     for i in range(10):
-        self.axes.text(0.99,0.875-i*pin_delta,self.ylist[i],ha='center',va='center',fontsize=9)
-    #for i in range(5,10):
-    #    self.axes.text(0.99,0.83-i*pin_delta,self.ylist[i],ha='center',va='center',fontsize=9)
-        
-        #self.canvas.draw()
-        #Tracer()()
+        self.axes.text(0.99,0.875-i*pin_delta,self.ylist[i],
+                       ha='center',va='center',fontsize=9)
