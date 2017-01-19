@@ -57,50 +57,39 @@ def s96o2(self):
     case_num = int(self.case_cbox.currentIndex())
     state_num = -1
     
-    FUE = self.bundle.cases[case_num].states[state_num].FUE
-    enr_levels  = FUE[:,2]
-    enr_ba = FUE[:,4]
-
-    #nc = enr_levels.size
-
     pin_radius = 0.028
     pin_delta = 0.078
     
     # Draw enrichment level circles
-    x = 1.06
-    for i in range(enr_levels.size):
-        y = 0.9 - i*pin_delta
+    x = 1.06  # horizontal position of the circles
+    num_levels = len(self.enrpinlist[case_num])
+    for i in range(num_levels):
+        y = 0.9 - i*pin_delta  # vertical positions
         self.enrpinlist[case_num][i].set_circle(x, y, pin_radius)
-
-        self.axes.text(x + 0.05, y, "%.2f" % enr_levels[i], fontsize=8)
-        if np.isnan(enr_ba[i]):  # no BA pin
+        enr = self.enrpinlist[case_num][i].ENR
+        self.axes.text(x + 0.05, y, "%.2f" % enr, fontsize=8)
+        ba = self.enrpinlist[case_num][i].BA
+        if np.isnan(ba) or ba < 0.00001:  # no BA pin
             self.enrpinlist[case_num][i].set_text(str(i+1))
         else:
             self.enrpinlist[case_num][i].set_text('Ba')
-            self.axes.text(x + 0.05, y - 0.03, "%.2f" % enr_ba[i], fontsize=8)
-        
+            self.axes.text(x + 0.05, y - 0.03, "%.2f" % ba, fontsize=8)
         self.axes.add_patch(self.enrpinlist[case_num][i].circle)
-                
+    
     # Print average enrichment
-    #ave_enr = self.dataobj.cases[case_num].data.ave_enr
     ave_enr = self.bundle.cases[case_num].states[state_num].ave_enr
     self.axes.text(1.02,0.05,"%.3f %%U-235" % ave_enr,fontsize=8)
     
     # Draw pin circles
-    #npst = self.dataobj.cases[case_num].data.npst
     npst = self.bundle.cases[case_num].states[0].npst
-    #LFU = self.dataobj.cases[case_num].data.LFU
     LFU = self.bundle.cases[case_num].states[state_num].LFU
     # Remove water cross rows and columns
     LFU = np.delete(LFU, (5), axis=0) # Delete row 6
     LFU = np.delete(LFU, (5), axis=1) # Delete col 6
-    #i = [i for i in range(LFU.shape[0]) if np.all(LFU[i,:]==0)][0]
-    #j = [j for j in range(LFU.shape[1]) if np.all(LFU[:,j]==0)][0]
 
     self.xlist = ('1','2','3','4','5','6','7','8','9','10')
     self.ylist  = ('A','B','C','D','E','F','G','H','I','J')
 
-    #self.circlelist = []
     k = 0
     for i in range(LFU.shape[0]):
         for j in range(LFU.shape[1]):
@@ -109,16 +98,14 @@ def s96o2(self):
             if j > 4: x += 0.04
             if i > 4: y -= 0.04
             if LFU[i,j] > 0:
-                self.pinobjects[case_num][k].set_circle(x,y,0.028,(1,1,1))
+                self.pinobjects[case_num][k].set_circle(x, y, pin_radius,
+                                                        (1,1,1))
                 self.pinobjects[case_num][k].coord = self.ylist[i] + self.xlist[j]
                 
                 self.pinobjects[case_num][k].set_text()
                 self.axes.add_patch(self.pinobjects[case_num][k].circle)
                 k += 1
-                #circobj = Circle(self.axes,x,y,(1,1,1),'')
-                #circobj.coord = self.ylist[i] + self.xlist[j]
-                #self.circlelist.append(circobj)
-
+    
     # Draw pin coordinates x-axis
     for i in range(5):
         self.axes.text(0.13 + i*pin_delta, 0.015, self.xlist[i],
@@ -134,4 +121,4 @@ def s96o2(self):
     for i in range(5,10):
         self.axes.text(0.99,0.83-i*pin_delta,self.ylist[i],
                        ha='center',va='center',fontsize=9)
-        
+    
