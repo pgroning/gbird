@@ -99,9 +99,11 @@ class cpin(object):
     def __init__(self,axes):
         self.axes = axes
 
-    def set_circle(self,x,y,r,c):
+    def set_circle(self, x, y, r, c=None):
         self.x = x
         self.y = y
+        if c is None:
+            c = self.facecolor
         self.circle = mpatches.Circle((x,y), r, fc=c, ec=(0.1, 0.1, 0.1))
         self.circle.set_linestyle('solid')
         self.circle.set_linewidth(2.0)
@@ -368,15 +370,25 @@ class MainWin(QMainWindow):
             msgBox = QMessageBox()
             msgBox.information(self,"No data",msg.strip(),QMessageBox.Close)
 
-            
+    def get_colormap(self, num_enr_levels):
+        cvec = ["#FF00FF", "#CC00FF", "#AA00FF", "#0000FF", "#0066FF",
+                "#00AAFF", "#00CCFF", "#00FFFF", "#00FFCC", "#00FFAA",
+                "#00FF66", "#00FF00", "#AAFF00", "#CCFF00", "#FFFF00",
+                "#FFCC00", "#FFAA00", "#FF9900", "#FF5500", "#FF0000"]
+        ic = np.linspace(0, len(cvec)-1, num_enr_levels).astype(int).tolist()
+        cmap = [cvec[i] for i in ic]
+        return cmap
+
     def init_pinobjects(self):
         self.pinobjects = []
         self.enrpinlist = []
         ncases = len(self.bundle.cases)
+        
         for case_num in range(ncases):
             LFU = self.bundle.cases[case_num].states[-1].LFU
             ENR = self.bundle.cases[case_num].states[-1].ENR
             BA = self.bundle.cases[case_num].states[-1].BA
+            
             pinlist = []
             for i in range(LFU.shape[0]):
                 for j in range(LFU.shape[1]):
@@ -393,14 +405,15 @@ class MainWin(QMainWindow):
             FUE = self.bundle.cases[case_num].states[-1].FUE
             enr_levels = FUE[:,2]
             enr_ba = FUE[:,4]
+            cmap = self.get_colormap(enr_levels.size)
             for i in range(enr_levels.size):
                 enrobj = cpin(self.axes)
+                enrobj.facecolor = cmap[i]
+                enrobj.ENR = enr_levels[i]
+                enrobj.BA = enr_ba[i]
                 enrlist.append(enrobj)
-
             self.enrpinlist.append(enrlist)
-
         #qtrace()
-            
             
     def set_pinvalues(self):
         #print "Set values"

@@ -51,84 +51,36 @@ def s96o2(self):
     rot45=mpatches.transforms.Affine2D().rotate_deg(45) + self.axes.transData
     transrot = mpatches.transforms.Affine2D().translate(0.70711,0.0) + rot45#self.axes.transData
     rect.set_transform(transrot)
-
     self.axes.add_patch(rect)
-
 
     # Draw enrichment levels
     case_num = int(self.case_cbox.currentIndex())
     state_num = -1
     
-    #pyqt_trace()
-    #FUE = self.dataobj.cases[case_num].data.FUE
     FUE = self.bundle.cases[case_num].states[state_num].FUE
     enr_levels  = FUE[:,2]
     enr_ba = FUE[:,4]
-    #print enr_levels, enr_ba
- 
-    #cmap = ["#6666FF","#B266FF","#66FFFF","#00CC00","#66FF66","#FFFF66","#FFB266","#FF9999","#FF3333","#FF3399"]
-    #cmap = [[0,0,1], [0,1,1], [0,1,0], [0.604,0.804,0.196], [1,1,0], [0.933,0.867,0.51], [1,0.549,0], [1,1,1], [1,0,0]]
-    nc = enr_levels.size
-    #nc1 = np.round(nc/2)
-    #b1 = np.linspace(1,0.2,nc1)
-    #b2 = np.linspace(0,0,nc-nc1)
-    #b = np.concatenate((b1,b2),axis=0)
-    #b = np.linspace(1,0,nc)
 
-    #r1 = np.linspace(0,0,nc1)
-    #r2 = np.linspace(0.2,1,nc-nc1)
-    #r = np.concatenate((r1,r2),axis=0)
-    #r = np.linspace(0,1,nc)
+    #nc = enr_levels.size
 
-    #g1 = np.linspace(0,0.8,np.round(nc/2))
-    #g2 = np.linspace(1,0,nc-np.round(nc/2))
-    #g = np.concatenate((g1,g2),axis=0)
-    #cmap = np.array([r,g,b]).transpose().tolist()
-
-    cvec = ["#FF00FF","#CC00FF","#AA00FF","#0000FF","#0066FF","#00AAFF","#00CCFF","#00FFFF","#00FFCC","#00FFAA",
-             "#00FF66","#00FF00","#AAFF00","#CCFF00","#FFFF00","#FFCC00","#FFAA00","#FF9900","#FF5500","#FF0000"]
-    #cvec = ["#FF00FF","#CC00FF","#AA00FF","#0000FF","#00AAFF","#00CCFF","#00FFFF","#00FFCC","#00FFAA",
-    #         "#00FF66","#00FF00","#AAFF00","#CCFF00","#FFFF00","#FFCC00","#FFAA00","#FF9900","#FF5500","#FF0000"]
-    ic = np.linspace(0,len(cvec)-1,nc).astype(int).tolist()
-    cmap = [cvec[i] for i in ic]
-
-    #enr_steps = [0.71, 2.5, 3.2, 3.4, 4.0, 4.2, 4.6, 4.9, 0]
-    #enr_ba = [3.4, 5.0]
-    #from pyqt_trace import pyqt_trace
-    #pyqt_trace()
     pin_radius = 0.028
     pin_delta = 0.078
     
     # Draw enrichment level circles
-    #self.enrpinlist = []
     x = 1.06
     for i in range(enr_levels.size):
-        y = 0.9-i*pin_delta
-        #enrobj = cpin(self.axes)
-        #enrobj.set_circle(x,y,0.028,cmap[i])
-        self.enrpinlist[case_num][i].set_circle(x,y,0.028,cmap[i])
-        #enrobj.set_text(str(i+1))
-        self.enrpinlist[case_num][i].set_text(str(i+1))
-        #enrobj.index = i+1
-        #circobj = Circle(self.axes,x,y,cmap[i],str(i+1))
-        #self.axes.add_patch(enrobj.circle)
-        self.axes.add_patch(self.enrpinlist[case_num][i].circle)
-        self.axes.text(x+0.05,y,"%.2f" % enr_levels[i],fontsize=8)
-        #enrobj.ENR = enr_levels[i]
-        #qtrace()
-        self.enrpinlist[case_num][i].ENR = enr_levels[i]
-        #enrobj.BA = enr_ba[i]
-        self.enrpinlist[case_num][i].BA = enr_ba[i]
-        #qtrace()
-        if not np.isnan(enr_ba[i]):
-            #enrobj.text.remove()
-            self.enrpinlist[case_num][i].text.remove()
-            #enrobj.set_text('Ba')
-            self.enrpinlist[case_num][i].set_text('Ba')
-            self.axes.text(x+0.05,y-0.03,"%.2f" % enr_ba[i],fontsize=8)
-            
-        #self.enrpinlist.append(enrobj)
+        y = 0.9 - i*pin_delta
+        self.enrpinlist[case_num][i].set_circle(x, y, pin_radius)
 
+        self.axes.text(x + 0.05, y, "%.2f" % enr_levels[i], fontsize=8)
+        if np.isnan(enr_ba[i]):  # no BA pin
+            self.enrpinlist[case_num][i].set_text(str(i+1))
+        else:
+            self.enrpinlist[case_num][i].set_text('Ba')
+            self.axes.text(x + 0.05, y - 0.03, "%.2f" % enr_ba[i], fontsize=8)
+        
+        self.axes.add_patch(self.enrpinlist[case_num][i].circle)
+                
     # Print average enrichment
     #ave_enr = self.dataobj.cases[case_num].data.ave_enr
     ave_enr = self.bundle.cases[case_num].states[state_num].ave_enr
