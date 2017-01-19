@@ -416,22 +416,12 @@ class MainWin(QMainWindow):
         #qtrace()
             
     def set_pinvalues(self):
-        #print "Set values"
+        """Update values"""
+
         param_str = str(self.param_cbox.currentText())
         case_num = int(self.case_cbox.currentIndex())
         point_num = int(self.point_sbox.value())
         state_num = -1
-        #print param_str,case_num,point_num
-
-        #self.table.setHorizontalHeaderItem(1,QTableWidgetItem(param_str))
-        #if param_str == 'FINT': param_str = 'POW'
-
-        #if hasattr(self,'dataobj'): # data is loaded
-        #    if param_str == 'ENR':
-        #        pinvalues = getattr(self.dataobj.cases[case_num].data,param_str)
-        #    else:
-        #        pinvalues = getattr(self.dataobj.cases[case_num].statepts[point_num],param_str)
-        #    #print pinvalues
 
         state = self.bundle.cases[case_num].states[state_num]
         
@@ -853,15 +843,13 @@ class MainWin(QMainWindow):
     def draw_fuelmap(self):
         """Draw fuel map"""
 
-        #print "draw fuel map"
         from map_s96 import s96o2
         from map_a10 import a10xm
 
-        #print "draw fuel map"
-        self.fig.set_facecolor((1,1,0.8784))
+        self.fig.set_facecolor((1, 1, 0.8784))
         # Draw outer rectangle
         rect = mpatches.Rectangle((0.035,0.035), 0.935, 0.935, 
-                                  fc=(0.8,0.898,1),ec=(0.3, 0.3, 0.3))
+                                  fc=(0.8,0.898,1), ec=(0.3, 0.3, 0.3))
         self.axes.add_patch(rect)
         
         # Draw control rods
@@ -869,7 +857,6 @@ class MainWin(QMainWindow):
                                        ec=(0.3, 0.3, 0.3))
         rodrect_v.set_fill(False)
         self.axes.add_patch(rodrect_v)
-        #self.axes.hlines(0.17,0.011,0.056)
         pp = [[0.011, 0.17], [0.056, 0.17]]
         poly = mpatches.Polygon(pp)
         poly.set_closed(False)
@@ -910,7 +897,7 @@ class MainWin(QMainWindow):
             a10xm(self)
         elif self.bundle.data.fuetype == 'A10B':
             a10xm(self)
-            
+        
         # Draw symmetry line
         #pp = [[0.035, 0.965], [0.965, 0.035]]
         #poly = mpatches.Polygon(pp)
