@@ -425,15 +425,10 @@ class MainWin(QMainWindow):
 
         state = self.bundle.cases[case_num].states[state_num]
         
-        #ENR = getattr(self.dataobj.cases[case_num].data,'ENR')
         ENR = state.ENR
-        #EXP = getattr(self.dataobj.cases[case_num].statepts[point_num],'EXP')
         EXP = state.statepoints[point_num].EXP
-        #FINT = getattr(self.dataobj.cases[case_num].statepts[point_num],'POW')
         FINT = state.statepoints[point_num].POW
-        #BTF = self.dataobj.btf.DOX[point_num,:,:]
         
-        #burnup = self.dataobj.cases[case_num].statepts[point_num].burnup
         burnup = state.statepoints[point_num].burnup
         btf_burnpoints = self.bundle.states[state_num].btf.burnpoints
         
@@ -444,17 +439,7 @@ class MainWin(QMainWindow):
         else:
             BTF = np.zeros(np.shape(self.bundle.states[state_num].btf.DOX)[1:])
             BTF.fill(np.nan)
-
-        #try:  # is BTF calculated for the specific burnup?
-        #    btf_num = next(i for i, x in
-        #                   enumerate(btf_burnpoints) if x == burnup)
-        #    BTF = self.bundle.states[state_num].btf.DOX[btf_num,:,:]
-        #except:
-        #    BTF = np.zeros(np.shape(self.bundle.states[state_num].btf.DOX)[1:])
-        #    BTF.fill(np.nan)
         
-        #qtrace()
-        #npst = state.npst
         npst = self.bundle.cases[case_num].states[0].npst
         LFU = state.LFU
         #BA = state.BA
@@ -468,7 +453,6 @@ class MainWin(QMainWindow):
         for i in range(npst):
             for j in range(npst):
                 if LFU[i,j] > 0:
-                    #print i,j
                     self.pinobjects[case_num][k].EXP = EXP[i,j]
                     self.pinobjects[case_num][k].FINT = FINT[i,j]
                     self.pinobjects[case_num][k].BTF = BTF[i,j]
@@ -489,24 +473,19 @@ class MainWin(QMainWindow):
                     k += 1
         
         statepoint = state.statepoints[point_num]
-        #burnup = self.dataobj.cases[case_num].statepts[point_num].burnup
         burnup = statepoint.burnup
-        #voi = self.dataobj.cases[case_num].statepts[point_num].voi
         voi = statepoint.voi
-        #vhi = self.dataobj.cases[case_num].statepts[point_num].vhi
         vhi = statepoint.vhi
-        #kinf = self.dataobj.cases[case_num].statepts[point_num].kinf
         kinf = statepoint.kinf
-        #fint = self.dataobj.cases[case_num].statepts[point_num].fint
         fint = statepoint.fint
         btf = BTF.max()
-        #tfu = self.dataobj.cases[case_num].statepts[point_num].tfu
         tfu = statepoint.tfu
-        #tmo = self.dataobj.cases[case_num].statepts[point_num].tmo
         tmo = statepoint.tmo
         
-        self.statusBar().showMessage("Burnup=%.3f : VOI=%.0f : VHI=%.0f : Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f" 
-                                     % (burnup,voi,vhi,kinf,fint,btf,tfu,tmo))
+        self.statusBar().showMessage("""Burnup=%.3f : VOI=%.0f : VHI=%.0f : 
+Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
+                                     % (burnup, voi, vhi, kinf, fint, btf,
+                                        tfu, tmo))
         
         npins = len(self.pinobjects[case_num])
         
@@ -519,40 +498,44 @@ class MainWin(QMainWindow):
                 j = next(j for j, enrpin in enumerate(self.enrpinlist[case_num])
                          if enrpin.BA == self.pinobjects[case_num][i].BA 
                          and enrpin.ENR == self.pinobjects[case_num][i].ENR)
-            self.pinobjects[case_num][i].LFU = j+1
-            fc = self.enrpinlist[case_num][j].circle.get_facecolor() 
-            
+            self.pinobjects[case_num][i].LFU = j + 1
+            fc = self.enrpinlist[case_num][j].circle.get_facecolor()
+            self.pinobjects[case_num][i].circle.set_facecolor(fc)
+
             if param_str == "ENR":
                 text = self.enrpinlist[case_num][j].text.get_text()
-                self.pinobjects[case_num][i].text.remove()
-                self.pinobjects[case_num][i].set_text(text)
-                self.pinobjects[case_num][i].circle.set_facecolor(fc)
+                #self.pinobjects[case_num][i].text.remove()
+                #self.pinobjects[case_num][i].set_text(text)
+                #self.pinobjects[case_num][i].circle.set_facecolor(fc)
                 
             elif param_str == "BTF":
-                btf_ratio = self.pinobjects[case_num][i].BTF/btf*100
+                btf_ratio = self.pinobjects[case_num][i].BTF/btf*1000
                 text =  ('%.0f' % (btf_ratio))
-                self.pinobjects[case_num][i].text.remove()
-                self.pinobjects[case_num][i].set_text(text)
-                self.pinobjects[case_num][i].circle.set_facecolor(fc)
+                #self.pinobjects[case_num][i].text.remove()
+                #self.pinobjects[case_num][i].set_text(text)
+                #self.pinobjects[case_num][i].circle.set_facecolor(fc)
                 
             elif param_str == "EXP":
                 if self.pinobjects[case_num][i].EXP < 10:
                     text =  ('%.1f' % (self.pinobjects[case_num][i].EXP))
                 else:
                     text =  ('%.0f' % (self.pinobjects[case_num][i].EXP))
-                self.pinobjects[case_num][i].text.remove()
-                self.pinobjects[case_num][i].set_text(text)
-                self.pinobjects[case_num][i].circle.set_facecolor(fc)
+                #self.pinobjects[case_num][i].text.remove()
+                #self.pinobjects[case_num][i].set_text(text)
+                #self.pinobjects[case_num][i].circle.set_facecolor(fc)
 
             elif param_str == "FINT":
                 if self.pinobjects[case_num][i].FINT < 10:
                     text =  ('%.1f' % (self.pinobjects[case_num][i].FINT))
                 else:
                     text =  ('%.0f' % (self.pinobjects[case_num][i].FINT))
-                self.pinobjects[case_num][i].text.remove()
-                self.pinobjects[case_num][i].set_text(text)
-                self.pinobjects[case_num][i].circle.set_facecolor(fc)
-                            
+                #self.pinobjects[case_num][i].text.remove()
+                #self.pinobjects[case_num][i].set_text(text)
+                #self.pinobjects[case_num][i].circle.set_facecolor(fc)
+
+            self.pinobjects[case_num][i].text.remove()
+            self.pinobjects[case_num][i].set_text(text) 
+
         self.canvas.draw()
 
     def setpincoords(self):
@@ -644,11 +627,14 @@ class MainWin(QMainWindow):
                 j = self.halfsym_pin(i)
 
 
-    def halfsym_pin(self,i):
+    def halfsym_pin(self, i):
+        """Find the corresponding pin for half symmetry"""
+
         case_num = int(self.case_cbox.currentIndex())
         pos = self.pinobjects[case_num][i].pos
         sympos = list(reversed(pos))
-        j = next(k for k,po in enumerate(self.pinobjects[case_num]) if po.pos == sympos)
+        j = next(k for k, po in enumerate(self.pinobjects[case_num]) 
+                 if po.pos == sympos)
         return j
 
     def mark_pin(self,i):
@@ -675,7 +661,8 @@ class MainWin(QMainWindow):
         #r = self.circlelist[i].circle.get_radius()*1.3
         #x = self.circlelist[i].x
         #y = self.circlelist[i].y
-        self.clickpatch = mpatches.Circle((x,y), r, fc=(1,1,1), alpha=1.0, ec=(0.2, 0.2, 0.2))
+        self.clickpatch = mpatches.Circle((x,y), r, fc=(1,1,1), alpha=1.0, 
+                                          ec=(0.2, 0.2, 0.2))
         self.clickpatch.set_linestyle('solid')
         self.clickpatch.set_fill(False)
         self.clickpatch.set_linewidth(2.0)
@@ -735,28 +722,25 @@ class MainWin(QMainWindow):
     def __pinenr_update(self, i, j):
         #i = self.pinselection_index
         case_num = int(self.case_cbox.currentIndex())
+        
         self.pinobjects[case_num][i].LFU = j + 1
         self.pinobjects[case_num][i].ENR = self.enrpinlist[case_num][j].ENR
-        #self.circlelist[i].ENR = self.enrpinlist[j].ENR
+        
         if np.isnan(self.enrpinlist[case_num][j].BA):
             self.pinobjects[case_num][i].BA = 0.0
-            #self.circlelist[i].BA = 0.0
         else:
             self.pinobjects[case_num][i].BA = self.enrpinlist[case_num][j].BA
-            #self.circlelist[i].BA = self.enrpinlist[j].BA
 
         fc = self.enrpinlist[case_num][j].circle.get_facecolor()
+        self.pinobjects[case_num][i].circle.set_facecolor(fc)
+
         text = self.enrpinlist[case_num][j].text.get_text()
         if str(self.param_cbox.currentText()) == 'ENR':
             self.pinobjects[case_num][i].text.remove()
             self.pinobjects[case_num][i].set_text(text)
-        #self.circlelist[i].set_text(text)
-        self.pinobjects[case_num][i].circle.set_facecolor(fc)
-        #self.circlelist[i].circle.set_facecolor(fc)
-
+        
         #self.bundle.cases[case_num].states[-1].LFU = self.__lfumap(case_num)
         #self.dataobj.cases[case_num].qcalc[0].LFU = self.__lfumap(case_num)
-        #qtrace()
         self.canvas.draw()
 
 
