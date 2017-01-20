@@ -96,7 +96,7 @@ class Circle(object):
 """
 
 class cpin(object):
-    def __init__(self,axes):
+    def __init__(self, axes):
         self.axes = axes
 
     def set_circle(self, x, y, r, c=None):
@@ -112,20 +112,20 @@ class cpin(object):
         except:
             pass
 
-    def set_text(self,string='',fsize=8):
+    def set_text(self, string='', fsize=8):
         #if hasattr(self,'text'):
         #    self.text.remove()
         self.text = self.axes.text(self.x,self.y,string,ha='center',va='center',fontsize=fsize)
 
-    def is_clicked(self,xc,yc):
+    def is_clicked(self, xc, yc):
         r2 = (xc-self.x)**2 + (yc-self.y)**2
-        if r2 < self.circle.get_radius()**2: #Mouse click is within pin radius
+        if r2 < self.circle.get_radius()**2: # Mouse click is within pin radius
             return True
         else:
             return False
 
 
-        
+
 class MainWin(QMainWindow):
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
@@ -172,7 +172,7 @@ class MainWin(QMainWindow):
         #self.draw_fuelmap()
         #Tracer()()
 
-    def on_resize(self,event):
+    def on_resize(self, event):
         self.axes.set_xlim(0,1.2)
         self.axes.set_ylim(0,1)
 
@@ -539,22 +539,19 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.canvas.draw()
 
     def setpincoords(self):
+        """Update table with pin coordinates"""
+
         self.table.clearContents()
-        #self.xlist = ('01','02','03','04','05','06','07','08','09','10')
-        #self.ylist  = ('A','B','C','D','E','F','G','H','I','J')
         case_num = int(self.case_cbox.currentIndex())
         npin = len(self.pinobjects[case_num])
-        #npin = len(self.circlelist)
         self.table.setRowCount(npin)
         
         for i,pinobj in enumerate(self.pinobjects[case_num]):
-        #for i,pinobj in enumerate(self.circlelist):
             coord_item = QTableWidgetItem(pinobj.coord)
             self.table.setVerticalHeaderItem(i,coord_item)
             i_item = QTableWidgetItem()
             i_item.setData(Qt.EditRole, QVariant(int(i)))
             self.table.setItem(i,0,i_item)
-
 
     def save_plot(self):
         file_choices = "PNG (*.png)|*.png"
@@ -581,17 +578,14 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             #item = QTableWidgetItem(str(self.circlelist[index].coord))
             self.table.setVerticalHeaderItem(i,item)
 
-
     def tableSelectRow(self,i):
         index = next(j for j in range(self.table.rowCount()) 
                      if int(self.table.item(j,0).text()) == i)
         self.table.selectRow(index)
 
-
     def pinSelect(self,i):
         index = int(self.table.item(i,0).text())
         self.mark_pin(index)
-
 
     def on_click(self, event):
         # The event received here is of the type
@@ -609,32 +603,42 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         case_num = int(self.case_cbox.currentIndex())
 
         if event.button is 1:
-            #print event.xdata, event.ydata
+            # print event.xdata, event.ydata
             i = np.nan
-            try: # check if any circle is selected and return the index
-                i = next(i for i,cobj in enumerate(self.pinobjects[case_num])
-                #i = next(i for i,cobj in enumerate(self.circlelist) 
-                         if cobj.is_clicked(event.xdata,event.ydata))
+            try:  # check if any pin is selected and return the index
+                i = next(i for i, cobj in enumerate(self.pinobjects[case_num])
+                         if cobj.is_clicked(event.xdata, event.ydata))
             except:
                 pass
-            if i >= 0: # A Circle is selected
-                #print self.circlelist[i].coord
+            if i >= 0:  # A pin is selected
                 self.tableSelectRow(i)
-                #self.table.selectRow(i)
-                #print i,self.circlelist[i].x,self.circlelist[i].y
                 self.mark_pin(i)
                 self.pinselection_index = i
                 j = self.halfsym_pin(i)
 
-
-    def halfsym_pin(self, i):
+    def halfsym_pin(self, i, case_num=None):
         """Find the corresponding pin for half symmetry"""
 
-        case_num = int(self.case_cbox.currentIndex())
+        if case_num is None:
+            case_num = int(self.case_cbox.currentIndex())
+
         pos = self.pinobjects[case_num][i].pos
         sympos = list(reversed(pos))
         j = next(k for k, po in enumerate(self.pinobjects[case_num]) 
                  if po.pos == sympos)
+        return j
+
+    def casecor_pin(self, case_num):
+        """Find the corresponding pin for another segment"""
+        
+        current_case_num = int(self.case_cbox.currentIndex())
+        i = self.pinselection_index
+        ipos = self.pinobjects[current_case_num][i].pos
+        try:
+            j = next(k for k, po in enumerate(self.pinobjects[case_num])
+                     if po.pos == ipos)
+        except:  # no corresponding pin found
+            j = np.nan
         return j
 
     def mark_pin(self,i):
@@ -672,27 +676,32 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
     def enr_add(self):
         halfsym = True
         case_num = int(self.case_cbox.currentIndex())
-        ivec=[]
-        ivec.append(self.pinselection_index)
+        #case_num = 1
+        ivec = []
+        #ipin = self.pinselection_index
+        # ivec.append(ipin)
+        ipin = self.casecor_pin(case_num)
+        if np.isnan(ipin):
+            return
+        ivec.append(ipin)
+        #qtrace()
         if halfsym:
-            isym = self.halfsym_pin(ivec[0])
-            if isym != ivec[0]: ivec.append(isym)
+            isym = self.halfsym_pin(ivec[0], case_num)
+            if isym != ivec[0]: 
+                ivec.append(isym)
         for i in ivec:
             #print "Increase enrichment for pin " + str(i)
             pinEnr = self.pinobjects[case_num][i].ENR
             pinBA = self.pinobjects[case_num][i].BA
-            #pinEnr = self.circlelist[i].ENR
-            #pinBA = self.circlelist[i].BA
             
             for j, x in enumerate(self.enrpinlist[case_num]):
-                #qtrace()
                 if np.isnan(x.BA):
                     x.BA = 0.0
                 if x.ENR == pinEnr and x.BA == pinBA:
                     break
             
             if j < len(self.enrpinlist[case_num])-1:
-                self.__pinenr_update(i,j+1)
+                self.__pinenr_update(i, j+1, case_num)
 
     def enr_sub(self):
         halfsym = True
@@ -719,9 +728,13 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         #enrArray = [x.ENR for x in self.enrpinlist][::-1] # Reverse order
         #print enrArray
 
-    def __pinenr_update(self, i, j):
+    #def enr_modify(self):
+    #    pass
+
+    def __pinenr_update(self, i, j, case_num=None):
         #i = self.pinselection_index
-        case_num = int(self.case_cbox.currentIndex())
+        if case_num is None:
+            case_num = int(self.case_cbox.currentIndex())
         
         self.pinobjects[case_num][i].LFU = j + 1
         self.pinobjects[case_num][i].ENR = self.enrpinlist[case_num][j].ENR
@@ -731,13 +744,14 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         else:
             self.pinobjects[case_num][i].BA = self.enrpinlist[case_num][j].BA
 
-        fc = self.enrpinlist[case_num][j].circle.get_facecolor()
-        self.pinobjects[case_num][i].circle.set_facecolor(fc)
-
-        text = self.enrpinlist[case_num][j].text.get_text()
-        if str(self.param_cbox.currentText()) == 'ENR':
-            self.pinobjects[case_num][i].text.remove()
-            self.pinobjects[case_num][i].set_text(text)
+        if case_num == int(self.case_cbox.currentIndex()):
+            fc = self.enrpinlist[case_num][j].circle.get_facecolor()
+            self.pinobjects[case_num][i].circle.set_facecolor(fc)
+            
+            text = self.enrpinlist[case_num][j].text.get_text()
+            if str(self.param_cbox.currentText()) == 'ENR':
+                self.pinobjects[case_num][i].text.remove()
+                self.pinobjects[case_num][i].set_text(text)
         
         #self.bundle.cases[case_num].states[-1].LFU = self.__lfumap(case_num)
         #self.dataobj.cases[case_num].qcalc[0].LFU = self.__lfumap(case_num)
