@@ -674,9 +674,36 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.canvas.draw()
 
     def enr_add(self):
+
+        modify_all = False
+
+        if modify_all:
+            ncases = len(self.pinobjects)
+            for case_num in range(ncases):
+                self.enr_modify("add", case_num)
+        else:
+            case_num = int(self.case_cbox.currentIndex())
+            self.enr_modify("add", case_num)
+
+    def enr_sub(self):
+
+        modify_all = False
+
+        if modify_all:
+            ncases = len(self.pinobjects)
+            for case_num in range(ncases):
+                self.enr_modify("sub", case_num)
+        else:
+            case_num = int(self.case_cbox.currentIndex())
+            self.enr_modify("sub", case_num)
+
+        #enrArray = [x.ENR for x in self.enrpinlist][::-1] # Reverse order
+        
+
+    def enr_modify(self, mod, case_num=None):
         halfsym = True
-        case_num = int(self.case_cbox.currentIndex())
-        #case_num = 1
+        if case_num is None:
+            case_num = int(self.case_cbox.currentIndex())
         ivec = []
         #ipin = self.pinselection_index
         # ivec.append(ipin)
@@ -684,7 +711,6 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         if np.isnan(ipin):
             return
         ivec.append(ipin)
-        #qtrace()
         if halfsym:
             isym = self.halfsym_pin(ivec[0], case_num)
             if isym != ivec[0]: 
@@ -699,37 +725,12 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                     x.BA = 0.0
                 if x.ENR == pinEnr and x.BA == pinBA:
                     break
-            
-            if j < len(self.enrpinlist[case_num])-1:
-                self.__pinenr_update(i, j+1, case_num)
-
-    def enr_sub(self):
-        halfsym = True
-        case_num = int(self.case_cbox.currentIndex())
-        ivec=[]
-        ivec.append(self.pinselection_index)
-        if halfsym:
-            isym = self.halfsym_pin(ivec[0])
-            if isym != ivec[0]: ivec.append(isym)
-        for i in ivec:
-            #print "Decrease enrichment for pin " + str(i)
-            pinEnr = self.pinobjects[case_num][i].ENR
-            pinBA = self.pinobjects[case_num][i].BA
-            #pinEnr = self.circlelist[i].ENR
-            #pinBA = self.circlelist[i].BA
-
-            for j,x in enumerate(self.enrpinlist[case_num]):
-                if np.isnan(x.BA): x.BA = 0.0
-                if x.ENR == pinEnr and x.BA == pinBA:
-                    break
-            if j > 0:
-                self.__pinenr_update(i,j-1)
-        
-        #enrArray = [x.ENR for x in self.enrpinlist][::-1] # Reverse order
-        #print enrArray
-
-    #def enr_modify(self):
-    #    pass
+            if mod == "add":
+                if j < len(self.enrpinlist[case_num])-1:
+                    self.__pinenr_update(i, j+1, case_num)
+            elif mod == "sub":
+                if j > 0:
+                    self.__pinenr_update(i, j-1, case_num)
 
     def __pinenr_update(self, i, j, case_num=None):
         #i = self.pinselection_index
