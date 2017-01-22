@@ -807,6 +807,11 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.draw_fuelmap()
         self.set_pinvalues()
 
+        case_num = int(self.case_cbox.currentIndex())
+        sim = self.bundle.cases[case_num].states[0].sim
+        text = sim.replace("SIM", "").replace("'", "").strip()
+        self.sim_text.setText(text)
+
     def on_draw(self):
         """ Setup the figure axis"""
 
@@ -1079,7 +1084,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         #sizePolicy.setHeightForWidth(self.ave_enr_text.sizePolicy().hasHeightForWidth())
         self.sim_text = QLineEdit()
         self.sim_text.setSizePolicy(sizePolicy)
-        self.sim_text.setReadOnly(True)
+        self.sim_text.setReadOnly(False)
         #text = self.bundle.cases[0].states[0].sim
         #self.sim_text.setText(text)
         info_flo.addRow("SIM", self.sim_text)
