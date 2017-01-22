@@ -677,7 +677,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
         modify_all = False
 
-        if modify_all:
+        if self.enr_case_cb.isChecked():
             ncases = len(self.pinobjects)
             for case_num in range(ncases):
                 self.enr_modify("add", case_num)
@@ -689,7 +689,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
         modify_all = False
 
-        if modify_all:
+        if self.enr_case_cb.isChecked():
             ncases = len(self.pinobjects)
             for case_num in range(ncases):
                 self.enr_modify("sub", case_num)
@@ -1017,9 +1017,12 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
         self.enr_plus_button = QPushButton("+ enr")
         self.enr_minus_button = QPushButton("- enr")
+        self.enr_case_cb = QCheckBox("All cases")
+        self.enr_case_cb.setChecked(False)
         enr_hbox = QHBoxLayout()
         enr_hbox.addWidget(self.enr_minus_button)
         enr_hbox.addWidget(self.enr_plus_button)
+        enr_hbox.addWidget(self.enr_case_cb)
         self.connect(self.enr_plus_button, SIGNAL('clicked()'), self.enr_add)
         self.connect(self.enr_minus_button, SIGNAL('clicked()'), self.enr_sub)
 
