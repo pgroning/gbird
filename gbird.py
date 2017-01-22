@@ -1071,6 +1071,23 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         #self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'), self.on_plot)
         #Tracer()()
 
+        self.ave_enr_text = QLineEdit()
+        #sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        sizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        #sizePolicy.setHorizontalStretch(0)
+        #sizePolicy.setVerticalStretch(0)
+        #sizePolicy.setHeightForWidth(self.ave_enr_text.sizePolicy().hasHeightForWidth())
+        self.ave_enr_text.setSizePolicy(sizePolicy)
+        self.ave_enr_text.setReadOnly(True)
+        info_flo = QFormLayout()
+        info_flo.addRow("Segment %U-235", self.ave_enr_text)
+        self.ave_enr_text.setText('3.142')
+        self.bundle_enr_text = QLineEdit()
+        self.bundle_enr_text.setSizePolicy(sizePolicy)
+        self.bundle_enr_text.setReadOnly(True)
+        info_flo.addRow("Bundle %U-235", self.bundle_enr_text)
+        self.bundle_enr_text.setText('2.818')
+        
         # Define table widget
         self.table = QTableWidget()
         self.table.setRowCount(100)
@@ -1122,10 +1139,11 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         vbox.addLayout(enr_hbox)
         vbox.addLayout(calc_hbox)
 
-        #spacerItem = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        #spacerItem = QSpacerItem(1, 1, QSizePolicy.Minimum, QSizePolicy.Minimum)
         #vbox.addItem(spacerItem)
         vbox.addStretch(1)
-
+        vbox.addLayout(info_flo)
+        
         groupbox = QGroupBox()
         groupbox.setStyleSheet("QGroupBox { background-color: rgb(200, 200,\
         200); border:1px solid gray; border-radius:5px;}")
