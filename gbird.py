@@ -1069,19 +1069,32 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
         #self.connect(self.case_cbox, SIGNAL('activated(QString)'), self.on_case)
         #self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'), self.on_plot)
-        #Tracer()()
-
-        self.ave_enr_text = QLineEdit()
-        #sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        
+        # Info form layout
+        info_flo = QFormLayout()
         sizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        #sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         #sizePolicy.setHorizontalStretch(0)
         #sizePolicy.setVerticalStretch(0)
         #sizePolicy.setHeightForWidth(self.ave_enr_text.sizePolicy().hasHeightForWidth())
+        self.sim_text = QLineEdit()
+        self.sim_text.setSizePolicy(sizePolicy)
+        self.sim_text.setReadOnly(True)
+        #text = self.bundle.cases[0].states[0].sim
+        #self.sim_text.setText(text)
+        info_flo.addRow("SIM", self.sim_text)
+
+        self.rod_types_text = QLineEdit()
+        self.rod_types_text.setSizePolicy(sizePolicy)
+        self.rod_types_text.setReadOnly(True)
+        info_flo.addRow("# Rod types", self.rod_types_text)
+        
+        self.ave_enr_text = QLineEdit()
         self.ave_enr_text.setSizePolicy(sizePolicy)
         self.ave_enr_text.setReadOnly(True)
-        info_flo = QFormLayout()
         info_flo.addRow("Segment %U-235", self.ave_enr_text)
         self.ave_enr_text.setText('3.142')
+        
         self.bundle_enr_text = QLineEdit()
         self.bundle_enr_text.setSizePolicy(sizePolicy)
         self.bundle_enr_text.setReadOnly(True)
