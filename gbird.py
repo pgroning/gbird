@@ -510,7 +510,10 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                 
             elif param_str == "BTF":
                 btf_ratio = self.pinobjects[case_num][i].BTF/btf*1000
-                text =  ('%.0f' % (btf_ratio))
+                if int(btf_ratio) == 1000:
+                    text =  "1k"
+                else:
+                    text =  ('%.0f' % (btf_ratio))
                 #self.pinobjects[case_num][i].text.remove()
                 #self.pinobjects[case_num][i].set_text(text)
                 #self.pinobjects[case_num][i].circle.set_facecolor(fc)
