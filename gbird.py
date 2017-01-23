@@ -712,6 +712,10 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         ave_enr = self.bundle.cases[case_num].states[-1].ave_enr
         self.ave_enr_text.setText("%.5f" % ave_enr)
 
+        self.bundle.ave_enr()
+        bundle_enr = self.bundle.states[-1].ave_enr
+        self.bundle_enr_text.setText("%.5f" % bundle_enr)
+
     def enr_modify(self, mod, case_num=None):
         halfsym = True
         if case_num is None:
@@ -825,9 +829,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         text = sim.replace("SIM", "").replace("'", "").strip()
         self.sim_text.setText(text)
 
-        self.bundle.cases[case_num].ave_enr()
-        ave_enr = self.bundle.cases[case_num].states[-1].ave_enr
-        self.ave_enr_text.setText("%.5f" % ave_enr)
+        self.enr_update()
+
 
     def on_draw(self):
         """ Setup the figure axis"""
@@ -1121,7 +1124,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.bundle_enr_text.setSizePolicy(sizePolicy)
         self.bundle_enr_text.setReadOnly(True)
         info_flo.addRow("Bundle %U-235", self.bundle_enr_text)
-        self.bundle_enr_text.setText('2.818')
+        #self.bundle_enr_text.setText('2.818')
         
         # Define table widget
         self.table = QTableWidget()
