@@ -528,10 +528,11 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                 #self.pinobjects[case_num][i].circle.set_facecolor(fc)
 
             elif param_str == "FINT":
-                if self.pinobjects[case_num][i].FINT < 10:
-                    text =  ('%.1f' % (self.pinobjects[case_num][i].FINT))
-                else:
-                    text =  ('%.0f' % (self.pinobjects[case_num][i].FINT))
+                text =  ('%.0f' % (self.pinobjects[case_num][i].FINT*100))
+                #if self.pinobjects[case_num][i].FINT < 10:
+                #    text =  ('%.1f' % (self.pinobjects[case_num][i].FINT))
+                #else:
+                #    text =  ('%.0f' % (self.pinobjects[case_num][i].FINT))
                 #self.pinobjects[case_num][i].text.remove()
                 #self.pinobjects[case_num][i].set_text(text)
                 #self.pinobjects[case_num][i].circle.set_facecolor(fc)
