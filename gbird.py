@@ -1022,14 +1022,15 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
         self.enr_plus_button = QPushButton("+ enr")
         self.enr_minus_button = QPushButton("- enr")
-        self.enr_case_cb = QCheckBox("All cases")
-        self.enr_case_cb.setChecked(False)
         enr_hbox = QHBoxLayout()
         enr_hbox.addWidget(self.enr_minus_button)
         enr_hbox.addWidget(self.enr_plus_button)
-        enr_hbox.addWidget(self.enr_case_cb)
         self.connect(self.enr_plus_button, SIGNAL('clicked()'), self.enr_add)
         self.connect(self.enr_minus_button, SIGNAL('clicked()'), self.enr_sub)
+        self.enr_case_cb = QCheckBox("All cases")
+        self.enr_case_cb.setChecked(False)
+        enr_case_hbox = QHBoxLayout()
+        enr_case_hbox.addWidget(self.enr_case_cb)
 
         self.calc_quick_button = QPushButton("Quick calc")
         self.calc_full_button = QPushButton("Full calc")
@@ -1084,7 +1085,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         #sizePolicy.setHeightForWidth(self.ave_enr_text.sizePolicy().hasHeightForWidth())
         self.sim_text = QLineEdit()
         self.sim_text.setSizePolicy(sizePolicy)
-        self.sim_text.setReadOnly(False)
+        self.sim_text.setReadOnly(True)
         #text = self.bundle.cases[0].states[0].sim
         #self.sim_text.setText(text)
         info_flo.addRow("SIM", self.sim_text)
@@ -1155,7 +1156,9 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         vbox.addLayout(case_hbox)
         vbox.addLayout(point_hbox)
         vbox.addLayout(enr_hbox)
+        vbox.addLayout(enr_case_hbox)
         vbox.addLayout(calc_hbox)
+        
 
         #spacerItem = QSpacerItem(1, 1, QSizePolicy.Minimum, QSizePolicy.Minimum)
         #vbox.addItem(spacerItem)
