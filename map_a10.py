@@ -37,8 +37,8 @@ def a10xm(self):
         self.axes.add_patch(self.enrpinlist[case_num][i].circle)
                 
     # Print average enrichment
-    ave_enr = self.bundle.cases[case_num].states[state_num].ave_enr
-    self.axes.text(1.02,0.05,"%.3f %%U-235" % ave_enr,fontsize=8)
+    #ave_enr = self.bundle.cases[case_num].states[state_num].ave_enr
+    #self.axes.text(1.02,0.05,"%.3f %%U-235" % ave_enr,fontsize=8)
 
     # List of pin coordinates
     self.xlist = ('1','2','3','4','5','6','7','8','9','10')

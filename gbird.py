@@ -675,9 +675,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
     def enr_add(self):
 
-        modify_all = False
-
-        if self.enr_case_cb.isChecked():
+        if self.enr_case_cb.isChecked():  # update all cases
             ncases = len(self.pinobjects)
             for case_num in range(ncases):
                 self.enr_modify("add", case_num)
@@ -685,9 +683,9 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             case_num = int(self.case_cbox.currentIndex())
             self.enr_modify("add", case_num)
 
-    def enr_sub(self):
+        self.enr_update()  # Update info fields
 
-        modify_all = False
+    def enr_sub(self):
 
         if self.enr_case_cb.isChecked():
             ncases = len(self.pinobjects)
@@ -697,8 +695,18 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             case_num = int(self.case_cbox.currentIndex())
             self.enr_modify("sub", case_num)
 
+        self.enr_update()  # Update info fields
+
         #enrArray = [x.ENR for x in self.enrpinlist][::-1] # Reverse order
-        
+
+    def enr_update(self):
+        '''Update enr value in info fields'''
+
+        case_num = int(self.case_cbox.currentIndex())
+        LFU = self.__lfumap(case_num)
+        self.bundle.cases[case_num].ave_enr(LFU)  # must take inargs
+        ave_enr = self.bundle.cases[case_num].states[-1].ave_enr
+        self.ave_enr_text.setText("%.5f" % ave_enr)
 
     def enr_modify(self, mod, case_num=None):
         halfsym = True
@@ -760,9 +768,9 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
 
     def __lfumap(self, case_num):
-        """Creating LFU map"""
+        """Creating LFU map from pinobjects"""
         
-        print "Creating LFU map"
+        #print "Creating LFU map"
         #case_num = int(self.case_cbox.currentIndex())
         
         # Initialize new LFU map and fill with zeros
@@ -807,10 +815,15 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.draw_fuelmap()
         self.set_pinvalues()
 
+        # Update info field
         case_num = int(self.case_cbox.currentIndex())
         sim = self.bundle.cases[case_num].states[0].sim
         text = sim.replace("SIM", "").replace("'", "").strip()
         self.sim_text.setText(text)
+
+        self.bundle.cases[case_num].ave_enr()
+        ave_enr = self.bundle.cases[case_num].states[-1].ave_enr
+        self.ave_enr_text.setText("%.5f" % ave_enr)
 
     def on_draw(self):
         """ Setup the figure axis"""
@@ -1099,7 +1112,6 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.ave_enr_text.setSizePolicy(sizePolicy)
         self.ave_enr_text.setReadOnly(True)
         info_flo.addRow("Segment %U-235", self.ave_enr_text)
-        self.ave_enr_text.setText('3.142')
         
         self.bundle_enr_text = QLineEdit()
         self.bundle_enr_text.setSizePolicy(sizePolicy)

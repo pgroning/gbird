@@ -414,22 +414,23 @@ class Segment(object):
         return Mt
 
     # --------Calculate average enrichment----------
-    def ave_enr(self):
+    def ave_enr(self, LFU=None):
+
+        # Inargs: FUE, LFU, ENR
 
         # Translate LFU map to DENS and ENR map
-        # data = self.states[-1]
-        # npst = data.npst
         npst = self.states[0].npst
         DENS = np.zeros((npst, npst))
-        # ENR = np.zeros((npst, npst))
+        ENR = np.zeros((npst, npst))
         Nfue = self.states[-1].FUE[:, 0].size
-        LFU = self.states[-1].LFU
+        if LFU is None:
+            LFU = self.states[-1].LFU
         FUE = self.states[-1].FUE
         for i in range(Nfue):
             ifu = int(FUE[i, 0])
             DENS[LFU == ifu] = FUE[i, 1]
-            # ENR[LFU == ifu] = FUE[i, 2]
-
+            ENR[LFU == ifu] = FUE[i, 2]
+        
         # Translate LPI map to pin radius map
         RADI = np.zeros((npst, npst))
         Npin = self.states[0].PIN[:, 0].size
@@ -443,7 +444,7 @@ class Segment(object):
         VOLU = np.pi*RADI**2
         MASS = DENS*VOLU
         mass = np.sum(MASS)
-        ENR = self.states[-1].ENR
+        #ENR = self.states[-1].ENR
         MASS_U235 = MASS*ENR
         mass_u235 = np.sum(MASS_U235)
         self.states[-1].ave_enr = mass_u235/mass
