@@ -535,7 +535,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             elif param_str == "BTF":
                 btf_ratio = self.pinobjects[case_num][i].BTF/btf*1000
                 if int(btf_ratio) == 1000:
-                    text =  "1k"
+                    text =  "1e3"
                 else:
                     text =  ('%.0f' % (btf_ratio))
                 #self.pinobjects[case_num][i].text.remove()
