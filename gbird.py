@@ -413,8 +413,26 @@ class MainWin(QMainWindow):
                 enrobj.BA = enr_ba[i]
                 enrlist.append(enrobj)
             self.enrpinlist.append(enrlist)
-        #qtrace()
-            
+    
+    def enrpin_remove(self):
+        """Remove enr level pin"""
+        case_num = int(self.case_cbox.currentIndex())
+
+        j = self.pinselection_index  # index of enr level pin to be removed
+        if j > 0:
+            mod = "sub"
+        else:
+            mod = "add"
+        enrpin = self.enrpinlist[case_num][j]
+        # change affected fuel pins before removal
+        for i, pin in enumerate(self.pinobjects[case_num]):
+            if pin.text.get_text() == enrpin.text.get_text():
+                print "pin enr modify " + str(i)
+                self.enr_modify(mod, ipin=i)
+        print "delete enr pin " + str(j)
+        del self.enrpinlist[case_num][j]
+        self.fig_update()
+    
     def set_pinvalues(self):
         """Update values"""
 
@@ -618,7 +636,32 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                 self.tableSelectRow(i)
                 self.mark_pin(i)
                 self.pinselection_index = i
-                j = self.halfsym_pin(i)
+                #j = self.halfsym_pin(i)
+
+            else:
+                try:  # check if enr level pin is clicked
+                    i = next(i for i, cobj in enumerate(self.enrpinlist[case_num])
+                         if cobj.is_clicked(event.xdata, event.ydata))
+                except:
+                    pass
+                if i >= 0:  # An enr level pin is selected
+                    self.pinselection_index = i
+                    #self.mark_enrpin(i)
+                    print self.pinselection_index
+
+                    self.popMenu = QMenu(self)
+                    self.popMenu.addAction("Remove", self.enrpin_remove)
+                    self.popMenu.addAction("Add", self.printenrclicked)
+                    #action = self.popMenu.addAction("Remove")
+                    #action.triggered.connect(self.printhello)
+                    #print event.xdata, event.ydata
+                    #mouse_cursor = QCursor()
+                    self.popMenu.exec_(QCursor.pos())
+                    #self.popMenu.exec_(QPoint(event.xdata, event.ydata))
+                    #qtrace()
+
+    def printenrclicked(self):  # only for testing
+        print "Pin was clicked"
 
     def halfsym_pin(self, i, case_num=None):
         """Find the corresponding pin for half symmetry"""
@@ -651,10 +694,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         x = self.pinobjects[case_num][i].x-d/2
         y = self.pinobjects[case_num][i].y-d/2
 
-        #d = self.circlelist[i].circle.get_radius()*2*1.25
-        #x = self.circlelist[i].x-d/2
-        #y = self.circlelist[i].y-d/2
-        if hasattr(self,'clickpatch'): # Remove any previously selected circles
+        if hasattr(self, 'clickpatch'):  # Remove any previously selected pins
             try:
                 self.clickpatch.remove()
             except:
@@ -666,9 +706,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         r = self.pinobjects[case_num][i].circle.get_radius()*1.3
         x = self.pinobjects[case_num][i].x
         y = self.pinobjects[case_num][i].y
-        #r = self.circlelist[i].circle.get_radius()*1.3
-        #x = self.circlelist[i].x
-        #y = self.circlelist[i].y
+
         self.clickpatch = mpatches.Circle((x,y), r, fc=(1,1,1), alpha=1.0, 
                                           ec=(0.2, 0.2, 0.2))
         self.clickpatch.set_linestyle('solid')
@@ -687,8 +725,9 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             case_num = int(self.case_cbox.currentIndex())
             self.enr_modify("add", case_num)
 
+        self.canvas.draw()
         self.enr_update()  # Update info fields
-
+        
     def enr_sub(self):
 
         if self.enr_case_cb.isChecked():
@@ -698,9 +737,11 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         else:
             case_num = int(self.case_cbox.currentIndex())
             self.enr_modify("sub", case_num)
-
+        
+        self.canvas.draw()
         self.enr_update()  # Update info fields
 
+        self.enrpin_remove()  # only for testing. should be removed
         #enrArray = [x.ENR for x in self.enrpinlist][::-1] # Reverse order
 
     def enr_update(self):
@@ -716,14 +757,15 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         bundle_enr = self.bundle.states[-1].ave_enr
         self.bundle_enr_text.setText("%.5f" % bundle_enr)
 
-    def enr_modify(self, mod, case_num=None):
+    def enr_modify(self, mod, case_num=None, ipin=None):
         halfsym = True
         if case_num is None:
             case_num = int(self.case_cbox.currentIndex())
         ivec = []
         #ipin = self.pinselection_index
         # ivec.append(ipin)
-        ipin = self.casecor_pin(case_num)
+        if ipin is None:
+            ipin = self.casecor_pin(case_num)
         if np.isnan(ipin):
             return
         ivec.append(ipin)
@@ -772,7 +814,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         
         #self.bundle.cases[case_num].states[-1].LFU = self.__lfumap(case_num)
         #self.dataobj.cases[case_num].qcalc[0].LFU = self.__lfumap(case_num)
-        self.canvas.draw()
+        #self.canvas.draw()
 
 
     def __lfumap(self, case_num):
