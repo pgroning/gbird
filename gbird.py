@@ -413,7 +413,13 @@ class MainWin(QMainWindow):
                 enrobj.BA = enr_ba[i]
                 enrlist.append(enrobj)
             self.enrpinlist.append(enrlist)
-    
+
+    def enrpin_add(self):
+        print "add enr pin"
+
+    def enrpin_edit(self):
+        print "edit enr pin"
+            
     def enrpin_remove(self):
         """Remove enr level pin"""
         case_num = int(self.case_cbox.currentIndex())
@@ -427,9 +433,9 @@ class MainWin(QMainWindow):
         # change affected fuel pins before removal
         for i, pin in enumerate(self.pinobjects[case_num]):
             if pin.text.get_text() == enrpin.text.get_text():
-                print "pin enr modify " + str(i)
+                #print "pin enr modify " + str(i)
                 self.enr_modify(mod, ipin=i)
-        print "delete enr pin " + str(j)
+        #print "delete enr pin " + str(j)
         del self.enrpinlist[case_num][j]
         self.fig_update()
     
@@ -647,11 +653,13 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                 if i >= 0:  # An enr level pin is selected
                     self.pinselection_index = i
                     #self.mark_enrpin(i)
-                    print self.pinselection_index
+                    #print self.pinselection_index
 
                     self.popMenu = QMenu(self)
+                    self.popMenu.addAction("Add...", self.enrpin_add)
+                    self.popMenu.addAction("Edit...", self.enrpin_edit)
                     self.popMenu.addAction("Remove", self.enrpin_remove)
-                    self.popMenu.addAction("Add", self.printenrclicked)
+                    
                     #action = self.popMenu.addAction("Remove")
                     #action.triggered.connect(self.printhello)
                     #print event.xdata, event.ydata
@@ -660,9 +668,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                     #self.popMenu.exec_(QPoint(event.xdata, event.ydata))
                     #qtrace()
 
-    def printenrclicked(self):  # only for testing
-        print "Pin was clicked"
-
+                    
     def halfsym_pin(self, i, case_num=None):
         """Find the corresponding pin for half symmetry"""
 
@@ -741,7 +747,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.canvas.draw()
         self.enr_update()  # Update info fields
 
-        self.enrpin_remove()  # only for testing. should be removed
+        #self.enrpin_remove()  # only for testing. should be removed
         #enrArray = [x.ENR for x in self.enrpinlist][::-1] # Reverse order
 
     def enr_update(self):
