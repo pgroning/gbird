@@ -125,38 +125,62 @@ class cpin(object):
             return False
 
 class EnrDialog(QDialog):
-    def __init__(self, parent):
+    def __init__(self, parent, mode="edit"):
         #QDialog.__init__(self, parent)
         QDialog.__init__(self)
         #self.setWindowTitle("Window title")
         # set x-pos relative to cursor position
-        xpos = QCursor.pos().x() - 250
-        # set y-pos relative to main window
+        #xpos = QCursor.pos().x() - 250
+        # set dialog pos relative to main window
+        xpos = parent.pos().x() + parent.size().width()/2
         ypos = parent.pos().y() + parent.size().height()/2
         self.setGeometry(QRect(xpos, ypos, 150, 120))
 
-        flo = QFormLayout()
-        self.enr_text = QLineEdit("0.00")
+        if mode == "edit":
+            self.setWindowTitle("Edit enrichment")
+            case_num = int(parent.case_cbox.currentIndex())
+            ipin = parent.pinselection_index
+            enr = parent.enrpinlist[case_num][ipin].ENR
+            ba = parent.enrpinlist[case_num][ipin].BA
+            ba = 0 if np.isnan(ba) else ba
+        elif mode == "add":
+            self.setWindowTitle("Add enrichment")
+            enr = 0
+            ba = 0
+        self.enr_text = QLineEdit("%.2f" % enr)
+        self.ba_text = QLineEdit("%.2f" % ba)
         validator = QDoubleValidator(0, 9.99, 2, self.enr_text)
         self.enr_text.setValidator(validator)
+
+        flo = QFormLayout()
         flo.addRow("%U-235:", self.enr_text)
-        self.ba_text = QLineEdit("0.00")
         flo.addRow("%Gd:", self.ba_text)
         
         hbox = QHBoxLayout()
         self.ok_button = QPushButton("Ok")
         self.cancel_button = QPushButton("Cancel")
-        self.connect(self.cancel_button, SIGNAL('clicked()'), self.close)
         hbox.addWidget(self.cancel_button)
         hbox.addWidget(self.ok_button)
-        
+        self.connect(self.cancel_button, SIGNAL('clicked()'), self.close)
+        if mode == "edit":
+            self.connect(self.ok_button, SIGNAL('clicked()'), self.editpin)
+        elif mode == "add":
+            self.connect(self.ok_button, SIGNAL('clicked()'), self.addpin)
         vbox = QVBoxLayout()
         vbox.addLayout(flo)
         vbox.addStretch()
         vbox.addLayout(hbox)
         self.setLayout(vbox)
 
+    def editpin(self):
+        print "Edit enr pin"
+        self.close()
 
+    def addpin(self):
+        print "Add enr pin"
+        self.close()
+
+        
 class MainWin(QMainWindow):
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
@@ -306,10 +330,7 @@ class MainWin(QMainWindow):
 #        print 'killed'
 
     def read_cax(self,filename):
-        msg = """Click Yes to start importing data from cax files.
-         
-        Continue?
-        """
+        msg = "Continue?"""
         msgBox = QMessageBox()
         ret = msgBox.information(self, "Importing data", msg.strip(),
                                  QMessageBox.Yes|QMessageBox.Cancel)
@@ -447,21 +468,19 @@ class MainWin(QMainWindow):
 
     def enrpin_add(self):
         """add enr pin"""
-        self.enr_add_dlg = EnrDialog(self)
-        self.enr_add_dlg.setWindowTitle("Add enrichment")
+        self.enr_add_dlg = EnrDialog(self, "add")
         self.enr_add_dlg.exec_()  # Make dialog modal
 
     def enrpin_edit(self):
         """edit enr pin"""
-        self.enr_edit_dlg = EnrDialog(self)
-        self.enr_edit_dlg.setWindowTitle("Edit enrichment")
+        self.enr_edit_dlg = EnrDialog(self, "edit")
         self.enr_edit_dlg.exec_()  # Make dialog modal
         
 
     def enrpin_remove(self):
         """Remove enr level pin"""
         msgBox = QMessageBox()
-        ret = msgBox.information(self, "Enrichment removal", "Are you sure?",
+        ret = msgBox.information(self, "Remove enrichment", "Are you sure?",
                                  QMessageBox.Yes|QMessageBox.Cancel)
         if ret == QMessageBox.Cancel:
             return
