@@ -124,6 +124,37 @@ class cpin(object):
         else:
             return False
 
+class EnrDialog(QDialog):
+    def __init__(self, parent):
+        #QDialog.__init__(self, parent)
+        QDialog.__init__(self)
+        #self.setWindowTitle("Window title")
+        # set x-pos relative to cursor position
+        xpos = QCursor.pos().x() - 250
+        # set y-pos relative to main window
+        ypos = parent.pos().y() + parent.size().height()/2
+        self.setGeometry(QRect(xpos, ypos, 150, 120))
+
+        flo = QFormLayout()
+        self.enr_text = QLineEdit("0.00")
+        validator = QDoubleValidator(0, 9.99, 2, self.enr_text)
+        self.enr_text.setValidator(validator)
+        flo.addRow("%U-235:", self.enr_text)
+        self.ba_text = QLineEdit("0.00")
+        flo.addRow("%Gd:", self.ba_text)
+        
+        hbox = QHBoxLayout()
+        self.ok_button = QPushButton("Ok")
+        self.cancel_button = QPushButton("Cancel")
+        self.connect(self.cancel_button, SIGNAL('clicked()'), self.close)
+        hbox.addWidget(self.cancel_button)
+        hbox.addWidget(self.ok_button)
+        
+        vbox = QVBoxLayout()
+        vbox.addLayout(flo)
+        vbox.addStretch()
+        vbox.addLayout(hbox)
+        self.setLayout(vbox)
 
 
 class MainWin(QMainWindow):
@@ -415,15 +446,27 @@ class MainWin(QMainWindow):
             self.enrpinlist.append(enrlist)
 
     def enrpin_add(self):
-        print "add enr pin"
+        """add enr pin"""
+        self.enr_add_dlg = EnrDialog(self)
+        self.enr_add_dlg.setWindowTitle("Add enrichment")
+        self.enr_add_dlg.exec_()  # Make dialog modal
 
     def enrpin_edit(self):
-        print "edit enr pin"
-            
+        """edit enr pin"""
+        self.enr_edit_dlg = EnrDialog(self)
+        self.enr_edit_dlg.setWindowTitle("Edit enrichment")
+        self.enr_edit_dlg.exec_()  # Make dialog modal
+        
+
     def enrpin_remove(self):
         """Remove enr level pin"""
-        case_num = int(self.case_cbox.currentIndex())
+        msgBox = QMessageBox()
+        ret = msgBox.information(self, "Enrichment removal", "Are you sure?",
+                                 QMessageBox.Yes|QMessageBox.Cancel)
+        if ret == QMessageBox.Cancel:
+            return
 
+        case_num = int(self.case_cbox.currentIndex())
         j = self.pinselection_index  # index of enr level pin to be removed
         if j > 0:
             mod = "sub"
@@ -1161,7 +1204,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.rod_types_text = QLineEdit()
         self.rod_types_text.setSizePolicy(sizePolicy)
         self.rod_types_text.setReadOnly(True)
-        info_flo.addRow("# Rod types", self.rod_types_text)
+        info_flo.addRow("Rod types", self.rod_types_text)
         
         self.ave_enr_text = QLineEdit()
         self.ave_enr_text.setSizePolicy(sizePolicy)
