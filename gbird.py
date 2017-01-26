@@ -479,12 +479,11 @@ class MainWin(QMainWindow):
 
     def enrpin_add_callback(self):
         """enr pin add callback"""
-        enr = self.enr_dlg.enr
-        ba = self.enr_dlg.ba
+        
         enrobj = cpin(self.axes)
         enrobj.facecolor = "#FF0000"
-        enrobj.ENR = enr
-        enrobj.BA = ba
+        enrobj.ENR = self.enr_dlg.enr
+        enrobj.BA = self.enr_dlg.ba
         case_num = int(self.case_cbox.currentIndex())
 
         if enrobj.ENR > self.enrpinlist[case_num][-1].ENR:
@@ -502,22 +501,22 @@ class MainWin(QMainWindow):
 
     def enrpin_edit_callback(self):
         """enr pin edit callback"""
-        enr = self.enr_dlg.enr
-        ba = self.enr_dlg.ba
-        case_num = int(self.case_cbox.currentIndex())
-        qtrace()
+
+        case_num = int(self.case_cbox.currentIndex())        
         ipin = self.pinselection_index  # index of enr level pin to be edited
         enrpin = self.enrpinlist[case_num][ipin]
+
         # first update fue pins
-        if np.isnan(enrpin.BA):
-            enrpin.BA = 0
         for pin in self.pinobjects[case_num]:
-            if pin.ENR == enrpin.ENR and pin.BA == enrpin.BA:
-                pin.ENR = enr
-                pin.BA = ba
+            if pin.LFU == ipin + 1:
+                pin.ENR = self.enr_dlg.enr
+                pin.BA = self.enr_dlg.ba
+
+        # FUE in ave_enr must be updated
+        
         # second update enr level pin
-        self.enrpinlist[case_num][ipin].ENR = enr
-        self.enrpinlist[case_num][ipin].BA = ba
+        self.enrpinlist[case_num][ipin].ENR = self.enr_dlg.enr
+        self.enrpinlist[case_num][ipin].BA = self.enr_dlg.ba
         self.fig_update()
 
     def enrpin_remove(self):
@@ -631,9 +630,6 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
             if param_str == "ENR":
                 text = self.enrpinlist[case_num][j].text.get_text()
-                #self.pinobjects[case_num][i].text.remove()
-                #self.pinobjects[case_num][i].set_text(text)
-                #self.pinobjects[case_num][i].circle.set_facecolor(fc)
                 
             elif param_str == "BTF":
                 btf_ratio = self.pinobjects[case_num][i].BTF/btf*1000
@@ -641,28 +637,15 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                     text =  "1e3"
                 else:
                     text =  ('%.0f' % (btf_ratio))
-                #self.pinobjects[case_num][i].text.remove()
-                #self.pinobjects[case_num][i].set_text(text)
-                #self.pinobjects[case_num][i].circle.set_facecolor(fc)
                 
             elif param_str == "EXP":
                 if self.pinobjects[case_num][i].EXP < 10:
                     text =  ('%.1f' % (self.pinobjects[case_num][i].EXP))
                 else:
                     text =  ('%.0f' % (self.pinobjects[case_num][i].EXP))
-                #self.pinobjects[case_num][i].text.remove()
-                #self.pinobjects[case_num][i].set_text(text)
-                #self.pinobjects[case_num][i].circle.set_facecolor(fc)
 
             elif param_str == "FINT":
                 text =  ('%.0f' % (self.pinobjects[case_num][i].FINT*100))
-                #if self.pinobjects[case_num][i].FINT < 10:
-                #    text =  ('%.1f' % (self.pinobjects[case_num][i].FINT))
-                #else:
-                #    text =  ('%.0f' % (self.pinobjects[case_num][i].FINT))
-                #self.pinobjects[case_num][i].text.remove()
-                #self.pinobjects[case_num][i].set_text(text)
-                #self.pinobjects[case_num][i].circle.set_facecolor(fc)
 
             self.pinobjects[case_num][i].text.remove()
             self.pinobjects[case_num][i].set_text(text) 
@@ -732,10 +715,10 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         #else:
         #    remove = True
         case_num = int(self.case_cbox.currentIndex())
-
-        if event.button is 1:
+        i = np.nan
+        if event.button is 1:  # left mouse click
             # print event.xdata, event.ydata
-            i = np.nan
+            #i = np.nan
             try:  # check if any pin is selected and return the index
                 i = next(i for i, cobj in enumerate(self.pinobjects[case_num])
                          if cobj.is_clicked(event.xdata, event.ydata))
@@ -747,27 +730,27 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                 self.pinselection_index = i
                 #j = self.halfsym_pin(i)
 
-            else:
-                try:  # check if enr level pin is clicked
-                    i = next(i for i, cobj in enumerate(self.enrpinlist[case_num])
+        elif event.button is 3:  # right mouse click
+            try:  # check if enr level pin is clicked
+                i = next(i for i, cobj in enumerate(self.enrpinlist[case_num])
                          if cobj.is_clicked(event.xdata, event.ydata))
-                except:
-                    pass
-                if i >= 0:  # An enr level pin is selected
-                    self.pinselection_index = i
+            except:
+                pass
+            if i >= 0:  # An enr level pin is selected
+                self.pinselection_index = i
                     #self.mark_enrpin(i)
                     #print self.pinselection_index
-
-                    self.popMenu = QMenu(self)
-                    self.popMenu.addAction("Add...", self.enrpin_add)
-                    self.popMenu.addAction("Edit...", self.enrpin_edit)
-                    self.popMenu.addAction("Remove", self.enrpin_remove)
-                    
+                
+                self.popMenu = QMenu(self)
+                self.popMenu.addAction("Add...", self.enrpin_add)
+                self.popMenu.addAction("Edit...", self.enrpin_edit)
+                self.popMenu.addAction("Remove", self.enrpin_remove)
+                
                     #action = self.popMenu.addAction("Remove")
                     #action.triggered.connect(self.printhello)
                     #print event.xdata, event.ydata
                     #mouse_cursor = QCursor()
-                    self.popMenu.exec_(QCursor.pos())
+                self.popMenu.exec_(QCursor.pos())
                     #self.popMenu.exec_(QPoint(event.xdata, event.ydata))
                     #qtrace()
 
@@ -858,6 +841,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
         case_num = int(self.case_cbox.currentIndex())
         LFU = self.__lfumap(case_num)
+        FUE = self.__fuemap(case_num)
         self.bundle.cases[case_num].ave_enr(LFU)  # must take inargs
         ave_enr = self.bundle.cases[case_num].states[-1].ave_enr
         self.ave_enr_text.setText("%.5f" % ave_enr)
@@ -946,6 +930,13 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                     k += 1
         return LFU
 
+    def __fuemap(self, case_num):
+        """Creating FUE map from enr level pins"""
+        nfue = len(self.enrpinlist[case_num])
+        FUE = np.zeros((nfue, 5))
+        #qtrace()
+        return FUE
+
     #def quick_calc(self,case_num):
     def quick_calc(self):
         print "Performing quick calculation..."
@@ -981,7 +972,6 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.sim_text.setText(text)
 
         self.enr_update()
-
 
     def on_draw(self):
         """ Setup the figure axis"""
