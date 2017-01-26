@@ -128,6 +128,9 @@ class EnrDialog(QDialog):
     def __init__(self, parent, mode="edit"):
         #QDialog.__init__(self, parent)
         QDialog.__init__(self)
+        self.parent = parent
+        self.mode = mode
+
         #self.setWindowTitle("Window title")
         # set x-pos relative to cursor position
         #xpos = QCursor.pos().x() - 250
@@ -149,8 +152,9 @@ class EnrDialog(QDialog):
             ba = 0
         self.enr_text = QLineEdit("%.2f" % enr)
         self.ba_text = QLineEdit("%.2f" % ba)
-        validator = QDoubleValidator(0, 9.99, 2, self.enr_text)
+        validator = QDoubleValidator(0, 9.99, 2, self)
         self.enr_text.setValidator(validator)
+        self.ba_text.setValidator(validator)
 
         flo = QFormLayout()
         flo.addRow("%U-235:", self.enr_text)
@@ -162,24 +166,26 @@ class EnrDialog(QDialog):
         hbox.addWidget(self.cancel_button)
         hbox.addWidget(self.ok_button)
         self.connect(self.cancel_button, SIGNAL('clicked()'), self.close)
-        if mode == "edit":
-            self.connect(self.ok_button, SIGNAL('clicked()'), self.editpin)
-        elif mode == "add":
-            self.connect(self.ok_button, SIGNAL('clicked()'), self.addpin)
+        self.connect(self.ok_button, SIGNAL('clicked()'), self.action)
+        #if mode == "edit":
+        #    self.connect(self.ok_button, SIGNAL('clicked()'), self.edit_action)
+        #elif mode == "add":
+        #    self.connect(self.ok_button, SIGNAL('clicked()'), self.add_action)
+        
         vbox = QVBoxLayout()
         vbox.addLayout(flo)
         vbox.addStretch()
         vbox.addLayout(hbox)
         self.setLayout(vbox)
 
-    def editpin(self):
-        print "Edit enr pin"
+    def action(self):
         self.close()
-
-    def addpin(self):
-        print "Add enr pin"
-        self.close()
-
+        self.enr = self.enr_text.text().toDouble()[0]
+        self.ba = self.ba_text.text().toDouble()[0]
+        if self.mode == "edit":
+            self.parent.enrpin_edit_callback()
+        elif self.mode == "add":
+            self.parent.enrpin_add_callback()
         
 class MainWin(QMainWindow):
     def __init__(self, parent=None):
@@ -468,14 +474,51 @@ class MainWin(QMainWindow):
 
     def enrpin_add(self):
         """add enr pin"""
-        self.enr_add_dlg = EnrDialog(self, "add")
-        self.enr_add_dlg.exec_()  # Make dialog modal
+        self.enr_dlg = EnrDialog(self, "add")
+        self.enr_dlg.exec_()  # Make dialog modal
+
+    def enrpin_add_callback(self):
+        """enr pin add callback"""
+        enr = self.enr_dlg.enr
+        ba = self.enr_dlg.ba
+        enrobj = cpin(self.axes)
+        enrobj.facecolor = "#FF0000"
+        enrobj.ENR = enr
+        enrobj.BA = ba
+        case_num = int(self.case_cbox.currentIndex())
+
+        if enrobj.ENR > self.enrpinlist[case_num][-1].ENR:
+            self.enrpinlist[case_num].append(enrobj)
+        else:
+            i = next(i for i, enrpin in enumerate(self.enrpinlist[case_num])
+                     if enrpin.ENR > enrobj.ENR)
+            self.enrpinlist[case_num].insert(i, enrobj)
+        self.fig_update()
 
     def enrpin_edit(self):
         """edit enr pin"""
-        self.enr_edit_dlg = EnrDialog(self, "edit")
-        self.enr_edit_dlg.exec_()  # Make dialog modal
-        
+        self.enr_dlg = EnrDialog(self, "edit")
+        self.enr_dlg.exec_()  # Make dialog modal
+
+    def enrpin_edit_callback(self):
+        """enr pin edit callback"""
+        enr = self.enr_dlg.enr
+        ba = self.enr_dlg.ba
+        case_num = int(self.case_cbox.currentIndex())
+        qtrace()
+        ipin = self.pinselection_index  # index of enr level pin to be edited
+        enrpin = self.enrpinlist[case_num][ipin]
+        # first update fue pins
+        if np.isnan(enrpin.BA):
+            enrpin.BA = 0
+        for pin in self.pinobjects[case_num]:
+            if pin.ENR == enrpin.ENR and pin.BA == enrpin.BA:
+                pin.ENR = enr
+                pin.BA = ba
+        # second update enr level pin
+        self.enrpinlist[case_num][ipin].ENR = enr
+        self.enrpinlist[case_num][ipin].BA = ba
+        self.fig_update()
 
     def enrpin_remove(self):
         """Remove enr level pin"""
@@ -487,10 +530,8 @@ class MainWin(QMainWindow):
 
         case_num = int(self.case_cbox.currentIndex())
         j = self.pinselection_index  # index of enr level pin to be removed
-        if j > 0:
-            mod = "sub"
-        else:
-            mod = "add"
+        mod = "sub" if j > 0 else "add"
+
         enrpin = self.enrpinlist[case_num][j]
         # change affected fuel pins before removal
         for i, pin in enumerate(self.pinobjects[case_num]):
@@ -498,7 +539,7 @@ class MainWin(QMainWindow):
                 #print "pin enr modify " + str(i)
                 self.enr_modify(mod, ipin=i)
         #print "delete enr pin " + str(j)
-        del self.enrpinlist[case_num][j]
+        del self.enrpinlist[case_num][j]  # remove j:th pin
         self.fig_update()
     
     def set_pinvalues(self):
