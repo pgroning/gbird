@@ -461,14 +461,18 @@ class MainWin(QMainWindow):
         
             enrlist = []
             FUE = self.bundle.cases[case_num].states[-1].FUE
-            enr_levels = FUE[:,2]
-            enr_ba = FUE[:,4]
+            enr_dens = FUE[:, 1]
+            enr_levels = FUE[:, 2]
+            enr_baindex = FUE[:, 3]
+            enr_ba = FUE[:, 4]
             cmap = self.get_colormap(enr_levels.size)
             for i in range(enr_levels.size):
                 enrobj = cpin(self.axes)
                 enrobj.facecolor = cmap[i]
                 enrobj.ENR = enr_levels[i]
                 enrobj.BA = enr_ba[i]
+                enrobj.BAindex = enr_baindex[i]
+                enrobj.DENS = enr_dens[i]
                 enrlist.append(enrobj)
             self.enrpinlist.append(enrlist)
 
@@ -843,7 +847,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         case_num = int(self.case_cbox.currentIndex())
         LFU = self.__lfumap(case_num)
         FUE = self.__fuemap(case_num)
-        self.bundle.cases[case_num].ave_enr(LFU)  # must take inargs
+        self.bundle.cases[case_num].ave_enr(LFU, FUE)  # must take inargs
         ave_enr = self.bundle.cases[case_num].states[-1].ave_enr
         self.ave_enr_text.setText("%.5f" % ave_enr)
 
@@ -933,9 +937,16 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
     def __fuemap(self, case_num):
         """Creating FUE map from enr level pins"""
+
+        FUE_old = self.bundle.cases[case_num].states[-1].FUE
         nfue = len(self.enrpinlist[case_num])
-        FUE = np.zeros((nfue, 5))
-        #qtrace()
+        FUE = np.zeros((nfue, FUE_old.shape[1])).astype(float)
+        for i in range(nfue):
+            FUE[i, 0] = i + 1
+            FUE[i, 1] = self.enrpinlist[case_num][i].DENS
+            FUE[i, 2] = self.enrpinlist[case_num][i].ENR
+            FUE[i, 3] = self.enrpinlist[case_num][i].BAindex
+            FUE[i, 4] = self.enrpinlist[case_num][i].BA
         return FUE
 
     #def quick_calc(self,case_num):

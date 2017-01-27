@@ -414,7 +414,7 @@ class Segment(object):
         return Mt
 
     # --------Calculate average enrichment----------
-    def ave_enr(self, LFU=None):
+    def ave_enr(self, LFU=None, FUE=None):
 
         # Inargs: FUE, LFU, ENR
 
@@ -422,10 +422,11 @@ class Segment(object):
         npst = self.states[0].npst
         DENS = np.zeros((npst, npst))
         ENR = np.zeros((npst, npst))
-        Nfue = self.states[-1].FUE[:, 0].size
         if LFU is None:
             LFU = self.states[-1].LFU
-        FUE = self.states[-1].FUE
+        if FUE is None:
+            FUE = self.states[-1].FUE
+        Nfue = FUE[:, 0].size
         for i in range(Nfue):
             ifu = int(FUE[i, 0])
             DENS[LFU == ifu] = FUE[i, 1]
