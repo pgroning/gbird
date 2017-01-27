@@ -531,10 +531,11 @@ class MainWin(QMainWindow):
         j = self.pinselection_index  # index of enr level pin to be removed
         mod = "sub" if j > 0 else "add"
 
-        enrpin = self.enrpinlist[case_num][j]
+        #enrpin = self.enrpinlist[case_num][j]
+        
         # change affected fuel pins before removal
         for i, pin in enumerate(self.pinobjects[case_num]):
-            if pin.text.get_text() == enrpin.text.get_text():
+            if pin.LFU == j + 1:
                 #print "pin enr modify " + str(i)
                 self.enr_modify(mod, ipin=i)
         #print "delete enr pin " + str(j)
