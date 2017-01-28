@@ -483,21 +483,31 @@ class MainWin(QMainWindow):
 
     def enrpin_add_callback(self):
         """enr pin add callback"""
-        
-        enrobj = cpin(self.axes)
-        enrobj.facecolor = "#FF0000"
-        enrobj.ENR = self.enr_dlg.enr
-        enrobj.BA = self.enr_dlg.ba
+
         case_num = int(self.case_cbox.currentIndex())
+        ipin = self.pinselection_index  # copy attributes from selected pin
 
-        if enrobj.ENR > self.enrpinlist[case_num][-1].ENR:
-            self.enrpinlist[case_num].append(enrobj)
+        enrobj = cpin(self.axes)
+        enrobj.facecolor = self.enrpinlist[case_num][ipin].facecolor
+        enrobj.DENS = self.enrpinlist[case_num][ipin].DENS
+        enrobj.ENR = self.enr_dlg.enr
+        if self.enr_dlg.ba < 0.00001:
+            enrobj.BA = np.nan
+            enrobj.BAindex = np.nan
         else:
-            i = next(i for i, enrpin in enumerate(self.enrpinlist[case_num])
-                     if enrpin.ENR > enrobj.ENR)
-            self.enrpinlist[case_num].insert(i, enrobj)
+            enrobj.BA = self.enr_dlg.ba
+            enrobj.BAindex = 7300  # Gd
+            
+        self.enrpinlist[case_num].append(enrobj)
+        
+        #if enrobj.ENR > self.enrpinlist[case_num][-1].ENR:
+        #    self.enrpinlist[case_num].append(enrobj)
+        #else:
+        #    i = next(i for i, enrpin in enumerate(self.enrpinlist[case_num])
+        #             if enrpin.ENR > enrobj.ENR)
+        #    self.enrpinlist[case_num].insert(i, enrobj)
         self.fig_update()
-
+        
     def enrpin_edit(self):
         """edit enr pin"""
         self.enr_dlg = EnrDialog(self, "edit")
@@ -506,7 +516,7 @@ class MainWin(QMainWindow):
     def enrpin_edit_callback(self):
         """enr pin edit callback"""
 
-        case_num = int(self.case_cbox.currentIndex())        
+        case_num = int(self.case_cbox.currentIndex())
         ipin = self.pinselection_index  # index of enr level pin to be edited
         enrpin = self.enrpinlist[case_num][ipin]
 
@@ -515,12 +525,13 @@ class MainWin(QMainWindow):
             if pin.LFU == ipin + 1:
                 pin.ENR = self.enr_dlg.enr
                 pin.BA = self.enr_dlg.ba
-
-        # FUE in ave_enr must be updated
         
         # second update enr level pin
         self.enrpinlist[case_num][ipin].ENR = self.enr_dlg.enr
-        self.enrpinlist[case_num][ipin].BA = self.enr_dlg.ba
+        if self.enr_dlg.ba < 0.00001:
+            self.enrpinlist[case_num][ipin].BA = np.nan
+        else:
+            self.enrpinlist[case_num][ipin].BA = self.enr_dlg.ba
         self.fig_update()
 
     def enrpin_remove(self):
