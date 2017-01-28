@@ -532,18 +532,22 @@ class MainWin(QMainWindow):
             return
 
         case_num = int(self.case_cbox.currentIndex())
-        j = self.pinselection_index  # index of enr level pin to be removed
-        mod = "sub" if j > 0 else "add"
+        ipin = self.pinselection_index  # index of enr level pin to be removed
 
-        #enrpin = self.enrpinlist[case_num][j]
-        
-        # change affected fuel pins before removal
+        del self.enrpinlist[case_num][ipin]  # remove the selected pin
+
+        if ipin >= len(self.enrpinlist[case_num]):
+            j = len(self.enrpinlist[case_num]) - 1
+        else:
+            j = ipin
+            
         for i, pin in enumerate(self.pinobjects[case_num]):
-            if pin.LFU == j + 1:
-                #print "pin enr modify " + str(i)
-                self.enr_modify(mod, ipin=i)
-        #print "delete enr pin " + str(j)
-        del self.enrpinlist[case_num][j]  # remove j:th pin
+            if pin.LFU == ipin + 1:
+                pin.ENR = self.enrpinlist[case_num][j].ENR
+                if np.isnan(self.enrpinlist[case_num][j].BA):
+                    pin.BA = 0.0
+                else:
+                    pin.BA = self.enrpinlist[case_num][j].BA
         self.fig_update()
     
     def set_pinvalues(self):
