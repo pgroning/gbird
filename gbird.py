@@ -142,15 +142,13 @@ class EnrDialog(QDialog):
 
         case_num = int(parent.case_cbox.currentIndex())
         ipin = parent.pinselection_index
+        enr = parent.enrpinlist[case_num][ipin].ENR
+        ba = parent.enrpinlist[case_num][ipin].BA
+        ba = 0 if np.isnan(ba) else ba
         if mode == "edit":
             self.setWindowTitle("Edit enrichment")
-            enr = parent.enrpinlist[case_num][ipin].ENR
-            ba = parent.enrpinlist[case_num][ipin].BA
-            ba = 0 if np.isnan(ba) else ba
         elif mode == "add":
             self.setWindowTitle("Add enrichment")
-            enr = 0
-            ba = 0
         self.enr_text = QLineEdit("%.2f" % enr)
         dens = parent.enrpinlist[case_num][ipin].DENS
         self.dens_text = QLineEdit("%.3f" % dens)
@@ -163,7 +161,7 @@ class EnrDialog(QDialog):
         
         flo = QFormLayout()
         flo.addRow("%U-235:", self.enr_text)
-        flo.addRow("DENS:", self.dens_text)
+        flo.addRow("Density:", self.dens_text)
         flo.addRow("%Gd:", self.ba_text)
         
         hbox = QHBoxLayout()
@@ -568,7 +566,11 @@ class MainWin(QMainWindow):
                 else:
                     pin.BA = self.enrpinlist[case_num][j].BA
         self.fig_update()
-    
+
+    def enrpin_sort(self):
+        print "sorting enr levels"
+        
+        
     def set_pinvalues(self):
         """Update values"""
 
@@ -773,6 +775,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                 self.popMenu.addAction("Add...", self.enrpin_add)
                 self.popMenu.addAction("Edit...", self.enrpin_edit)
                 self.popMenu.addAction("Remove", self.enrpin_remove)
+                self.popMenu.addAction("Sort", self.enrpin_sort)
                 
                     #action = self.popMenu.addAction("Remove")
                     #action.triggered.connect(self.printhello)
