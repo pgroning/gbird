@@ -139,10 +139,11 @@ class EnrDialog(QDialog):
         ypos = parent.pos().y() + parent.size().height()/2
         self.setGeometry(QRect(xpos, ypos, 150, 120))
 
+
+        case_num = int(parent.case_cbox.currentIndex())
+        ipin = parent.pinselection_index
         if mode == "edit":
             self.setWindowTitle("Edit enrichment")
-            case_num = int(parent.case_cbox.currentIndex())
-            ipin = parent.pinselection_index
             enr = parent.enrpinlist[case_num][ipin].ENR
             ba = parent.enrpinlist[case_num][ipin].BA
             ba = 0 if np.isnan(ba) else ba
@@ -151,13 +152,18 @@ class EnrDialog(QDialog):
             enr = 0
             ba = 0
         self.enr_text = QLineEdit("%.2f" % enr)
+        dens = parent.enrpinlist[case_num][ipin].DENS
+        self.dens_text = QLineEdit("%.3f" % dens)
         self.ba_text = QLineEdit("%.2f" % ba)
         validator = QDoubleValidator(0, 9.99, 2, self)
         self.enr_text.setValidator(validator)
         self.ba_text.setValidator(validator)
-
+        validator = QDoubleValidator(0, 9.99, 3, self)
+        self.dens_text.setValidator(validator)
+        
         flo = QFormLayout()
         flo.addRow("%U-235:", self.enr_text)
+        flo.addRow("DENS:", self.dens_text)
         flo.addRow("%Gd:", self.ba_text)
         
         hbox = QHBoxLayout()
@@ -181,6 +187,7 @@ class EnrDialog(QDialog):
     def action(self):
         self.close()
         self.enr = self.enr_text.text().toDouble()[0]
+        self.dens = self.dens_text.text().toDouble()[0]
         self.ba = self.ba_text.text().toDouble()[0]
         if self.mode == "edit":
             self.parent.enrpin_edit_callback()
@@ -489,7 +496,7 @@ class MainWin(QMainWindow):
 
         enrobj = cpin(self.axes)
         enrobj.facecolor = self.enrpinlist[case_num][ipin].facecolor
-        enrobj.DENS = self.enrpinlist[case_num][ipin].DENS
+        enrobj.DENS = self.enr_dlg.dens
         enrobj.ENR = self.enr_dlg.enr
         if self.enr_dlg.ba < 0.00001:
             enrobj.BA = np.nan
@@ -524,6 +531,7 @@ class MainWin(QMainWindow):
         for pin in self.pinobjects[case_num]:
             if pin.LFU == ipin + 1:
                 pin.ENR = self.enr_dlg.enr
+                pin.DENS = self.enr_dlg.dens
                 pin.BA = self.enr_dlg.ba
         
         # second update enr level pin
