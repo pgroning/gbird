@@ -558,7 +558,7 @@ class MainWin(QMainWindow):
         else:
             j = ipin
             
-        for i, pin in enumerate(self.pinobjects[case_num]):
+        for pin in self.pinobjects[case_num]:
             if pin.LFU == ipin + 1:
                 pin.ENR = self.enrpinlist[case_num][j].ENR
                 if np.isnan(self.enrpinlist[case_num][j].BA):
@@ -568,8 +568,25 @@ class MainWin(QMainWindow):
         self.fig_update()
 
     def enrpin_sort(self):
-        print "sorting enr levels"
+        """sorting enr levels on enr"""
+
+        msgBox = QMessageBox()
+        ret = msgBox.information(self, "Sort enrichments", "Are you sure?",
+                                 QMessageBox.Yes|QMessageBox.Cancel)
+        if ret == QMessageBox.Cancel:
+            return
         
+        case_num = int(self.case_cbox.currentIndex())
+        enrlist = [pin.ENR for pin in self.enrpinlist[case_num]]
+        isort = [i for i, e in sorted(enumerate(enrlist), key=lambda x:x[1])]
+
+        cmap = self.get_colormap(len(isort))
+        pinlist_sorted = []
+        for i, j in enumerate(isort):
+            pinlist_sorted.append(self.enrpinlist[case_num][j])
+            pinlist_sorted[-1].facecolor = cmap[i]
+        self.enrpinlist[case_num] = pinlist_sorted
+        self.fig_update()
         
     def set_pinvalues(self):
         """Update values"""
