@@ -553,6 +553,12 @@ class Segment(object):
 
     def add_state(self, LFU=None, FUE=None, voi=None):
         """Append a list element to store result of new calculation"""
+
+        # limit number of states to 4
+        # 0=original, 1=reference, 2=previous, 3=current
+        if len(self.states) > 3:
+            del self.states[2]
+
         self.states.append(DataStruct())  # Add an element to list
         if LFU is None:
             LFU = self.states[-2].LFU
