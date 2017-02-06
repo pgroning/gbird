@@ -774,7 +774,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             if i >= 0:  # A pin is selected
                 self.tableSelectRow(i)
                 self.mark_pin(i)
-                self.pinselection_index = i
+                #self.pinselection_index = i
                 #j = self.halfsym_pin(i)
 
         elif event.button is 3:  # right mouse click
@@ -828,7 +828,9 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             j = np.nan
         return j
 
-    def mark_pin(self,i):
+    def mark_pin(self, i):
+
+        self.pinselection_index = i
         case_num = int(self.case_cbox.currentIndex())
         d = self.pinobjects[case_num][i].circle.get_radius()*2*1.25
         x = self.pinobjects[case_num][i].x-d/2
