@@ -990,14 +990,17 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
     #def quick_calc(self,case_num):
     def quick_calc(self):
+        """Performing quick calculation"""
         print "Performing quick calculation..."
         
+        chanbow = self.chanbow_sbox.value() / 10 #  in cm
+
         for case_num in xrange(len(self.bundle.cases)):
             LFU = self.__lfumap(case_num)
             FUE = self.__fuemap(case_num)
             # FUE = self.bundle.cases[case_num].states[-1].FUE
             voi = None
-            self.bundle.cases[case_num].add_state(LFU, FUE, voi)
+            self.bundle.cases[case_num].add_state(LFU, FUE, voi, chanbow)
 
         self.bundle.new_calc()
         self.bundle.new_btf()

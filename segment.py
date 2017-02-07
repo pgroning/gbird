@@ -551,15 +551,15 @@ class Segment(object):
         else:
             call(arglist[3:], stdout=fout, stderr=STDOUT, shell=False)
 
-    def add_state(self, LFU=None, FUE=None, voi=None):
+    def add_state(self, LFU=None, FUE=None, voi=None, box_offset=0.0):
         """Append a list element to store result of new calculation"""
 
         # limit number of states to 4
         # 0=original, 1=reference, 2=previous, 3=current
         if len(self.states) > 3:
             del self.states[2]
+        self.states.append(DataStruct())  # Add an new element to list
 
-        self.states.append(DataStruct())  # Add an element to list
         if LFU is None:
             LFU = self.states[-2].LFU
         self.states[-1].LFU = LFU
@@ -582,6 +582,8 @@ class Segment(object):
             voivec = [int(voi)]
         self.states[-1].voivec = voivec
 
+        self.states[-1].box_offset = box_offset
+
     # def voivec(self):
     #    info = self.states[0]
     #    voids = (info.voi.split('*')[0].replace(',', ' ')
@@ -589,7 +591,7 @@ class Segment(object):
     #    return voids
 
     def writec3cai(self, file_base_name, voi=None, maxdep=None, depthres=None,
-                   box_offset=0):
+                   box_offset=0.0):
         # filebasename = "./" + str(uuid.uuid4())
         c3inp = file_base_name + ".inp"
         # c3inp = tempfile.NamedTemporaryFile(dir='.',
@@ -640,10 +642,6 @@ class Segment(object):
             print "Error: LFU is missing."
             return
 
-        # info = self.db['origin']['info']
-        # LFU = self.db['qcalc'][-1]['info'].get('LFU')
-
-        # f = c3inp.file
         f = open(c3inp, 'w')
 
         tit_1 = "TIT "
@@ -688,13 +686,17 @@ class Segment(object):
         # Tracer()()
         # if '/' in info.bwr:
         #    bwr = info.bwr.replace('/','//')  # a // is needed for C3
-        # Tracer()()
-        if box_offset:
-            bwr = self.__boxbow(box_offset)
-            # f.write(bwr + '\n')
-        else:
-            bwr = info.bwr.strip()
-            # f.write(info.bwr.strip() + '\n')
+        
+        if hasattr(self.states[-1], 'box_offset'):
+            box_offset = self.states[-1].box_offset
+        bwr = self.__boxbow(box_offset)
+
+        #if box_offset:
+        #    bwr = self.__boxbow(box_offset)
+        #    # f.write(bwr + '\n')
+        #else:
+        #    bwr = info.bwr.strip()
+        #    # f.write(info.bwr.strip() + '\n')
 
         # box corner radius (extra thickness). Valid for AT11
         if '/' in bwr:
