@@ -794,14 +794,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                 self.popMenu.addAction("Remove", self.enrpin_remove)
                 self.popMenu.addAction("Sort", self.enrpin_sort)
                 
-                    #action = self.popMenu.addAction("Remove")
-                    #action.triggered.connect(self.printhello)
-                    #print event.xdata, event.ydata
-                    #mouse_cursor = QCursor()
                 self.popMenu.exec_(QCursor.pos())
-                    #self.popMenu.exec_(QPoint(event.xdata, event.ydata))
-                    #qtrace()
-
+                    
                     
     def halfsym_pin(self, i, case_num=None):
         """Find the corresponding pin for half symmetry"""

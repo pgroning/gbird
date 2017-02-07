@@ -66,14 +66,19 @@ def s96o2(self):
     case_num = int(self.case_cbox.currentIndex())
     state_num = -1
     
-    pin_radius = 0.028
-    pin_delta = 0.078
+    #pin_radius = 0.028
+    #pin_delta = 0.078
     
+    pin_radius = 0.0252*0.9
+    pin_delta = 0.07055*0.9
+
     # Draw enrichment level circles
     x = 1.06  # horizontal position of the circles
     num_levels = len(self.enrpinlist[case_num])
+    y0 = 0.5 + (num_levels-1)/2 * pin_delta
     for i in range(num_levels):
-        y = 0.9 - i*pin_delta  # vertical positions
+        y = y0 - i*pin_delta  # vertical positions
+        #y = 0.95 - i*pin_delta  # vertical positions
         self.enrpinlist[case_num][i].set_circle(x, y, pin_radius)
         enr = self.enrpinlist[case_num][i].ENR
         self.axes.text(x + 0.05, y, "%.2f" % enr, fontsize=8)
@@ -82,7 +87,7 @@ def s96o2(self):
             self.enrpinlist[case_num][i].set_text(str(i+1))
         else:
             self.enrpinlist[case_num][i].set_text('Ba')
-            self.axes.text(x + 0.05, y - 0.03, "%.2f" % ba, fontsize=8)
+            self.axes.text(x + 0.05, y - 0.025, "%.2f" % ba, fontsize=8)
         self.axes.add_patch(self.enrpinlist[case_num][i].circle)
     
     # Print average enrichment
@@ -99,6 +104,9 @@ def s96o2(self):
     # Remove water cross rows and columns
     LFU = np.delete(LFU, (5), axis=0) # Delete row 6
     LFU = np.delete(LFU, (5), axis=1) # Delete col 6
+
+    pin_radius = 0.028
+    pin_delta = 0.078
 
     k = 0
     for i in range(LFU.shape[0]):
