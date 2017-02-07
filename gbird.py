@@ -1214,7 +1214,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         param_hbox.addWidget(self.param_cbox)
         self.connect(self.param_cbox, SIGNAL('currentIndexChanged(int)'), self.set_pinvalues)
 
-        case_label = QLabel('Case number:')
+        case_label = QLabel('Segment:')
         self.case_cbox = QComboBox()
         #caselist = ['1', '2', '3']
         #for i in caselist:
