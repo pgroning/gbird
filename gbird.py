@@ -1241,7 +1241,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         enr_hbox.addWidget(self.enr_plus_button)
         self.connect(self.enr_plus_button, SIGNAL('clicked()'), self.enr_add)
         self.connect(self.enr_minus_button, SIGNAL('clicked()'), self.enr_sub)
-        self.enr_case_cb = QCheckBox("All cases")
+        self.enr_case_cb = QCheckBox("All segments")
         self.enr_case_cb.setChecked(False)
         enr_case_hbox = QHBoxLayout()
         enr_case_hbox.addWidget(self.enr_case_cb)
