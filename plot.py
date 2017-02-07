@@ -64,13 +64,13 @@ class PlotWin(QMainWindow):
     #    #self.cas = casio()
     #    #self.cas.loadpic('caxfiles.p')
 
-    def plot_kinf(self,case_id):
+    def plot_kinf(self, case_id, state_num=-1, linestyle="-"):
         
         # case = self.cas.cases[case_id]
         case = self.parent.bundle.cases[case_id]
         idx0 = self.startpoint(case_id)
         #statepts = case.statepts[idx0:]
-        statepoints = case.states[-1].statepoints[idx0:]
+        statepoints = case.states[state_num].statepoints[idx0:]
         
         burnup_old = 0.0
         for idx, p in enumerate(statepoints):
@@ -87,7 +87,7 @@ class PlotWin(QMainWindow):
         #labstr = os.path.split(labstr)[1]
         #labstr = os.path.splitext(labstr)[0]
         
-        self.axes.plot(x,y,label=labstr)
+        self.axes.plot(x, y, label=labstr, linestyle=linestyle)
         self.axes.set_xlabel('Burnup (MWd/kgU)')
         self.axes.set_ylabel('K-inf')
         self.axes.legend(loc='best',prop={'size':8})
@@ -95,13 +95,13 @@ class PlotWin(QMainWindow):
         self.on_draw()
         
 
-    def plot_fint(self,case_id):
+    def plot_fint(self, case_id, state_num=-1, linestyle="-"):
 
         #case = self.cas.cases[case_id]
         case = self.parent.bundle.cases[case_id]
         idx0 = self.startpoint(case_id)
         #statepts = case.statepts[idx0:]
-        statepoints = case.states[-1].statepoints[idx0:]
+        statepoints = case.states[state_num].statepoints[idx0:]
 
         burnup_old = 0.0
         for idx,p in enumerate(statepoints):
@@ -118,21 +118,21 @@ class PlotWin(QMainWindow):
         #labstr = os.path.split(labstr)[1]
         #labstr = os.path.splitext(labstr)[0]
         
-        self.axes.plot(x,y,label=labstr)
+        self.axes.plot(x, y, label=labstr, linestyle=linestyle)
         self.axes.set_xlabel('Burnup (MWd/kgU)')
         self.axes.set_ylabel('Fint')
         self.axes.legend(loc='best',prop={'size':8})
         self.canvas.draw()
         self.on_draw()
 
-    def plot_btf(self,case_id):
+    def plot_btf(self, case_id, state_num=-1, linestyle="-"):
         
         # x = self.cas.btf.burnpoints
-        x = self.parent.bundle.states[-1].btf.burnpoints
+        x = self.parent.bundle.states[state_num].btf.burnpoints
         # DOX = self.cas.btf.DOX
-        DOX = self.parent.bundle.states[-1].btf.DOX
+        DOX = self.parent.bundle.states[state_num].btf.DOX
         y = [elem.max() for elem in DOX]
-        self.axes.plot(x,y)
+        self.axes.plot(x, y, linestyle=linestyle)
         
         self.axes.set_xlabel('Burnup (MWd/kgU)')
         self.axes.set_ylabel('BTF')
@@ -233,13 +233,17 @@ class PlotWin(QMainWindow):
             else:
                 #idx0 = self.startpoint(case_id)
                 self.plot_kinf(case_id)
-        
+                if self.original_cb.isChecked():
+                    self.plot_kinf(case_id, state_num=0, linestyle="--")
+
         elif param == 'Fint':
             if self.case_cb.isChecked():
                 for i in range(case_id_max):
                     self.plot_fint(i)
             else:
                 self.plot_fint(case_id)
+                if self.original_cb.isChecked():
+                    self.plot_fint(case_id, state_num=0, linestyle="--")
 
         elif param == 'BTF':
             if self.case_cb.isChecked():
@@ -247,6 +251,8 @@ class PlotWin(QMainWindow):
                     self.plot_btf(i)
             else:
                 self.plot_btf(case_id)
+                if self.original_cb.isChecked():
+                    self.plot_btf(case_id, state_num=0, linestyle="--")
  
 
 #    def on_index(self):
@@ -325,7 +331,7 @@ class PlotWin(QMainWindow):
         #self.connect(self.param_cbox, SIGNAL('currentIndexChanged(int)'), self.on_plot)
         
         #case_label = QLabel('All cases:')
-        self.case_cb = QCheckBox("All Cases")
+        self.case_cb = QCheckBox("All seg.")
         self.case_cb.setChecked(False)
         self.connect(self.case_cb, SIGNAL('stateChanged(int)'), self.on_plot)
 #       self.case_cbox = QComboBox()
@@ -333,6 +339,11 @@ class PlotWin(QMainWindow):
 #        for i in caselist:
 #            self.case_cbox.addItem(i)
         
+        self.original_cb = QCheckBox("Plot orig.")
+        self.original_cb.setChecked(False)
+        self.connect(self.original_cb, SIGNAL('stateChanged(int)'),
+                     self.on_plot)
+
         type_label = QLabel('Type:')
         self.type_cbox = QComboBox()
         typelist = ['Hot', 'HCr', 'CCl', 'CCr']
@@ -396,10 +407,10 @@ class PlotWin(QMainWindow):
         #for w in [  self.textbox, self.draw_button, self.grid_cb,
         #            slider_label, self.slider]:
         
-        for w in [  self.draw_button, self.grid_cb, slider_label, self.slider, self.case_cb,
-                    param_label, self.param_cbox,
-                    type_label, self.type_cbox, voi_label, self.voi_cbox,
-                    vhi_label, self.vhi_cbox]:
+        for w in [self.draw_button, self.grid_cb, slider_label, self.slider,
+                  self.case_cb, self.original_cb, param_label, self.param_cbox,
+                  type_label, self.type_cbox, voi_label, self.voi_cbox,
+                  vhi_label, self.vhi_cbox]:
 
             hbox.addWidget(w)
             hbox.setAlignment(w, Qt.AlignVCenter)
