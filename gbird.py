@@ -1253,6 +1253,14 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         calc_hbox.addWidget(self.calc_full_button)
         self.connect(self.calc_quick_button, SIGNAL('clicked()'), self.quick_calc)
 
+        chanbow_hbox = QHBoxLayout()
+        self.chanbow_sbox = QDoubleSpinBox()
+        self.chanbow_sbox.setRange(-3, 3)
+        self.chanbow_sbox.setSingleStep(0.25)
+        self.chanbow_sbox.setSuffix(" mm")
+        chanbow_hbox.addWidget(QLabel("Channel bow:"))
+        chanbow_hbox.addWidget(self.chanbow_sbox)
+
         type_label = QLabel('Type:')
         self.type_cbox = QComboBox()
         typelist = ['Hot', 'HCr', 'CCl', 'CCr']
@@ -1371,7 +1379,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         vbox.addLayout(enr_hbox)
         vbox.addLayout(enr_case_hbox)
         vbox.addLayout(calc_hbox)
-        
+        vbox.addLayout(chanbow_hbox)
 
         #spacerItem = QSpacerItem(1, 1, QSizePolicy.Minimum, QSizePolicy.Minimum)
         #vbox.addItem(spacerItem)
