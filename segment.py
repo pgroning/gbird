@@ -551,7 +551,7 @@ class Segment(object):
         else:
             call(arglist[3:], stdout=fout, stderr=STDOUT, shell=False)
 
-    def add_state(self, LFU=None, FUE=None, voi=None, box_offset=0.0):
+    def add_state(self, LFU=None, FUE=None, BA=None, voi=None, box_offset=0.0):
         """Append a list element to store result of new calculation"""
 
         # limit number of states to 4
@@ -568,6 +568,10 @@ class Segment(object):
             FUE = self.states[-2].FUE
         self.states[-1].FUE = FUE
 
+        if BA is None:
+            BA = self.states[-2].BA
+        self.states[-1].BA = BA
+        
         npst = self.states[0].npst
         ENR = np.zeros((npst, npst))
         Nfue = FUE[:, 0].size

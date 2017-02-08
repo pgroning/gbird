@@ -460,10 +460,8 @@ class MainWin(QMainWindow):
         for case_num in range(ncases):
             LFU = self.bundle.cases[case_num].states[-1].LFU
             ENR = self.bundle.cases[case_num].states[-1].ENR
-            #BA = self.bundle.cases[case_num].states[-1].BA
-            # only for testing. Should update BA map in add state method!!!
-            BA = self.bundle.cases[case_num].states[0].BA
-
+            BA = self.bundle.cases[case_num].states[-1].BA
+            
             pinlist = []
             for i in range(LFU.shape[0]):
                 for j in range(LFU.shape[1]):
@@ -627,10 +625,8 @@ class MainWin(QMainWindow):
         
         npst = self.bundle.cases[case_num].states[0].npst
         LFU = state.LFU
-        #BA = state.BA
-        # only for testing. Should update BA map in add state method!!!
-        BA = self.bundle.cases[case_num].states[0].BA 
-        #qtrace()
+        BA = state.BA
+        
         # Sorting table column 0 in ascending order
         self.table.sortItems(0,Qt.AscendingOrder)
         self.setpincoords()
@@ -1001,19 +997,36 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             FUE[i, 4] = self.enrpinlist[case_num][i].BA
         return FUE
 
+    def __bamap(self, case_num):
+        """Creating BA map from pinobjects"""
+
+        # Initialize new BA map and fill with zeros
+        LFU = self.bundle.cases[case_num].states[-1].LFU
+        BA = np.zeros(LFU.shape).astype(float)
+
+        k = 0
+        for i in range(BA.shape[0]):
+            for j in range(BA.shape[1]):
+                if LFU[i,j] > 0:
+                    BA[i,j] = self.pinobjects[case_num][k].BA
+                    k += 1
+        return BA
+        
     #def quick_calc(self,case_num):
     def quick_calc(self):
         """Performing quick calculation"""
         print "Performing quick calculation..."
         
-        chanbow = self.chanbow_sbox.value() / 10 #  in cm
+        chanbow = self.chanbow_sbox.value() / 10  # mm -> cm
 
         for case_num in xrange(len(self.bundle.cases)):
             LFU = self.__lfumap(case_num)
             FUE = self.__fuemap(case_num)
+            BA = self.__bamap(case_num)
+            
             # FUE = self.bundle.cases[case_num].states[-1].FUE
             voi = None
-            self.bundle.cases[case_num].add_state(LFU, FUE, voi, chanbow)
+            self.bundle.cases[case_num].add_state(LFU, FUE, BA, voi, chanbow)
 
         self.bundle.new_calc()
         self.bundle.new_btf()
