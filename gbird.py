@@ -243,7 +243,7 @@ class MainWin(QMainWindow):
         self.axes.set_ylim(0,1)
 
     def openFile(self):
-
+        
         # Import default path from config file
         self.settings.beginGroup("PATH")
         path_default = self.settings.value("path_default",
@@ -268,11 +268,11 @@ class MainWin(QMainWindow):
                 self.read_cax(filename)
         
 
-    def load_pickle(self,filename):
+    def load_pickle(self, filename):
         self.statusBar().showMessage('Importing data from %s' % filename, 2000)
-        self.dataobj = casio()
-        self.dataobj.loadpic(filename)
-
+        self.bundle = Bundle()
+        self.bundle.loadpic(filename)
+        
         self.init_pinobjects()
         #fuetype = 'SVEA-96'
         #self.dataobj.btf = btf(self.dataobj,fuetype)
@@ -282,8 +282,8 @@ class MainWin(QMainWindow):
         #self.set_pinvalues()
 
         # Update case number list box
-        ncases = len(self.dataobj.cases)
-        for i in range(1,ncases+1):
+        ncases = len(self.bundle.cases)
+        for i in range(1, ncases+1):
             self.case_cbox.addItem(str(i))
         self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'), 
                      self.fig_update)
@@ -419,19 +419,29 @@ class MainWin(QMainWindow):
             return
 
     def saveData(self):
+
+        # Import default path from config file
+        self.settings.beginGroup("PATH")
+        path_default = self.settings.value("path_default",
+                                           QString("")).toString()
+        self.settings.endGroup()
+
         file_choices = "Data files (*.p)"
-        filename = unicode(QFileDialog.getSaveFileName(self, 'Open file', '', file_choices))
-        self.dataobj.savepic(filename)
+        filename = unicode(QFileDialog.getSaveFileName(self, 'Save to file', 
+                                                       path_default, 
+                                                       file_choices))
+        self.bundle.savepic(filename)
 
     def plotWin(self):
-        #print "Open plot window"
+        """Open plot window"""
+
         if hasattr(self,'bundle'):
             plotwin = PlotWin(self)
             plotwin.show()
         else:
             msg = "There is no data to plot."
             msgBox = QMessageBox()
-            msgBox.information(self,"No data",msg.strip(),QMessageBox.Close)
+            msgBox.information(self,"No data", msg.strip(), QMessageBox.Close)
 
     def get_colormap(self, num_enr_levels):
         cvec = ["#FF00FF", "#CC00FF", "#AA00FF", "#0000FF", "#0066FF",
@@ -450,8 +460,10 @@ class MainWin(QMainWindow):
         for case_num in range(ncases):
             LFU = self.bundle.cases[case_num].states[-1].LFU
             ENR = self.bundle.cases[case_num].states[-1].ENR
-            BA = self.bundle.cases[case_num].states[-1].BA
-            
+            #BA = self.bundle.cases[case_num].states[-1].BA
+            # only for testing. Should update BA map in add state method!!!
+            BA = self.bundle.cases[case_num].states[0].BA
+
             pinlist = []
             for i in range(LFU.shape[0]):
                 for j in range(LFU.shape[1]):
@@ -616,8 +628,9 @@ class MainWin(QMainWindow):
         npst = self.bundle.cases[case_num].states[0].npst
         LFU = state.LFU
         #BA = state.BA
-        BA = self.bundle.cases[case_num].states[0].BA  # only for testing
-
+        # only for testing. Should update BA map in add state method!!!
+        BA = self.bundle.cases[case_num].states[0].BA 
+        #qtrace()
         # Sorting table column 0 in ascending order
         self.table.sortItems(0,Qt.AscendingOrder)
         self.setpincoords()

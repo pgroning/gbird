@@ -2,6 +2,7 @@
 
 from __future__ import division
 from IPython.core.debugger import Tracer  # Debugging
+from pyqt_trace import pyqt_trace as qtrace  # Break point that works with Qt
 ''' ipy example:
 import bundle
 : obj = bundle.bundle()
@@ -205,14 +206,18 @@ class Bundle(object):
         p.join()
 
     def savepic(self, pfile):
+        """Save data base to a python pickle file"""
+        #qtrace()
         # pfile = os.path.splitext(self.data.inpfile)[0] + '.p'
         with open(pfile, 'wb') as fp:
             pickle.dump(self.data, fp, 1)
             pickle.dump(self.cases, fp, 1)
-            try:
-                pickle.dump(self.btf, fp, 1)
-            except:
-                print "Warning: Could not save BTF"
+            pickle.dump(self.states, fp, 1)
+
+            #try:
+            #    pickle.dump(self.btf, fp, 1)
+            #except:
+            #    print "Warning: Could not save BTF"
         print "Saved data to file " + pfile
 
     def loadpic(self, pfile):
@@ -220,10 +225,12 @@ class Bundle(object):
         with open(pfile, 'rb') as fp:
             self.data = pickle.load(fp)
             self.cases = pickle.load(fp)
-            try:
-                self.btf = pickle.load(fp)
-            except:
-                print "Warning: Could not load BTF"
+            self.states = pickle.load(fp)
+            
+#try:
+            #    self.btf = pickle.load(fp)
+            #except:
+            #    print "Warning: Could not load BTF"
         self.data.pfile = pfile
 
     def new_btf(self):
