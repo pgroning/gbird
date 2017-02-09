@@ -19,10 +19,7 @@ import sys
 import os 
 import time
 import numpy as np
-
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-# from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui, QtCore
 
 import matplotlib
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
@@ -43,7 +40,7 @@ from progbar import ProgressBar
 #from map_a10 import a10xm
 
 
-class dataThread(QThread):
+class dataThread(QtCore.QThread):
     def __init__(self,parent):
         QThread.__init__(self)
         self.parent = parent
@@ -129,10 +126,10 @@ class cpin(object):
         else:
             return False
 
-class EnrDialog(QDialog):
+class EnrDialog(QtGui.QDialog):
     def __init__(self, parent, mode="edit"):
         #QDialog.__init__(self, parent)
-        QDialog.__init__(self)
+        QtGui.QDialog.__init__(self)
         self.parent = parent
         self.mode = mode
 
@@ -142,8 +139,7 @@ class EnrDialog(QDialog):
         # set dialog pos relative to main window
         xpos = parent.pos().x() + parent.size().width()/2
         ypos = parent.pos().y() + parent.size().height()/2
-        self.setGeometry(QRect(xpos, ypos, 150, 120))
-
+        self.setGeometry(QtCore.QRect(xpos, ypos, 150, 120))
 
         case_num = int(parent.case_cbox.currentIndex())
         ipin = parent.pinselection_index
@@ -154,34 +150,34 @@ class EnrDialog(QDialog):
             self.setWindowTitle("Edit enrichment")
         elif mode == "add":
             self.setWindowTitle("Add enrichment")
-        self.enr_text = QLineEdit("%.2f" % enr)
+        self.enr_text = QtGui.QLineEdit("%.2f" % enr)
         dens = parent.enrpinlist[case_num][ipin].DENS
-        self.dens_text = QLineEdit("%.3f" % dens)
-        self.ba_text = QLineEdit("%.2f" % ba)
-        validator = QDoubleValidator(0, 9.99, 2, self)
+        self.dens_text = QtGui.QLineEdit("%.3f" % dens)
+        self.ba_text = QtGui.QLineEdit("%.2f" % ba)
+        validator = QtGui.QDoubleValidator(0, 9.99, 2, self)
         self.enr_text.setValidator(validator)
         self.ba_text.setValidator(validator)
-        validator = QDoubleValidator(0, 9.99, 3, self)
+        validator = QtGui.QDoubleValidator(0, 9.99, 3, self)
         self.dens_text.setValidator(validator)
         
-        flo = QFormLayout()
+        flo = QtGui.QFormLayout()
         flo.addRow("%U-235:", self.enr_text)
         flo.addRow("Density:", self.dens_text)
         flo.addRow("%Gd:", self.ba_text)
         
-        hbox = QHBoxLayout()
-        self.ok_button = QPushButton("Ok")
-        self.cancel_button = QPushButton("Cancel")
+        hbox = QtGui.QHBoxLayout()
+        self.ok_button = QtGui.QPushButton("Ok")
+        self.cancel_button = QtGui.QPushButton("Cancel")
         hbox.addWidget(self.cancel_button)
         hbox.addWidget(self.ok_button)
-        self.connect(self.cancel_button, SIGNAL('clicked()'), self.close)
-        self.connect(self.ok_button, SIGNAL('clicked()'), self.action)
+        self.connect(self.cancel_button, QtCore.SIGNAL('clicked()'), self.close)
+        self.connect(self.ok_button, QtCore.SIGNAL('clicked()'), self.action)
         #if mode == "edit":
         #    self.connect(self.ok_button, SIGNAL('clicked()'), self.edit_action)
         #elif mode == "add":
         #    self.connect(self.ok_button, SIGNAL('clicked()'), self.add_action)
         
-        vbox = QVBoxLayout()
+        vbox = QtGui.QVBoxLayout()
         vbox.addLayout(flo)
         vbox.addStretch()
         vbox.addLayout(hbox)
@@ -197,21 +193,21 @@ class EnrDialog(QDialog):
         elif self.mode == "add":
             self.parent.enrpin_add_callback()
         
-class MainWin(QMainWindow):
+class MainWin(QtGui.QMainWindow):
     def __init__(self, parent=None):
-        QMainWindow.__init__(self, parent)
+        QtGui.QMainWindow.__init__(self, parent)
         self.setWindowTitle('Main Window')
         
         #self.resize(1100,620)
         #self.move(200,200)
         
         # Initial window size/pos last saved
-        self.settings = QSettings("greenbird")
+        self.settings = QtCore.QSettings("greenbird")
         self.settings.beginGroup("MainWindow")
         self.resize(self.settings.value("size", 
-                                        QVariant(QSize(1100, 620))).toSize());
+                                        QtCore.QVariant(QtCore.QSize(1100, 620))).toSize());
         self.move(self.settings.value("pos", 
-                                      QVariant(QPoint(200, 200))).toPoint())
+                                      QtCore.QVariant(QtCore.QPoint(200, 200))).toPoint())
         self.settings.endGroup()
         
         #screenShape = QDesktopWidget().screenGeometry()
@@ -252,18 +248,18 @@ class MainWin(QMainWindow):
         # Import default path from config file
         self.settings.beginGroup("PATH")
         path_default = self.settings.value("path_default",
-                                           QString("")).toString()
+                                           QtCore.QString("")).toString()
         self.settings.endGroup()
         #file_choices = "inp (*.inp);;pickle (*.p)"
         file_choices = "Data files (*.inp *.p)"
-        filename = unicode(QFileDialog.getOpenFileName(self, 'Open file',
-                                                       path_default,
-                                                       file_choices))
+        filename = unicode(QtGui.QFileDialog.getOpenFileName(self, 'Open file',
+                                                             path_default,
+                                                             file_choices))
         if filename:
             # Save default path to config file
             path = os.path.split(filename)[0]
             self.settings.beginGroup("PATH")
-            self.settings.setValue("path_default", QString(path))
+            self.settings.setValue("path_default", QtCore.QString(path))
             self.settings.endGroup()
             
             filext = os.path.splitext(filename)[1]
@@ -289,10 +285,9 @@ class MainWin(QMainWindow):
         ncases = len(self.bundle.cases)
         for i in range(1, ncases+1):
             self.case_cbox.addItem(str(i))
-        self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'), 
+        self.connect(self.case_cbox, QtCore.SIGNAL('currentIndexChanged(int)'), 
                      self.fig_update)
         self.fig_update()
-        
         
     def dataobj_finished(self):
         print "dataobject constructed"
@@ -346,14 +341,14 @@ class MainWin(QMainWindow):
 
     def read_cax(self,filename):
         msg = "Continue?"""
-        msgBox = QMessageBox()
-        ret = msgBox.information(self, "Importing data", msg.strip(),
-                                 QMessageBox.Yes|QMessageBox.Cancel)
+        msgBox = QtGui.QMessageBox()
+        status = msgBox.information(self, "Importing data", msg.strip(),
+                                 QtGui.QMessageBox.Yes|QtGui.QMessageBox.Cancel)
         # ret = msgBox.question(self,"Importing data",msg.strip(),
         # QMessageBox.Yes|QMessageBox.Cancel)
         self.statusBar().showMessage('Importing data from %s' % filename, 2000)
         self._filename = filename
-        if ret == QMessageBox.Yes:
+        if status == QtGui.QMessageBox.Yes:
 
             print "importing data"
             
@@ -368,7 +363,8 @@ class MainWin(QMainWindow):
             ncases = len(self.bundle.cases)
             for i in range(1,ncases+1):
                 self.case_cbox.addItem(str(i))
-            self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'), 
+            self.connect(self.case_cbox, 
+                         QtCore.SIGNAL('currentIndexChanged(int)'), 
                          self.fig_update)
 
             self.fig_update()
@@ -427,13 +423,14 @@ class MainWin(QMainWindow):
         # Import default path from config file
         self.settings.beginGroup("PATH")
         path_default = self.settings.value("path_default",
-                                           QString("")).toString()
+                                           QtCore.QString("")).toString()
         self.settings.endGroup()
 
         file_choices = "Data files (*.p)"
-        filename = unicode(QFileDialog.getSaveFileName(self, 'Save to file', 
-                                                       path_default, 
-                                                       file_choices))
+        filename = unicode(QtGui.QFileDialog.getSaveFileName(self, 
+                                                             "Save to file", 
+                                                             path_default,
+                                                             file_choices))
         #self.bundle.savepic(filename)
         with open(filename, 'wb') as fp:
             pickle.dump(self.bundle, fp, 1)
@@ -447,8 +444,10 @@ class MainWin(QMainWindow):
             plotwin.show()
         else:
             msg = "There is no data to plot."
-            msgBox = QMessageBox()
-            msgBox.information(self,"No data", msg.strip(), QMessageBox.Close)
+            msgBox = QtGui.QMessageBox()
+            #msgBox.information(self,"No data", msg.strip(), 
+            #                   QtGui.QMessageBox.Close)
+            msgBox.information(self, "No data", msg.strip(), msgBox.Close)
 
     def get_colormap(self, num_enr_levels):
         cvec = ["#FF00FF", "#CC00FF", "#AA00FF", "#0000FF", "#0066FF",
@@ -559,10 +558,10 @@ class MainWin(QMainWindow):
 
     def enrpin_remove(self):
         """Remove enr level pin"""
-        msgBox = QMessageBox()
-        ret = msgBox.information(self, "Remove enrichment", "Are you sure?",
-                                 QMessageBox.Yes|QMessageBox.Cancel)
-        if ret == QMessageBox.Cancel:
+        msgBox = QtGui.QMessageBox()
+        status = msgBox.information(self, "Remove enrichment", "Are you sure?",
+                                 QtGui.QMessageBox.Yes|QtGui.QMessageBox.Cancel)
+        if status == QtGui.QMessageBox.Cancel:
             return
 
         case_num = int(self.case_cbox.currentIndex())
@@ -587,10 +586,10 @@ class MainWin(QMainWindow):
     def enrpin_sort(self):
         """sorting enr levels on enr"""
 
-        msgBox = QMessageBox()
-        ret = msgBox.information(self, "Sort enrichments", "Are you sure?",
-                                 QMessageBox.Yes|QMessageBox.Cancel)
-        if ret == QMessageBox.Cancel:
+        msgBox = QtGui.QMessageBox()
+        status = msgBox.information(self, "Sort enrichments", "Are you sure?",
+                                 QtGui.QMessageBox.Yes|QtGui.QMessageBox.Cancel)
+        if status == QtGui.QMessageBox.Cancel:
             return
         
         case_num = int(self.case_cbox.currentIndex())
@@ -635,7 +634,7 @@ class MainWin(QMainWindow):
         BA = state.BA
         
         # Sorting table column 0 in ascending order
-        self.table.sortItems(0,Qt.AscendingOrder)
+        self.table.sortItems(0, QtCore.Qt.AscendingOrder)
         self.setpincoords()
         
         k = 0
@@ -646,15 +645,18 @@ class MainWin(QMainWindow):
                     self.pinobjects[case_num][k].FINT = FINT[i,j]
                     self.pinobjects[case_num][k].BTF = BTF[i,j]
                     
-                    expItem = QTableWidgetItem()
-                    expItem.setData(Qt.EditRole,
-                                    QVariant(float(np.round(EXP[i,j],3))))
-                    fintItem = QTableWidgetItem()
-                    fintItem.setData(Qt.EditRole,
-                                     QVariant(float(np.round(FINT[i,j],3))))
-                    btfItem = QTableWidgetItem()
-                    btfItem.setData(Qt.EditRole,
-                                    QVariant(float(np.round(BTF[i,j],3))))    
+                    expItem = QtGui.QTableWidgetItem()
+                    expItem.setData(QtCore.Qt.EditRole,
+                                    QtCore.QVariant(
+                            float(np.round(EXP[i,j],3))))
+                    fintItem = QtGui.QTableWidgetItem()
+                    fintItem.setData(QtCore.Qt.EditRole,
+                                     QtCore.QVariant(
+                            float(np.round(FINT[i,j],3))))
+                    btfItem = QtGui.QTableWidgetItem()
+                    btfItem.setData(QtCore.Qt.EditRole,
+                                    QtCore.QVariant(
+                            float(np.round(BTF[i,j],3))))    
 
                     self.table.setItem(k,1,expItem)
                     self.table.setItem(k,2,fintItem)
@@ -724,11 +726,11 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.table.setRowCount(npin)
         
         for i,pinobj in enumerate(self.pinobjects[case_num]):
-            coord_item = QTableWidgetItem(pinobj.coord)
-            self.table.setVerticalHeaderItem(i,coord_item)
-            i_item = QTableWidgetItem()
-            i_item.setData(Qt.EditRole, QVariant(int(i)))
-            self.table.setItem(i,0,i_item)
+            coord_item = QtGui.QTableWidgetItem(pinobj.coord)
+            self.table.setVerticalHeaderItem(i, coord_item)
+            i_item = QtGui.QTableWidgetItem()
+            i_item.setData(QtCore.Qt.EditRole, QtCore.QVariant(int(i)))
+            self.table.setItem(i, 0, i_item)
 
     def save_plot(self):
         file_choices = "PNG (*.png)|*.png"
@@ -747,11 +749,12 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
     def tableHeaderSort(self):
         #print "Sort header"
         case_num = int(self.case_cbox.currentIndex())
-        for i,pinobj in enumerate(self.pinobjects[case_num]):
+        for i, pinobj in enumerate(self.pinobjects[case_num]):
             #for i,pinobj in enumerate(self.circlelist):
             #item = QTableWidgetItem(str(self.table.item(i,0).text()))
             index = int(self.table.item(i,0).text())
-            item = QTableWidgetItem(str(self.pinobjects[case_num][index].coord))
+            item = QtGui.QTableWidgetItem(
+                str(self.pinobjects[case_num][index].coord))
             #item = QTableWidgetItem(str(self.circlelist[index].coord))
             self.table.setVerticalHeaderItem(i,item)
 
@@ -804,14 +807,14 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                     #self.mark_enrpin(i)
                     #print self.pinselection_index
                 
-                self.popMenu = QMenu(self)
+                self.popMenu = QtGui.QMenu(self)
                 self.popMenu.addAction("Add...", self.enrpin_add)
                 self.popMenu.addAction("Edit...", self.enrpin_edit)
                 self.popMenu.addAction("Remove", self.enrpin_remove)
                 self.popMenu.addAction("Sort", self.enrpin_sort)
                 
-                self.popMenu.exec_(QCursor.pos())
-                    
+                self.popMenu.exec_(QtGui.QCursor.pos())
+                
                     
     def halfsym_pin(self, i, case_num=None):
         """Find the corresponding pin for half symmetry"""
@@ -1180,7 +1183,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
 
     def create_main_frame(self):
-        self.main_frame = QWidget()
+        self.main_frame = QtGui.QWidget()
 
         # Create the mpl Figure and FigCanvas objects. 
         # 5x4 inches, 100 dots-per-inch
@@ -1191,13 +1194,13 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.canvas = FigureCanvas(self.fig)
         self.canvas.mpl_connect('button_press_event',self.on_click)
         self.canvas.setParent(self.main_frame)
-        self.canvas.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
+        self.canvas.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         self.canvas.setMinimumWidth(500)
         self.canvas.setMinimumHeight(416)
         
-        cvbox = QVBoxLayout()
+        cvbox = QtGui.QVBoxLayout()
         cvbox.addWidget(self.canvas)
-        canvasGbox = QGroupBox()
+        canvasGbox = QtGui.QGroupBox()
         canvasGbox.setStyleSheet("QGroupBox { background-color: rgb(200, 200,\
         200); border:1px solid gray; border-radius:5px;}")
         canvasGbox.setLayout(cvbox)
@@ -1239,73 +1242,77 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         #self.slider.setTickPosition(QSlider.TicksBothSides)
         #self.connect(self.slider, SIGNAL('valueChanged(int)'), self.on_draw)
  
-        param_label = QLabel('Parameter:')
-        self.param_cbox = QComboBox()
+        param_label = QtGui.QLabel('Parameter:')
+        self.param_cbox = QtGui.QComboBox()
         paramlist = ['ENR','FINT','EXP','BTF','BTFP','XFL1','XFL2','ROD','LOCK']
         for i in paramlist:
             self.param_cbox.addItem(i)
         #self.connect(self.param_cbox, SIGNAL('currentIndexChanged(int)'), self.on_plot)
-        param_hbox = QHBoxLayout()
+        param_hbox = QtGui.QHBoxLayout()
         param_hbox.addWidget(param_label)
         param_hbox.addWidget(self.param_cbox)
-        self.connect(self.param_cbox, SIGNAL('currentIndexChanged(int)'), self.set_pinvalues)
+        self.connect(self.param_cbox, QtCore.SIGNAL('currentIndexChanged(int)'), self.set_pinvalues)
 
-        case_label = QLabel('Segment:')
-        self.case_cbox = QComboBox()
+        case_label = QtGui.QLabel('Segment:')
+        self.case_cbox = QtGui.QComboBox()
         #caselist = ['1', '2', '3']
         #for i in caselist:
         #    self.case_cbox.addItem(i)
-        case_hbox = QHBoxLayout()
+        case_hbox = QtGui.QHBoxLayout()
         case_hbox.addWidget(case_label)
         case_hbox.addWidget(self.case_cbox)
         #self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'), self.set_pinvalues)
         #self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'), self.fig_update)
 
-        point_label = QLabel('Point number:')
-        self.point_sbox = QSpinBox()
+        point_label = QtGui.QLabel('Point number:')
+        self.point_sbox = QtGui.QSpinBox()
         self.point_sbox.setMinimum(0)
         self.point_sbox.setMaximum(10000)
-        point_hbox = QHBoxLayout()
+        point_hbox = QtGui.QHBoxLayout()
         point_hbox.addWidget(point_label)
         point_hbox.addWidget(self.point_sbox)
-        self.connect(self.point_sbox, SIGNAL('valueChanged(int)'), self.set_pinvalues)
+        self.connect(self.point_sbox, QtCore.SIGNAL('valueChanged(int)'), 
+                     self.set_pinvalues)
 
-        self.enr_plus_button = QPushButton("+ enr")
-        self.enr_minus_button = QPushButton("- enr")
-        enr_hbox = QHBoxLayout()
+        self.enr_plus_button = QtGui.QPushButton("+ enr")
+        self.enr_minus_button = QtGui.QPushButton("- enr")
+        enr_hbox = QtGui.QHBoxLayout()
         enr_hbox.addWidget(self.enr_minus_button)
         enr_hbox.addWidget(self.enr_plus_button)
-        self.connect(self.enr_plus_button, SIGNAL('clicked()'), self.enr_add)
-        self.connect(self.enr_minus_button, SIGNAL('clicked()'), self.enr_sub)
-        self.enr_case_cb = QCheckBox("All segments")
+        self.connect(self.enr_plus_button, QtCore.SIGNAL('clicked()'), 
+                     self.enr_add)
+        self.connect(self.enr_minus_button, QtCore.SIGNAL('clicked()'), 
+                     self.enr_sub)
+        self.enr_case_cb = QtGui.QCheckBox("All segments")
         self.enr_case_cb.setChecked(False)
-        enr_case_hbox = QHBoxLayout()
+        enr_case_hbox = QtGui.QHBoxLayout()
         enr_case_hbox.addWidget(self.enr_case_cb)
 
-        self.calc_quick_button = QPushButton("Quick calc")
-        self.calc_full_button = QPushButton("Full calc")
-        calc_hbox = QHBoxLayout()
+        self.calc_quick_button = QtGui.QPushButton("Quick calc")
+        self.calc_full_button = QtGui.QPushButton("Full calc")
+        calc_hbox = QtGui.QHBoxLayout()
         calc_hbox.addWidget(self.calc_quick_button)
         calc_hbox.addWidget(self.calc_full_button)
-        self.connect(self.calc_quick_button, SIGNAL('clicked()'), self.quick_calc)
+        self.connect(self.calc_quick_button, QtCore.SIGNAL('clicked()'), 
+                     self.quick_calc)
 
-        chanbow_hbox = QHBoxLayout()
-        self.chanbow_sbox = QDoubleSpinBox()
+        chanbow_hbox = QtGui.QHBoxLayout()
+        self.chanbow_sbox = QtGui.QDoubleSpinBox()
         self.chanbow_sbox.setRange(-3, 3)
         self.chanbow_sbox.setSingleStep(0.25)
         self.chanbow_sbox.setSuffix(" mm")
-        chanbow_hbox.addWidget(QLabel("Channel bow:"))
+        chanbow_hbox.addWidget(QtGui.QLabel("Channel bow:"))
         chanbow_hbox.addWidget(self.chanbow_sbox)
 
-        type_label = QLabel('Type:')
-        self.type_cbox = QComboBox()
+        type_label = QtGui.QLabel('Type:')
+        self.type_cbox = QtGui.QComboBox()
         typelist = ['Hot', 'HCr', 'CCl', 'CCr']
         for i in typelist:
             self.type_cbox.addItem(i)
         #self.connect(self.type_cbox, SIGNAL('currentIndexChanged(int)'), self.on_index)
 
-        voi_label = QLabel('VOI:')
-        self.voi_cbox = QComboBox()
+        voi_label = QtGui.QLabel('VOI:')
+        self.voi_cbox = QtGui.QComboBox()
         self.voilist = ['0', '40', '80']
         for i in self.voilist:
             self.voi_cbox.addItem(i)
@@ -1316,8 +1323,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         #self.voi_cbox.setCurrentIndex(voi_index)
         #self.connect(self.voi_cbox, SIGNAL('currentIndexChanged(int)'), self.on_plot)
 
-        vhi_label = QLabel('VHI:')
-        self.vhi_cbox = QComboBox()
+        vhi_label = QtGui.QLabel('VHI:')
+        self.vhi_cbox = QtGui.QComboBox()
         self.vhilist = ['0', '40', '80']
         for i in self.vhilist:
             self.vhi_cbox.addItem(i)
@@ -1335,51 +1342,55 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         #self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'), self.on_plot)
         
         # Info form layout
-        info_flo = QFormLayout()
-        sizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        info_flo = QtGui.QFormLayout()
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, 
+                                       QtGui.QSizePolicy.Minimum)
         #sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         #sizePolicy.setHorizontalStretch(0)
         #sizePolicy.setVerticalStretch(0)
         #sizePolicy.setHeightForWidth(self.ave_enr_text.sizePolicy().hasHeightForWidth())
-        self.sim_text = QLineEdit()
+        self.sim_text = QtGui.QLineEdit()
         self.sim_text.setSizePolicy(sizePolicy)
         self.sim_text.setReadOnly(True)
         #text = self.bundle.cases[0].states[0].sim
         #self.sim_text.setText(text)
         info_flo.addRow("SIM", self.sim_text)
 
-        self.rod_types_text = QLineEdit()
+        self.rod_types_text = QtGui.QLineEdit()
         self.rod_types_text.setSizePolicy(sizePolicy)
         self.rod_types_text.setReadOnly(True)
         info_flo.addRow("Rod types", self.rod_types_text)
         
-        self.ave_enr_text = QLineEdit()
+        self.ave_enr_text = QtGui.QLineEdit()
         self.ave_enr_text.setSizePolicy(sizePolicy)
         self.ave_enr_text.setReadOnly(True)
         info_flo.addRow("Segment %U-235", self.ave_enr_text)
         
-        self.bundle_enr_text = QLineEdit()
+        self.bundle_enr_text = QtGui.QLineEdit()
         self.bundle_enr_text.setSizePolicy(sizePolicy)
         self.bundle_enr_text.setReadOnly(True)
         info_flo.addRow("Bundle %U-235", self.bundle_enr_text)
         #self.bundle_enr_text.setText('2.818')
         
         # Define table widget
-        self.table = QTableWidget()
+        self.table = QtGui.QTableWidget()
         self.table.setRowCount(100)
         self.table.setColumnCount(4)
         #self.table.verticalHeader().hide()
-        self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.table.horizontalHeader().setResizeMode(QHeaderView.Stretch)
-        self.table.setSizePolicy(QSizePolicy.Minimum,QSizePolicy.Minimum)
+        self.table.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
+        self.table.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
+        self.table.setSizePolicy(QtGui.QSizePolicy.Minimum,
+                                 QtGui.QSizePolicy.Minimum)
         self.table.setMinimumWidth(180)
         self.table.setHorizontalHeaderLabels(('Index','EXP','FINT','BTF'))
         self.table.setSortingEnabled(True)
         self.table.setColumnHidden(0,True)
         
         #self.connect(self.table.horizontalHeader(),SIGNAL('QHeaderView.sortIndicatorChanged(int)'),self.openFile)
-        self.connect(self.table.horizontalHeader(),SIGNAL('sectionClicked(int)'),self.tableHeaderSort)
-        self.connect(self.table.verticalHeader(),SIGNAL('sectionClicked(int)'),self.pinSelect)
+        self.connect(self.table.horizontalHeader(), 
+                     QtCore.SIGNAL('sectionClicked(int)'), self.tableHeaderSort)
+        self.connect(self.table.verticalHeader(),
+                     QtCore.SIGNAL('sectionClicked(int)'), self.pinSelect)
         #self.connect(self.table,SIGNAL('cellClicked(int,int)'),self.pinSelect)
         #self.connect(self.table,SIGNAL('currentChanged(int)'),self.pinSelect)
         #Tracer()()
@@ -1387,9 +1398,9 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.table.cellClicked.connect(self.pinSelect)
         #self.table.selectionModel().selectionChanged.connect(self.pinSelect)
 
-        tvbox = QVBoxLayout()
+        tvbox = QtGui.QVBoxLayout()
         tvbox.addWidget(self.table)
-        tableGbox = QGroupBox()
+        tableGbox = QtGui.QGroupBox()
         tableGbox.setStyleSheet("QGroupBox { background-color: rgb(200, 200,\
         200); border:1px solid gray; border-radius:5px;}")
         tableGbox.setLayout(tvbox)
@@ -1408,7 +1419,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         #
         # Layout with box sizers
         # 
-        vbox = QVBoxLayout()
+        vbox = QtGui.QVBoxLayout()
         vbox.addLayout(param_hbox)
         vbox.addLayout(case_hbox)
         vbox.addLayout(point_hbox)
@@ -1422,7 +1433,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         vbox.addStretch(1)
         vbox.addLayout(info_flo)
         
-        groupbox = QGroupBox()
+        groupbox = QtGui.QGroupBox()
         groupbox.setStyleSheet("QGroupBox { background-color: rgb(200, 200,\
         200); border:1px solid gray; border-radius:5px;}")
         groupbox.setLayout(vbox)
@@ -1441,14 +1452,15 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         #self.bundle.setParent(self.main_frame)
         #Tracer()()
 
-        hbox = QHBoxLayout()
+        hbox = QtGui.QHBoxLayout()
 
         #hbox.addWidget(self.bundle)
         #vbox.addLayout(hbox)
         #vbox.addWidget(self.canvas)
         #hbox2.addWidget(self.mpl_toolbar)
         
-        spacerItemH = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        spacerItemH = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, 
+                                        QtGui.QSizePolicy.Minimum)
 
         #hbox.addLayout(vbox)
         hbox.addWidget(groupbox)
@@ -1462,10 +1474,9 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
         self.main_frame.setLayout(hbox)
         self.setCentralWidget(self.main_frame)
-        #Tracer()()
     
     def create_status_bar(self):
-        self.status_text = QLabel("Main window")
+        self.status_text = QtGui.QLabel("Main window")
         self.statusBar().addWidget(self.status_text, 1)
         
     def create_menu(self):        
@@ -1512,19 +1523,19 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.add_actions(self.help_menu, (about_action,))
 
     def create_toolbar(self):
-        exitAction = QAction(QIcon('icons/exit-icon_32x32.png'), 'Exit', self)
+        exitAction = QtGui.QAction(QtGui.QIcon('icons/exit-icon_32x32.png'), 'Exit', self)
         #exitAction.setShortcut('Ctrl+Q')
         exitAction.setStatusTip('Exit application')
         exitAction.triggered.connect(self.close)
 
-        fileAction = QAction(QIcon('icons/open-file-icon_32x32.png'), 'Open file', self)
+        fileAction = QtGui.QAction(QtGui.QIcon('icons/open-file-icon_32x32.png'), 'Open file', self)
         fileAction.setStatusTip('Open file')
         fileAction.triggered.connect(self.openFile)
 
-        settingsAction = QAction(QIcon('icons/preferences-icon_32x32.png'), 'Settings', self)
+        settingsAction = QtGui.QAction(QtGui.QIcon('icons/preferences-icon_32x32.png'), 'Settings', self)
         settingsAction.setStatusTip('Settings')
 
-        plotAction = QAction(QIcon('icons/diagram-icon_32x32.png'), 'Plot', self)
+        plotAction = QtGui.QAction(QtGui.QIcon('icons/diagram-icon_32x32.png'), 'Plot', self)
         plotAction.setStatusTip('Open plot window')
         plotAction.triggered.connect(self.plotWin)
 
@@ -1549,7 +1560,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
     def create_action(  self, text, slot=None, shortcut=None, 
                         icon=None, tip=None, checkable=False, 
                         signal="triggered()"):
-        action = QAction(text, self)
+        action = QtGui.QAction(text, self)
         if icon is not None:
             action.setIcon(QIcon(":/%s.png" % icon))
         if shortcut is not None:
@@ -1558,22 +1569,24 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             action.setToolTip(tip)
             action.setStatusTip(tip)
         if slot is not None:
-            self.connect(action, SIGNAL(signal), slot)
+            self.connect(action, QtCore.SIGNAL(signal), slot)
         if checkable:
             action.setCheckable(True)
         return action
 
     def closeEvent(self, event):
+        """Runs before program terminates"""
+
         # Write window size and position to config file
         self.settings.beginGroup("MainWindow")
-        self.settings.setValue("size", QVariant(self.size()))
-        self.settings.setValue("pos", QVariant(self.pos()))
+        self.settings.setValue("size", QtCore.QVariant(self.size()))
+        self.settings.setValue("pos", QtCore.QVariant(self.pos()))
         self.settings.endGroup()
         print "Good bye!"
         
 
 def main():
-    app = QApplication(sys.argv)
+    app = QtGui.QApplication(sys.argv)
     window = MainWin()
     window.show()
     #app.exec_()
