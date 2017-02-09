@@ -362,7 +362,6 @@ class MainWin(QMainWindow):
             self.bundle.readcax()  # readcax("all") reads the whole file content
             self.bundle.new_btf()
 
-            print "init pinobjects"
             self.init_pinobjects()
             
             # Update case number list box
@@ -1036,7 +1035,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             voi = None
             self.bundle.cases[case_num].add_state(LFU, FUE, BA, voi, chanbow)
 
-        self.bundle.new_calc()
+        self.bundle.new_calc(model='c3')
         self.bundle.new_btf()
         self.fig_update()
         #qtrace()
