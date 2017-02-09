@@ -11,9 +11,7 @@ import sys
 import os
 import numpy as np
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-#from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui, QtCore
 
 import matplotlib
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
@@ -25,7 +23,7 @@ from matplotlib.figure import Figure
 
 from bundle import Bundle
 
-class PlotWin(QMainWindow):
+class PlotWin(QtGui.QMainWindow):
     def __init__(self, parent=None):
         super(PlotWin, self).__init__(parent)
         self.parent = parent
@@ -33,10 +31,10 @@ class PlotWin(QMainWindow):
         self.setWindowTitle('Plot Window')
         #self.move(600,300)
 
-        self.settings = QSettings("greenbird")
+        self.settings = QtCore.QSettings("greenbird")
         self.settings.beginGroup("PlotWindow")
-        self.resize(self.settings.value("size", QVariant(QSize(800, 650))).toSize());
-        self.move(self.settings.value("pos", QVariant(QPoint(600, 300))).toPoint())
+        self.resize(self.settings.value("size", QtCore.QVariant(QtCore.QSize(800, 650))).toSize());
+        self.move(self.settings.value("pos", QtCore.QVariant(QtCore.QPoint(600, 300))).toPoint())
         self.settings.endGroup()
         
         # Retrieve initial data
@@ -90,7 +88,7 @@ class PlotWin(QMainWindow):
         self.axes.plot(x, y, label=labstr, linestyle=linestyle)
         self.axes.set_xlabel('Burnup (MWd/kgU)')
         self.axes.set_ylabel('K-inf')
-        self.axes.legend(loc='best',prop={'size':8})
+        self.axes.legend(loc='best', prop={'size':8})
         self.canvas.draw()
         self.on_draw()
         
@@ -149,21 +147,16 @@ class PlotWin(QMainWindow):
             self.statusBar().showMessage('Saved to %s' % path, 2000)
     
     def on_about(self):
-        msg = """A design tool using PyQt with matplotlib:
-        """
-        QMessageBox.about(self, "About the demo", msg.strip())
+        msg = """Greenbird plot window"""
+        QtGui.QMessageBox.about(self, "About the window", msg.strip())
     
     def on_pick(self, event):
-        # The event received here is of the type
         # matplotlib.backend_bases.PickEvent
         #
-        # It carries lots of information, of which we're using
-        # only a small amount here.
-        # 
         box_points = event.artist.get_bbox().get_points()
         msg = "You've clicked on a bar with coords:\n %s" % box_points
         
-        QMessageBox.information(self, "Click!", msg)
+        QtGui.QMessageBox.information(self, "Click!", msg)
     
     def on_draw(self):
         """ Redraws the figure
@@ -275,7 +268,7 @@ class PlotWin(QMainWindow):
 #            print idx0
 
     def create_main_frame(self):
-        self.main_frame = QWidget()
+        self.main_frame = QtGui.QWidget()
         
         # Create the mpl Figure and FigCanvas objects. 
         # 5x4 inches, 100 dots-per-inch
@@ -285,7 +278,8 @@ class PlotWin(QMainWindow):
         
         self.canvas = FigureCanvas(self.fig)
         self.canvas.setParent(self.main_frame)
-        self.canvas.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
+        self.canvas.setSizePolicy(QtGui.QSizePolicy.Expanding, 
+                                  QtGui.QSizePolicy.Expanding)
 
         # Since we have only one plot, we can use add_axes 
         # instead of add_subplot, but then the subplot
@@ -308,51 +302,55 @@ class PlotWin(QMainWindow):
         #self.textbox.setMinimumWidth(200)
         #self.connect(self.textbox, SIGNAL('editingFinished ()'), self.on_draw)
         
-        self.draw_button = QPushButton("Redraw")
-        self.connect(self.draw_button, SIGNAL('clicked()'), self.on_plot)
+        self.draw_button = QtGui.QPushButton("Redraw")
+        self.connect(self.draw_button, QtCore.SIGNAL('clicked()'), 
+                     self.on_plot)
         
-        self.grid_cb = QCheckBox("Show Grid")
+        self.grid_cb = QtGui.QCheckBox("Show Grid")
         self.grid_cb.setChecked(True)
-        self.connect(self.grid_cb, SIGNAL('stateChanged(int)'), self.on_draw)
+        self.connect(self.grid_cb, QtCore.SIGNAL('stateChanged(int)'), 
+                     self.on_draw)
         
-        slider_label = QLabel('X-max:')
-        self.slider = QSlider(Qt.Horizontal)
+        slider_label = QtGui.QLabel('X-max:')
+        self.slider = QtGui.QSlider(QtCore.Qt.Horizontal)
         self.slider.setRange(1, 75)
         self.slider.setValue(65)
         self.slider.setTracking(True)
-        self.slider.setTickPosition(QSlider.TicksBothSides)
-        self.connect(self.slider, SIGNAL('valueChanged(int)'), self.on_draw)
+        self.slider.setTickPosition(QtGui.QSlider.TicksBothSides)
+        self.connect(self.slider, QtCore.SIGNAL('valueChanged(int)'), 
+                     self.on_draw)
         
-        param_label = QLabel('Param:')
-        self.param_cbox = QComboBox()
+        param_label = QtGui.QLabel('Param:')
+        self.param_cbox = QtGui.QComboBox()
         paramlist = ['Kinf','Fint','BTF']
         for i in paramlist:
             self.param_cbox.addItem(i)
         #self.connect(self.param_cbox, SIGNAL('currentIndexChanged(int)'), self.on_plot)
         
         #case_label = QLabel('All cases:')
-        self.case_cb = QCheckBox("All seg.")
+        self.case_cb = QtGui.QCheckBox("All seg.")
         self.case_cb.setChecked(False)
-        self.connect(self.case_cb, SIGNAL('stateChanged(int)'), self.on_plot)
+        self.connect(self.case_cb, QtCore.SIGNAL('stateChanged(int)'), 
+                     self.on_plot)
 #       self.case_cbox = QComboBox()
 #        caselist = ['1','2','3','All']
 #        for i in caselist:
 #            self.case_cbox.addItem(i)
         
-        self.original_cb = QCheckBox("Plot orig.")
+        self.original_cb = QtGui.QCheckBox("Plot orig.")
         self.original_cb.setChecked(False)
-        self.connect(self.original_cb, SIGNAL('stateChanged(int)'),
+        self.connect(self.original_cb, QtCore.SIGNAL('stateChanged(int)'),
                      self.on_plot)
 
-        type_label = QLabel('Type:')
-        self.type_cbox = QComboBox()
+        type_label = QtGui.QLabel('Type:')
+        self.type_cbox = QtGui.QComboBox()
         typelist = ['Hot', 'HCr', 'CCl', 'CCr']
         for i in typelist:
             self.type_cbox.addItem(i)
         #self.connect(self.type_cbox, SIGNAL('currentIndexChanged(int)'), self.on_index)
 
-        voi_label = QLabel('VOI:')
-        self.voi_cbox = QComboBox()
+        voi_label = QtGui.QLabel('VOI:')
+        self.voi_cbox = QtGui.QComboBox()
         # self.voilist = ['0', '40', '80']
         self.voilist = (self.parent.bundle.cases[self.case_id_current]
                         .states[-1].voivec)
@@ -369,8 +367,8 @@ class PlotWin(QMainWindow):
         voi_index = voi_index[0]
         self.voi_cbox.setCurrentIndex(voi_index)
         #self.connect(self.voi_cbox, SIGNAL('currentIndexChanged(int)'), self.on_plot)
-        vhi_label = QLabel('VHI:')
-        self.vhi_cbox = QComboBox()
+        vhi_label = QtGui.QLabel('VHI:')
+        self.vhi_cbox = QtGui.QComboBox()
         #self.vhilist = ['0', '40', '80']
         self.vhilist = self.voilist
         for v in self.vhilist:
@@ -402,7 +400,7 @@ class PlotWin(QMainWindow):
         #
         # Layout with box sizers
         # 
-        hbox = QHBoxLayout()
+        hbox = QtGui.QHBoxLayout()
         
         #for w in [  self.textbox, self.draw_button, self.grid_cb,
         #            slider_label, self.slider]:
@@ -413,9 +411,9 @@ class PlotWin(QMainWindow):
                   vhi_label, self.vhi_cbox]:
 
             hbox.addWidget(w)
-            hbox.setAlignment(w, Qt.AlignVCenter)
+            hbox.setAlignment(w, QtCore.Qt.AlignVCenter)
         
-        vbox = QVBoxLayout()
+        vbox = QtGui.QVBoxLayout()
         #vbox.addLayout(hbox)
         #vbox.addWidget(self.canvas)
         vbox.addWidget(self.mpl_toolbar)
@@ -424,10 +422,9 @@ class PlotWin(QMainWindow):
 
         self.main_frame.setLayout(vbox)
         self.setCentralWidget(self.main_frame)
-        
-
+    
     def create_status_bar(self):
-        self.status_text = QLabel("Plot window")
+        self.status_text = QtGui.QLabel("Plot window")
         self.statusBar().addWidget(self.status_text, 1)
         
     def create_menu(self):        
@@ -443,7 +440,6 @@ class PlotWin(QMainWindow):
 
         self.add_actions(self.file_menu, 
             (export_action, save_file_action, None, quit_action))
-
 
         self.edit_menu = self.menuBar().addMenu("&Edit") 
         preferences = self.create_action("Preferences...", tip="Preferences...")        
@@ -467,27 +463,29 @@ class PlotWin(QMainWindow):
             else:
                 target.addAction(action)
 
-    def create_action(  self, text, slot=None, shortcut=None, 
-                        icon=None, tip=None, checkable=False, 
-                        signal="triggered()"):
-        action = QAction(text, self)
+    def create_action(self, text, slot=None, shortcut=None, 
+                      icon=None, tip=None, checkable=False, 
+                      signal="triggered()"):
+        action = QtGui.QAction(text, self)
         if icon is not None:
-            action.setIcon(QIcon(":/%s.png" % icon))
+            action.setIcon(QtGui.QIcon(":/%s.png" % icon))
         if shortcut is not None:
             action.setShortcut(shortcut)
         if tip is not None:
             action.setToolTip(tip)
             action.setStatusTip(tip)
         if slot is not None:
-            self.connect(action, SIGNAL(signal), slot)
+            self.connect(action, QtCore.SIGNAL(signal), slot)
         if checkable:
             action.setCheckable(True)
         return action
 
     def closeEvent(self, event):
+        """This method is called before closing the window"""
+
         self.settings.beginGroup("PlotWindow")
-        self.settings.setValue("size", QVariant(self.size()))
-        self.settings.setValue("pos", QVariant(self.pos()))
+        self.settings.setValue("size", QtCore.QVariant(self.size()))
+        self.settings.setValue("pos", QtCore.QVariant(self.pos()))
         self.settings.endGroup()
 
 def main():

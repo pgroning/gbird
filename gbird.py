@@ -195,7 +195,8 @@ class EnrDialog(QtGui.QDialog):
         
 class MainWin(QtGui.QMainWindow):
     def __init__(self, parent=None):
-        QtGui.QMainWindow.__init__(self, parent)
+        super(MainWin, self).__init__(parent)
+        #QtGui.QMainWindow.__init__(self, parent)
         self.setWindowTitle('Main Window')
         
         #self.resize(1100,620)
@@ -744,7 +745,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
     
     def on_about(self):
         msg = """Greenbird version X.X.X"""
-        QMessageBox.about(self, "About the software", msg.strip())
+        QtGui.QMessageBox.about(self, "About the software", msg.strip())
 
     def tableHeaderSort(self):
         #print "Sort header"
