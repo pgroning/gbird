@@ -206,31 +206,23 @@ class Bundle(object):
         p.join()
 
     def savepic(self, pfile):
-        """Save data base to a python pickle file"""
-        #qtrace()
-        # pfile = os.path.splitext(self.data.inpfile)[0] + '.p'
+        """Save objects to a python pickle file"""
+
         with open(pfile, 'wb') as fp:
             pickle.dump(self.data, fp, 1)
             pickle.dump(self.cases, fp, 1)
             pickle.dump(self.states, fp, 1)
-
-            #try:
-            #    pickle.dump(self.btf, fp, 1)
-            #except:
-            #    print "Warning: Could not save BTF"
         print "Saved data to file " + pfile
 
     def loadpic(self, pfile):
+        """Save objects from a python pickle file"""
+
         print "Loading data from file " + pfile
         with open(pfile, 'rb') as fp:
             self.data = pickle.load(fp)
             self.cases = pickle.load(fp)
             self.states = pickle.load(fp)
             
-#try:
-            #    self.btf = pickle.load(fp)
-            #except:
-            #    print "Warning: Could not load BTF"
         self.data.pfile = pfile
 
     def new_btf(self):

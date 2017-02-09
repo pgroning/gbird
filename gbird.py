@@ -10,6 +10,11 @@ from IPython.core.debugger import Tracer  # Set tracepoint (used for debugging)
 from pyqt_trace import pyqt_trace as qtrace 
 # Usage: qtrace()
 
+try:
+    import cPickle as pickle
+except:
+    import pickle
+
 import sys
 import os 
 import time
@@ -269,17 +274,16 @@ class MainWin(QMainWindow):
         
 
     def load_pickle(self, filename):
-        self.statusBar().showMessage('Importing data from %s' % filename, 2000)
-        self.bundle = Bundle()
-        self.bundle.loadpic(filename)
-        
-        self.init_pinobjects()
-        #fuetype = 'SVEA-96'
-        #self.dataobj.btf = btf(self.dataobj,fuetype)
+        """Load bundle object from pickle file"""
 
-        #self.setpincoords()
-        #self.draw_fuelmap()
-        #self.set_pinvalues()
+        self.statusBar().showMessage('Importing data from %s' % filename, 2000)
+        #self.bundle = Bundle()
+        #self.bundle.loadpic(filename)
+        print "Loading data from file " + filename
+        with open(filename, 'rb') as fp:
+            self.bundle = pickle.load(fp)
+
+        self.init_pinobjects()
 
         # Update case number list box
         ncases = len(self.bundle.cases)
@@ -419,6 +423,7 @@ class MainWin(QMainWindow):
             return
 
     def saveData(self):
+        """Save bundle object to pickle file"""
 
         # Import default path from config file
         self.settings.beginGroup("PATH")
@@ -430,7 +435,10 @@ class MainWin(QMainWindow):
         filename = unicode(QFileDialog.getSaveFileName(self, 'Save to file', 
                                                        path_default, 
                                                        file_choices))
-        self.bundle.savepic(filename)
+        #self.bundle.savepic(filename)
+        with open(filename, 'wb') as fp:
+            pickle.dump(self.bundle, fp, 1)
+        print "Saved data to file " + filename
 
     def plotWin(self):
         """Open plot window"""
