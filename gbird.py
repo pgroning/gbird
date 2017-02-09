@@ -6,8 +6,8 @@ This window embeds a matplotlib (mpl) plot into a PyQt4 GUI application
 
 from IPython.core.debugger import Tracer  # Set tracepoint (used for debugging)
 # Usage: Tracer()()
- # Set a tracepoint that works with Qt
-from pyqt_trace import pyqt_trace as qtrace 
+# Set a tracepoint that works with Qt
+from pyqt_trace import pyqt_trace as qtrace
 # Usage: qtrace()
 
 try:
@@ -16,16 +16,17 @@ except:
     import pickle
 
 import sys
-import os 
+import os
 import time
 import numpy as np
 from PyQt4 import QtGui, QtCore
 
 import matplotlib
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-#from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg \
+    as FigureCanvas
+# from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 from matplotlib.figure import Figure
-#from matplotlib.patches import FancyBboxPatch
+# from matplotlib.patches import FancyBboxPatch
 import matplotlib.patches as mpatches
 try:  # patheffects not available for older versions of matplotlib
     import matplotlib.patheffects as path_effects
@@ -36,12 +37,12 @@ from bundle import Bundle
 from btf import Btf
 from plot import PlotWin
 from progbar import ProgressBar
-#from map_s96 import s96o2
-#from map_a10 import a10xm
+# from map_s96 import s96o2
+# from map_a10 import a10xm
 
 
 class dataThread(QtCore.QThread):
-    def __init__(self,parent):
+    def __init__(self, parent):
         QThread.__init__(self)
         self.parent = parent
         self._kill = False
@@ -54,17 +55,17 @@ class dataThread(QtCore.QThread):
             self.dataobj = casio()
             self.dataobj.readinp(self.parent._filename)
             self.dataobj.readcax()
-            self.emit(SIGNAL('progressbar_update(int)'),90)
+            self.emit(QtCore.SIGNAL('progressbar_update(int)'), 90)
         if not self._kill:
             self.dataobj.calcbtf()
         if not self._kill:
             self.parent.dataobj = self.dataobj
 
-        #self.parent.dataobj = casio()
-        #self.parent.dataobj.readinp(self.parent._filename)
-        #self.parent.dataobj.readcax()
-        #self.emit(SIGNAL('progressbar_update(int)'),90)
-        #self.parent.dataobj.calcbtf()
+        # self.parent.dataobj = casio()
+        # self.parent.dataobj.readinp(self.parent._filename)
+        # self.parent.dataobj.readcax()
+        # self.emit(SIGNAL('progressbar_update(int)'),90)
+        # self.parent.dataobj.calcbtf()
 
 """
 class Circle(object):
@@ -80,9 +81,8 @@ class Circle(object):
         self.x = x
         self.y = y
         self.text = self.axes.text(x,y,text,ha='center',va='center',fontsize=8)
-        #self.axes.add_patch(self.circle)
-        
-        
+        # self.axes.add_patch(self.circle)
+
     def set_text(self,text):
         pass
         #self.text.remove()
@@ -97,6 +97,7 @@ class Circle(object):
             return False
 """
 
+
 class cpin(object):
     def __init__(self, axes):
         self.axes = axes
@@ -106,7 +107,7 @@ class cpin(object):
         self.y = y
         if c is None:
             c = self.facecolor
-        self.circle = mpatches.Circle((x,y), r, fc=c, ec=(0.1, 0.1, 0.1))
+        self.circle = mpatches.Circle((x, y), r, fc=c, ec=(0.1, 0.1, 0.1))
         self.circle.set_linestyle('solid')
         self.circle.set_linewidth(2.0)
         try:
@@ -115,27 +116,29 @@ class cpin(object):
             pass
 
     def set_text(self, string='', fsize=8):
-        #if hasattr(self,'text'):
+        # if hasattr(self,'text'):
         #    self.text.remove()
-        self.text = self.axes.text(self.x,self.y,string,ha='center',va='center',fontsize=fsize)
+        self.text = self.axes.text(self.x, self.y, string, ha='center',
+                                   va='center', fontsize=fsize)
 
     def is_clicked(self, xc, yc):
         r2 = (xc-self.x)**2 + (yc-self.y)**2
-        if r2 < self.circle.get_radius()**2: # Mouse click is within pin radius
+        if r2 < self.circle.get_radius()**2:  # Mouse click is within pin radius
             return True
         else:
             return False
 
+
 class EnrDialog(QtGui.QDialog):
     def __init__(self, parent, mode="edit"):
-        #QDialog.__init__(self, parent)
+        # QDialog.__init__(self, parent)
         QtGui.QDialog.__init__(self)
         self.parent = parent
         self.mode = mode
 
-        #self.setWindowTitle("Window title")
+        # self.setWindowTitle("Window title")
         # set x-pos relative to cursor position
-        #xpos = QCursor.pos().x() - 250
+        # xpos = QCursor.pos().x() - 250
         # set dialog pos relative to main window
         xpos = parent.pos().x() + parent.size().width()/2
         ypos = parent.pos().y() + parent.size().height()/2
@@ -159,12 +162,12 @@ class EnrDialog(QtGui.QDialog):
         self.ba_text.setValidator(validator)
         validator = QtGui.QDoubleValidator(0, 9.99, 3, self)
         self.dens_text.setValidator(validator)
-        
+
         flo = QtGui.QFormLayout()
         flo.addRow("%U-235:", self.enr_text)
         flo.addRow("Density:", self.dens_text)
         flo.addRow("%Gd:", self.ba_text)
-        
+
         hbox = QtGui.QHBoxLayout()
         self.ok_button = QtGui.QPushButton("Ok")
         self.cancel_button = QtGui.QPushButton("Cancel")
@@ -172,11 +175,11 @@ class EnrDialog(QtGui.QDialog):
         hbox.addWidget(self.ok_button)
         self.connect(self.cancel_button, QtCore.SIGNAL('clicked()'), self.close)
         self.connect(self.ok_button, QtCore.SIGNAL('clicked()'), self.action)
-        #if mode == "edit":
+        # if mode == "edit":
         #    self.connect(self.ok_button, SIGNAL('clicked()'), self.edit_action)
-        #elif mode == "add":
+        # elif mode == "add":
         #    self.connect(self.ok_button, SIGNAL('clicked()'), self.add_action)
-        
+
         vbox = QtGui.QVBoxLayout()
         vbox.addLayout(flo)
         vbox.addStretch()
@@ -192,35 +195,38 @@ class EnrDialog(QtGui.QDialog):
             self.parent.enrpin_edit_callback()
         elif self.mode == "add":
             self.parent.enrpin_add_callback()
-        
+
+
 class MainWin(QtGui.QMainWindow):
     def __init__(self, parent=None):
         super(MainWin, self).__init__(parent)
-        #QtGui.QMainWindow.__init__(self, parent)
+        # QtGui.QMainWindow.__init__(self, parent)
         self.setWindowTitle('Main Window')
-        
-        #self.resize(1100,620)
-        #self.move(200,200)
+
+        # self.resize(1100,620)
+        # self.move(200,200)
         
         # Initial window size/pos last saved
         self.settings = QtCore.QSettings("greenbird")
         self.settings.beginGroup("MainWindow")
-        self.resize(self.settings.value("size", 
-                                        QtCore.QVariant(QtCore.QSize(1100, 620))).toSize());
-        self.move(self.settings.value("pos", 
-                                      QtCore.QVariant(QtCore.QPoint(200, 200))).toPoint())
+        self.resize(self.settings.value("size", QtCore.
+                                        QVariant(QtCore.QSize(1100, 620))).
+                    toSize())
+        self.move(self.settings.value("pos", QtCore.
+                                      QVariant(QtCore.QPoint(200, 200))).
+                  toPoint())
         self.settings.endGroup()
         
-        #screenShape = QDesktopWidget().screenGeometry()
-        #self.resize( screenShape.width()*0.8,screenShape.width()*0.445 )
-        #self.setMinimumWidth(1100)
-        #self.setMinimumHeight(610)
+        # screenShape = QDesktopWidget().screenGeometry()
+        # self.resize( screenShape.width()*0.8,screenShape.width()*0.445 )
+        # self.setMinimumWidth(1100)
+        # self.setMinimumHeight(610)
 
         self.resizeEvent = self.on_resize
         
         # Retrieve initial data
-        #self.data_init()
-        #self.case_id_current = 0
+        # self.data_init()
+        # self.case_id_current = 0
 
         self.create_menu()
         self.create_toolbar()
@@ -228,21 +234,20 @@ class MainWin(QtGui.QMainWindow):
         self.create_status_bar()
         
         self.on_draw()  # Init plot
-        #self.draw_fuelmap()
-        #Tracer()()
-        #self.textbox.setText('1 2 3 4')
-        #self.data_init()
+
+        # self.draw_fuelmap()
+        # self.textbox.setText('1 2 3 4')
+        # self.data_init()
         
-        #self.case_cbox.setCurrentIndex(0) # Set default plot case
-        #self.case_id_current = 0
-        #self.on_plot() # Init plot
-        #self.on_draw()
-        #self.draw_fuelmap()
-        #Tracer()()
+        # self.case_cbox.setCurrentIndex(0) # Set default plot case
+        # self.case_id_current = 0
+        # self.on_plot() # Init plot
+        # self.on_draw()
+        # self.draw_fuelmap()
 
     def on_resize(self, event):
-        self.axes.set_xlim(0,1.2)
-        self.axes.set_ylim(0,1)
+        self.axes.set_xlim(0, 1.2)
+        self.axes.set_ylim(0, 1)
 
     def openFile(self):
         
@@ -251,7 +256,7 @@ class MainWin(QtGui.QMainWindow):
         path_default = self.settings.value("path_default",
                                            QtCore.QString("")).toString()
         self.settings.endGroup()
-        #file_choices = "inp (*.inp);;pickle (*.p)"
+        # file_choices = "inp (*.inp);;pickle (*.p)"
         file_choices = "Data files (*.inp *.p)"
         filename = unicode(QtGui.QFileDialog.getOpenFileName(self, 'Open file',
                                                              path_default,
@@ -268,14 +273,13 @@ class MainWin(QtGui.QMainWindow):
                 self.load_pickle(filename)
             elif filext == ".inp":
                 self.read_cax(filename)
-        
 
     def load_pickle(self, filename):
         """Load bundle object from pickle file"""
 
         self.statusBar().showMessage('Importing data from %s' % filename, 2000)
-        #self.bundle = Bundle()
-        #self.bundle.loadpic(filename)
+        # self.bundle = Bundle()
+        # self.bundle.loadpic(filename)
         print "Loading data from file " + filename
         with open(filename, 'rb') as fp:
             self.bundle = pickle.load(fp)
@@ -286,7 +290,7 @@ class MainWin(QtGui.QMainWindow):
         ncases = len(self.bundle.cases)
         for i in range(1, ncases+1):
             self.case_cbox.addItem(str(i))
-        self.connect(self.case_cbox, QtCore.SIGNAL('currentIndexChanged(int)'), 
+        self.connect(self.case_cbox, QtCore.SIGNAL('currentIndexChanged(int)'),
                      self.fig_update)
         self.fig_update()
         
@@ -294,25 +298,25 @@ class MainWin(QtGui.QMainWindow):
         print "dataobject constructed"
         self.init_pinobjects()
 
-        # Perform reference quick calculation for base case 
+        # Perform reference quick calculation for base case
         print "Performing a reference quick calculation..."
         ncases = len(self.dataobj.cases)
         for case_num in range(ncases):
             self.quick_calc(case_num)
 
-        #pyqt_trace()
-        #self.thread.quit()
-        #self.draw_fuelmap()
-        #self.set_pinvalues()
+        # self.thread.quit()
+        # self.draw_fuelmap()
+        # self.set_pinvalues()
         self.timer.stop()
 
         # Update case number list box
-        #ncases = len(self.dataobj.cases)
-        for i in range(1,ncases+1):
+        # ncases = len(self.dataobj.cases)
+        for i in range(1, ncases+1):
             self.case_cbox.addItem(str(i))
-        self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'), self.fig_update)
+        self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'),
+                     self.fig_update)
         self.fig_update()
-            
+
         self.progressbar.update(100)
         self.progressbar.setWindowTitle('All data imported')
         self.progressbar.button.setText('Ok')
@@ -320,33 +324,33 @@ class MainWin(QtGui.QMainWindow):
         self.progressbar.button.clicked.connect(self.progressbar.close)
         self.progressbar.button.setEnabled(True)
         
-        #pyqt_trace()
-        #QMessageBox.information(self,"Done!","All data imported!")
+        # QtGui.QMessageBox.information(self,"Done!","All data imported!")
 
-    def progressbar_update(self,val=None):
+    def progressbar_update(self, val=None):
         if val is not None:
-            self.progressbar._value = max(val,self.progressbar._value)
+            self.progressbar._value = max(val, self.progressbar._value)
         self.progressbar.update(self.progressbar._value)
         self.progressbar._value += 1
 
     def killThread(self):
         print 'killThread'
-        self.disconnect(self.timer,SIGNAL('timeout()'),self.progressbar_update)
-        self.disconnect(self.thread,SIGNAL('finished()'),self.dataobj_finished)
-        self.disconnect(self.thread,SIGNAL('progressbar_update(int)'),self.progressbar_update)
+        self.disconnect(self.timer, QtCore.SIGNAL('timeout()'),
+                        self.progressbar_update)
+        self.disconnect(self.thread, QtCore.SIGNAL('finished()'),
+                        self.dataobj_finished)
+        self.disconnect(self.thread, QtCore.SIGNAL('progressbar_update(int)'),
+                        self.progressbar_update)
         self.thread._kill = True
         self.progressbar.close()
-        #self.progressbar.close
-#        self.thread.wait()
-#        print 'killed'
+        # self.progressbar.close
+        # self.thread.wait()
 
-    def read_cax(self,filename):
-        msg = "Continue?"""
+    def read_cax(self, filename):
+        msg = "Continue?"
         msgBox = QtGui.QMessageBox()
         status = msgBox.information(self, "Importing data", msg.strip(),
-                                 QtGui.QMessageBox.Yes|QtGui.QMessageBox.Cancel)
-        # ret = msgBox.question(self,"Importing data",msg.strip(),
-        # QMessageBox.Yes|QMessageBox.Cancel)
+                                    QtGui.QMessageBox.Yes |
+                                    QtGui.QMessageBox.Cancel)
         self.statusBar().showMessage('Importing data from %s' % filename, 2000)
         self._filename = filename
         if status == QtGui.QMessageBox.Yes:
@@ -362,16 +366,16 @@ class MainWin(QtGui.QMainWindow):
             
             # Update case number list box
             ncases = len(self.bundle.cases)
-            for i in range(1,ncases+1):
+            for i in range(1, ncases+1):
                 self.case_cbox.addItem(str(i))
-            self.connect(self.case_cbox, 
+            self.connect(self.case_cbox,
                          QtCore.SIGNAL('currentIndexChanged(int)'), 
                          self.fig_update)
 
             self.fig_update()
-            #self.canvas.draw()
-            #self.axes.clear()
-            #self.draw_fuelmap()
+            # self.canvas.draw()
+            # self.axes.clear()
+            # self.draw_fuelmap()
             
             '''
             #self.progressbar = ProgressBar()
@@ -432,7 +436,7 @@ class MainWin(QtGui.QMainWindow):
                                                              "Save to file", 
                                                              path_default,
                                                              file_choices))
-        #self.bundle.savepic(filename)
+        # self.bundle.savepic(filename)
         with open(filename, 'wb') as fp:
             pickle.dump(self.bundle, fp, 1)
         print "Saved data to file " + filename
@@ -440,13 +444,13 @@ class MainWin(QtGui.QMainWindow):
     def plotWin(self):
         """Open plot window"""
 
-        if hasattr(self,'bundle'):
+        if hasattr(self, "bundle"):
             plotwin = PlotWin(self)
             plotwin.show()
         else:
             msg = "There is no data to plot."
             msgBox = QtGui.QMessageBox()
-            #msgBox.information(self,"No data", msg.strip(), 
+            # msgBox.information(self,"No data", msg.strip(), 
             #                   QtGui.QMessageBox.Close)
             msgBox.information(self, "No data", msg.strip(), msgBox.Close)
 
@@ -472,12 +476,12 @@ class MainWin(QtGui.QMainWindow):
             pinlist = []
             for i in range(LFU.shape[0]):
                 for j in range(LFU.shape[1]):
-                    if LFU[i,j] > 0:
+                    if LFU[i, j] > 0:
                         pinobj = cpin(self.axes)
-                        pinobj.pos = [i,j]
-                        pinobj.ENR = ENR[i,j]
-                        pinobj.BA = BA[i,j]
-                        pinobj.LFU = LFU[i,j]
+                        pinobj.pos = [i, j]
+                        pinobj.ENR = ENR[i, j]
+                        pinobj.BA = BA[i, j]
+                        pinobj.LFU = LFU[i, j]
                         pinlist.append(pinobj)
             self.pinobjects.append(pinlist)
         
@@ -561,7 +565,8 @@ class MainWin(QtGui.QMainWindow):
         """Remove enr level pin"""
         msgBox = QtGui.QMessageBox()
         status = msgBox.information(self, "Remove enrichment", "Are you sure?",
-                                 QtGui.QMessageBox.Yes|QtGui.QMessageBox.Cancel)
+                                    QtGui.QMessageBox.Yes |
+                                    QtGui.QMessageBox.Cancel)
         if status == QtGui.QMessageBox.Cancel:
             return
 
@@ -589,7 +594,8 @@ class MainWin(QtGui.QMainWindow):
 
         msgBox = QtGui.QMessageBox()
         status = msgBox.information(self, "Sort enrichments", "Are you sure?",
-                                 QtGui.QMessageBox.Yes|QtGui.QMessageBox.Cancel)
+                                    QtGui.QMessageBox.Yes |
+                                    QtGui.QMessageBox.Cancel)
         if status == QtGui.QMessageBox.Cancel:
             return
         
@@ -625,7 +631,7 @@ class MainWin(QtGui.QMainWindow):
         index_array = np.where(btf_burnpoints == burnup)[0]
         if len(index_array) > 0:  # is BTF calculated for the specific burnup?
             btf_num = index_array[0]
-            BTF = self.bundle.states[state_num].btf.DOX[btf_num,:,:]
+            BTF = self.bundle.states[state_num].btf.DOX[btf_num, :, :]
         else:
             BTF = np.zeros(np.shape(self.bundle.states[state_num].btf.DOX)[1:])
             BTF.fill(np.nan)
@@ -641,27 +647,27 @@ class MainWin(QtGui.QMainWindow):
         k = 0
         for i in range(npst):
             for j in range(npst):
-                if LFU[i,j] > 0:
-                    self.pinobjects[case_num][k].EXP = EXP[i,j]
-                    self.pinobjects[case_num][k].FINT = FINT[i,j]
-                    self.pinobjects[case_num][k].BTF = BTF[i,j]
+                if LFU[i, j] > 0:
+                    self.pinobjects[case_num][k].EXP = EXP[i, j]
+                    self.pinobjects[case_num][k].FINT = FINT[i, j]
+                    self.pinobjects[case_num][k].BTF = BTF[i, j]
                     
                     expItem = QtGui.QTableWidgetItem()
                     expItem.setData(QtCore.Qt.EditRole,
                                     QtCore.QVariant(
-                            float(np.round(EXP[i,j],3))))
+                            float(np.round(EXP[i, j], 3))))
                     fintItem = QtGui.QTableWidgetItem()
                     fintItem.setData(QtCore.Qt.EditRole,
                                      QtCore.QVariant(
-                            float(np.round(FINT[i,j],3))))
+                            float(np.round(FINT[i, j], 3))))
                     btfItem = QtGui.QTableWidgetItem()
                     btfItem.setData(QtCore.Qt.EditRole,
                                     QtCore.QVariant(
-                            float(np.round(BTF[i,j],3))))    
+                            float(np.round(BTF[i, j], 3))))    
 
-                    self.table.setItem(k,1,expItem)
-                    self.table.setItem(k,2,fintItem)
-                    self.table.setItem(k,3,btfItem)
+                    self.table.setItem(k, 1, expItem)
+                    self.table.setItem(k, 2, fintItem)
+                    self.table.setItem(k, 3, btfItem)
                     k += 1
         
         statepoint = state.statepoints[point_num]
@@ -700,18 +706,18 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             elif param_str == "BTF":
                 btf_ratio = self.pinobjects[case_num][i].BTF/btf*1000
                 if int(btf_ratio) == 1000:
-                    text =  "1e3"
+                    text = "1e3"
                 else:
-                    text =  ('%.0f' % (btf_ratio))
+                    text = ('%.0f' % (btf_ratio))
                 
             elif param_str == "EXP":
                 if self.pinobjects[case_num][i].EXP < 10:
-                    text =  ('%.1f' % (self.pinobjects[case_num][i].EXP))
+                    text = ('%.1f' % (self.pinobjects[case_num][i].EXP))
                 else:
-                    text =  ('%.0f' % (self.pinobjects[case_num][i].EXP))
+                    text = ('%.0f' % (self.pinobjects[case_num][i].EXP))
 
             elif param_str == "FINT":
-                text =  ('%.0f' % (self.pinobjects[case_num][i].FINT*100))
+                text = ('%.0f' % (self.pinobjects[case_num][i].FINT*100))
 
             self.pinobjects[case_num][i].text.remove()
             self.pinobjects[case_num][i].set_text(text) 
@@ -736,9 +742,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
     def save_plot(self):
         file_choices = "PNG (*.png)|*.png"
         
-        path = unicode(QFileDialog.getSaveFileName(self, 
-                        'Save file', '', 
-                        file_choices))
+        path = unicode(QFileDialog.getSaveFileName(self, 'Save file', '',
+                                                   file_choices))
         if path:
             self.canvas.print_figure(path, dpi=self.dpi)
             self.statusBar().showMessage('Saved to %s' % path, 2000)
@@ -751,8 +756,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         #print "Sort header"
         case_num = int(self.case_cbox.currentIndex())
         for i, pinobj in enumerate(self.pinobjects[case_num]):
-            #for i,pinobj in enumerate(self.circlelist):
-            #item = QTableWidgetItem(str(self.table.item(i,0).text()))
+            # for i,pinobj in enumerate(self.circlelist):
+            # item = QTableWidgetItem(str(self.table.item(i,0).text()))
             index = int(self.table.item(i,0).text())
             item = QtGui.QTableWidgetItem(
                 str(self.pinobjects[case_num][index].coord))
@@ -776,10 +781,10 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         # only a small amount here.
         # 
 
-        #print event.x,event.y
-        #if qApp.keyboardModifiers() & Qt.ControlModifier: # ctrl+click
+        # print event.x,event.y
+        # if qApp.keyboardModifiers() & Qt.ControlModifier: # ctrl+click
         #    remove = False
-        #else:
+        # else:
         #    remove = True
         case_num = int(self.case_cbox.currentIndex())
         i = np.nan
@@ -794,8 +799,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             if i >= 0:  # A pin is selected
                 self.tableSelectRow(i)
                 self.mark_pin(i)
-                #self.pinselection_index = i
-                #j = self.halfsym_pin(i)
+                # self.pinselection_index = i
+                # j = self.halfsym_pin(i)
 
         elif event.button is 3:  # right mouse click
             try:  # check if enr level pin is clicked
@@ -805,8 +810,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                 pass
             if i >= 0:  # An enr level pin is selected
                 self.pinselection_index = i
-                    #self.mark_enrpin(i)
-                    #print self.pinselection_index
+                # self.mark_enrpin(i)
+                # print self.pinselection_index
                 
                 self.popMenu = QtGui.QMenu(self)
                 self.popMenu.addAction("Add...", self.enrpin_add)
@@ -815,8 +820,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                 self.popMenu.addAction("Sort", self.enrpin_sort)
                 
                 self.popMenu.exec_(QtGui.QCursor.pos())
-                
-                    
+
     def halfsym_pin(self, i, case_num=None):
         """Find the corresponding pin for half symmetry"""
 
@@ -855,9 +859,9 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                 self.clickpatch.remove()
             except:
                 pass
-        #self.clickrect = mpatches.Rectangle((x,y), d, d,hatch='.',
+        # self.clickrect = mpatches.Rectangle((x,y), d, d,hatch='.',
         #                                    fc=(1,1,1),alpha=1.0,ec=(1, 0, 0))
-        #self.clickrect = mpatches.Rectangle((x,y), d, d,
+        # self.clickrect = mpatches.Rectangle((x,y), d, d,
         #                                    fc=(1,1,1),Fill=False,ec=(0, 0, 0))
         r = self.pinobjects[case_num][i].circle.get_radius()*1.3
         x = self.pinobjects[case_num][i].x
@@ -897,8 +901,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.canvas.draw()
         self.enr_update()  # Update info fields
 
-        #self.enrpin_remove()  # only for testing. should be removed
-        #enrArray = [x.ENR for x in self.enrpinlist][::-1] # Reverse order
+        # self.enrpin_remove()  # only for testing. should be removed
+        # enrArray = [x.ENR for x in self.enrpinlist][::-1] # Reverse order
 
     def enr_update(self):
         '''Update enr value in info fields'''
@@ -919,7 +923,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         if case_num is None:
             case_num = int(self.case_cbox.currentIndex())
         ivec = []
-        #ipin = self.pinselection_index
+        # ipin = self.pinselection_index
         # ivec.append(ipin)
         if ipin is None:
             ipin = self.casecor_pin(case_num)
@@ -931,7 +935,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             if isym != ivec[0]: 
                 ivec.append(isym)
         for i in ivec:
-            #print "Increase enrichment for pin " + str(i)
+            # print "Increase enrichment for pin " + str(i)
             pinEnr = self.pinobjects[case_num][i].ENR
             pinBA = self.pinobjects[case_num][i].BA
             
@@ -948,7 +952,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                     self.__pinenr_update(i, j-1, case_num)
 
     def __pinenr_update(self, i, j, case_num=None):
-        #i = self.pinselection_index
+        # i = self.pinselection_index
         if case_num is None:
             case_num = int(self.case_cbox.currentIndex())
         
@@ -969,16 +973,15 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                 self.pinobjects[case_num][i].text.remove()
                 self.pinobjects[case_num][i].set_text(text)
         
-        #self.bundle.cases[case_num].states[-1].LFU = self.__lfumap(case_num)
-        #self.dataobj.cases[case_num].qcalc[0].LFU = self.__lfumap(case_num)
-        #self.canvas.draw()
-
+        # self.bundle.cases[case_num].states[-1].LFU = self.__lfumap(case_num)
+        # self.dataobj.cases[case_num].qcalc[0].LFU = self.__lfumap(case_num)
+        # self.canvas.draw()
 
     def __lfumap(self, case_num):
         """Creating LFU map from pinobjects"""
         
-        #print "Creating LFU map"
-        #case_num = int(self.case_cbox.currentIndex())
+        # print "Creating LFU map"
+        # case_num = int(self.case_cbox.currentIndex())
         
         # Initialize new LFU map and fill with zeros
         LFU_old = self.bundle.cases[case_num].states[-1].LFU
@@ -989,8 +992,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         k = 0
         for i in range(LFU.shape[0]):
             for j in range(LFU.shape[1]):
-                if LFU_old[i,j] > 0:
-                    LFU[i,j] = self.pinobjects[case_num][k].LFU
+                if LFU_old[i, j] > 0:
+                    LFU[i, j] = self.pinobjects[case_num][k].LFU
                     k += 1
         return LFU
 
@@ -1018,11 +1021,11 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         k = 0
         for i in range(BA.shape[0]):
             for j in range(BA.shape[1]):
-                if LFU[i,j] > 0:
-                    BA[i,j] = self.pinobjects[case_num][k].BA
+                if LFU[i, j] > 0:
+                    BA[i, j] = self.pinobjects[case_num][k].BA
                     k += 1
         return BA
-        
+
     #def quick_calc(self,case_num):
     def quick_calc(self):
         """Performing quick calculation"""
@@ -1049,10 +1052,9 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 #       case_num = int(self.case_cbox.currentIndex())        
 #        self.dataobj.cases[case_num].pertcalc()
 
-
     def fig_update(self):
-        """ Redraw figure and update values
-        """
+        """ Redraw figure and update values"""
+
         ##self.on_draw()
         self.axes.clear()
         self.draw_fuelmap()
@@ -1157,11 +1159,10 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             a10xm(self)
         
         # Draw symmetry line
-        #pp = [[0.035, 0.965], [0.965, 0.035]]
-        #poly = mpatches.Polygon(pp)
-        #poly.set_closed(False)
-        #self.axes.add_patch(poly)
-
+        # pp = [[0.035, 0.965], [0.965, 0.035]]
+        # poly = mpatches.Polygon(pp)
+        # poly.set_closed(False)
+        # self.axes.add_patch(poly)
         
     def startpoint(self,case_id):
         voi_val = int(self.voi_cbox.currentText())
@@ -1180,8 +1181,6 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         else:
             idx0 = case.findpoint(voi=voi_val,vhi=vhi_val)
         return idx0
-
-
 
     def create_main_frame(self):
         self.main_frame = QtGui.QWidget()
@@ -1227,7 +1226,6 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         #self.textbox.setMinimumWidth(200)
         #self.connect(self.textbox, SIGNAL('editingFinished ()'), self.on_draw)
 
-                
         #self.draw_button = QPushButton("Draw")
         #self.connect(self.draw_button, SIGNAL('clicked()'), self.on_plot)
         
@@ -1336,7 +1334,6 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         #self.vhi_cbox.setCurrentIndex(vhi_index)
         #self.connect(self.vhi_cbox, SIGNAL('currentIndexChanged(int)'), self.on_plot)
 
-
         #self.case_cbox.setWhatsThis("What is this?")
 
         #self.connect(self.case_cbox, SIGNAL('activated(QString)'), self.on_case)
@@ -1406,13 +1403,12 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         200); border:1px solid gray; border-radius:5px;}")
         tableGbox.setLayout(tvbox)
         
-        #self.hview = QHeaderView
+        # self.hview = QHeaderView
 
-       #self.tableview = QTableView()
-        #self.connect(self.table.horizontalHeader().sectionClicked(), SIGNAL('logicalIndex(int)'),self.openFile)
-        #self.connect(QHeaderView.sortIndicatorChanged(), SIGNAL('logicalIndex(int)'),self.openFile)
+        # self.tableview = QTableView()
+        # self.connect(self.table.horizontalHeader().sectionClicked(), SIGNAL('logicalIndex(int)'),self.openFile)
+        # self.connect(QHeaderView.sortIndicatorChanged(), SIGNAL('logicalIndex(int)'),self.openFile)
         
-
         #self.setpincoords()
         self.table.resizeColumnsToContents()
         #Tracer()()
@@ -1484,10 +1480,13 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.file_menu = self.menuBar().addMenu("&File")
         
         save_settings_action = self.create_action("&Save settings...",
-            shortcut="Ctrl+E", slot=self.save_plot, 
-            tip="Save settings")
-        quit_action = self.create_action("&Quit", slot=self.close, 
-                                         shortcut="Ctrl+Q", tip="Close the application")
+                                                  shortcut="Ctrl+E",
+                                                  slot=self.save_plot, 
+                                                  tip="Save settings")
+
+        quit_action = self.create_action("&Quit", slot=self.close,
+                                         shortcut="Ctrl+Q",
+                                         tip="Close the application")
         
         open_file_action = self.create_action("&Open file...", slot=self.openFile,
                                               shortcut="Ctrl+L", tip="Open file")
@@ -1558,9 +1557,9 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             else:
                 target.addAction(action)
 
-    def create_action(  self, text, slot=None, shortcut=None, 
-                        icon=None, tip=None, checkable=False, 
-                        signal="triggered()"):
+    def create_action(self, text, slot=None, shortcut=None, icon=None, 
+                      tip=None, checkable=False, signal="triggered()"):
+
         action = QtGui.QAction(text, self)
         if icon is not None:
             action.setIcon(QIcon(":/%s.png" % icon))
@@ -1584,13 +1583,12 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.settings.setValue("pos", QtCore.QVariant(self.pos()))
         self.settings.endGroup()
         print "Good bye!"
-        
+
 
 def main():
     app = QtGui.QApplication(sys.argv)
     window = MainWin()
     window.show()
-    #app.exec_()
     sys.exit(app.exec_())
 
 
