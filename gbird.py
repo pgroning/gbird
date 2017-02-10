@@ -24,7 +24,8 @@ from PyQt4 import QtGui, QtCore
 import matplotlib
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg \
     as FigureCanvas
-# from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+# from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg \
+# as NavigationToolbar
 from matplotlib.figure import Figure
 # from matplotlib.patches import FancyBboxPatch
 import matplotlib.patches as mpatches
@@ -71,7 +72,7 @@ class dataThread(QtCore.QThread):
 class Circle(object):
     def __init__(self,axes,x,y,c=(1,1,1),text='',r=0.028):
         self.axes = axes
-        #radius = 0.028
+        # radius = 0.028
         self.circle = mpatches.Circle((x,y), r, fc=c, ec=(0.1, 0.1, 0.1))
         self.circle.set_linestyle('solid')
         try:
@@ -85,9 +86,9 @@ class Circle(object):
 
     def set_text(self,text):
         pass
-        #self.text.remove()
-        #self.text = self.axes.text(self.x,self.y,text,ha='center',va='center',fontsize=8)
-
+        # self.text.remove()
+        # self.text = self.axes.text(self.x,self.y,text,ha='center',
+        va='center',fontsize=8)
 
     def is_clicked(self,xc,yc):
         r2 = (xc-self.x)**2 + (yc-self.y)**2
@@ -111,7 +112,8 @@ class cpin(object):
         self.circle.set_linestyle('solid')
         self.circle.set_linewidth(2.0)
         try:
-            self.circle.set_path_effects([path_effects.withSimplePatchShadow()])
+            self.circle.set_path_effects([path_effects.
+                                          withSimplePatchShadow()])
         except:
             pass
 
@@ -122,8 +124,9 @@ class cpin(object):
                                    va='center', fontsize=fsize)
 
     def is_clicked(self, xc, yc):
-        r2 = (xc-self.x)**2 + (yc-self.y)**2
-        if r2 < self.circle.get_radius()**2:  # Mouse click is within pin radius
+        r2 = (xc - self.x)**2 + (yc - self.y)**2
+        # Mouse click is within pin radius ?
+        if r2 < self.circle.get_radius()**2:
             return True
         else:
             return False
@@ -140,8 +143,8 @@ class EnrDialog(QtGui.QDialog):
         # set x-pos relative to cursor position
         # xpos = QCursor.pos().x() - 250
         # set dialog pos relative to main window
-        xpos = parent.pos().x() + parent.size().width()/2
-        ypos = parent.pos().y() + parent.size().height()/2
+        xpos = parent.pos().x() + parent.size().width() / 2
+        ypos = parent.pos().y() + parent.size().height() / 2
         self.setGeometry(QtCore.QRect(xpos, ypos, 150, 120))
 
         case_num = int(parent.case_cbox.currentIndex())
@@ -173,12 +176,9 @@ class EnrDialog(QtGui.QDialog):
         self.cancel_button = QtGui.QPushButton("Cancel")
         hbox.addWidget(self.cancel_button)
         hbox.addWidget(self.ok_button)
-        self.connect(self.cancel_button, QtCore.SIGNAL('clicked()'), self.close)
+        self.connect(self.cancel_button, QtCore.SIGNAL('clicked()'),
+                     self.close)
         self.connect(self.ok_button, QtCore.SIGNAL('clicked()'), self.action)
-        # if mode == "edit":
-        #    self.connect(self.ok_button, SIGNAL('clicked()'), self.edit_action)
-        # elif mode == "add":
-        #    self.connect(self.ok_button, SIGNAL('clicked()'), self.add_action)
 
         vbox = QtGui.QVBoxLayout()
         vbox.addLayout(flo)
@@ -288,7 +288,7 @@ class MainWin(QtGui.QMainWindow):
 
         # Update case number list box
         ncases = len(self.bundle.cases)
-        for i in range(1, ncases+1):
+        for i in range(1, ncases + 1):
             self.case_cbox.addItem(str(i))
         self.connect(self.case_cbox, QtCore.SIGNAL('currentIndexChanged(int)'),
                      self.fig_update)
@@ -311,7 +311,7 @@ class MainWin(QtGui.QMainWindow):
 
         # Update case number list box
         # ncases = len(self.dataobj.cases)
-        for i in range(1, ncases+1):
+        for i in range(1, ncases + 1):
             self.case_cbox.addItem(str(i))
         self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'),
                      self.fig_update)
@@ -359,14 +359,14 @@ class MainWin(QtGui.QMainWindow):
             
             self.bundle = Bundle()
             self.bundle.readinp(filename)
-            self.bundle.readcax()  # readcax("all") reads the whole file content
+            self.bundle.readcax()  # inargs "all" reads the whole file content
             self.bundle.new_btf()
 
             self.init_pinobjects()
             
             # Update case number list box
             ncases = len(self.bundle.cases)
-            for i in range(1, ncases+1):
+            for i in range(1, ncases + 1):
                 self.case_cbox.addItem(str(i))
             self.connect(self.case_cbox,
                          QtCore.SIGNAL('currentIndexChanged(int)'), 
@@ -388,36 +388,37 @@ class MainWin(QtGui.QMainWindow):
 
             self.progressbar = ProgressBar()
             xpos = self.pos().x() + self.width()/2 - self.progressbar.width()/2
-            ypos = self.pos().y() + self.height()/2 - self.progressbar.height()/2
+            ypos = self.pos().y() + self.height()/2 - 
+            self.progressbar.height()/2
             self.progressbar.move(xpos,ypos)
             self.progressbar.show()
             self.progressbar.button.setEnabled(False)
             self.progressbar.button.clicked.connect(self.killThread)
-            #self.progressbar.button.clicked.connect(self.progressbar.close)
+            # self.progressbar.button.clicked.connect(self.progressbar.close)
 
             self.timer = QTimer()
             self.connect(self.timer,SIGNAL('timeout()'),self.progressbar_update)
             self.progressbar._value = 1
             self.timer.start(500)
 
-            #time.sleep(20)
-            #self.thread.terminate()
-            #pyqt_trace()
+            # time.sleep(20)
+            # self.thread.terminate()
+            # pyqt_trace()
 
-            #print self.dataobj.data.caxfiles
+            # print self.dataobj.data.caxfiles
 
-            #self.dataobj = casio()
-            #self.dataobj.readinp(filename)
-            #self.dataobj.readcax()
+            # self.dataobj = casio()
+            # self.dataobj.readinp(filename)
+            # self.dataobj.readcax()
 
-            #self.dataobj.calcbtf()
-            #fuetype = 'SVEA-96'
-            #self.dataobj.btf = btf(self.dataobj,fuetype)
+            # self.dataobj.calcbtf()
+            # fuetype = 'SVEA-96'
+            # self.dataobj.btf = btf(self.dataobj,fuetype)
 
-            #self.setpincoords()
-            #self.draw_fuelmap()
-            #self.set_pinvalues()
-            #self.dataobj.savecas()
+            # self.setpincoords()
+            # self.draw_fuelmap()
+            # self.set_pinvalues()
+            # self.dataobj.savecas()
             '''
         else:
             return
@@ -459,7 +460,7 @@ class MainWin(QtGui.QMainWindow):
                 "#00AAFF", "#00CCFF", "#00FFFF", "#00FFCC", "#00FFAA",
                 "#00FF66", "#00FF00", "#AAFF00", "#CCFF00", "#FFFF00",
                 "#FFCC00", "#FFAA00", "#FF9900", "#FF5500", "#FF0000"]
-        ic = np.linspace(0, len(cvec)-1, num_enr_levels).astype(int).tolist()
+        ic = np.linspace(0, len(cvec) - 1, num_enr_levels).astype(int).tolist()
         cmap = [cvec[i] for i in ic]
         return cmap
 
@@ -653,17 +654,14 @@ class MainWin(QtGui.QMainWindow):
                     self.pinobjects[case_num][k].BTF = BTF[i, j]
                     
                     expItem = QtGui.QTableWidgetItem()
-                    expItem.setData(QtCore.Qt.EditRole,
-                                    QtCore.QVariant(
+                    expItem.setData(QtCore.Qt.EditRole, QtCore.QVariant(
                             float(np.round(EXP[i, j], 3))))
                     fintItem = QtGui.QTableWidgetItem()
-                    fintItem.setData(QtCore.Qt.EditRole,
-                                     QtCore.QVariant(
+                    fintItem.setData(QtCore.Qt.EditRole, QtCore.QVariant(
                             float(np.round(FINT[i, j], 3))))
                     btfItem = QtGui.QTableWidgetItem()
-                    btfItem.setData(QtCore.Qt.EditRole,
-                                    QtCore.QVariant(
-                            float(np.round(BTF[i, j], 3))))    
+                    btfItem.setData(QtCore.Qt.EditRole, QtCore.QVariant(
+                            float(np.round(BTF[i, j], 3))))
 
                     self.table.setItem(k, 1, expItem)
                     self.table.setItem(k, 2, fintItem)
@@ -690,12 +688,12 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         for i in xrange(npins):
             
             if self.pinobjects[case_num][i].BA < 0.00001:
-                j = next(j for j,enrpin in enumerate(self.enrpinlist[case_num]) 
-                         if enrpin.ENR == self.pinobjects[case_num][i].ENR)
+                j = next(j for j, epin in enumerate(self.enrpinlist[case_num]) 
+                         if epin.ENR == self.pinobjects[case_num][i].ENR)
             else:
-                j = next(j for j, enrpin in enumerate(self.enrpinlist[case_num])
-                         if enrpin.BA == self.pinobjects[case_num][i].BA 
-                         and enrpin.ENR == self.pinobjects[case_num][i].ENR)
+                j = next(j for j, epin in enumerate(self.enrpinlist[case_num])
+                         if epin.BA == self.pinobjects[case_num][i].BA 
+                         and epin.ENR == self.pinobjects[case_num][i].ENR)
             self.pinobjects[case_num][i].LFU = j + 1
             fc = self.enrpinlist[case_num][j].circle.get_facecolor()
             self.pinobjects[case_num][i].circle.set_facecolor(fc)
@@ -704,7 +702,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                 text = self.enrpinlist[case_num][j].text.get_text()
                 
             elif param_str == "BTF":
-                btf_ratio = self.pinobjects[case_num][i].BTF/btf*1000
+                btf_ratio = self.pinobjects[case_num][i].BTF / btf * 1000
                 if int(btf_ratio) == 1000:
                     text = "1e3"
                 else:
@@ -717,7 +715,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                     text = ('%.0f' % (self.pinobjects[case_num][i].EXP))
 
             elif param_str == "FINT":
-                text = ('%.0f' % (self.pinobjects[case_num][i].FINT*100))
+                text = ('%.0f' % (self.pinobjects[case_num][i].FINT * 100))
 
             self.pinobjects[case_num][i].text.remove()
             self.pinobjects[case_num][i].set_text(text) 
@@ -732,7 +730,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         npin = len(self.pinobjects[case_num])
         self.table.setRowCount(npin)
         
-        for i,pinobj in enumerate(self.pinobjects[case_num]):
+        for i, pinobj in enumerate(self.pinobjects[case_num]):
             coord_item = QtGui.QTableWidgetItem(pinobj.coord)
             self.table.setVerticalHeaderItem(i, coord_item)
             i_item = QtGui.QTableWidgetItem()
@@ -758,19 +756,19 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         for i, pinobj in enumerate(self.pinobjects[case_num]):
             # for i,pinobj in enumerate(self.circlelist):
             # item = QTableWidgetItem(str(self.table.item(i,0).text()))
-            index = int(self.table.item(i,0).text())
+            index = int(self.table.item(i, 0).text())
             item = QtGui.QTableWidgetItem(
                 str(self.pinobjects[case_num][index].coord))
             #item = QTableWidgetItem(str(self.circlelist[index].coord))
-            self.table.setVerticalHeaderItem(i,item)
+            self.table.setVerticalHeaderItem(i, item)
 
-    def tableSelectRow(self,i):
+    def tableSelectRow(self, i):
         index = next(j for j in range(self.table.rowCount()) 
-                     if int(self.table.item(j,0).text()) == i)
+                     if int(self.table.item(j, 0).text()) == i)
         self.table.selectRow(index)
 
-    def pinSelect(self,i):
-        index = int(self.table.item(i,0).text())
+    def pinSelect(self, i):
+        index = int(self.table.item(i, 0).text())
         self.mark_pin(index)
 
     def on_click(self, event):
@@ -850,9 +848,9 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
         self.pinselection_index = i
         case_num = int(self.case_cbox.currentIndex())
-        d = self.pinobjects[case_num][i].circle.get_radius()*2*1.25
-        x = self.pinobjects[case_num][i].x-d/2
-        y = self.pinobjects[case_num][i].y-d/2
+        d = self.pinobjects[case_num][i].circle.get_radius() * 2 * 1.25
+        x = self.pinobjects[case_num][i].x - d / 2
+        y = self.pinobjects[case_num][i].y - d / 2
 
         if hasattr(self, 'clickpatch'):  # Remove any previously selected pins
             try:
@@ -862,12 +860,12 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         # self.clickrect = mpatches.Rectangle((x,y), d, d,hatch='.',
         #                                    fc=(1,1,1),alpha=1.0,ec=(1, 0, 0))
         # self.clickrect = mpatches.Rectangle((x,y), d, d,
-        #                                    fc=(1,1,1),Fill=False,ec=(0, 0, 0))
-        r = self.pinobjects[case_num][i].circle.get_radius()*1.3
+        #                                   fc=(1,1,1),Fill=False,ec=(0, 0, 0))
+        r = self.pinobjects[case_num][i].circle.get_radius() * 1.3
         x = self.pinobjects[case_num][i].x
         y = self.pinobjects[case_num][i].y
 
-        self.clickpatch = mpatches.Circle((x,y), r, fc=(1,1,1), alpha=1.0, 
+        self.clickpatch = mpatches.Circle((x, y), r, fc=(1, 1, 1), alpha=1.0,
                                           ec=(0.2, 0.2, 0.2))
         self.clickpatch.set_linestyle('solid')
         self.clickpatch.set_fill(False)
@@ -945,11 +943,11 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                 if x.ENR == pinEnr and x.BA == pinBA:
                     break
             if mod == "add":
-                if j < len(self.enrpinlist[case_num])-1:
-                    self.__pinenr_update(i, j+1, case_num)
+                if j < len(self.enrpinlist[case_num]) - 1:
+                    self.__pinenr_update(i, j + 1, case_num)
             elif mod == "sub":
                 if j > 0:
-                    self.__pinenr_update(i, j-1, case_num)
+                    self.__pinenr_update(i, j - 1, case_num)
 
     def __pinenr_update(self, i, j, case_num=None):
         # i = self.pinselection_index
@@ -1083,7 +1081,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         #self.axes.set_position([0,0,1,1])
         #self.axes.set_xlim(0,1.2)
         #self.axes.set_ylim(0,1)
-        self.axes.set_position([0,0,1,1])
+        self.axes.set_position([0, 0, 1, 1])
         #self.axes.set_visible(False)
         self.axes.set_frame_on(False)
         self.axes.get_xaxis().set_visible(False)
@@ -1108,12 +1106,12 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
         self.fig.set_facecolor((1, 1, 0.8784))
         # Draw outer rectangle
-        rect = mpatches.Rectangle((0.035,0.035), 0.935, 0.935, 
-                                  fc=(0.8,0.898,1), ec=(0.3, 0.3, 0.3))
+        rect = mpatches.Rectangle((0.035, 0.035), 0.935, 0.935,
+                                  fc=(0.8, 0.898, 1), ec=(0.3, 0.3, 0.3))
         self.axes.add_patch(rect)
         
         # Draw control rods
-        rodrect_v = mpatches.Rectangle((0.011,0.13), 0.045, 0.77, 
+        rodrect_v = mpatches.Rectangle((0.011, 0.13), 0.045, 0.77,
                                        ec=(0.3, 0.3, 0.3))
         rodrect_v.set_fill(False)
         self.axes.add_patch(rodrect_v)
@@ -1126,7 +1124,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         poly.set_closed(False)
         self.axes.add_patch(poly)
 
-        rodrect_h = mpatches.Rectangle((0.1,0.95), 0.77, 0.045, 
+        rodrect_h = mpatches.Rectangle((0.1, 0.95), 0.77, 0.045, 
                                        ec=(0.3, 0.3, 0.3))
         rodrect_h.set_fill(False)
         self.axes.add_patch(rodrect_h)
@@ -1140,11 +1138,10 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.axes.add_patch(poly)
 
         # a fancy box with round corners (pad).
-        p_fancy = mpatches.FancyBboxPatch((0.12, 0.12),
-                                          0.77, 0.77,
+        p_fancy = mpatches.FancyBboxPatch((0.12, 0.12), 0.77, 0.77,
                                           boxstyle="round,pad=0.04",
                                           #fc=(0.85,1,1),
-                                          fc=(1,1,1),
+                                          fc=(1, 1, 1),
                                           ec=(0.3, 0.3, 0.3))
         p_fancy.set_linewidth(4.0)
         self.axes.add_patch(p_fancy)
@@ -1164,7 +1161,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         # poly.set_closed(False)
         # self.axes.add_patch(poly)
         
-    def startpoint(self,case_id):
+    def startpoint(self, case_id):
         voi_val = int(self.voi_cbox.currentText())
         vhi_val = int(self.vhi_cbox.currentText())
         type_val = str(self.type_cbox.currentText())
@@ -1174,12 +1171,14 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             idx0 = case.findpoint(tfu=293)
             voi = case.statepts[idx0].voi
             vhi = case.statepts[idx0].vhi
-            voi_index = [i for i,v in enumerate(self.voilist) if int(v) == voi][0]
-            vhi_index = [i for i,v in enumerate(self.vhilist) if int(v) == vhi][0]
+            voi_index = [i for i, v in enumerate(self.voilist)
+                         if int(v) == voi][0]
+            vhi_index = [i for i, v in enumerate(self.vhilist)
+                         if int(v) == vhi][0]
             self.voi_cbox.setCurrentIndex(voi_index)
             self.vhi_cbox.setCurrentIndex(vhi_index)
         else:
-            idx0 = case.findpoint(voi=voi_val,vhi=vhi_val)
+            idx0 = case.findpoint(voi=voi_val, vhi=vhi_val)
         return idx0
 
     def create_main_frame(self):
@@ -1192,9 +1191,10 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.fig = Figure((6, 5), dpi=self.dpi, facecolor=None)
         #self.fig = Figure((6, 5), dpi=self.dpi, facecolor=(1,1,1))
         self.canvas = FigureCanvas(self.fig)
-        self.canvas.mpl_connect('button_press_event',self.on_click)
+        self.canvas.mpl_connect('button_press_event', self.on_click)
         self.canvas.setParent(self.main_frame)
-        self.canvas.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        self.canvas.setSizePolicy(QtGui.QSizePolicy.Expanding,
+                                  QtGui.QSizePolicy.Expanding)
         self.canvas.setMinimumWidth(500)
         self.canvas.setMinimumHeight(416)
         
@@ -1243,25 +1243,31 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
  
         param_label = QtGui.QLabel('Parameter:')
         self.param_cbox = QtGui.QComboBox()
-        paramlist = ['ENR','FINT','EXP','BTF','BTFP','XFL1','XFL2','ROD','LOCK']
+        paramlist = ['ENR', 'FINT', 'EXP', 'BTF', 'BTFP', 'XFL1', 'XFL2',
+                     'ROD', 'LOCK']
         for i in paramlist:
             self.param_cbox.addItem(i)
-        #self.connect(self.param_cbox, SIGNAL('currentIndexChanged(int)'), self.on_plot)
+        # self.connect(self.param_cbox, SIGNAL('currentIndexChanged(int)'),
+        # self.on_plot)
         param_hbox = QtGui.QHBoxLayout()
         param_hbox.addWidget(param_label)
         param_hbox.addWidget(self.param_cbox)
-        self.connect(self.param_cbox, QtCore.SIGNAL('currentIndexChanged(int)'), self.set_pinvalues)
+        self.connect(self.param_cbox,
+                     QtCore.SIGNAL('currentIndexChanged(int)'),
+                     self.set_pinvalues)
 
         case_label = QtGui.QLabel('Segment:')
         self.case_cbox = QtGui.QComboBox()
-        #caselist = ['1', '2', '3']
-        #for i in caselist:
-        #    self.case_cbox.addItem(i)
+        # caselist = ['1', '2', '3']
+        # for i in caselist:
+        #     self.case_cbox.addItem(i)
         case_hbox = QtGui.QHBoxLayout()
         case_hbox.addWidget(case_label)
         case_hbox.addWidget(self.case_cbox)
-        #self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'), self.set_pinvalues)
-        #self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'), self.fig_update)
+        # self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'),
+        # self.set_pinvalues)
+        # self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'),
+        # self.fig_update)
 
         point_label = QtGui.QLabel('Point number:')
         self.point_sbox = QtGui.QSpinBox()
@@ -1308,19 +1314,23 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         typelist = ['Hot', 'HCr', 'CCl', 'CCr']
         for i in typelist:
             self.type_cbox.addItem(i)
-        #self.connect(self.type_cbox, SIGNAL('currentIndexChanged(int)'), self.on_index)
+        # self.connect(self.type_cbox, SIGNAL('currentIndexChanged(int)'),
+        # self.on_index)
 
         voi_label = QtGui.QLabel('VOI:')
         self.voi_cbox = QtGui.QComboBox()
+        
         self.voilist = ['0', '40', '80']
         for i in self.voilist:
             self.voi_cbox.addItem(i)
+
         # Determine voi index
-        #voi = self.cas.cases[self.case_id_current].statepts[0].voi
-        #voi_index = [i for i,v in enumerate(self.voilist) if int(v) == voi]
-        #voi_index = voi_index[0]
-        #self.voi_cbox.setCurrentIndex(voi_index)
-        #self.connect(self.voi_cbox, SIGNAL('currentIndexChanged(int)'), self.on_plot)
+        # voi = self.cas.cases[self.case_id_current].statepts[0].voi
+        # voi_index = [i for i,v in enumerate(self.voilist) if int(v) == voi]
+        # voi_index = voi_index[0]
+        # self.voi_cbox.setCurrentIndex(voi_index)
+        # self.connect(self.voi_cbox, SIGNAL('currentIndexChanged(int)'),
+        # self.on_plot)
 
         vhi_label = QtGui.QLabel('VHI:')
         self.vhi_cbox = QtGui.QComboBox()
@@ -1328,30 +1338,34 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         for i in self.vhilist:
             self.vhi_cbox.addItem(i)
         # Determine vhi index
-        #vhi = self.cas.cases[self.case_id_current].statepts[0].vhi
-        #vhi_index = [i for i,v in enumerate(self.vhilist) if int(v) == vhi]
-        #vhi_index = vhi_index[0]
-        #self.vhi_cbox.setCurrentIndex(vhi_index)
-        #self.connect(self.vhi_cbox, SIGNAL('currentIndexChanged(int)'), self.on_plot)
+        # vhi = self.cas.cases[self.case_id_current].statepts[0].vhi
+        # vhi_index = [i for i,v in enumerate(self.vhilist) if int(v) == vhi]
+        # vhi_index = vhi_index[0]
+        # self.vhi_cbox.setCurrentIndex(vhi_index)
+        # self.connect(self.vhi_cbox, SIGNAL('currentIndexChanged(int)'),
+        # self.on_plot)
 
-        #self.case_cbox.setWhatsThis("What is this?")
+        # self.case_cbox.setWhatsThis("What is this?")
 
-        #self.connect(self.case_cbox, SIGNAL('activated(QString)'), self.on_case)
-        #self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'), self.on_plot)
+        # self.connect(self.case_cbox, SIGNAL('activated(QString)'),
+        # self.on_case)
+        # self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'),
+        # self.on_plot)
         
         # Info form layout
         info_flo = QtGui.QFormLayout()
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, 
                                        QtGui.QSizePolicy.Minimum)
-        #sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        #sizePolicy.setHorizontalStretch(0)
-        #sizePolicy.setVerticalStretch(0)
-        #sizePolicy.setHeightForWidth(self.ave_enr_text.sizePolicy().hasHeightForWidth())
+        # sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        # sizePolicy.setHorizontalStretch(0)
+        # sizePolicy.setVerticalStretch(0)
+        # sizePolicy.setHeightForWidth(self.ave_enr_text.sizePolicy().
+        # hasHeightForWidth())
         self.sim_text = QtGui.QLineEdit()
         self.sim_text.setSizePolicy(sizePolicy)
         self.sim_text.setReadOnly(True)
-        #text = self.bundle.cases[0].states[0].sim
-        #self.sim_text.setText(text)
+        # text = self.bundle.cases[0].states[0].sim
+        # self.sim_text.setText(text)
         info_flo.addRow("SIM", self.sim_text)
 
         self.rod_types_text = QtGui.QLineEdit()
@@ -1368,33 +1382,37 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.bundle_enr_text.setSizePolicy(sizePolicy)
         self.bundle_enr_text.setReadOnly(True)
         info_flo.addRow("Bundle %U-235", self.bundle_enr_text)
-        #self.bundle_enr_text.setText('2.818')
+        # self.bundle_enr_text.setText('2.818')
         
         # Define table widget
         self.table = QtGui.QTableWidget()
         self.table.setRowCount(100)
         self.table.setColumnCount(4)
-        #self.table.verticalHeader().hide()
+        # self.table.verticalHeader().hide()
         self.table.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         self.table.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
         self.table.setSizePolicy(QtGui.QSizePolicy.Minimum,
                                  QtGui.QSizePolicy.Minimum)
         self.table.setMinimumWidth(180)
-        self.table.setHorizontalHeaderLabels(('Index','EXP','FINT','BTF'))
+        self.table.setHorizontalHeaderLabels(('Index', 'EXP', 'FINT', 'BTF'))
         self.table.setSortingEnabled(True)
-        self.table.setColumnHidden(0,True)
+        self.table.setColumnHidden(0, True)
         
-        #self.connect(self.table.horizontalHeader(),SIGNAL('QHeaderView.sortIndicatorChanged(int)'),self.openFile)
-        self.connect(self.table.horizontalHeader(), 
-                     QtCore.SIGNAL('sectionClicked(int)'), self.tableHeaderSort)
+        # self.connect(self.table.horizontalHeader(),
+        # SIGNAL('QHeaderView.sortIndicatorChanged(int)'), self.openFile)
+        self.connect(self.table.horizontalHeader(),
+                     QtCore.SIGNAL('sectionClicked(int)'),
+                     self.tableHeaderSort)
         self.connect(self.table.verticalHeader(),
                      QtCore.SIGNAL('sectionClicked(int)'), self.pinSelect)
-        #self.connect(self.table,SIGNAL('cellClicked(int,int)'),self.pinSelect)
-        #self.connect(self.table,SIGNAL('currentChanged(int)'),self.pinSelect)
-        #Tracer()()
+        # self.connect(self.table,SIGNAL('cellClicked(int,int)'),
+        # self.pinSelect)
+        # self.connect(self.table,SIGNAL('currentChanged(int)'),
+        # self.pinSelect)
+        
         self.table.cellActivated.connect(self.pinSelect)
         self.table.cellClicked.connect(self.pinSelect)
-        #self.table.selectionModel().selectionChanged.connect(self.pinSelect)
+        # self.table.selectionModel().selectionChanged.connect(self.pinSelect)
 
         tvbox = QtGui.QVBoxLayout()
         tvbox.addWidget(self.table)
@@ -1406,16 +1424,15 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         # self.hview = QHeaderView
 
         # self.tableview = QTableView()
-        # self.connect(self.table.horizontalHeader().sectionClicked(), SIGNAL('logicalIndex(int)'),self.openFile)
-        # self.connect(QHeaderView.sortIndicatorChanged(), SIGNAL('logicalIndex(int)'),self.openFile)
+        # self.connect(self.table.horizontalHeader().sectionClicked(),
+        # SIGNAL('logicalIndex(int)'),self.openFile)
+        # self.connect(QHeaderView.sortIndicatorChanged(),
+        # SIGNAL('logicalIndex(int)'),self.openFile)
         
-        #self.setpincoords()
+        # self.setpincoords()
         self.table.resizeColumnsToContents()
-        #Tracer()()
 
-        #
-        # Layout with box sizers
-        # 
+        # Layout with box sizers 
         vbox = QtGui.QVBoxLayout()
         vbox.addLayout(param_hbox)
         vbox.addLayout(case_hbox)
@@ -1425,8 +1442,9 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         vbox.addLayout(calc_hbox)
         vbox.addLayout(chanbow_hbox)
 
-        #spacerItem = QSpacerItem(1, 1, QSizePolicy.Minimum, QSizePolicy.Minimum)
-        #vbox.addItem(spacerItem)
+        # spacerItem = QSpacerItem(1, 1, QSizePolicy.Minimum,
+        # QSizePolicy.Minimum)
+        # vbox.addItem(spacerItem)
         vbox.addStretch(1)
         vbox.addLayout(info_flo)
         
@@ -1435,39 +1453,37 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         200); border:1px solid gray; border-radius:5px;}")
         groupbox.setLayout(vbox)
 
-        #for w in [  self.textbox, self.draw_button, self.grid_cb,
+        # for w in [  self.textbox, self.draw_button, self.grid_cb,
         #            slider_label, self.slider]:
         
-        #for w in [  type_label, self.type_cbox, voi_label, self.voi_cbox,
+        # for w in [  type_label, self.type_cbox, voi_label, self.voi_cbox,
         #            vhi_label, self.vhi_cbox]:
         #
         #    vbox.addWidget(w)
         #    vbox.setAlignment(w, Qt.AlignHCenter)
         
-
-        #self.bundle = Bundle()
-        #self.bundle.setParent(self.main_frame)
-        #Tracer()()
+        # self.bundle = Bundle()
+        # self.bundle.setParent(self.main_frame)
 
         hbox = QtGui.QHBoxLayout()
 
-        #hbox.addWidget(self.bundle)
-        #vbox.addLayout(hbox)
-        #vbox.addWidget(self.canvas)
-        #hbox2.addWidget(self.mpl_toolbar)
+        # hbox.addWidget(self.bundle)
+        # vbox.addLayout(hbox)
+        # vbox.addWidget(self.canvas)
+        # hbox2.addWidget(self.mpl_toolbar)
         
         spacerItemH = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, 
                                         QtGui.QSizePolicy.Minimum)
 
-        #hbox.addLayout(vbox)
+        # hbox.addLayout(vbox)
         hbox.addWidget(groupbox)
-        #hbox.addItem(spacerItemH)
-        #hbox.addWidget(self.canvas)
+        # hbox.addItem(spacerItemH)
+        # hbox.addWidget(self.canvas)
         hbox.addWidget(canvasGbox)
-        #hbox.addItem(spacerItemH)
+        # hbox.addItem(spacerItemH)
         hbox.addWidget(tableGbox)
-        #hbox.addWidget(self.table)
-        #hbox.addItem(spacerItemH)
+        # hbox.addWidget(self.table)
+        # hbox.addItem(spacerItemH)
 
         self.main_frame.setLayout(hbox)
         self.setCentralWidget(self.main_frame)
@@ -1488,54 +1504,65 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                                          shortcut="Ctrl+Q",
                                          tip="Close the application")
         
-        open_file_action = self.create_action("&Open file...", slot=self.openFile,
-                                              shortcut="Ctrl+L", tip="Open file")
+        open_file_action = self.create_action("&Open file...",
+                                              slot=self.openFile,
+                                              shortcut="Ctrl+L",
+                                              tip="Open file")
 
-        save_data_action = self.create_action("&Save data...", slot=self.saveData,
-                                              shortcut="Ctrl+S", tip="Save data to file")
+        save_data_action = self.create_action("&Save data...",
+                                              slot=self.saveData,
+                                              shortcut="Ctrl+S",
+                                              tip="Save data to file")
 
-        self.add_actions(self.file_menu, 
-            (open_file_action, save_data_action, save_settings_action, None, quit_action))
-
+        self.add_actions(self.file_menu, (open_file_action, save_data_action,
+                                          save_settings_action, None,
+                                          quit_action))
 
         self.edit_menu = self.menuBar().addMenu("&Edit") 
-        preferences = self.create_action("Preferences...", tip="Preferences...")        
+        preferences = self.create_action("Preferences...",
+                                         tip="Preferences...")        
         self.add_actions(self.edit_menu, (None, preferences))
 
         self.tools_menu = self.menuBar().addMenu("&Tools")
-        plot_action = self.create_action("Plot...", tip="Plot...", slot=self.plotWin)
+        plot_action = self.create_action("Plot...", tip="Plot...",
+                                         slot=self.plotWin)
         btf_action = self.create_action("BTF...", tip="BTF...")
         casmo_action = self.create_action("CASMO...", tip="CASMO...")
         data_action = self.create_action("Fuel data...", tip="Fuel data...")
-        table_action = self.create_action("Point table...", tip="Point table...")
-        optim_action = self.create_action("Optimization...", tip="BTF optimization...")
+        table_action = self.create_action("Point table...",
+                                          tip="Point table...")
+        optim_action = self.create_action("Optimization...",
+                                          tip="BTF optimization...")
         egv_action = self.create_action("EGV...", tip="EGV...")
-        self.add_actions(self.tools_menu, 
+        self.add_actions(self.tools_menu,
                          (plot_action, btf_action, casmo_action, data_action,
                           table_action, optim_action, egv_action))
         
-        
         self.help_menu = self.menuBar().addMenu("&Help")
-        about_action = self.create_action("&About", 
-            shortcut='F1', slot=self.on_about, 
-            tip='About the demo')
+        about_action = self.create_action("&About", shortcut='F1',
+                                          slot=self.on_about,
+                                          tip='About the demo')
         
         self.add_actions(self.help_menu, (about_action,))
 
     def create_toolbar(self):
-        exitAction = QtGui.QAction(QtGui.QIcon('icons/exit-icon_32x32.png'), 'Exit', self)
+        exitAction = QtGui.QAction(QtGui.QIcon('icons/exit-icon_32x32.png'),
+                                   'Exit', self)
         #exitAction.setShortcut('Ctrl+Q')
         exitAction.setStatusTip('Exit application')
         exitAction.triggered.connect(self.close)
-
-        fileAction = QtGui.QAction(QtGui.QIcon('icons/open-file-icon_32x32.png'), 'Open file', self)
+        
+        fileAction = QtGui.QAction(QtGui.
+                                   QIcon('icons/open-file-icon_32x32.png'),
+                                   'Open file', self)
         fileAction.setStatusTip('Open file')
         fileAction.triggered.connect(self.openFile)
 
         settingsAction = QtGui.QAction(QtGui.QIcon('icons/preferences-icon_32x32.png'), 'Settings', self)
         settingsAction.setStatusTip('Settings')
 
-        plotAction = QtGui.QAction(QtGui.QIcon('icons/diagram-icon_32x32.png'), 'Plot', self)
+        plotAction = QtGui.QAction(QtGui.QIcon(
+                'icons/diagram-icon_32x32.png'), 'Plot', self)
         plotAction.setStatusTip('Open plot window')
         plotAction.triggered.connect(self.plotWin)
 
@@ -1548,7 +1575,6 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         toolbar.setMovable(False)
         toolbar.setFloatable(True)
         toolbar.setAutoFillBackground(False)
-
 
     def add_actions(self, target, actions):
         for action in actions:
