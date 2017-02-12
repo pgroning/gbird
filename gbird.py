@@ -1572,10 +1572,22 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         plotAction.setStatusTip('Open plot window')
         plotAction.triggered.connect(self.plotWin)
 
+        arrow_left_icon = "icons/arrow-left-icon_32x32.png"
+        backAction = QtGui.QAction(QtGui.QIcon(arrow_left_icon),
+                                   'Back to previous state', self)
+        backAction.setStatusTip('Back to previous state')
+
+        arrow_forward_icon = "icons/arrow-right-icon_32x32.png"
+        forwardAction = QtGui.QAction(QtGui.QIcon(arrow_forward_icon),
+                                      'Forward to next state', self)
+        forwardAction.setStatusTip('Forward to next state')
+        
         toolbar = self.addToolBar('Toolbar')
         toolbar.addAction(fileAction)
         toolbar.addAction(settingsAction)
         toolbar.addAction(plotAction)
+        toolbar.addAction(backAction)
+        toolbar.addAction(forwardAction)
         toolbar.addAction(exitAction)
 
         toolbar.setMovable(False)
