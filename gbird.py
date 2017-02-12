@@ -1029,6 +1029,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
     def quick_calc(self):
         """Performing quick calculation"""
         print "Performing quick calculation..."
+        self.setCursor(QtCore.Qt.WaitCursor)
         
         chanbow = self.chanbow_sbox.value() / 10  # mm -> cm
 
@@ -1044,6 +1045,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.bundle.new_calc(model='c3')
         self.bundle.new_btf()
         self.fig_update()
+        self.setCursor(QtCore.Qt.ArrowCursor)
+        
         #
         # self.dataobj.cases[case_num].qcalc[0].LFU = LFU
         # self.dataobj.cases[case_num].quickcalc()
