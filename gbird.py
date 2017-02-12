@@ -354,6 +354,7 @@ class MainWin(QtGui.QMainWindow):
         self.statusBar().showMessage('Importing data from %s' % filename, 2000)
         self._filename = filename
         if status == QtGui.QMessageBox.Yes:
+            self.setCursor(QtCore.Qt.WaitCursor)
 
             print "importing data"
 
@@ -373,6 +374,7 @@ class MainWin(QtGui.QMainWindow):
                          self.fig_update)
 
             self.fig_update()
+            self.setCursor(QtCore.Qt.ArrowCursor)
             # self.canvas.draw()
             # self.axes.clear()
             # self.draw_fuelmap()
