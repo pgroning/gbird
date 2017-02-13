@@ -270,6 +270,7 @@ class MainWin(QtGui.QMainWindow):
 
             filext = os.path.splitext(filename)[1]
             if filext == ".p":
+                self.state_index = -1
                 self.load_pickle(filename)
             elif filext == ".inp":
                 msgBox = QtGui.QMessageBox()
@@ -282,8 +283,12 @@ class MainWin(QtGui.QMainWindow):
                 self._filename = filename
                 if status == QtGui.QMessageBox.Yes:
                     self.setCursor(QtCore.Qt.WaitCursor)
+                    self.state_index = 0
                     self.read_cax(filename)
-                    self.quick_calc()  # reference calculation
+                    #self.enr_update()
+                    self.quick_calc(state_num=0)  # reference calculation
+                    #self.state_index = 0
+                    #self.fig_update()
                     self.setCursor(QtCore.Qt.ArrowCursor)
 
     def load_pickle(self, filename):
@@ -484,10 +489,12 @@ class MainWin(QtGui.QMainWindow):
         self.enrpinlist = []
         ncases = len(self.bundle.cases)
 
+        state_num = self.state_index
+
         for case_num in range(ncases):
-            LFU = self.bundle.cases[case_num].states[-1].LFU
-            ENR = self.bundle.cases[case_num].states[-1].ENR
-            BA = self.bundle.cases[case_num].states[-1].BA
+            LFU = self.bundle.cases[case_num].states[state_num].LFU
+            ENR = self.bundle.cases[case_num].states[state_num].ENR
+            BA = self.bundle.cases[case_num].states[state_num].BA
 
             pinlist = []
             for i in range(LFU.shape[0]):
@@ -502,7 +509,7 @@ class MainWin(QtGui.QMainWindow):
             self.pinobjects.append(pinlist)
 
             enrlist = []
-            FUE = self.bundle.cases[case_num].states[-1].FUE
+            FUE = self.bundle.cases[case_num].states[state_num].FUE
             enr_dens = FUE[:, 1]
             enr_levels = FUE[:, 2]
             enr_baindex = FUE[:, 3]
@@ -633,7 +640,7 @@ class MainWin(QtGui.QMainWindow):
         param_str = str(self.param_cbox.currentText())
         case_num = int(self.case_cbox.currentIndex())
         point_num = int(self.point_sbox.value())
-        state_num = -1
+        state_num = self.state_index
 
         state = self.bundle.cases[case_num].states[state_num]
 
@@ -918,17 +925,23 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         # enrArray = [x.ENR for x in self.enrpinlist][::-1] # Reverse order
 
     def enr_update(self):
-        '''Update enr value in info fields'''
+        """Update enr value in info fields"""
 
         case_num = int(self.case_cbox.currentIndex())
         LFU = self.__lfumap(case_num)
         FUE = self.__fuemap(case_num)
-        self.bundle.cases[case_num].ave_enr(LFU, FUE)  # must take inargs
-        ave_enr = self.bundle.cases[case_num].states[-1].ave_enr
+        state_num = self.state_index
+        self.bundle.cases[case_num].ave_enr(state_num, LFU, FUE)
+
+        ave_enr = self.bundle.cases[case_num].states[state_num].ave_enr
+
+        #ave_enr = self.bundle.cases[case_num].states[state_num].ave_enr
         self.ave_enr_text.setText("%.5f" % ave_enr)
 
-        self.bundle.ave_enr()
-        bundle_enr = self.bundle.states[-1].ave_enr
+        #print "state num = " + str(state_num)
+        #qtrace()
+        self.bundle.ave_enr(state_num)
+        bundle_enr = self.bundle.states[state_num].ave_enr
         self.bundle_enr_text.setText("%.5f" % bundle_enr)
 
     def enr_modify(self, mod, case_num=None, ipin=None):
@@ -1040,7 +1053,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         return BA
 
     # def quick_calc(self,case_num):
-    def quick_calc(self):
+    def quick_calc(self, state_num=-1):
         """Performing quick calculation"""
         print "Performing quick calculation..."
         self.setCursor(QtCore.Qt.WaitCursor)
@@ -1058,6 +1071,11 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
         self.bundle.new_calc(model='c3')
         self.bundle.new_btf()
+        #if state_num:
+        self.state_index= state_num
+        #else:
+        #    self.state_index = len(self.bundle.cases[0].states) - 1
+        print self.state_index
         self.fig_update()
         self.setCursor(QtCore.Qt.ArrowCursor)
         
@@ -1588,11 +1606,13 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         backAction = QtGui.QAction(QtGui.QIcon(arrow_left_icon),
                                    'Back to previous state', self)
         backAction.setStatusTip('Back to previous state')
+        backAction.triggered.connect(self.back_state)
 
         arrow_forward_icon = "icons/arrow-right-icon_32x32.png"
         forwardAction = QtGui.QAction(QtGui.QIcon(arrow_forward_icon),
                                       'Forward to next state', self)
         forwardAction.setStatusTip('Forward to next state')
+        forwardAction.triggered.connect(self.forward_state)
         
         toolbar = self.addToolBar('Toolbar')
         toolbar.addAction(fileAction)
@@ -1605,6 +1625,32 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         toolbar.setMovable(False)
         toolbar.setFloatable(True)
         toolbar.setAutoFillBackground(False)
+
+    def back_state(self):
+        """Back to previous state"""
+        nstates = len(self.bundle.cases[0].states)
+        if self.state_index < 0:
+            self.state_index = nstates - self.state_index
+        self.state_index -= 1
+        if self.state_index < 0:
+            self.state_index = 0
+        else:
+            self.init_pinobjects()
+            self.fig_update()
+        print self.state_index
+        
+    def forward_state(self):
+        """Forward to next state"""
+        nstates = len(self.bundle.cases[0].states)
+        if self.state_index < 0:
+            self.state_index = nstates - self.state_index
+        self.state_index += 1
+        if self.state_index >= nstates:
+            self.state_index = nstates - 1
+        else:
+            self.init_pinobjects()
+            self.fig_update()
+        print self.state_index
 
     def add_actions(self, target, actions):
         for action in actions:

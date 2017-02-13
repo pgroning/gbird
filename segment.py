@@ -414,18 +414,18 @@ class Segment(object):
         return Mt
 
     # --------Calculate average enrichment----------
-    def ave_enr(self, LFU=None, FUE=None):
+    def ave_enr(self, state_num=-1, LFU=None, FUE=None):
 
-        # Inargs: FUE, LFU, ENR
-
+        # Inargs: state_num, FUE, LFU, ENR
+        
         # Translate LFU map to DENS and ENR map
         npst = self.states[0].npst
         DENS = np.zeros((npst, npst))
         ENR = np.zeros((npst, npst))
         if LFU is None:
-            LFU = self.states[-1].LFU
+            LFU = self.states[state_num].LFU
         if FUE is None:
-            FUE = self.states[-1].FUE
+            FUE = self.states[state_num].FUE
         Nfue = FUE[:, 0].size
         for i in range(Nfue):
             ifu = int(FUE[i, 0])
@@ -448,7 +448,7 @@ class Segment(object):
         #ENR = self.states[-1].ENR
         MASS_U235 = MASS*ENR
         mass_u235 = np.sum(MASS_U235)
-        self.states[-1].ave_enr = mass_u235/mass
+        self.states[state_num].ave_enr = mass_u235/mass
 
     # -------Write cai file------------
     def writecai(self, file_base_name):

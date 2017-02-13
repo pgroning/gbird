@@ -49,6 +49,7 @@ def quickcalc_fun(tup):
 class Bundle(object):
     """Read, save and load cases"""
 
+    #def __init__(self, parent=None):
     def __init__(self, inpfile=None):
         self.data = DataStruct()
         self.cases = []
@@ -56,6 +57,7 @@ class Bundle(object):
         self.states = []
         self.states.append(DataStruct())
 
+        #self.parent = parent
         if inpfile:
             self.readinp(inpfile)
 
@@ -235,7 +237,7 @@ class Bundle(object):
         self.states[-1].btf = Btf(self)
         self.states[-1].btf.calc_btf()
 
-    def ave_enr(self):
+    def ave_enr(self, state_num=-1):
         """The method calculates the average enrichment of the bundle.
         This algorithm is likely naive and needs to be updated in the future"""
 
@@ -245,12 +247,12 @@ class Bundle(object):
         nodes = np.array([0]+nodelist)  # prepend 0
         dn = np.diff(nodes)
         # Tracer()()
-        enrlist = [case.states[-1].ave_enr for case in self.cases]
+        enrlist = [case.states[state_num].ave_enr for case in self.cases]
         # Tracer()()
         seg_enr = np.array(enrlist)
 
         ave_enr = sum(seg_enr*dn) / sum(dn)
-        self.states[-1].ave_enr = ave_enr
+        self.states[state_num].ave_enr = ave_enr
 
     def pow3(self, POW, nodes):
         """Expanding a number of 2D pin power distributions into a 3D
