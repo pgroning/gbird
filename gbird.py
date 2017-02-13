@@ -272,7 +272,19 @@ class MainWin(QtGui.QMainWindow):
             if filext == ".p":
                 self.load_pickle(filename)
             elif filext == ".inp":
-                self.read_cax(filename)
+                msgBox = QtGui.QMessageBox()
+                status = msgBox.information(self, "Importing data",
+                                            "Continue?",
+                                            QtGui.QMessageBox.Yes |
+                                            QtGui.QMessageBox.Cancel)
+                self.statusBar().showMessage('Importing data from %s' 
+                                             % filename, 2000)
+                self._filename = filename
+                if status == QtGui.QMessageBox.Yes:
+                    self.setCursor(QtCore.Qt.WaitCursor)
+                    self.read_cax(filename)
+                    self.quick_calc()  # reference calculation
+                    self.setCursor(QtCore.Qt.ArrowCursor)
 
     def load_pickle(self, filename):
         """Load bundle object from pickle file"""
@@ -346,85 +358,85 @@ class MainWin(QtGui.QMainWindow):
         # self.thread.wait()
 
     def read_cax(self, filename):
-        msg = "Continue?"
-        msgBox = QtGui.QMessageBox()
-        status = msgBox.information(self, "Importing data", msg.strip(),
-                                    QtGui.QMessageBox.Yes |
-                                    QtGui.QMessageBox.Cancel)
-        self.statusBar().showMessage('Importing data from %s' % filename, 2000)
-        self._filename = filename
-        if status == QtGui.QMessageBox.Yes:
-            self.setCursor(QtCore.Qt.WaitCursor)
+        #msg = "Continue?"
+        #msgBox = QtGui.QMessageBox()
+        #status = msgBox.information(self, "Importing data", msg.strip(),
+        #                            QtGui.QMessageBox.Yes |
+        #                            QtGui.QMessageBox.Cancel)
+        #self.statusBar().showMessage('Importing data from %s' % filename, 2000)
+        #self._filename = filename
+        #if status == QtGui.QMessageBox.Yes:
+            #self.setCursor(QtCore.Qt.WaitCursor)
 
-            print "importing data"
+        print "importing data"
+        
+        self.bundle = Bundle()
+        self.bundle.readinp(filename)
+        self.bundle.readcax()  # inargs "all" reads the whole file content
+        self.bundle.new_btf()
+        
+        self.init_pinobjects()
+        
+        # Update case number list box
+        ncases = len(self.bundle.cases)
+        for i in range(1, ncases + 1):
+            self.case_cbox.addItem(str(i))
+        self.connect(self.case_cbox,
+                     QtCore.SIGNAL('currentIndexChanged(int)'),
+                     self.fig_update)
 
-            self.bundle = Bundle()
-            self.bundle.readinp(filename)
-            self.bundle.readcax()  # inargs "all" reads the whole file content
-            self.bundle.new_btf()
-
-            self.init_pinobjects()
-
-            # Update case number list box
-            ncases = len(self.bundle.cases)
-            for i in range(1, ncases + 1):
-                self.case_cbox.addItem(str(i))
-            self.connect(self.case_cbox,
-                         QtCore.SIGNAL('currentIndexChanged(int)'),
-                         self.fig_update)
-
-            self.fig_update()
-            self.setCursor(QtCore.Qt.ArrowCursor)
+        #self.fig_update()
+            #self.setCursor(QtCore.Qt.ArrowCursor)
             # self.canvas.draw()
             # self.axes.clear()
             # self.draw_fuelmap()
 
-            '''
-            #self.progressbar = ProgressBar()
-
-            #self.dataobj = casio()
-            self.thread = dataThread(self)
-            self.connect(self.thread,SIGNAL('finished()'),self.dataobj_finished)
-            self.connect(self.thread,SIGNAL('progressbar_update(int)'),
-            # self.progressbar_update)
-            self.thread.start()
-
-            self.progressbar = ProgressBar()
-            xpos = self.pos().x() + self.width()/2 - self.progressbar.width()/2
-            ypos = self.pos().y() + self.height()/2 -
-            self.progressbar.height()/2
-            self.progressbar.move(xpos,ypos)
-            self.progressbar.show()
-            self.progressbar.button.setEnabled(False)
-            self.progressbar.button.clicked.connect(self.killThread)
-            # self.progressbar.button.clicked.connect(self.progressbar.close)
-
-            self.timer = QTimer()
-            self.connect(self.timer,SIGNAL('timeout()'),self.progressbar_update)
-            self.progressbar._value = 1
-            self.timer.start(500)
-
-            # time.sleep(20)
-            # self.thread.terminate()
-            # pyqt_trace()
-
-            # print self.dataobj.data.caxfiles
-
-            # self.dataobj = casio()
-            # self.dataobj.readinp(filename)
-            # self.dataobj.readcax()
-
-            # self.dataobj.calcbtf()
-            # fuetype = 'SVEA-96'
-            # self.dataobj.btf = btf(self.dataobj,fuetype)
-
-            # self.setpincoords()
-            # self.draw_fuelmap()
-            # self.set_pinvalues()
-            # self.dataobj.savecas()
-            '''
-        else:
-            return
+        '''
+        #self.progressbar = ProgressBar()
+        
+        #self.dataobj = casio()
+        self.thread = dataThread(self)
+        self.connect(self.thread,SIGNAL('finished()'),self.dataobj_finished)
+        self.connect(self.thread,SIGNAL('progressbar_update(int)'),
+        # self.progressbar_update)
+        self.thread.start()
+        
+        self.progressbar = ProgressBar()
+        xpos = self.pos().x() + self.width()/2 - self.progressbar.width()/2
+        ypos = self.pos().y() + self.height()/2 -
+        self.progressbar.height()/2
+        self.progressbar.move(xpos,ypos)
+        self.progressbar.show()
+        self.progressbar.button.setEnabled(False)
+        self.progressbar.button.clicked.connect(self.killThread)
+        # self.progressbar.button.clicked.connect(self.progressbar.close)
+        
+        self.timer = QTimer()
+        self.connect(self.timer,SIGNAL('timeout()'),self.progressbar_update)
+        self.progressbar._value = 1
+        self.timer.start(500)
+        
+        # time.sleep(20)
+        # self.thread.terminate()
+        # pyqt_trace()
+        
+        # print self.dataobj.data.caxfiles
+        
+        # self.dataobj = casio()
+        # self.dataobj.readinp(filename)
+        # self.dataobj.readcax()
+        
+        # self.dataobj.calcbtf()
+        # fuetype = 'SVEA-96'
+        # self.dataobj.btf = btf(self.dataobj,fuetype)
+        
+        # self.setpincoords()
+        # self.draw_fuelmap()
+        # self.set_pinvalues()
+        # self.dataobj.savecas()
+        '''
+        #else:
+        #    return
 
     def saveData(self):
         """Save bundle object to pickle file"""
