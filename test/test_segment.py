@@ -42,10 +42,10 @@ class UnitTest(unittest.TestCase):
     def test_readcax_topol_atxm(self):
         testfile = "test/topol/ATXM/10g40dom/e28ATXM-385-10g40dom-cas.cax"
         s = Segment(testfile)
-        Nstatepoints = len(s.states[0].statepoints)
+        Nstatepoints = len(s.data.statepoints)
         self.assertEqual(153, Nstatepoints, 
                          "Number of state points is incorrect")
-        self.assertListEqual([40, 0, 80], s.states[0].voivec,
+        self.assertListEqual([40, 0, 80], s.data.voivec,
                          "void list is incorrect")
 
     @unittest.skip("test_readcax_topol_atxm_all")
@@ -59,31 +59,34 @@ class UnitTest(unittest.TestCase):
     def test_readcax_tosim_at11(self):
         testfile = "test/tosim/AT11/14g35top/exxAT11-384-14g35top-cas.cax"
         s = Segment(testfile)
-        Nstatepoints = len(s.states[0].statepoints)
+        Nstatepoints = len(s.data.statepoints)
         self.assertEqual(145, Nstatepoints,
                         "Number of state points is incorrect")
-        self.assertEqual(s.states[0].voivec, [0, 40, 80])
+        self.assertEqual(s.data.voivec, [0, 40, 80])
 
-    @unittest.skip("test_get_voivec")  
+    #@unittest.skip("test_get_voivec")  
     def test_get_voivec(self):
         testfile = "test/tosim/OPT2/12g30mid/e32OPT2-390-12g30mid-cas.cax"
         s = Segment(testfile)
-        self.assertEqual(s.states[0].voivec, [0, 40, 80])
+        self.assertEqual(s.data.voivec, [0, 40, 80])
         
     def test_ave_enr(self):
         testfile = "test/topol/AT-B/08g30van/e27AT-B-386-08g30van-cas.cax"
-        s = Segment(testfile)
-        ave_enr = s.states[0].ave_enr
+        s = Segment()
+        s.readcax(testfile)
+        s.ave_enr_calc()
+        ave_enr = s.data.ave_enr
         self.assertTrue(ave_enr > 3.854 and ave_enr < 3.865)
         
     def test_boxbow(self):
         s = Segment()
-        s.states[0].bwr = "BWR 11 1.300 13.580 0.14 0.762 0.753 1.27   * xyz"
+        s.data.bwr = "BWR 11 1.300 13.580 0.14 0.762 0.753 1.27   * xyz"
         box_offset = 0.1
         bwr = s._Segment__boxbow(box_offset)  # reaching "private" method
         result = "11 1.300 13.580 0.14 0.862 0.653 1.27"
         self.assertTrue(result in bwr)
     
+    @unittest.skip("test_add_state")
     def test_add_state(self):
         testfile = "test/tosim/OPT2/12g30mid/e32OPT2-390-12g30mid-cas.cax"
         s = Segment(testfile)
@@ -93,11 +96,14 @@ class UnitTest(unittest.TestCase):
         s.add_state(LFU, FUE, voi)
         self.assertTrue((s.states[1].LFU == LFU).all())
     
+    @unittest.skip("test_writec3cai_at11")
     def test_writec3cai_at11(self):
         testfile = "test/tosim/AT11/14g35top/exxAT11-384-14g35top-cas.cax"
+        #testfile = "test/tosim/OPT2/12g30mid/e32OPT2-390-12g30mid-cas.cax"
         s = Segment(testfile)
         s.writec3cai(self.file_base_name)
         caifile = self.file_base_name + ".inp"
+        
         # check file content
         with open(caifile) as f:
             flines = f.read().splitlines()
@@ -122,7 +128,7 @@ class UnitTest(unittest.TestCase):
         self.assertEqual(13200, len(flines),
                         "number of lines in file is wrong")
 
-    @unittest.skip('skip test_runc4')
+    #@unittest.skip('skip test_runc4')
     def test_runc4(self):
         testfile = "test/topol/ATXM/10g40dom/e28ATXM-385-10g40dom-cas.cax"
         s = Segment(testfile)
@@ -137,7 +143,7 @@ class UnitTest(unittest.TestCase):
     def test_readc3cax(self):
         s = Segment()
         s.readc3cax("test/files/e33OPT3-383-11g50bot-cas_test_c3")
-        Nstatepoints = len(s.states[0].statepoints)
+        Nstatepoints = len(s.data.statepoints)
         self.assertEqual(147, Nstatepoints,
                         "Number of statepoints is less than 20")
 
@@ -145,7 +151,7 @@ class UnitTest(unittest.TestCase):
         testfile = "test/tosim/OPT3/11g50bot/e33OPT3-383-11g50bot-cas.cax"
         s = Segment(testfile)
         s.quickcalc()
-        Nstatepoints = len(s.states[1].statepoints)
+        Nstatepoints = len(s.data.statepoints)
         self.assertEqual(147, Nstatepoints, 
                         "Number of state points is incorrect")
 

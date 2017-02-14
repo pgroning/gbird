@@ -39,9 +39,10 @@ class DataStruct(object):
 
 class Segment(object):
 
-    def __init__(self, caxfile=None, read_content=None):
-        self.states = []
-        self.states.append(DataStruct())
+    def __init__(self, caxfile=None, read_all=False):
+        self.data = DataStruct()
+        #self.states = []
+        #self.states.append(DataStruct())
         # self.add_calc()
         # self.states[0].refcalc = DataStruct()
         # Tracer()()
@@ -52,8 +53,8 @@ class Segment(object):
         #self.pert = DataStruct()
         '''
         if caxfile:
-            self.readcax(caxfile, read_content)
-            self.ave_enr()
+            self.readcax(caxfile, read_all)
+            self.ave_enr_calc()
             # self.quickcalc(refcalc=True)
             # self.btfcalc()
 
@@ -123,7 +124,7 @@ class Segment(object):
                 BA[LFU == ifu] = FUE[i, 4]
         return BA
 
-    def readcax(self, caxfile, read_content=None):
+    def readcax(self, caxfile, read_all=False):
 
         if not os.path.isfile(caxfile):
             print "Could not open file " + caxfile
@@ -172,7 +173,7 @@ class Segment(object):
                                                            or True)]
         voivec = map(int, map(float, voilist))
 
-        if read_content != 'all':
+        if not read_all:
             flines = flines[:i]  # Reduce the number of lines in list
 
         # Search for regexp matches
@@ -395,7 +396,8 @@ class Segment(object):
         do.npst = npst
         do.voivec = voivec
         # Append data object to last list element
-        self.states[-1] = do
+        #self.states[-1] = do
+        self.data = do
 
     def __map2mat(self, caxmap, dim):
         M = np.zeros((dim, dim))
@@ -414,18 +416,18 @@ class Segment(object):
         return Mt
 
     # --------Calculate average enrichment----------
-    def ave_enr(self, state_num=-1, LFU=None, FUE=None):
+    def ave_enr_calc(self, LFU=None, FUE=None):
 
-        # Inargs: state_num, FUE, LFU, ENR
+        # Inargs: FUE, LFU
         
         # Translate LFU map to DENS and ENR map
-        npst = self.states[0].npst
+        npst = self.data.npst
         DENS = np.zeros((npst, npst))
         ENR = np.zeros((npst, npst))
         if LFU is None:
-            LFU = self.states[state_num].LFU
+            LFU = self.data.LFU
         if FUE is None:
-            FUE = self.states[state_num].FUE
+            FUE = self.data.FUE
         Nfue = FUE[:, 0].size
         for i in range(Nfue):
             ifu = int(FUE[i, 0])
@@ -434,21 +436,20 @@ class Segment(object):
         
         # Translate LPI map to pin radius map
         RADI = np.zeros((npst, npst))
-        Npin = self.states[0].PIN[:, 0].size
-        LPI = self.states[0].LPI
-        PIN = self.states[0].PIN
+        LPI = self.data.LPI
+        PIN = self.data.PIN
+        Npin = PIN[:, 0].size
         for i in range(Npin):
             ipi = int(PIN[i, 0])
             RADI[LPI == ipi] = PIN[i, 1]
-
+        
         # Calculate mass
         VOLU = np.pi*RADI**2
         MASS = DENS*VOLU
         mass = np.sum(MASS)
-        #ENR = self.states[-1].ENR
         MASS_U235 = MASS*ENR
         mass_u235 = np.sum(MASS_U235)
-        self.states[state_num].ave_enr = mass_u235/mass
+        self.data.ave_enr = mass_u235/mass
 
     # -------Write cai file------------
     def writecai(self, file_base_name):
@@ -550,7 +551,7 @@ class Segment(object):
                 call(arglist[3:], stdout=fout, stderr=STDOUT, shell=False)
         else:
             call(arglist[3:], stdout=fout, stderr=STDOUT, shell=False)
-
+    '''
     def add_state(self, LFU=None, FUE=None, BA=None, voi=None, box_offset=0.0):
         """Append a list element to store result of new calculation"""
 
@@ -587,7 +588,7 @@ class Segment(object):
         self.states[-1].voivec = voivec
 
         self.states[-1].box_offset = box_offset
-
+    '''
     # def voivec(self):
     #    info = self.states[0]
     #    voids = (info.voi.split('*')[0].replace(',', ' ')
@@ -603,7 +604,7 @@ class Segment(object):
         print "Writing c3 input file " + c3inp
 
         # Creating dep strings
-        info = self.states[0]
+        info = self.data
         voivec = info.voivec
         # voivec = self.voivec()
         # voivec = (info.voi.split('*')[0].replace(',', ' ')
@@ -638,14 +639,14 @@ class Segment(object):
                 burnlist.append(red_points)
             else:
                 burnlist.append(all_points)
-
+        
         # info = self.data[0]['info']  # Get info data from original import
-        if hasattr(self.states[-1], 'LFU'):
-            LFU = self.states[-1].LFU  # Get LFU from last calc
+        if hasattr(self.data, 'LFU'):
+            LFU = self.data.LFU
         else:
             print "Error: LFU is missing."
             return
-
+        
         f = open(c3inp, 'w')
 
         tit_1 = "TIT "
@@ -665,7 +666,7 @@ class Segment(object):
             tit = tit + "VOI=" + str(voi) + " "
             f.write(tit + '\n')
         f.write(info.sim.strip() + '\n')
-
+        
         FUE = info.FUE
         Nfue = FUE.shape[0]
         baid_offset = 0  # The same BA id must not occur more than once
@@ -685,16 +686,16 @@ class Segment(object):
 
         pde = info.pde.split('\'')[0]
         f.write(pde.strip() + '\n')
-
+        
         # box corner radius (extra thickness). True for AT11
         # Tracer()()
         # if '/' in info.bwr:
         #    bwr = info.bwr.replace('/','//')  # a // is needed for C3
         
-        if hasattr(self.states[-1], 'box_offset'):
-            box_offset = self.states[-1].box_offset
+        if hasattr(self.data, 'box_offset'):
+            box_offset = self.data.box_offset
         bwr = self.__boxbow(box_offset)
-
+        
         #if box_offset:
         #    bwr = self.__boxbow(box_offset)
         #    # f.write(bwr + '\n')
@@ -719,11 +720,11 @@ class Segment(object):
             else:
                 red_pinstr = info.pinlines[i].strip()
             f.write(red_pinstr.strip() + '\n')
-
+        
         if hasattr(info, 'slaline'):  # has water cross?
             if info.slaline:  # check that it is not empty
                 f.write(info.slaline.strip() + '\n')
-
+        
         f.write('LPI\n')
         for i in xrange(info.npst):
             for j in xrange(i+1):
@@ -731,7 +732,7 @@ class Segment(object):
             f.write('\n')
 
         f.write(info.spa.strip() + '\n')
-
+        
         f.write("DEP" + '\n')
         for x in burnlist[0]:
             f.write(str(x) + '\n')
@@ -740,7 +741,7 @@ class Segment(object):
         # else:
         #    depstr = "DEP 0, 0.001, -" + str(maxdep)
         #    f.write(depstr + '\n')
-
+        
         f.write('NLI\n')
         f.write('STA\n')
 
@@ -933,28 +934,27 @@ class Segment(object):
             statepoints[i].POW = POW[:, :, i]
             statepoints[i].EXP = EXP[:, :, i]
 
-        if refcalc:
-            self.states[0].refcalc = DataStruct()
-            self.states[0].refcalc.statepoints = statepoints
-        else:
+        #if refcalc:
+        #    self.states[0].refcalc = DataStruct()
+        #    self.states[0].refcalc.statepoints = statepoints
+        #else:
             # self.quickcalc_add(statepoints)
-            self.states[-1].statepoints = statepoints
-        # Tracer()()
+        self.data.statepoints = statepoints
 
-    def quickcalc_add(self, statepoints):
-        """Adds the quickcalc differencies to the initial state"""
-        sp0 = self.states[0].statepoints
-        rsp = self.states[0].refcalc.statepoints
-        sp1 = statepoints
-
-        N = len(sp1)
-        # kinf
-        dPOW = [sp1[i].POW - rsp[i].POW for i in range(N)]
-        POW = np.array([dPOW[i] + sp0[i].POW for i in range(N)]).swapaxes(0, 2)
-        fint = self.__fintcalc(POW)
-        # burnup =
-        # EXP = self.__expcalc(POW, burnup)
-        # Tracer()()
+    #def quickcalc_add(self, statepoints):
+    #    """Adds the quickcalc differencies to the initial state"""
+    #    sp0 = self.states[0].statepoints
+    #    rsp = self.states[0].refcalc.statepoints
+    #    sp1 = statepoints
+    #
+    #    N = len(sp1)
+    #    # kinf
+    #    dPOW = [sp1[i].POW - rsp[i].POW for i in range(N)]
+    #    POW = np.array([dPOW[i] + sp0[i].POW for i in range(N)]).swapaxes(0, 2)
+    #    fint = self.__fintcalc(POW)
+    #    # burnup =
+    #    # EXP = self.__expcalc(POW, burnup)
+    #    # Tracer()()
 
     def quickcalc(self, voi=None, maxdep=None, depthres=None, refcalc=False,
                   grid=True, model='c3', box_offset=0, neulib=False):
@@ -969,6 +969,7 @@ class Segment(object):
 
         file_base_name = "./tmp." + str(uuid.uuid4()).split('-')[0]
         # file_base_name = "./" + str(uuid.uuid4())
+
         self.writec3cai(file_base_name, voi, maxdep, depthres, box_offset)
         if model == 'c3':
             self.runc3(file_base_name, grid)
@@ -978,7 +979,7 @@ class Segment(object):
             print "Quickcalc model is unknown"
             return
         self.readc3cax(file_base_name, refcalc)
-        self.ave_enr()
+        self.ave_enr_calc()
 
         os.remove(file_base_name + ".inp")
         os.remove(file_base_name + ".out")
@@ -992,14 +993,15 @@ class Segment(object):
 
     def __boxbow(self, box_offset=0.0):
         """Updating the BWR card to account for box bowing."""
-        bwr = self.states[0].bwr
+        bwr = self.data.bwr
         bwr_arr = bwr.split()
+        
         gaw = float(bwr_arr[5]) + box_offset
         gan = float(bwr_arr[6]) - box_offset  # gaw + gan = constant
         bwr_arr[5] = str(gaw)
         bwr_arr[6] = str(gan)
         bwr_offset = ' '.join(bwr_arr)
-        self.states[-1].box_offset = box_offset
+        self.data.box_offset = box_offset
         return bwr_offset
 
     def __expcalc(self, POW, burnup):
@@ -1026,14 +1028,12 @@ class Segment(object):
             fint[i] = POW[:, :, i].max()
         return fint
 
-    def findpoint(self, stateindex=-1,
-                  burnup=None, vhi=None, voi=None, tfu=None):
+    def findpoint(self, burnup=None, vhi=None, voi=None, tfu=None):
         """Return statepoint index that correspond to specific burnup,
         void and void history
         Syntax: pt = findpoint(burnup=burnup_val,vhi=vhi_val,voi=voi_val,
         tfu=tfu_val)"""
-        # Tracer()()
-        statepoints = self.states[stateindex].statepoints
+        statepoints = self.data.statepoints
 
         if tfu is not None:
             pindex = next(i for i, p in enumerate(statepoints) if p.tfu == tfu)
@@ -1046,10 +1046,10 @@ class Segment(object):
                           if p.vhi == vhi and p.voi == voi)
         return pindex
 
-    def burnpoints(self, voi=40, stateindex=0):
+    def burnpoints(self, voi=40):
         """Return depletion vector for given voi (vhi=voi)"""
-        statepoints = self.states[stateindex].statepoints
-        i = self.findpoint(stateindex, voi=voi, vhi=voi)
+        statepoints = self.data.statepoints
+        i = self.findpoint(voi=voi, vhi=voi)
         burnlist = [statepoints[i].burnup]
         Nstatepoints = len(statepoints)
         while ((i < Nstatepoints-1) and
@@ -1057,7 +1057,7 @@ class Segment(object):
             burnlist.append(statepoints[i+1].burnup)
             i += 1
         return burnlist
-
+    
     # def burnpoints(self, voi=40, stateindex=0):
     #    """Return depletion vector for given voi (vhi=voi)"""
     #    statepoints = self.states[stateindex].statepoints
