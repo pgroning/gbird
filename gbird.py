@@ -1072,10 +1072,10 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.bundle.new_calc(model='c3')
         self.bundle.new_btf()
         #if state_num:
-        self.state_index= state_num
+        self.state_index = state_num
         #else:
         #    self.state_index = len(self.bundle.cases[0].states) - 1
-        print self.state_index
+        #print self.state_index
         self.fig_update()
         self.setCursor(QtCore.Qt.ArrowCursor)
         
@@ -1637,7 +1637,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         else:
             self.init_pinobjects()
             self.fig_update()
-        print self.state_index
+        #print self.state_index
         
     def forward_state(self):
         """Forward to next state"""
@@ -1650,7 +1650,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         else:
             self.init_pinobjects()
             self.fig_update()
-        print self.state_index
+        #print self.state_index
 
     def add_actions(self, target, actions):
         for action in actions:
