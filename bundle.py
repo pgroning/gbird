@@ -2,6 +2,7 @@
 
 from __future__ import division
 from IPython.core.debugger import Tracer  # Debugging
+from pyqt_trace import pyqt_trace as qtrace  # Break point that works with Qt
 ''' ipy example:
 import bundle
 : obj = bundle.bundle()
@@ -37,7 +38,7 @@ def readcax_fun(tup):
 
 def quickcalc_fun(tup):
     """Wrapper function used for multithreaded quickcalc"""
-    case = tup[0]  # First arg should always be the object
+    case = tup[0]  # First argument should always be an instance of the class
     case.quickcalc(*tup[1:])
     return case
     # case, voi, maxdep, opt = tup
@@ -48,6 +49,7 @@ def quickcalc_fun(tup):
 class Bundle(object):
     """Read, save and load cases"""
 
+    #def __init__(self, parent=None):
     def __init__(self, inpfile=None):
         self.data = DataStruct()
         self.cases = []
@@ -55,6 +57,7 @@ class Bundle(object):
         self.states = []
         self.states.append(DataStruct())
 
+        #self.parent = parent
         if inpfile:
             self.readinp(inpfile)
 
@@ -179,7 +182,10 @@ class Bundle(object):
     def new_calc(self, voi=None, maxdep=None, depthres=None, refcalc=False,
                  grid=True, model='c3', box_offset=0, neulib=False):
 
-        self.states.append(DataStruct)
+        # For storage of new calculation
+        # self.cases[i].add_state() 
+
+        # self.states.append(DataStruct)  # For storage of new BTF calculation
         # ----Code block only for testing purpose-----
         # if not refcalc:
         #    for i in range(len(self.cases)):
@@ -202,25 +208,23 @@ class Bundle(object):
         p.join()
 
     def savepic(self, pfile):
-        # pfile = os.path.splitext(self.data.inpfile)[0] + '.p'
+        """Save objects to a python pickle file"""
+
         with open(pfile, 'wb') as fp:
             pickle.dump(self.data, fp, 1)
             pickle.dump(self.cases, fp, 1)
-            try:
-                pickle.dump(self.btf, fp, 1)
-            except:
-                print "Warning: Could not save BTF"
+            pickle.dump(self.states, fp, 1)
         print "Saved data to file " + pfile
 
     def loadpic(self, pfile):
+        """Save objects from a python pickle file"""
+
         print "Loading data from file " + pfile
         with open(pfile, 'rb') as fp:
             self.data = pickle.load(fp)
             self.cases = pickle.load(fp)
-            try:
-                self.btf = pickle.load(fp)
-            except:
-                print "Warning: Could not load BTF"
+            self.states = pickle.load(fp)
+            
         self.data.pfile = pfile
 
     def new_btf(self):
@@ -233,7 +237,7 @@ class Bundle(object):
         self.states[-1].btf = Btf(self)
         self.states[-1].btf.calc_btf()
 
-    def ave_enr(self):
+    def ave_enr(self, state_num=-1):
         """The method calculates the average enrichment of the bundle.
         This algorithm is likely naive and needs to be updated in the future"""
 
@@ -243,12 +247,12 @@ class Bundle(object):
         nodes = np.array([0]+nodelist)  # prepend 0
         dn = np.diff(nodes)
         # Tracer()()
-        enrlist = [case.states[-1].ave_enr for case in self.cases]
+        enrlist = [case.states[state_num].ave_enr for case in self.cases]
         # Tracer()()
         seg_enr = np.array(enrlist)
 
         ave_enr = sum(seg_enr*dn) / sum(dn)
-        self.states[-1].ave_enr = ave_enr
+        self.states[state_num].ave_enr = ave_enr
 
     def pow3(self, POW, nodes):
         """Expanding a number of 2D pin power distributions into a 3D
@@ -295,10 +299,11 @@ class Bundle(object):
 
 
 if __name__ == '__main__':
-    cio = casio()
-    cio.readinp(sys.argv[1])
-    cio.readcax()
-    cio.runc3()
+    pass
+    #cio = casio()
+    #cio.readinp(sys.argv[1])
+    #cio.readcax()
+    #cio.runc3()
 
     '''
     P1 = sys.argv[1]

@@ -414,22 +414,24 @@ class Segment(object):
         return Mt
 
     # --------Calculate average enrichment----------
-    def ave_enr(self):
+    def ave_enr(self, state_num=-1, LFU=None, FUE=None):
 
+        # Inargs: state_num, FUE, LFU, ENR
+        
         # Translate LFU map to DENS and ENR map
-        # data = self.states[-1]
-        # npst = data.npst
         npst = self.states[0].npst
         DENS = np.zeros((npst, npst))
-        # ENR = np.zeros((npst, npst))
-        Nfue = self.states[-1].FUE[:, 0].size
-        LFU = self.states[-1].LFU
-        FUE = self.states[-1].FUE
+        ENR = np.zeros((npst, npst))
+        if LFU is None:
+            LFU = self.states[state_num].LFU
+        if FUE is None:
+            FUE = self.states[state_num].FUE
+        Nfue = FUE[:, 0].size
         for i in range(Nfue):
             ifu = int(FUE[i, 0])
             DENS[LFU == ifu] = FUE[i, 1]
-            # ENR[LFU == ifu] = FUE[i, 2]
-
+            ENR[LFU == ifu] = FUE[i, 2]
+        
         # Translate LPI map to pin radius map
         RADI = np.zeros((npst, npst))
         Npin = self.states[0].PIN[:, 0].size
@@ -443,10 +445,10 @@ class Segment(object):
         VOLU = np.pi*RADI**2
         MASS = DENS*VOLU
         mass = np.sum(MASS)
-        ENR = self.states[-1].ENR
+        #ENR = self.states[-1].ENR
         MASS_U235 = MASS*ENR
         mass_u235 = np.sum(MASS_U235)
-        self.states[-1].ave_enr = mass_u235/mass
+        self.states[state_num].ave_enr = mass_u235/mass
 
     # -------Write cai file------------
     def writecai(self, file_base_name):
@@ -549,12 +551,27 @@ class Segment(object):
         else:
             call(arglist[3:], stdout=fout, stderr=STDOUT, shell=False)
 
-    def add_state(self, LFU, FUE, voi=None):
+    def add_state(self, LFU=None, FUE=None, BA=None, voi=None, box_offset=0.0):
         """Append a list element to store result of new calculation"""
-        self.states.append(DataStruct())  # Add an element to list
+
+        # limit number of states to 4
+        # 0=original, 1=reference, 2=previous, 3=current
+        if len(self.states) > 3:
+            del self.states[2]
+        self.states.append(DataStruct())  # Add an new element to list
+
+        if LFU is None:
+            LFU = self.states[-2].LFU
         self.states[-1].LFU = LFU
+
+        if FUE is None:
+            FUE = self.states[-2].FUE
         self.states[-1].FUE = FUE
 
+        if BA is None:
+            BA = self.states[-2].BA
+        self.states[-1].BA = BA
+        
         npst = self.states[0].npst
         ENR = np.zeros((npst, npst))
         Nfue = FUE[:, 0].size
@@ -569,6 +586,8 @@ class Segment(object):
             voivec = [int(voi)]
         self.states[-1].voivec = voivec
 
+        self.states[-1].box_offset = box_offset
+
     # def voivec(self):
     #    info = self.states[0]
     #    voids = (info.voi.split('*')[0].replace(',', ' ')
@@ -576,7 +595,7 @@ class Segment(object):
     #    return voids
 
     def writec3cai(self, file_base_name, voi=None, maxdep=None, depthres=None,
-                   box_offset=0):
+                   box_offset=0.0):
         # filebasename = "./" + str(uuid.uuid4())
         c3inp = file_base_name + ".inp"
         # c3inp = tempfile.NamedTemporaryFile(dir='.',
@@ -627,10 +646,6 @@ class Segment(object):
             print "Error: LFU is missing."
             return
 
-        # info = self.db['origin']['info']
-        # LFU = self.db['qcalc'][-1]['info'].get('LFU')
-
-        # f = c3inp.file
         f = open(c3inp, 'w')
 
         tit_1 = "TIT "
@@ -675,13 +690,17 @@ class Segment(object):
         # Tracer()()
         # if '/' in info.bwr:
         #    bwr = info.bwr.replace('/','//')  # a // is needed for C3
-        # Tracer()()
-        if box_offset:
-            bwr = self.__boxbow(box_offset)
-            # f.write(bwr + '\n')
-        else:
-            bwr = info.bwr.strip()
-            # f.write(info.bwr.strip() + '\n')
+        
+        if hasattr(self.states[-1], 'box_offset'):
+            box_offset = self.states[-1].box_offset
+        bwr = self.__boxbow(box_offset)
+
+        #if box_offset:
+        #    bwr = self.__boxbow(box_offset)
+        #    # f.write(bwr + '\n')
+        #else:
+        #    bwr = info.bwr.strip()
+        #    # f.write(info.bwr.strip() + '\n')
 
         # box corner radius (extra thickness). Valid for AT11
         if '/' in bwr:
@@ -941,11 +960,13 @@ class Segment(object):
                   grid=True, model='c3', box_offset=0, neulib=False):
 
         tic = time.time()
-        LFU = self.states[0].LFU  # LFU is set to original state only
-        FUE = self.states[0].FUE  # for testing purpose
+        # # LFU is set to original state only for testing purpose
+        # LFU = self.states[0].LFU
+        # FUE = self.states[0].FUE
+        # # Append element to hold a new calculation
+        # self.add_state(LFU, FUE, voi)
+        # ---------------------------------
 
-        # Append element to hold a new calculation
-        self.add_state(LFU, FUE, voi)
         file_base_name = "./tmp." + str(uuid.uuid4()).split('-')[0]
         # file_base_name = "./" + str(uuid.uuid4())
         self.writec3cai(file_base_name, voi, maxdep, depthres, box_offset)
