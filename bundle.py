@@ -52,7 +52,7 @@ class Bundle(object):
     #def __init__(self, parent=None):
     def __init__(self, inpfile=None):
         self.data = DataStruct()
-        self.cases = []
+        #self.cases = []
         # self.btf = Btf(self)
         self.states = []
         self.states.append(DataStruct())
@@ -167,12 +167,15 @@ class Bundle(object):
         n = len(self.data.caxfiles)  # Number of threads
         p = Pool(n)  # Make the Pool of workers
         # Start processes in their own threads and return the results
-        self.cases = p.map(readcax_fun, inlist)
+        self.states[0].cases = p.map(readcax_fun, inlist)
+        #self.cases = p.map(readcax_fun, inlist)
         # self.cases = p.map(casdata, self.data.caxfiles)
         p.close()
         p.join()
+        
         for i, node in enumerate(self.data.nodes):
-            self.cases[i].topnode = node
+            self.states[0].cases[i].topnode = node
+            #self.cases[i].topnode = node
 
         # for i,f in enumerate(self.data.caxfiles):
         #     case = casdata(f)
@@ -237,7 +240,7 @@ class Bundle(object):
         self.states[-1].btf = Btf(self)
         self.states[-1].btf.calc_btf()
 
-    def ave_enr(self, state_num=-1):
+    def ave_enr_calc(self, state_num=-1):
         """The method calculates the average enrichment of the bundle.
         This algorithm is likely naive and needs to be updated in the future"""
 
@@ -246,9 +249,8 @@ class Bundle(object):
         # nodes = np.array(nodelist)
         nodes = np.array([0]+nodelist)  # prepend 0
         dn = np.diff(nodes)
-        # Tracer()()
-        enrlist = [case.states[state_num].ave_enr for case in self.cases]
-        # Tracer()()
+        cases = self.states[state_num].cases
+        enrlist = [cas.data.ave_enr for cas in cases]
         seg_enr = np.array(enrlist)
 
         ave_enr = sum(seg_enr*dn) / sum(dn)
