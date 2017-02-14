@@ -36,7 +36,7 @@ class UnitTest(unittest.TestCase):
         testfile = "test/topol/bundle_a10xm.inp"
         b = Bundle(testfile)
         b.readcax()
-        self.assertTrue(len(b.states[0].cases) == 5, "reading cax files failed")
+        self.assertTrue(len(b.states[0].segments) == 5, "reading cax files failed")
     
     #@unittest.skip("skip this test")
     def test_bundle_ave_enr(self):
@@ -75,7 +75,7 @@ class UnitTest(unittest.TestCase):
         self.assertTrue(b.states[1].ave_enr > 0, 
                         "bundle enrichment is invalid")
 
-    @unittest.skip("skip this test")
+    #@unittest.skip("skip this test")
     def test_btf_calc_a10xm(self):
         testfile = 'test/topol/bundle_a10xm.inp'
         b = Bundle(testfile)
@@ -86,7 +86,7 @@ class UnitTest(unittest.TestCase):
                         "Btf calculation failed")
         self.assertFalse(numpy.isnan(b.states[0].btf.DOX).any(), "Btf is NaN")
 
-    @unittest.skip("skip this test")
+    #@unittest.skip("skip this test")
     def test_btf_calc_a10b(self):
         testfile = 'test/tosim/bundle_a10b.inp'
         b = Bundle(testfile)

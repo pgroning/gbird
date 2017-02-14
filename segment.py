@@ -1034,7 +1034,7 @@ class Segment(object):
         Syntax: pt = findpoint(burnup=burnup_val,vhi=vhi_val,voi=voi_val,
         tfu=tfu_val)"""
         statepoints = self.data.statepoints
-
+        
         if tfu is not None:
             pindex = next(i for i, p in enumerate(statepoints) if p.tfu == tfu)
         elif burnup is not None:

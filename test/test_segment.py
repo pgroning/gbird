@@ -128,7 +128,7 @@ class UnitTest(unittest.TestCase):
         self.assertEqual(13200, len(flines),
                         "number of lines in file is wrong")
 
-    #@unittest.skip('skip test_runc4')
+    @unittest.skip('skip test_runc4')
     def test_runc4(self):
         testfile = "test/topol/ATXM/10g40dom/e28ATXM-385-10g40dom-cas.cax"
         s = Segment(testfile)

@@ -167,14 +167,14 @@ class Bundle(object):
         n = len(self.data.caxfiles)  # Number of threads
         p = Pool(n)  # Make the Pool of workers
         # Start processes in their own threads and return the results
-        self.states[0].cases = p.map(readcax_fun, inlist)
+        self.states[0].segments = p.map(readcax_fun, inlist)
         #self.cases = p.map(readcax_fun, inlist)
         # self.cases = p.map(casdata, self.data.caxfiles)
         p.close()
         p.join()
         
         for i, node in enumerate(self.data.nodes):
-            self.states[0].cases[i].topnode = node
+            self.states[0].segments[i].topnode = node
             #self.cases[i].topnode = node
 
         # for i,f in enumerate(self.data.caxfiles):
@@ -233,13 +233,14 @@ class Bundle(object):
     def new_btf(self):
         """Administrates btf calculation by composition of the Btf class"""
 
-        nstates = len(self.cases[0].states)
-        while len(self.states) < nstates:
-            self.states.append(DataStruct())
+        nstates = len(self.states)
+        #nstates = len(self.cases[0].states)
+        #while len(self.states) < nstates:
+        #    self.states.append(DataStruct())
 
         self.states[-1].btf = Btf(self)
         self.states[-1].btf.calc_btf()
-
+        
     def ave_enr_calc(self, state_num=-1):
         """The method calculates the average enrichment of the bundle.
         This algorithm is likely naive and needs to be updated in the future"""
@@ -249,8 +250,8 @@ class Bundle(object):
         # nodes = np.array(nodelist)
         nodes = np.array([0]+nodelist)  # prepend 0
         dn = np.diff(nodes)
-        cases = self.states[state_num].cases
-        enrlist = [cas.data.ave_enr for cas in cases]
+        segments = self.states[state_num].segments
+        enrlist = [seg.data.ave_enr for seg in segments]
         seg_enr = np.array(enrlist)
 
         ave_enr = sum(seg_enr*dn) / sum(dn)
