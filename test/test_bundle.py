@@ -58,7 +58,23 @@ class UnitTest(unittest.TestCase):
         b.new_calc(grid=False)
         self.assertTrue(len(b.states[1].segments[4].data.statepoints) > 10, 
                         "new c3 calculation failed")
-
+        b.new_state()
+        b.new_calc(grid=False, voi=60, maxdep=20)
+        self.assertEqual(b.states[2].segments[2].data.voivec, [60],
+                        "void failed to update correctly")
+        self.assertEqual(b.states[2].segments[1].data.statepoints[-1].voi,
+                         60, "Void is incorrect")
+        self.assertEqual(b.states[2].segments[1].data.statepoints[-1].burnup,
+                         20, "Max depletion is incorrect")
+        b.new_state()
+        b.new_calc(grid=False, depthres=20)
+        self.assertTrue(len(b.states[3].segments[3].data.statepoints) > 10, 
+                        "new c3 calculation with depthres failed")
+        b.new_state()
+        b.new_calc(box_offset=0.2)
+        self.assertEqual(b.states[4].segments[1].data.box_offset, 0.2,
+                        "box offset calculation failed")
+        
     @unittest.skip("skip test_new_calc_c4")
     def test_new_calc_c4(self):
         #testfile = "test/tosim/bundle_at11.inp"

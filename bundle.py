@@ -184,7 +184,7 @@ class Bundle(object):
         #     self.cases.append(case)
 
     def new_calc(self, voi=None, maxdep=None, depthres=None, refcalc=False,
-                 grid=True, model='c3', box_offset=0, neulib=False):
+                 grid=False, model='c3', box_offset=0, neulib=False):
 
         # For storage of new calculation
         #self.new_state()
@@ -218,6 +218,7 @@ class Bundle(object):
                            model, box_offset, neulib))
         
         #quickcalc_fun(inlist[0])
+        #Tracer()()
         n = len(segments)  # Number of threads
         p = Pool(n)  # Make the Pool of workers
         

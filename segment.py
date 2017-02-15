@@ -579,7 +579,7 @@ class Segment(object):
             self.data.ENR = ENR
         
         if voi:
-            self.data.voivec = voi
+            self.data.voivec = [int(voi)]
 
         self.data.box_offset = box_offset
 
@@ -612,7 +612,7 @@ class Segment(object):
         # voivec = self.voivec()
         # voivec = (info.voi.split('*')[0].replace(',', ' ')
         #          .strip().split(' ')[1:])
-
+        
         if voi is not None:
             if int(voi) in voivec:
                 bp_voivec = [int(voi)]
@@ -620,13 +620,15 @@ class Segment(object):
                 bp_voivec = [voivec[0]]  # get burn points from first void
         else:
             bp_voivec = voivec
-
+        
         if voi is not None:
             voivec = [int(voi)]
-
+            self.data.voivec = voivec
+        
         burnlist = []
         for i, v in enumerate(bp_voivec):
             all_points = self.burnpoints(voi=int(v))
+            
             if maxdep:
                 red_points = [x for x in all_points if x <= maxdep]
                 burnlist.append(red_points)
@@ -776,7 +778,7 @@ class Segment(object):
 
     def runc3(self, filebasename, grid=False):
         """Running C3 perturbation model"""
-
+        
         # C3 input file
         c3inp = filebasename + ".inp"
         # c3inp = "./c3.inp"
@@ -971,10 +973,9 @@ class Segment(object):
         # self.add_state(LFU, FUE, voi)
         # ---------------------------------
 
-        file_base_name = "./tmp." + str(uuid.uuid4()).split('-')[0]
-        # file_base_name = "./" + str(uuid.uuid4())
-
+        file_base_name = "./tmp." + str(uuid.uuid4()).split('-')[0]        
         self.writec3cai(file_base_name, voi, maxdep, depthres, box_offset)
+        
         if model == 'c3':
             self.runc3(file_base_name, grid)
         elif model == 'c4':
@@ -1052,6 +1053,7 @@ class Segment(object):
 
     def burnpoints(self, voi=40):
         """Return depletion vector for given voi (vhi=voi)"""
+        
         statepoints = self.data.statepoints
         i = self.findpoint(voi=voi, vhi=voi)
         burnlist = [statepoints[i].burnup]
