@@ -48,11 +48,11 @@ class UnitTest(unittest.TestCase):
         self.assertListEqual([40, 0, 80], s.data.voivec,
                          "void list is incorrect")
 
-    @unittest.skip("test_readcax_topol_atxm_all")
+    #@unittest.skip("test_readcax_topol_atxm_all")
     def test_readcax_topol_atxm_all(self):
         testfile = "test/topol/ATXM/10g40dom/e28ATXM-385-10g40dom-cas.cax"
-        s = Segment(testfile, 'all')
-        Nstatepoints = len(s.states[0].statepoints)
+        s = Segment(testfile, read_all=True)
+        Nstatepoints = len(s.data.statepoints)
         self.assertEqual(19482, Nstatepoints,
                         "Number of state points is incorrect")
 
@@ -86,15 +86,15 @@ class UnitTest(unittest.TestCase):
         result = "11 1.300 13.580 0.14 0.862 0.653 1.27"
         self.assertTrue(result in bwr)
     
-    @unittest.skip("test_add_state")
-    def test_add_state(self):
-        testfile = "test/tosim/OPT2/12g30mid/e32OPT2-390-12g30mid-cas.cax"
-        s = Segment(testfile)
-        LFU = s.states[0].LFU
-        FUE = s.states[0].FUE
-        voi = 50
-        s.add_state(LFU, FUE, voi)
-        self.assertTrue((s.states[1].LFU == LFU).all())
+    #@unittest.skip("test_add_state")
+    #def test_add_state(self):
+    #    testfile = "test/tosim/OPT2/12g30mid/e32OPT2-390-12g30mid-cas.cax"
+    #    s = Segment(testfile)
+    #    LFU = s.states[0].LFU
+    #    FUE = s.states[0].FUE
+    #    voi = 50
+    #    s.add_state(LFU, FUE, voi)
+    #    self.assertTrue((s.states[1].LFU == LFU).all())
     
     @unittest.skip("test_writec3cai_at11")
     def test_writec3cai_at11(self):

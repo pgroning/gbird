@@ -24,7 +24,7 @@ class UnitTest(unittest.TestCase):
     def tearDown(self):
         unittest.TestCase.tearDown(self)
 
-    @unittest.skip("skip this test")
+    #@unittest.skip("skip this test")
     def test_readinp(self):
         testfile = "test/topol/bundle_a10xm.inp"
         b = Bundle(testfile)
@@ -32,14 +32,14 @@ class UnitTest(unittest.TestCase):
                         type(b.data.nodes) is list,
                         "reading inp file failed")
 
-    @unittest.skip("skip this test")
+    #@unittest.skip("skip this test")
     def test_readcax(self):
         testfile = "test/topol/bundle_a10xm.inp"
         b = Bundle(testfile)
         b.readcax()
         self.assertTrue(len(b.states[0].segments) == 5, "reading cax files failed")
     
-    @unittest.skip("skip this test")
+    #@unittest.skip("skip this test")
     def test_bundle_ave_enr(self):
         testfile = "test/topol/bundle_a10xm.inp"
         b = Bundle(testfile)
@@ -85,17 +85,19 @@ class UnitTest(unittest.TestCase):
         self.assertTrue(len(b.states[1].segments[0].data.statepoints) > 10, 
                         "new c4 calculation failed")
 
-    @unittest.skip("skip this test")
+    #@unittest.skip("skip this test")
     def test_new_ave_enr_calc(self):
-        testfile = "test/tosim/bundle_at11.inp"
+        #testfile = "test/tosim/bundle_at11.inp"
+        testfile = 'test/tosim/bundle_a10b.inp'
         b = Bundle(testfile)
         b.readcax()
+        b.new_state()
         b.new_calc(grid=True)
-        b.ave_enr()
+        b.ave_enr_calc()
         self.assertTrue(b.states[1].ave_enr > 0, 
                         "bundle enrichment is invalid")
 
-    @unittest.skip("skip this test")
+    #@unittest.skip("skip this test")
     def test_btf_calc_a10xm(self):
         testfile = 'test/topol/bundle_a10xm.inp'
         b = Bundle(testfile)
@@ -106,7 +108,7 @@ class UnitTest(unittest.TestCase):
                         "Btf calculation failed")
         self.assertFalse(numpy.isnan(b.states[0].btf.DOX).any(), "Btf is NaN")
 
-    @unittest.skip("skip this test")
+    #@unittest.skip("skip this test")
     def test_btf_calc_a10b(self):
         testfile = 'test/tosim/bundle_a10b.inp'
         b = Bundle(testfile)
@@ -117,12 +119,13 @@ class UnitTest(unittest.TestCase):
                         "Btf calculation failed")
         self.assertFalse(numpy.isnan(b.states[0].btf.DOX).any(), "Btf is NaN")
 
-    @unittest.skip("skip this test")
+    #@unittest.skip("skip this test")
     def test_new_btf_calc(self):
         testfile = 'test/tosim/bundle_opt2.inp'
         b = Bundle(testfile)
         b.readcax()
         b.new_btf()
+        b.new_state()
         b.new_calc(grid=False, voi=50, depthres=20)
         b.new_btf()
         self.assertTrue(type(b.states[0].btf.DOX) is numpy.ndarray and 
