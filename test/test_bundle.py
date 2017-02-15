@@ -24,6 +24,7 @@ class UnitTest(unittest.TestCase):
     def tearDown(self):
         unittest.TestCase.tearDown(self)
 
+    @unittest.skip("skip this test")
     def test_readinp(self):
         testfile = "test/topol/bundle_a10xm.inp"
         b = Bundle(testfile)
@@ -31,14 +32,14 @@ class UnitTest(unittest.TestCase):
                         type(b.data.nodes) is list,
                         "reading inp file failed")
 
-    #@unittest.skip("skip this test")
+    @unittest.skip("skip this test")
     def test_readcax(self):
         testfile = "test/topol/bundle_a10xm.inp"
         b = Bundle(testfile)
         b.readcax()
         self.assertTrue(len(b.states[0].segments) == 5, "reading cax files failed")
     
-    #@unittest.skip("skip this test")
+    @unittest.skip("skip this test")
     def test_bundle_ave_enr(self):
         testfile = "test/topol/bundle_a10xm.inp"
         b = Bundle(testfile)
@@ -47,22 +48,25 @@ class UnitTest(unittest.TestCase):
         self.assertTrue(b.states[0].ave_enr > 0, 
                         "bundle enrichment is invalid")
 
-    @unittest.skip("skip this test")
+    #@unittest.skip("skip this test")
     def test_new_calc(self):
-        testfile = "test/tosim/bundle_at11.inp"
+        #testfile = "test/tosim/bundle_at11.inp"
+        testfile = "test/topol/bundle_a10xm.inp"
         b = Bundle(testfile)
         b.readcax()
-        b.new_calc(grid=True)
-        self.assertTrue(len(b.cases[0].states[1].statepoints) > 10, 
+        b.new_state()
+        b.new_calc(grid=False)
+        self.assertTrue(len(b.states[1].segments[4].data.statepoints) > 10, 
                         "new c3 calculation failed")
 
     @unittest.skip("skip test_new_calc_c4")
     def test_new_calc_c4(self):
-        testfile = "test/tosim/bundle_at11.inp"
+        #testfile = "test/tosim/bundle_at11.inp"
+        testfile = "test/topol/bundle_a10xm.inp"
         b = Bundle(testfile)
         b.readcax()
-        b.new_calc(grid=False, model='c4', voi=60)
-        self.assertTrue(len(b.cases[0].states[1].statepoints) > 10, 
+        b.new_calc(grid=True, model='c4', voi=60)
+        self.assertTrue(len(b.states[1].segments[0].data.statepoints) > 10, 
                         "new c4 calculation failed")
 
     @unittest.skip("skip this test")
@@ -75,7 +79,7 @@ class UnitTest(unittest.TestCase):
         self.assertTrue(b.states[1].ave_enr > 0, 
                         "bundle enrichment is invalid")
 
-    #@unittest.skip("skip this test")
+    @unittest.skip("skip this test")
     def test_btf_calc_a10xm(self):
         testfile = 'test/topol/bundle_a10xm.inp'
         b = Bundle(testfile)
@@ -86,7 +90,7 @@ class UnitTest(unittest.TestCase):
                         "Btf calculation failed")
         self.assertFalse(numpy.isnan(b.states[0].btf.DOX).any(), "Btf is NaN")
 
-    #@unittest.skip("skip this test")
+    @unittest.skip("skip this test")
     def test_btf_calc_a10b(self):
         testfile = 'test/tosim/bundle_a10b.inp'
         b = Bundle(testfile)

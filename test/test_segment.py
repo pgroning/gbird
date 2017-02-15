@@ -121,7 +121,7 @@ class UnitTest(unittest.TestCase):
         caxfile = self.file_base_name + ".cax"
         inpfile = self.file_base_name + ".inp"
         shutil.copy2("test/files/e33OPT3-383-11g50bot-cas_test_c3.inp", inpfile)
-        s.runc3(self.file_base_name, grid=True)
+        s.runc3(self.file_base_name, grid=False)
         # check file content
         with open(caxfile) as f:
             flines = f.read().splitlines()
@@ -150,7 +150,7 @@ class UnitTest(unittest.TestCase):
     def test_quickcalc(self):
         testfile = "test/tosim/OPT3/11g50bot/e33OPT3-383-11g50bot-cas.cax"
         s = Segment(testfile)
-        s.quickcalc()
+        s.quickcalc(grid=False)
         Nstatepoints = len(s.data.statepoints)
         self.assertEqual(147, Nstatepoints, 
                         "Number of state points is incorrect")

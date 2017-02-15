@@ -551,44 +551,47 @@ class Segment(object):
                 call(arglist[3:], stdout=fout, stderr=STDOUT, shell=False)
         else:
             call(arglist[3:], stdout=fout, stderr=STDOUT, shell=False)
-    '''
-    def add_state(self, LFU=None, FUE=None, BA=None, voi=None, box_offset=0.0):
+    
+    def set_data(self, LFU=None, FUE=None, BA=None, voi=None, box_offset=0.0):
         """Append a list element to store result of new calculation"""
 
         # limit number of states to 4
         # 0=original, 1=reference, 2=previous, 3=current
-        if len(self.states) > 3:
-            del self.states[2]
-        self.states.append(DataStruct())  # Add an new element to list
+        #if len(self.states) > 3:
+        #    del self.states[2]
+        #self.states.append(DataStruct())  # Add an new element to list
+       
+        if LFU:
+            self.data.LFU = LFU 
 
-        if LFU is None:
-            LFU = self.states[-2].LFU
-        self.states[-1].LFU = LFU
+        if FUE:
+            self.data.FUE = FUE
 
-        if FUE is None:
-            FUE = self.states[-2].FUE
-        self.states[-1].FUE = FUE
+        if BA:
+            self.data.BA = BA
 
-        if BA is None:
-            BA = self.states[-2].BA
-        self.states[-1].BA = BA
+        if LFU and FUE:
+            ENR = np.zeros(LFU.shape)
+            Nfue = FUE[:, 0].size
+            for i in range(Nfue):
+                ifu = int(FUE[i, 0])
+                ENR[LFU == ifu] = FUE[i, 2]
+            self.data.ENR = ENR
         
-        npst = self.states[0].npst
-        ENR = np.zeros((npst, npst))
-        Nfue = FUE[:, 0].size
-        for i in range(Nfue):
-            ifu = int(FUE[i, 0])
-            ENR[LFU == ifu] = FUE[i, 2]
-        self.states[-1].ENR = ENR
+        if voi:
+            self.data.voivec = voi
 
-        if voi is None:
-            voivec = self.states[0].voivec
-        else:
-            voivec = [int(voi)]
-        self.states[-1].voivec = voivec
+        self.data.box_offset = box_offset
 
-        self.states[-1].box_offset = box_offset
-    '''
+        #
+        #if voi is None:
+        #    voivec = self.states[0].voivec
+        #else:
+        #    voivec = [int(voi)]
+        #self.states[-1].voivec = voivec
+        #
+        #self.states[-1].box_offset = box_offset
+    
     # def voivec(self):
     #    info = self.states[0]
     #    voids = (info.voi.split('*')[0].replace(',', ' ')
@@ -827,7 +830,7 @@ class Segment(object):
         arglist = ['linrsh', c3exe, c3cfg]
         arglist.insert(1, '-q')
         arglist.insert(2, 'all.q@wrath,all.q@envy,all.q@pride')
-        # Tracer()()
+        #Tracer()()
         if grid:
             try:  # use linrsh if available
                 call(arglist, shell=False)
@@ -835,6 +838,7 @@ class Segment(object):
                 print "Warning: Grid is not available on the system."
                 call(arglist[3:], shell=False)
         else:
+            os.environ["TMPDIR"] = "/tmp"
             call(arglist[3:], shell=False)
 
         # Remove files

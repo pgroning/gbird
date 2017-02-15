@@ -23,6 +23,7 @@ import os.path
 import re
 import numpy as np
 import ConfigParser
+import copy
 
 from multiprocessing import Pool
 from segment import Segment, DataStruct
@@ -38,9 +39,9 @@ def readcax_fun(tup):
 
 def quickcalc_fun(tup):
     """Wrapper function used for multithreaded quickcalc"""
-    case = tup[0]  # First argument should always be an instance of the class
-    case.quickcalc(*tup[1:])
-    return case
+    segment = tup[0]  # First argument should always be an instance of the class
+    segment.quickcalc(*tup[1:])
+    return segment
     # case, voi, maxdep, opt = tup
     # case.quickcalc(voi, maxdep, opt)
     # return case
@@ -186,29 +187,55 @@ class Bundle(object):
                  grid=True, model='c3', box_offset=0, neulib=False):
 
         # For storage of new calculation
+        #self.new_state()
+
+        #for s in self.states[-1].segments:
+        #    s.set_data(box_offset=box_offset)
+            
         # self.cases[i].add_state() 
 
-        # self.states.append(DataStruct)  # For storage of new BTF calculation
         # ----Code block only for testing purpose-----
+        #segments = self.states[0].segments
         # if not refcalc:
-        #    for i in range(len(self.cases)):
-        #        LFU = self.cases[i].states[0].LFU
+        #for i in range(len(self.states[0].segments)):
+        #    LFU = self.states[0].segments[i].data.LFU
+        #    FUE = self.states[0].segments[i].data.FUE
+        #    BA = self.states[0].segments[i].data.BA
+        #    voivec = self.states[0].segments[i].data.voivec
+        #    
+        #    self.states[-1].segments[i].set_data(LFU, FUE, BA, voivec)
+        #    #self.states[-1].segments[i].data.LFU = LFU
+        #    self.states
         #        self.cases[i].add_calc(LFU)
         #        #self.cases[i].data[-1].data.LFU = \
         #        #self.cases[i].data[0].data.LFU
         # --------------------------------------------
         inlist = []  # Bundle input args
-        for case in self.cases:
-            inlist.append((case, voi, maxdep, depthres, refcalc, grid,
+        
+        segments = self.states[-1].segments
+        for s in segments:
+            inlist.append((s, voi, maxdep, depthres, refcalc, grid,
                            model, box_offset, neulib))
-
-        # quickcalc_fun(inlist[1])
-        n = len(self.cases)  # Number of threads
+        
+        #quickcalc_fun(inlist[0])
+        n = len(segments)  # Number of threads
         p = Pool(n)  # Make the Pool of workers
-        self.cases = p.map(quickcalc_fun, inlist)
+        
+        self.states[-1].segments = p.map(quickcalc_fun, inlist)
+        #self.cases = p.map(quickcalc_fun, inlist)
         # cases = p.map(quickcalc_fun, self.cases)
         p.close()
         p.join()
+
+    def new_state(self):
+        """Append a list element to store new segment instancies"""
+
+        self.states.append(DataStruct())  # Add an new state element
+        self.states[-1].segments = []
+        for s in self.states[0].segments: # Add new segments
+            self.states[-1].segments.append(Segment())
+            # deep copy data from original state
+            self.states[-1].segments[-1].data = copy.deepcopy(s.data)
 
     def savepic(self, pfile):
         """Save objects to a python pickle file"""
