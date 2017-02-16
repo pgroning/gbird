@@ -39,6 +39,17 @@ class UnitTest(unittest.TestCase):
         b.readcax()
         self.assertTrue(len(b.states[0].segments) == 5, "reading cax files failed")
     
+    def test_readrun_all(self):
+        testfile = 'test/topol/bundle_opt2.inp'
+        b = Bundle(testfile)
+        b.readcax(read_all=True)
+        b.append_state()
+        b.new_calc()
+        self.assertEqual(len(b.states[0].segments[2].data.statepoints), 18500, 
+                        "read all failed")
+        self.assertEqual(len(b.states[1].segments[2].data.statepoints), 144, 
+                        "new calculation failed")
+
     #@unittest.skip("skip this test")
     def test_bundle_ave_enr(self):
         testfile = "test/topol/bundle_a10xm.inp"
@@ -54,11 +65,11 @@ class UnitTest(unittest.TestCase):
         testfile = "test/topol/bundle_a10xm.inp"
         b = Bundle(testfile)
         b.readcax()
-        b.new_state()
+        b.append_state()
         b.new_calc(grid=False)
         self.assertTrue(len(b.states[1].segments[4].data.statepoints) > 10, 
                         "new c3 calculation failed")
-        b.new_state()
+        b.append_state()
         b.new_calc(grid=False, voi=60, maxdep=20)
         self.assertEqual(b.states[2].segments[2].data.voivec, [60],
                         "void failed to update correctly")
@@ -66,21 +77,22 @@ class UnitTest(unittest.TestCase):
                          60, "Void is incorrect")
         self.assertEqual(b.states[2].segments[1].data.statepoints[-1].burnup,
                          20, "Max depletion is incorrect")
-        b.new_state()
+        b.append_state()
         b.new_calc(grid=False, depthres=20)
         self.assertTrue(len(b.states[3].segments[3].data.statepoints) > 10, 
                         "new c3 calculation with depthres failed")
-        b.new_state()
+        b.append_state()
         b.new_calc(box_offset=0.2)
         self.assertEqual(b.states[4].segments[1].data.box_offset, 0.2,
                         "box offset calculation failed")
         
-    @unittest.skip("skip test_new_calc_c4")
+    #@unittest.skip("skip test_new_calc_c4")
     def test_new_calc_c4(self):
         #testfile = "test/tosim/bundle_at11.inp"
         testfile = "test/topol/bundle_a10xm.inp"
         b = Bundle(testfile)
         b.readcax()
+        b.append_state()
         b.new_calc(grid=True, model='c4', voi=60)
         self.assertTrue(len(b.states[1].segments[0].data.statepoints) > 10, 
                         "new c4 calculation failed")
@@ -91,7 +103,7 @@ class UnitTest(unittest.TestCase):
         testfile = 'test/tosim/bundle_a10b.inp'
         b = Bundle(testfile)
         b.readcax()
-        b.new_state()
+        b.append_state()
         b.new_calc(grid=True)
         b.ave_enr_calc()
         self.assertTrue(b.states[1].ave_enr > 0, 
@@ -125,7 +137,7 @@ class UnitTest(unittest.TestCase):
         b = Bundle(testfile)
         b.readcax()
         b.new_btf()
-        b.new_state()
+        b.append_state()
         b.new_calc(grid=False, voi=50, depthres=20)
         b.new_btf()
         self.assertTrue(type(b.states[0].btf.DOX) is numpy.ndarray and 

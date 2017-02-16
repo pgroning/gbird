@@ -155,7 +155,7 @@ class Bundle(object):
         self.data.nodes = nodes
         self.data.btf_cases = btf_cases
     '''
-    def readcax(self, read_content=None):
+    def readcax(self, read_all=False):
         """Read multiple caxfiles using multithreading.
         Syntax:
         readcax() reads the first part of the file (where voi=vhi)
@@ -163,7 +163,7 @@ class Bundle(object):
 
         inlist = []  # Bundle input args
         for caxfile in self.data.caxfiles:
-            inlist.append((caxfile, read_content))
+            inlist.append((caxfile, read_all))
 
         n = len(self.data.caxfiles)  # Number of threads
         p = Pool(n)  # Make the Pool of workers
@@ -228,7 +228,7 @@ class Bundle(object):
         p.close()
         p.join()
 
-    def new_state(self):
+    def append_state(self):
         """Append a list element to store new segment instancies"""
 
         self.states.append(DataStruct())  # Add an new state element

@@ -645,7 +645,8 @@ class Segment(object):
             else:
                 burnlist.append(all_points)
         
-        # info = self.data[0]['info']  # Get info data from original import
+
+
         if hasattr(self.data, 'LFU'):
             LFU = self.data.LFU
         else:
@@ -973,7 +974,7 @@ class Segment(object):
         # self.add_state(LFU, FUE, voi)
         # ---------------------------------
 
-        file_base_name = "./tmp." + str(uuid.uuid4()).split('-')[0]        
+        file_base_name = "./tmp." + str(uuid.uuid4()).split('-')[0]
         self.writec3cai(file_base_name, voi, maxdep, depthres, box_offset)
         
         if model == 'c3':
