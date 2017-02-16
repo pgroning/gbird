@@ -597,16 +597,16 @@ class Segment(object):
         #    del self.states[2]
         #self.states.append(DataStruct())  # Add an new element to list
        
-        if LFU:
+        if LFU.any() is not None:
             self.data.LFU = LFU 
 
-        if FUE:
+        if FUE.any():
             self.data.FUE = FUE
 
-        if BA:
+        if BA.any():
             self.data.BA = BA
 
-        if LFU and FUE:
+        if LFU.any() and FUE.any():
             ENR = np.zeros(LFU.shape)
             Nfue = FUE[:, 0].size
             for i in range(Nfue):

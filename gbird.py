@@ -383,8 +383,10 @@ class MainWin(QtGui.QMainWindow):
         self.init_pinobjects()
         
         # Update case number list box
-        ncases = len(self.bundle.cases)
-        for i in range(1, ncases + 1):
+        state_num = self.state_index
+        nsegments = len(self.bundle.states[state_num].segments)
+        #ncases = len(self.bundle.cases)
+        for i in range(1, nsegments + 1):
             self.case_cbox.addItem(str(i))
         self.connect(self.case_cbox,
                      QtCore.SIGNAL('currentIndexChanged(int)'),
@@ -487,15 +489,15 @@ class MainWin(QtGui.QMainWindow):
     def init_pinobjects(self):
         self.pinobjects = []
         self.enrpinlist = []
-        ncases = len(self.bundle.cases)
 
         state_num = self.state_index
+        nsegments = len(self.bundle.states[state_num].segments)
 
-        for case_num in range(ncases):
-            LFU = self.bundle.cases[case_num].states[state_num].LFU
-            ENR = self.bundle.cases[case_num].states[state_num].ENR
-            BA = self.bundle.cases[case_num].states[state_num].BA
-
+        for iseg in range(nsegments):
+            LFU = self.bundle.states[state_num].segments[iseg].data.LFU
+            ENR = self.bundle.states[state_num].segments[iseg].data.ENR
+            BA = self.bundle.states[state_num].segments[iseg].data.BA
+            
             pinlist = []
             for i in range(LFU.shape[0]):
                 for j in range(LFU.shape[1]):
@@ -507,9 +509,9 @@ class MainWin(QtGui.QMainWindow):
                         pinobj.LFU = LFU[i, j]
                         pinlist.append(pinobj)
             self.pinobjects.append(pinlist)
-
+            
             enrlist = []
-            FUE = self.bundle.cases[case_num].states[state_num].FUE
+            FUE = self.bundle.states[state_num].segments[iseg].data.FUE
             enr_dens = FUE[:, 1]
             enr_levels = FUE[:, 2]
             enr_baindex = FUE[:, 3]
@@ -1003,52 +1005,53 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         # self.dataobj.cases[case_num].qcalc[0].LFU = self.__lfumap(case_num)
         # self.canvas.draw()
 
-    def __lfumap(self, case_num):
+    def __lfumap(self, iseg):
         """Creating LFU map from pinobjects"""
         
         # print "Creating LFU map"
         # case_num = int(self.case_cbox.currentIndex())
         
         # Initialize new LFU map and fill with zeros
-        LFU_old = self.bundle.cases[case_num].states[-1].LFU
-        # LFU_old = self.dataobj.cases[case_num].data.LFU
-        # LFU = np.zeros((LFU_old.shape[0],LFU_old.shape[1]));
+        LFU_old = self.bundle.states[-1].segments[iseg].data.LFU
+        # LFU_old = self.bundle.cases[case_num].states[-1].LFU
         LFU = np.zeros(LFU_old.shape).astype(int)
         
         k = 0
-        for i in range(LFU.shape[0]):
-            for j in range(LFU.shape[1]):
+        for i in xrange(LFU.shape[0]):
+            for j in xrange(LFU.shape[1]):
                 if LFU_old[i, j] > 0:
-                    LFU[i, j] = self.pinobjects[case_num][k].LFU
+                    LFU[i, j] = self.pinobjects[iseg][k].LFU
                     k += 1
         return LFU
 
-    def __fuemap(self, case_num):
+    def __fuemap(self, iseg):
         """Creating FUE map from enr level pins"""
 
-        FUE_old = self.bundle.cases[case_num].states[-1].FUE
-        nfue = len(self.enrpinlist[case_num])
+        FUE_old = self.bundle.states[-1].segments[iseg].data.FUE
+        #FUE_old = self.bundle.cases[case_num].states[-1].FUE
+        nfue = len(self.enrpinlist[iseg])
         FUE = np.zeros((nfue, FUE_old.shape[1])).astype(float)
-        for i in range(nfue):
+        for i in xrange(nfue):
             FUE[i, 0] = i + 1
-            FUE[i, 1] = self.enrpinlist[case_num][i].DENS
-            FUE[i, 2] = self.enrpinlist[case_num][i].ENR
-            FUE[i, 3] = self.enrpinlist[case_num][i].BAindex
-            FUE[i, 4] = self.enrpinlist[case_num][i].BA
+            FUE[i, 1] = self.enrpinlist[iseg][i].DENS
+            FUE[i, 2] = self.enrpinlist[iseg][i].ENR
+            FUE[i, 3] = self.enrpinlist[iseg][i].BAindex
+            FUE[i, 4] = self.enrpinlist[iseg][i].BA
         return FUE
 
-    def __bamap(self, case_num):
+    def __bamap(self, iseg):
         """Creating BA map from pinobjects"""
 
         # Initialize new BA map and fill with zeros
-        LFU = self.bundle.cases[case_num].states[-1].LFU
+        LFU = self.bundle.states[-1].segments[iseg].data.LFU
+        #LFU = self.bundle.cases[case_num].states[-1].LFU
         BA = np.zeros(LFU.shape).astype(float)
 
         k = 0
         for i in range(BA.shape[0]):
             for j in range(BA.shape[1]):
                 if LFU[i, j] > 0:
-                    BA[i, j] = self.pinobjects[case_num][k].BA
+                    BA[i, j] = self.pinobjects[iseg][k].BA
                     k += 1
         return BA
 
@@ -1060,14 +1063,18 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         
         chanbow = self.chanbow_sbox.value() / 10  # mm -> cm
 
-        for case_num in xrange(len(self.bundle.cases)):
-            LFU = self.__lfumap(case_num)
-            FUE = self.__fuemap(case_num)
-            BA = self.__bamap(case_num)
+        nsegments = len(self.bundle.states[state_num].segments)
+        for iseg in xrange(nsegments):
+            LFU = self.__lfumap(iseg)
+            FUE = self.__fuemap(iseg)
+            BA = self.__bamap(iseg)
             
-            # FUE = self.bundle.cases[case_num].states[-1].FUE
             voi = None
-            self.bundle.cases[case_num].add_state(LFU, FUE, BA, voi, chanbow)
+            self.bundle.append_state()
+            self.bundle.states[-1].segments[iseg].set_data(LFU, FUE, BA,
+                                                           voi, chanbow)
+            
+            #self.bundle.cases[case_num].add_state(LFU, FUE, BA, voi, chanbow)
 
         self.bundle.new_calc(model='c3')
         self.bundle.new_btf()
