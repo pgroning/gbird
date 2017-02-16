@@ -30,7 +30,7 @@ class Btf(object):
     def lastindex(self, case_id):
         """Iterate over burnup points"""
         
-        statepoints = self.bundle.states[-1].segments[case_id].data.statepoints
+        statepoints = self.bundle.states[-1].segments[case_id].statepoints
         burnup_old = 0.0
         for idx, p in enumerate(statepoints):
             if p.burnup < burnup_old:
@@ -45,10 +45,10 @@ class Btf(object):
         nsegments = len(segments)
         idx = self.lastindex(0)
         
-        x = [segments[0].data.statepoints[i].burnup for i in range(idx)]
+        x = [segments[0].statepoints[i].burnup for i in range(idx)]
         for j in range(1, nsegments):
             idx = self.lastindex(j)
-            x2 = ([segments[j].data.statepoints[i].burnup
+            x2 = ([segments[j].statepoints[i].burnup
                    for i in range(idx)])
             x = [val for val in x if val in x2]
         return x
@@ -74,14 +74,14 @@ class Btf(object):
             
             if int(voi) in voivec:
                 i1 = segments[i].findpoint(burnup=burnup, vhi=voi, voi=voi)
-                POW[i, :, :] = segments[i].data.statepoints[i1].POW
+                POW[i, :, :] = segments[i].statepoints[i1].POW
             else:
                 voi1 = max([x for x in voivec if x < voi])
                 i1 = segments[i].findpoint(burnup=burnup, vhi=voi1, voi=voi1)
                 voi2 = min([x for x in voivec if x > voi])
                 i2 = segments[i].findpoint(burnup=burnup, vhi=voi2, voi=voi2)
-                P1 = segments[i].data.statepoints[i1].POW
-                P2 = segments[i].data.statepoints[i2].POW
+                P1 = segments[i].statepoints[i1].POW
+                P2 = segments[i].statepoints[i2].POW
                 POW[i, :, :] = self.bundle.interp2(P1, P2, voi1, voi2, voi)
                 
         POW3 = self.bundle.pow3(POW, nodes)

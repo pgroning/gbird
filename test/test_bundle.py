@@ -39,15 +39,16 @@ class UnitTest(unittest.TestCase):
         b.readcax()
         self.assertTrue(len(b.states[0].segments) == 5, "reading cax files failed")
     
+    @unittest.skip("skip this test")
     def test_readrun_all(self):
         testfile = 'test/topol/bundle_opt2.inp'
         b = Bundle(testfile)
         b.readcax(read_all=True)
         b.append_state()
         b.new_calc()
-        self.assertEqual(len(b.states[0].segments[2].data.statepoints), 18500, 
+        self.assertEqual(18500, len(b.states[0].segments[2].statepoints), 
                         "read all failed")
-        self.assertEqual(len(b.states[1].segments[2].data.statepoints), 144, 
+        self.assertEqual(119, len(b.states[1].segments[2].statepoints), 
                         "new calculation failed")
 
     #@unittest.skip("skip this test")
@@ -67,19 +68,19 @@ class UnitTest(unittest.TestCase):
         b.readcax()
         b.append_state()
         b.new_calc(grid=False)
-        self.assertTrue(len(b.states[1].segments[4].data.statepoints) > 10, 
+        self.assertTrue(len(b.states[1].segments[4].statepoints) > 10, 
                         "new c3 calculation failed")
         b.append_state()
         b.new_calc(grid=False, voi=60, maxdep=20)
         self.assertEqual(b.states[2].segments[2].data.voivec, [60],
                         "void failed to update correctly")
-        self.assertEqual(b.states[2].segments[1].data.statepoints[-1].voi,
+        self.assertEqual(b.states[2].segments[1].statepoints[-1].voi,
                          60, "Void is incorrect")
-        self.assertEqual(b.states[2].segments[1].data.statepoints[-1].burnup,
+        self.assertEqual(b.states[2].segments[1].statepoints[-1].burnup,
                          20, "Max depletion is incorrect")
         b.append_state()
         b.new_calc(grid=False, depthres=20)
-        self.assertTrue(len(b.states[3].segments[3].data.statepoints) > 10, 
+        self.assertTrue(len(b.states[3].segments[3].statepoints) > 10, 
                         "new c3 calculation with depthres failed")
         b.append_state()
         b.new_calc(box_offset=0.2)
@@ -94,7 +95,7 @@ class UnitTest(unittest.TestCase):
         b.readcax()
         b.append_state()
         b.new_calc(grid=True, model='c4', voi=60)
-        self.assertTrue(len(b.states[1].segments[0].data.statepoints) > 10, 
+        self.assertTrue(len(b.states[1].segments[0].statepoints) > 10, 
                         "new c4 calculation failed")
 
     #@unittest.skip("skip this test")

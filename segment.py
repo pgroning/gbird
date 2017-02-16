@@ -219,33 +219,46 @@ class Segment(object):
         iSTA = self.__matchcontent(flines, '^\s*STA', 'next')
         print "Done."
 
-        do = DataStruct()  # Init data container object
+        #do = DataStruct()  # Init data container object
         # Read title
-        do.title = flines[iTTL[0]]
+        self.data.title = flines[iTTL[0]]
+        #do.title = flines[iTTL[0]]
         # SIM
-        do.sim = flines[iSIM[0]]
+        self.data.sim = flines[iSIM[0]]
+        #do.sim = flines[iSIM[0]]
         # TFU
-        do.tfu = flines[iTFU]
+        self.data.tfu = flines[iTFU]
+        #do.tfu = flines[iTFU]
         # TMO
-        do.tmo = flines[iTMO]
+        self.data.tmo = flines[iTMO]
+        #do.tmo = flines[iTMO]
         # VOI
-        do.voi = flines[iVOI[0]]
+        self.data.voi = flines[iVOI[0]]
+        #do.voi = flines[iVOI[0]]
         # PDE
-        do.pde = flines[iPDE]
+        self.data.pde = flines[iPDE]
+        #do.pde = flines[iPDE]
         # BWR
-        do.bwr = flines[iBWR]
+        self.data.bwr = flines[iBWR]
+        #do.bwr = flines[iBWR]
         # SPA
-        do.spa = flines[iSPA[0]]
+        self.data.spa = flines[iSPA[0]]
+        #do.spa = flines[iSPA[0]]
         # DEP
-        do.dep = flines[iDEP[0]]
+        self.data.dep = flines[iDEP[0]]
+        #do.dep = flines[iDEP[0]]
         # GAM
-        do.gam = flines[iGAM[0]]
+        self.data.gam = flines[iGAM[0]]
+        #do.gam = flines[iGAM[0]]
         # WRI
-        do.wri = flines[iWRI]
+        self.data.wri = flines[iWRI]
+        #do.wri = flines[iWRI]
         # STA
-        do.sta = flines[iSTA]
+        self.data.sta = flines[iSTA]
+        #do.sta = flines[iSTA]
         # CRD
-        do.crd = flines[iCRD[0]]
+        self.data.crd = flines[iCRD[0]]
+        #do.crd = flines[iCRD[0]]
 
         # get fuel dimension
         npst = int(flines[iBWR][5:7])
@@ -282,11 +295,11 @@ class Segment(object):
 
         Npin = PIN.shape[0]
         # self.pinlines = flines[iPIN[0]:iPIN[0]+Npin]
-        do.pinlines = flines[iPIN[0]:iPIN[0]+Npin]
+        self.data.pinlines = flines[iPIN[0]:iPIN[0]+Npin]
 
         # Read SLA
         if iSLA is not None:
-            do.slaline = flines[iSLA]
+            self.data.slaline = flines[iSLA]
 
         # ------Step through the state points----------
         print "Scanning state points..."
@@ -367,37 +380,60 @@ class Segment(object):
         fint = self.__fintcalc(POW)
 
         # Append state instancies
-        do.statepoints = []
+        #do.statepoints = []
+        self.statepoints = []
         for i in range(Nburnpts):
             # append new instance to list
-            do.statepoints.append(DataStruct())
-            do.statepoints[i].titcrd = titcrd[i]
-            do.statepoints[i].burnup = burnup[i]
-            do.statepoints[i].voi = voi[i]
-            do.statepoints[i].vhi = vhi[i]
-            do.statepoints[i].tfu = tfu[i]
-            do.statepoints[i].tmo = tmo[i]
-            do.statepoints[i].kinf = kinf[i]
-            do.statepoints[i].fint = fint[i]
-            do.statepoints[i].EXP = EXP[:, :, i]
+            self.statepoints.append(DataStruct())
+            #do.statepoints.append(DataStruct())
+            self.statepoints[i].titcrd = titcrd[i]
+            #do.statepoints[i].titcrd = titcrd[i]
+            self.statepoints[i].burnup = burnup[i]
+            #do.statepoints[i].burnup = burnup[i]
+            self.statepoints[i].voi = voi[i]
+            #do.statepoints[i].voi = voi[i]
+            self.statepoints[i].vhi = vhi[i]
+            #do.statepoints[i].vhi = vhi[i]
+            self.statepoints[i].tfu = tfu[i]
+            #do.statepoints[i].tfu = tfu[i]
+            self.statepoints[i].tmo = tmo[i]
+            #do.statepoints[i].tmo = tmo[i]
+            self.statepoints[i].kinf = kinf[i]
+            #do.statepoints[i].kinf = kinf[i]
+            self.statepoints[i].fint = fint[i]
+            #do.statepoints[i].fint = fint[i]
+            self.statepoints[i].EXP = EXP[:, :, i]
+            #do.statepoints[i].EXP = EXP[:, :, i]
             if iXFL:
-                do.statepoints[i].XFL1 = XFL1[:, :, i]
-                do.statepoints[i].XFL2 = XFL2[:, :, i]
-            do.statepoints[i].POW = POW[:, :, i]
+                self.statepoints[i].XFL1 = XFL1[:, :, i]
+                #do.statepoints[i].XFL1 = XFL1[:, :, i]
+                self.statepoints[i].XFL2 = XFL2[:, :, i]
+                #do.statepoints[i].XFL2 = XFL2[:, :, i]
+            self.statepoints[i].POW = POW[:, :, i]
+            #do.statepoints[i].POW = POW[:, :, i]
 
         # Saving geninfo
-        do.caxfile = caxfile
-        do.ENR = ENR
-        do.BA = BA
-        do.PIN = PIN
-        do.LPI = LPI
-        do.FUE = FUE
-        do.LFU = LFU
-        do.npst = npst
-        do.voivec = voivec
+        self.data.caxfile = caxfile
+        #do.caxfile = caxfile
+        self.data.ENR = ENR
+        #do.ENR = ENR
+        self.data.BA = BA
+        #do.BA = BA
+        self.data.PIN = PIN
+        #do.PIN = PIN
+        self.data.LPI = LPI
+        #do.LPI = LPI
+        self.data.FUE = FUE
+        #do.FUE = FUE
+        self.data.LFU = LFU
+        #do.LFU = LFU
+        self.data.npst = npst
+        #do.npst = npst
+        self.data.voivec = voivec
+        #do.voivec = voivec
         # Append data object to last list element
         #self.states[-1] = do
-        self.data = do
+        #self.data = do
 
     def __map2mat(self, caxmap, dim):
         M = np.zeros((dim, dim))
@@ -608,45 +644,64 @@ class Segment(object):
 
         # Creating dep strings
         info = self.data
-        voivec = info.voivec
+        #voivec = info.voivec
         # voivec = self.voivec()
         # voivec = (info.voi.split('*')[0].replace(',', ' ')
         #          .strip().split(' ')[1:])
         
-        if voi is not None:
-            if int(voi) in voivec:
-                bp_voivec = [int(voi)]
-            else:
-                bp_voivec = [voivec[0]]  # get burn points from first void
-        else:
-            bp_voivec = voivec
-        
-        if voi is not None:
+        if voi:
             voivec = [int(voi)]
             self.data.voivec = voivec
+        else:
+            voivec = self.data.voivec
+        
+        #if voi is not None:
+        #    if int(voi) in voivec:
+        #        bp_voivec = [int(voi)]
+        #    else:
+        #        bp_voivec = [voivec[0]]  # get burn points from first void
+        #else:
+        #    bp_voivec = voivec
+        
+        #if voi is not None:
+        #    voivec = [int(voi)]
+        #    self.data.voivec = voivec
         
         burnlist = []
-        for i, v in enumerate(bp_voivec):
-            all_points = self.burnpoints(voi=int(v))
-            
+        for i, v in enumerate(voivec):
             if maxdep:
-                red_points = [x for x in all_points if x <= maxdep]
-                burnlist.append(red_points)
+                dep_points = [0, 0.001, -maxdep]
             elif depthres:
-                lo_points = [x for x in all_points if x <= depthres]
-                # reduce number of points by taking every 5:th step in list
-                up_points = [x for x in all_points if x > depthres][5::5]
-                # concatenate lists
-                red_points = sum([lo_points, up_points], [])
-                # make sure last point is included
-                if red_points[-1] < all_points[-1]:
-                    red_points.append(all_points[-1])
-                burnlist.append(red_points)
+                dep_points = [0, 0.001, -depthres]
+                dep_next = -dep_points[-1] + 10
+                while dep_next < 60:
+                    dep_points.append(dep_next)
+                    dep_next += 10
+                dep_points.append(60)
             else:
-                burnlist.append(all_points)
+                dep_points = [0, 0.001, -60]
+            burnlist.append(dep_points)
         
-
-
+        #burnlist = []
+        #for i, v in enumerate(bp_voivec):
+        #    all_points = self.burnpoints(voi=int(v))
+        #    
+        #    if maxdep:
+        #        red_points = [x for x in all_points if x <= maxdep]
+        #        burnlist.append(red_points)
+        #    elif depthres:
+        #        lo_points = [x for x in all_points if x <= depthres]
+        #        # reduce number of points by taking every 5:th step in list
+        #        up_points = [x for x in all_points if x > depthres][5::5]
+        #        # concatenate lists
+        #        red_points = sum([lo_points, up_points], [])
+        #        # make sure last point is included
+        #        if red_points[-1] < all_points[-1]:
+        #            red_points.append(all_points[-1])
+        #        burnlist.append(red_points)
+        #    else:
+        #        burnlist.append(all_points)
+        
         if hasattr(self.data, 'LFU'):
             LFU = self.data.LFU
         else:
@@ -946,7 +1001,7 @@ class Segment(object):
         #    self.states[0].refcalc.statepoints = statepoints
         #else:
             # self.quickcalc_add(statepoints)
-        self.data.statepoints = statepoints
+        self.statepoints = statepoints
 
     #def quickcalc_add(self, statepoints):
     #    """Adds the quickcalc differencies to the initial state"""
@@ -1039,7 +1094,7 @@ class Segment(object):
         void and void history
         Syntax: pt = findpoint(burnup=burnup_val,vhi=vhi_val,voi=voi_val,
         tfu=tfu_val)"""
-        statepoints = self.data.statepoints
+        statepoints = self.statepoints
         
         if tfu is not None:
             pindex = next(i for i, p in enumerate(statepoints) if p.tfu == tfu)
