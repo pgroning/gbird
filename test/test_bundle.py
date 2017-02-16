@@ -1,5 +1,11 @@
 # python test/test_bundle.py
 #
+# Run single test:
+# $ python test_bundle.py UnitTest.test_append_state
+# Run all tests in directory test:
+# $ python -m unittest discover test
+#
+
 from IPython.core.debugger import Tracer
 import sys
 if sys.version_info < (2, 7):
@@ -146,5 +152,20 @@ class UnitTest(unittest.TestCase):
                         "new btf calculation failed")
         self.assertFalse(numpy.isnan(b.states[1].btf.DOX).any(), "Btf is NaN")
 
+    def test_append_state(self):
+        testfile = 'test/tosim/bundle_opt2.inp'
+        b = Bundle(testfile)
+        b.readcax()
+        b.append_state()
+        self.assertEqual(b.states[0].segments[1].data.LFU.any(),
+                         b.states[1].segments[1].data.LFU.any(),
+                         "LFU is not equal")
+        LFU_new = numpy.zeros((11, 11))
+        b.states[1].segments[1].data.LFU = LFU_new
+        self.assertNotEqual(b.states[0].segments[1].data.LFU.any(),
+                         b.states[1].segments[1].data.LFU.any(),
+                         "LFU is equal")
+        
+        
 if __name__ == '__main__':
     unittest.main()

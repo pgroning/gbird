@@ -235,8 +235,9 @@ class Bundle(object):
         self.states[-1].segments = []
         for s in self.states[0].segments: # Add new segments
             self.states[-1].segments.append(Segment())
-            # deep copy data from original state
-            self.states[-1].segments[-1].data = copy.deepcopy(s.data)
+            # copy data from original state
+            self.states[-1].segments[-1].data = copy.copy(s.data)
+            #self.states[-1].segments[-1].data = copy.deepcopy(s.data)
 
     def savepic(self, pfile):
         """Save objects to a python pickle file"""
