@@ -634,7 +634,7 @@ class Segment(object):
     #              .strip().split(' ')[1:])
     #    return voids
 
-    def writec3cai(self, file_base_name, voi=None, maxdep=None, depthres=None,
+    def writec3cai(self, file_base_name, voi=None, maxdep=60, depthres=None,
                    box_offset=0.0):
         # filebasename = "./" + str(uuid.uuid4())
         c3inp = file_base_name + ".inp"
@@ -666,20 +666,21 @@ class Segment(object):
         #if voi is not None:
         #    voivec = [int(voi)]
         #    self.data.voivec = voivec
-        
+
+        if not maxdep:
+            maxdep = 60
+
         burnlist = []
-        for i, v in enumerate(voivec):
-            if maxdep:
-                dep_points = [0, 0.001, -maxdep]
-            elif depthres:
+        for v in voivec:
+            if depthres:
                 dep_points = [0, 0.001, -depthres]
                 dep_next = -dep_points[-1] + 10
-                while dep_next < 60:
+                while dep_next < maxdep:
                     dep_points.append(dep_next)
                     dep_next += 10
-                dep_points.append(60)
+                dep_points.append(maxdep)
             else:
-                dep_points = [0, 0.001, -60]
+                dep_points = [0, 0.001, -maxdep]
             burnlist.append(dep_points)
         
         #burnlist = []
@@ -1018,8 +1019,8 @@ class Segment(object):
     #    # EXP = self.__expcalc(POW, burnup)
     #    # Tracer()()
 
-    def quickcalc(self, voi=None, maxdep=None, depthres=None, refcalc=False,
-                  grid=True, model='c3', box_offset=0, neulib=False):
+    def quickcalc(self, voi=None, maxdep=60, depthres=None, refcalc=False,
+                  grid=True, model='c3', box_offset=0.0, neulib=False):
 
         tic = time.time()
         # # LFU is set to original state only for testing purpose

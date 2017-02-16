@@ -183,7 +183,7 @@ class Bundle(object):
         #     case.data.topnode = self.data.nodes[i]
         #     self.cases.append(case)
 
-    def new_calc(self, voi=None, maxdep=None, depthres=None, refcalc=False,
+    def new_calc(self, voi=None, maxdep=60, depthres=None, refcalc=False,
                  grid=False, model='c3', box_offset=0, neulib=False):
 
         # For storage of new calculation
