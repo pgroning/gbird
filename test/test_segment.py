@@ -47,7 +47,7 @@ class UnitTest(unittest.TestCase):
         Nstatepoints = len(s.statepoints)
         self.assertEqual(153, Nstatepoints, 
                          "Number of state points is incorrect")
-        self.assertListEqual([40, 0, 80], s.data.voivec,
+        self.assertListEqual([40, 0, 80], s.data.voilist,
                          "void list is incorrect")
 
     #@unittest.skip("test_readcax_topol_atxm_all")
@@ -67,11 +67,11 @@ class UnitTest(unittest.TestCase):
                         "Number of state points is incorrect")
         self.assertEqual(s.data.voivec, [0, 40, 80])
 
-    #@unittest.skip("test_get_voivec")
-    def test_get_voivec(self):
+    #@unittest.skip("test_get_voilist")
+    def test_get_voilist(self):
         testfile = "test/tosim/OPT2/12g30mid/e32OPT2-390-12g30mid-cas.cax"
         s = Segment(testfile)
-        self.assertEqual(s.data.voivec, [0, 40, 80])
+        self.assertEqual(s.data.voilist, [0, 40, 80])
     
     #@unittest.skip("skip this test")
     def test_ave_enr(self):

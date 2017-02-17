@@ -78,7 +78,7 @@ class UnitTest(unittest.TestCase):
                         "new c3 calculation failed")
         b.append_state()
         b.new_calc(grid=False, voi=60, maxdep=20)
-        self.assertEqual(b.states[2].segments[2].data.voivec, [60],
+        self.assertEqual(b.states[2].segments[2].data.voilist, [60],
                         "void failed to update correctly")
         self.assertEqual(b.states[2].segments[1].statepoints[-1].voi,
                          60, "Void is incorrect")

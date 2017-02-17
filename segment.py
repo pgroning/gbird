@@ -154,7 +154,7 @@ class Segment(object):
         # self.__flines = flines
 
         # Find last index containing voids voi=vhi
-        voilist = []  # temporary list of voids
+        tmp_voilist = []  # temporary list of voids
         # if read_content != 'all':
         oTIT = self.__matchcontent(flines, '^TIT', 'object')
         while True:
@@ -167,12 +167,12 @@ class Segment(object):
             voi, vhi = rstr[1], rstr[2]
             if voi != vhi:
                 break
-            voilist.append(voi)
+            tmp_voilist.append(voi)
         # Reduce to a unique list and also keep the order
         tmp = []
-        voilist = [x for x in voilist if x not in tmp and (tmp.append(x)
-                                                           or True)]
-        voivec = map(int, map(float, voilist))
+        tmp_voilist = [x for x in tmp_voilist if x not in tmp and (tmp.append(x)
+                                                                   or True)]
+        voilist = map(int, map(float, tmp_voilist))
 
         if not read_all:
             flines = flines[:i]  # Reduce the number of lines in list
@@ -430,7 +430,7 @@ class Segment(object):
         #do.LFU = LFU
         self.data.npst = npst
         #do.npst = npst
-        self.data.voivec = voivec
+        self.data.voilist = voilist
         #do.voivec = voivec
         # Append data object to last list element
         #self.states[-1] = do
@@ -616,7 +616,7 @@ class Segment(object):
             self.data.ENR = ENR
         
         if voi is not None:
-            self.data.voivec = [int(voi)]
+            self.data.voilist = [int(voi)]
         
         self.data.box_offset = box_offset
         
@@ -651,10 +651,10 @@ class Segment(object):
         #          .strip().split(' ')[1:])
         
         if voi:
-            voivec = [int(voi)]
-            self.data.voivec = voivec
+            voilist = [int(voi)]
+            self.data.voilist = voilist
         else:
-            voivec = self.data.voivec
+            voilist = self.data.voilist
         
         #if voi is not None:
         #    if int(voi) in voivec:
@@ -672,7 +672,7 @@ class Segment(object):
             maxdep = 60
 
         burnlist = []
-        for v in voivec:
+        for v in voilist:
             if depthres:
                 dep_points = [0, 0.001, -depthres]
                 dep_next = -dep_points[-1] + 10
@@ -722,8 +722,8 @@ class Segment(object):
         if voi is None:
             # voivec = info.voi.split('*')[0].replace(',', ' ')\
             #                                      .strip().split(' ')[1:]
-            tit = tit + "VOI=" + str(voivec[0]) + " "
-            ide = ["'BD" + str(x) + "'" for x in voivec]
+            tit = tit + "VOI=" + str(voilist[0]) + " "
+            ide = ["'BD" + str(x) + "'" for x in voilist]
             f.write(tit + "IDE=" + ide[0] + '\n')
         else:
             tit = tit + "VOI=" + str(voi) + " "
@@ -815,7 +815,7 @@ class Segment(object):
                 # f.write(tit + "IDE=" + ide[i] + '\n')
                 res = "RES," + ide[i-1] + ",0"
                 f.write(res + '\n')
-                f.write("VOI " + str(voivec[i]) + '\n')
+                f.write("VOI " + str(voilist[i]) + '\n')
 
                 f.write("DEP" + '\n')
                 for x in burnlist[i]:

@@ -70,15 +70,15 @@ class Btf(object):
         
         # determine which voids are present in data
         for i in range(nsegments):
-            voivec = segments[i].data.voivec
+            voilist = segments[i].data.voilist
             
-            if int(voi) in voivec:
+            if int(voi) in voilist:
                 i1 = segments[i].findpoint(burnup=burnup, vhi=voi, voi=voi)
                 POW[i, :, :] = segments[i].statepoints[i1].POW
             else:
-                voi1 = max([x for x in voivec if x < voi])
+                voi1 = max([x for x in voilist if x < voi])
                 i1 = segments[i].findpoint(burnup=burnup, vhi=voi1, voi=voi1)
-                voi2 = min([x for x in voivec if x > voi])
+                voi2 = min([x for x in voilist if x > voi])
                 i2 = segments[i].findpoint(burnup=burnup, vhi=voi2, voi=voi2)
                 P1 = segments[i].statepoints[i1].POW
                 P2 = segments[i].statepoints[i2].POW
