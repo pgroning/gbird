@@ -168,7 +168,7 @@ class Bundle(object):
         n = len(self.data.caxfiles)  # Number of threads
         p = Pool(n)  # Make the Pool of workers
         # Start processes in their own threads and return the results
-        self.states[0].segments = p.map(readcax_fun, inlist)
+        self.states[-1].segments = p.map(readcax_fun, inlist)
         #self.cases = p.map(readcax_fun, inlist)
         # self.cases = p.map(casdata, self.data.caxfiles)
         p.close()

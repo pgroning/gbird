@@ -99,8 +99,10 @@ def s96o2(self):
     self.ylist  = ('A','B','C','D','E','F','G','H','I','J')
     
     # Draw pin circles
-    npst = self.bundle.cases[case_num].states[0].npst
-    LFU = self.bundle.cases[case_num].states[state_num].LFU
+    npst = self.bundle.states[0].segments[case_num].data.npst
+    #npst = self.bundle.cases[case_num].states[0].npst
+    LFU = self.bundle.states[0].segments[case_num].data.LFU
+    #LFU = self.bundle.cases[case_num].states[state_num].LFU
     # Remove water cross rows and columns
     LFU = np.delete(LFU, (5), axis=0) # Delete row 6
     LFU = np.delete(LFU, (5), axis=1) # Delete col 6

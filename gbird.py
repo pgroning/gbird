@@ -640,17 +640,19 @@ class MainWin(QtGui.QMainWindow):
         """Update values"""
 
         param_str = str(self.param_cbox.currentText())
-        case_num = int(self.case_cbox.currentIndex())
+        iseg = int(self.case_cbox.currentIndex())
         point_num = int(self.point_sbox.value())
         state_num = self.state_index
 
-        state = self.bundle.cases[case_num].states[state_num]
+        segment = self.bundle.states[state_num].segments[iseg]
+        #state = self.bundle.cases[case_num].states[state_num]
+        
+        ENR = segment.data.ENR
+        
+        EXP = segment.statepoints[point_num].EXP
+        FINT = segment.statepoints[point_num].POW
 
-        ENR = state.ENR
-        EXP = state.statepoints[point_num].EXP
-        FINT = state.statepoints[point_num].POW
-
-        burnup = state.statepoints[point_num].burnup
+        burnup = segment.statepoints[point_num].burnup
         btf_burnpoints = self.bundle.states[state_num].btf.burnpoints
 
         index_array = np.where(btf_burnpoints == burnup)[0]
@@ -661,9 +663,10 @@ class MainWin(QtGui.QMainWindow):
             BTF = np.zeros(np.shape(self.bundle.states[state_num].btf.DOX)[1:])
             BTF.fill(np.nan)
 
-        npst = self.bundle.cases[case_num].states[0].npst
-        LFU = state.LFU
-        BA = state.BA
+        npst = segment.data.npst
+        #npst = self.bundle.cases[case_num].states[0].npst
+        LFU = segment.data.LFU
+        BA = segment.data.BA
 
         # Sorting table column 0 in ascending order
         self.table.sortItems(0, QtCore.Qt.AscendingOrder)
@@ -673,9 +676,9 @@ class MainWin(QtGui.QMainWindow):
         for i in range(npst):
             for j in range(npst):
                 if LFU[i, j] > 0:
-                    self.pinobjects[case_num][k].EXP = EXP[i, j]
-                    self.pinobjects[case_num][k].FINT = FINT[i, j]
-                    self.pinobjects[case_num][k].BTF = BTF[i, j]
+                    self.pinobjects[iseg][k].EXP = EXP[i, j]
+                    self.pinobjects[iseg][k].FINT = FINT[i, j]
+                    self.pinobjects[iseg][k].BTF = BTF[i, j]
 
                     expItem = QtGui.QTableWidgetItem()
                     expItem.setData(QtCore.Qt.EditRole, QtCore.QVariant(
@@ -692,7 +695,8 @@ class MainWin(QtGui.QMainWindow):
                     self.table.setItem(k, 3, btfItem)
                     k += 1
         
-        statepoint = state.statepoints[point_num]
+        statepoint = segment.statepoints[point_num]
+        #statepoint = state.statepoints[point_num]
         burnup = statepoint.burnup
         voi = statepoint.voi
         vhi = statepoint.vhi
@@ -707,42 +711,42 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                                      % (burnup, voi, vhi, kinf, fint, btf,
                                         tfu, tmo))
         
-        npins = len(self.pinobjects[case_num])
+        npins = len(self.pinobjects[iseg])
         
         for i in xrange(npins):
             
-            if self.pinobjects[case_num][i].BA < 0.00001:
-                j = next(j for j, epin in enumerate(self.enrpinlist[case_num])
-                         if epin.ENR == self.pinobjects[case_num][i].ENR)
+            if self.pinobjects[iseg][i].BA < 0.00001:
+                j = next(j for j, epin in enumerate(self.enrpinlist[iseg])
+                         if epin.ENR == self.pinobjects[iseg][i].ENR)
             else:
-                j = next(j for j, epin in enumerate(self.enrpinlist[case_num])
-                         if epin.BA == self.pinobjects[case_num][i].BA
-                         and epin.ENR == self.pinobjects[case_num][i].ENR)
-            self.pinobjects[case_num][i].LFU = j + 1
-            fc = self.enrpinlist[case_num][j].circle.get_facecolor()
-            self.pinobjects[case_num][i].circle.set_facecolor(fc)
+                j = next(j for j, epin in enumerate(self.enrpinlist[iseg])
+                         if epin.BA == self.pinobjects[iseg][i].BA
+                         and epin.ENR == self.pinobjects[iseg][i].ENR)
+            self.pinobjects[iseg][i].LFU = j + 1
+            fc = self.enrpinlist[iseg][j].circle.get_facecolor()
+            self.pinobjects[iseg][i].circle.set_facecolor(fc)
 
             if param_str == "ENR":
-                text = self.enrpinlist[case_num][j].text.get_text()
+                text = self.enrpinlist[iseg][j].text.get_text()
                 
             elif param_str == "BTF":
-                btf_ratio = self.pinobjects[case_num][i].BTF / btf * 1000
+                btf_ratio = self.pinobjects[iseg][i].BTF / btf * 1000
                 if int(btf_ratio) == 1000:
                     text = "1e3"
                 else:
                     text = ('%.0f' % (btf_ratio))
                 
             elif param_str == "EXP":
-                if self.pinobjects[case_num][i].EXP < 10:
-                    text = ('%.1f' % (self.pinobjects[case_num][i].EXP))
+                if self.pinobjects[iseg][i].EXP < 10:
+                    text = ('%.1f' % (self.pinobjects[iseg][i].EXP))
                 else:
-                    text = ('%.0f' % (self.pinobjects[case_num][i].EXP))
+                    text = ('%.0f' % (self.pinobjects[iseg][i].EXP))
 
             elif param_str == "FINT":
-                text = ('%.0f' % (self.pinobjects[case_num][i].FINT * 100))
+                text = ('%.0f' % (self.pinobjects[iseg][i].FINT * 100))
 
-            self.pinobjects[case_num][i].text.remove()
-            self.pinobjects[case_num][i].set_text(text)
+            self.pinobjects[iseg][i].text.remove()
+            self.pinobjects[iseg][i].set_text(text)
 
         self.canvas.draw()
 
@@ -929,21 +933,22 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
     def enr_update(self):
         """Update enr value in info fields"""
 
-        case_num = int(self.case_cbox.currentIndex())
-        LFU = self.__lfumap(case_num)
-        FUE = self.__fuemap(case_num)
-        state_num = self.state_index
-        self.bundle.cases[case_num].ave_enr(state_num, LFU, FUE)
+        iseg = int(self.case_cbox.currentIndex())
+        LFU = self.__lfumap(iseg)
+        FUE = self.__fuemap(iseg)
+        istate = self.state_index
+        
+        self.bundle.states[istate].segments[iseg].ave_enr_calc()
+        #self.bundle.cases[case_num].ave_enr(state_num, LFU, FUE)
 
-        ave_enr = self.bundle.cases[case_num].states[state_num].ave_enr
-
+        ave_enr = self.bundle.states[istate].segments[iseg].data.ave_enr
         #ave_enr = self.bundle.cases[case_num].states[state_num].ave_enr
+
         self.ave_enr_text.setText("%.5f" % ave_enr)
 
-        #print "state num = " + str(state_num)
-        #qtrace()
-        self.bundle.ave_enr(state_num)
-        bundle_enr = self.bundle.states[state_num].ave_enr
+        self.bundle.ave_enr_calc(istate)
+        #self.bundle.ave_enr(state_num)
+        bundle_enr = self.bundle.states[istate].ave_enr
         self.bundle_enr_text.setText("%.5f" % bundle_enr)
 
     def enr_modify(self, mod, case_num=None, ipin=None):
@@ -1064,13 +1069,13 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         chanbow = self.chanbow_sbox.value() / 10  # mm -> cm
 
         nsegments = len(self.bundle.states[state_num].segments)
+        self.bundle.append_state()
+
         for iseg in xrange(nsegments):
             LFU = self.__lfumap(iseg)
             FUE = self.__fuemap(iseg)
             BA = self.__bamap(iseg)
-            
             voi = None
-            self.bundle.append_state()
             self.bundle.states[-1].segments[iseg].set_data(LFU, FUE, BA,
                                                            voi, chanbow)
             
@@ -1102,8 +1107,9 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.set_pinvalues()
 
         # Update info field
-        case_num = int(self.case_cbox.currentIndex())
-        sim = self.bundle.cases[case_num].states[0].sim
+        iseg = int(self.case_cbox.currentIndex())
+        sim = self.bundle.states[0].segments[iseg].data.sim
+        #sim = self.bundle.cases[case_num].states[0].sim
         text = sim.replace("SIM", "").replace("'", "").strip()
         self.sim_text.setText(text)
 
@@ -1635,7 +1641,9 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
     def back_state(self):
         """Back to previous state"""
-        nstates = len(self.bundle.cases[0].states)
+        
+        nstates = len(self.bundle.states)
+        #nstates = len(self.bundle.cases[0].states)
         if self.state_index < 0:
             self.state_index = nstates - self.state_index
         self.state_index -= 1
@@ -1644,11 +1652,12 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         else:
             self.init_pinobjects()
             self.fig_update()
-        #print self.state_index
         
     def forward_state(self):
         """Forward to next state"""
-        nstates = len(self.bundle.cases[0].states)
+
+        nstates = len(self.bundle.states)
+        #nstates = len(self.bundle.cases[0].states)
         if self.state_index < 0:
             self.state_index = nstates - self.state_index
         self.state_index += 1
@@ -1657,7 +1666,6 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         else:
             self.init_pinobjects()
             self.fig_update()
-        #print self.state_index
 
     def add_actions(self, target, actions):
         for action in actions:
