@@ -161,7 +161,7 @@ class UnitTest(unittest.TestCase):
                          b.states[1].segments[1].data.LFU.any(),
                          "LFU is not equal")
         LFU_new = numpy.zeros((11, 11))
-        b.states[1].segments[1].data.LFU = LFU_new
+        b.states[1].segments[1].set_data(LFU=LFU_new)
         self.assertNotEqual(b.states[0].segments[1].data.LFU.any(),
                          b.states[1].segments[1].data.LFU.any(),
                          "LFU is equal")

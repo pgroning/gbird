@@ -25,6 +25,7 @@ import time
 from subprocess import call, STDOUT
 import uuid  # used for random generated file names
 import shlex  # used for splitting subprocess call argument string into a list
+
 '''
 #from multiprocessing import Pool
 #from btf import btf
@@ -597,16 +598,16 @@ class Segment(object):
         #    del self.states[2]
         #self.states.append(DataStruct())  # Add an new element to list
        
-        if LFU.any() is not None:
-            self.data.LFU = LFU 
-
-        if FUE.any():
+        if LFU is not None:
+            self.data.LFU = LFU
+        
+        if FUE is not None:
             self.data.FUE = FUE
-
-        if BA.any():
+        
+        if BA is not None:
             self.data.BA = BA
-
-        if LFU.any() and FUE.any():
+        
+        if (LFU is not None) and (FUE is not None):
             ENR = np.zeros(LFU.shape)
             Nfue = FUE[:, 0].size
             for i in range(Nfue):
@@ -614,11 +615,11 @@ class Segment(object):
                 ENR[LFU == ifu] = FUE[i, 2]
             self.data.ENR = ENR
         
-        if voi:
+        if voi is not None:
             self.data.voivec = [int(voi)]
-
+        
         self.data.box_offset = box_offset
-
+        
         #
         #if voi is None:
         #    voivec = self.states[0].voivec
