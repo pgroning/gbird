@@ -123,6 +123,7 @@ def s96o2(self):
                 self.pinobjects[case_num][k].coord = (self.ylist[i]
                                                       + self.xlist[j])
                 self.pinobjects[case_num][k].set_text()
+                self.axes.add_patch(self.pinobjects[case_num][k].rectangle)
                 self.axes.add_patch(self.pinobjects[case_num][k].circle)
                 k += 1
     

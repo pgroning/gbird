@@ -117,6 +117,13 @@ class cpin(object):
         except:
             pass
 
+        # Set background
+        d = r*2*1.35
+        self.rectangle = mpatches.Rectangle((x-d/2, y-d/2), d, d,
+                                            fc=(1,1,0), alpha=0.5, ec=(0, 0, 0))
+        self.rectangle.set_fill(True)
+        self.rectangle.set_linewidth(0.0)
+        
     def set_text(self, string='', fsize=8):
         # if hasattr(self,'text'):
         #    self.text.remove()
