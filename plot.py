@@ -65,13 +65,12 @@ class PlotWin(QtGui.QMainWindow):
     #    #self.cas = casio()
     #    #self.cas.loadpic('caxfiles.p')
 
-    def plot_kinf(self, case_id, state_num=-1, linestyle="-"):
+    def plot_kinf(self, case_id, istate=-1, linestyle="-"):
         
-        # case = self.cas.cases[case_id]
-        case = self.parent.bundle.cases[case_id]
-        idx0 = self.startpoint(case_id)
-        # statepts = case.statepts[idx0:]
-        statepoints = case.states[state_num].statepoints[idx0:]
+        segment = self.parent.bundle.states[istate].segments[case_id]
+        #case = self.parent.bundle.cases[case_id]
+        idx0 = self.startpoint(case_id, istate)
+        statepoints = segment.statepoints[idx0:]
         
         burnup_old = 0.0
         for idx, p in enumerate(statepoints):
@@ -82,7 +81,7 @@ class PlotWin(QtGui.QMainWindow):
         x = [statepoints[i].burnup for i in range(idx)]
         y = [statepoints[i].kinf for i in range(idx)]
         
-        labstr = case.states[0].sim
+        labstr = segment.data.sim
         labstr = labstr.replace("SIM", "").replace("'", "").strip()
         # labstr = case.states[0].caxfile
         # labstr = os.path.split(labstr)[1]
@@ -95,11 +94,11 @@ class PlotWin(QtGui.QMainWindow):
         self.canvas.draw()
         self.on_draw()
 
-    def plot_fint(self, case_id, state_num=-1, linestyle="-"):
+    def plot_fint(self, case_id, istate=-1, linestyle="-"):
 
-        case = self.parent.bundle.cases[case_id]
-        idx0 = self.startpoint(case_id)
-        statepoints = case.states[state_num].statepoints[idx0:]
+        segment = self.parent.bundle.states[istate].segments[case_id]
+        idx0 = self.startpoint(case_id, istate)
+        statepoints = segment.statepoints[idx0:]
 
         burnup_old = 0.0
         for idx, p in enumerate(statepoints):
@@ -110,7 +109,7 @@ class PlotWin(QtGui.QMainWindow):
         x = [statepoints[i].burnup for i in range(idx)]
         y = [statepoints[i].fint for i in range(idx)]
 
-        labstr = case.states[0].sim
+        labstr = segment.data.sim
         labstr = labstr.replace("SIM", "").replace("'", "").strip()
         # labstr = case.states[-1].caxfile
         # labstr = os.path.split(labstr)[1]
@@ -123,15 +122,15 @@ class PlotWin(QtGui.QMainWindow):
         self.canvas.draw()
         self.on_draw()
 
-    def plot_btf(self, case_id, state_num=-1, linestyle="-"):
+    def plot_btf(self, case_id, istate=-1, linestyle="-"):
         
         # x = self.cas.btf.burnpoints
-        x = self.parent.bundle.states[state_num].btf.burnpoints
+        x = self.parent.bundle.states[istate].btf.burnpoints
         # DOX = self.cas.btf.DOX
-        DOX = self.parent.bundle.states[state_num].btf.DOX
+        DOX = self.parent.bundle.states[istate].btf.DOX
         y = [elem.max() for elem in DOX]
         self.axes.plot(x, y, linestyle=linestyle)
-        
+
         self.axes.set_xlabel('Burnup (MWd/kgU)')
         self.axes.set_ylabel('BTF')
         self.on_draw()
@@ -186,18 +185,18 @@ class PlotWin(QtGui.QMainWindow):
         
         self.canvas.draw()
 
-    def startpoint(self, case_id):
+    def startpoint(self, case_id, istate):
         voi_val = int(self.voi_cbox.currentText())
         vhi_val = int(self.vhi_cbox.currentText())
         type_val = str(self.type_cbox.currentText())
         
-        # case = self.cas.cases[case_id]
-        case = self.parent.bundle.cases[case_id]
+        segment = self.parent.bundle.states[istate].segments[case_id]
+        #case = self.parent.bundle.cases[case_id]
         
         if type_val == 'CCl':
-            idx0 = case.findpoint(tfu=293)
-            voi = case.statepts[idx0].voi
-            vhi = case.statepts[idx0].vhi
+            idx0 = segment.findpoint(tfu=293)
+            voi = segment.statepts[idx0].voi
+            vhi = segment.statepts[idx0].vhi
             voi_index = [i for i, v in enumerate(self.voilist)
                          if int(v) == voi][0]
             vhi_index = [i for i, v in enumerate(self.vhilist)
@@ -205,14 +204,14 @@ class PlotWin(QtGui.QMainWindow):
             self.voi_cbox.setCurrentIndex(voi_index)
             self.vhi_cbox.setCurrentIndex(vhi_index)
         else:
-            idx0 = case.findpoint(voi=voi_val, vhi=vhi_val)
+            idx0 = segment.findpoint(voi=voi_val, vhi=vhi_val)
         return idx0
 
     def on_plot(self):
         
         case_id = self.case_id_current
-        # case_id_max = len(self.cas.cases)
-        case_id_max = len(self.parent.bundle.cases)
+        case_id_max = len(self.parent.bundle.states[-1].segments)
+        #case_id_max = len(self.parent.bundle.cases)
         param = self.param_cbox.currentText()
         
         self.axes.clear()
@@ -225,7 +224,7 @@ class PlotWin(QtGui.QMainWindow):
                 # idx0 = self.startpoint(case_id)
                 self.plot_kinf(case_id)
                 if self.original_cb.isChecked():
-                    self.plot_kinf(case_id, state_num=0, linestyle="--")
+                    self.plot_kinf(case_id, istate=0, linestyle="--")
 
         elif param == 'Fint':
             if self.case_cb.isChecked():
@@ -234,7 +233,7 @@ class PlotWin(QtGui.QMainWindow):
             else:
                 self.plot_fint(case_id)
                 if self.original_cb.isChecked():
-                    self.plot_fint(case_id, state_num=0, linestyle="--")
+                    self.plot_fint(case_id, istate=0, linestyle="--")
 
         elif param == 'BTF':
             if self.case_cb.isChecked():
@@ -243,7 +242,7 @@ class PlotWin(QtGui.QMainWindow):
             else:
                 self.plot_btf(case_id)
                 if self.original_cb.isChecked():
-                    self.plot_btf(case_id, state_num=0, linestyle="--")
+                    self.plot_btf(case_id, istate=0, linestyle="--")
  
 
 #    def on_index(self):
@@ -353,18 +352,22 @@ class PlotWin(QtGui.QMainWindow):
         voi_label = QtGui.QLabel('VOI:')
         self.voi_cbox = QtGui.QComboBox()
         # self.voilist = ['0', '40', '80']
-        self.voilist = (self.parent.bundle.cases[self.case_id_current]
-                        .states[-1].voivec)
+        iseg = self.case_id_current
+        self.voilist = (self.parent.bundle.states[-1].
+                        segments[iseg].data.voilist)
+
+        #self.voilist = (self.parent.bundle.cases[self.case_id_current]
+        #                .states[-1].voivec)
         # self.voilist = map(str, self.voilist)
         
         for v in self.voilist:
             self.voi_cbox.addItem(str(v))
         # Determine voi index
-        voi = (self.parent.bundle.cases[self.case_id_current].states[-1]
-               .statepoints[0].voi)
+        voi = (self.parent.bundle.states[-1].segments[iseg].statepoints[0].voi)
+        #voi = (self.parent.bundle.cases[self.case_id_current].states[-1]
+        #       .statepoints[0].voi)
         # voi = self.cas.cases[self.case_id_current].statepts[0].voi
         voi_index = [i for i, v in enumerate(self.voilist) if int(v) == voi]
-        
         voi_index = voi_index[0]
         self.voi_cbox.setCurrentIndex(voi_index)
         # self.connect(self.voi_cbox, SIGNAL('currentIndexChanged(int)'),
@@ -377,9 +380,9 @@ class PlotWin(QtGui.QMainWindow):
             self.vhi_cbox.addItem(str(v))
         
         # Determine vhi index
-        # vhi = self.cas.cases[self.case_id_current].statepts[0].vhi
-        vhi = (self.parent.bundle.cases[self.case_id_current].states[-1]
-               .statepoints[0].vhi)
+        vhi = (self.parent.bundle.states[-1].segments[iseg].statepoints[0].vhi)
+        #vhi = (self.parent.bundle.cases[self.case_id_current].states[-1]
+        #       .statepoints[0].vhi)
         vhi_index = [i for i, v in enumerate(self.vhilist) if int(v) == vhi]
         vhi_index = vhi_index[0]
         self.vhi_cbox.setCurrentIndex(vhi_index)
