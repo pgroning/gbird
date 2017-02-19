@@ -52,14 +52,17 @@ def a10xm(self):
     LFU = self.bundle.states[0].segments[case_num].data.LFU
     #LFU = self.bundle.cases[case_num].states[state_num].LFU
     
-    pin_radius = 0.028*1.1
-    pin_delta = 0.083
+    #pin_radius = 0.0308
+    pin_radius = 0.028+0.002
+    pin_delta = 0.078+0.0045
+    #pin_delta = 0.083
 
     k = 0
     for i in range(LFU.shape[0]):
         for j in range(LFU.shape[1]):
             x = 0.13 + j*pin_delta
-            y = 0.879 - i*pin_delta
+            #y = 0.879 - i*pin_delta
+            y = 0.875-i*pin_delta
             if LFU[i,j] > 0:
                 self.pinobjects[case_num][k].set_circle(x,y,pin_radius,(1,1,1))
                 self.pinobjects[case_num][k].coord = (self.ylist[i]

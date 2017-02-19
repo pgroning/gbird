@@ -56,8 +56,8 @@ def s96o2(self):
     # Draw water channel
     # Rectangle center at origo
     y0 = 0.003
-    rect = mpatches.Rectangle((-0.095+y0, -0.095+y0), 0.19, 0.19, fc=(0.8, 0.898, 1),
-                              ec=(0.3, 0.3, 0.3))
+    rect = mpatches.Rectangle((-0.095+y0, -0.095+y0), 0.19, 0.19,
+                              fc=(0.8, 0.898, 1), ec=(0.3, 0.3, 0.3))
     rect.set_linewidth(2.0)
     # 1. Translate rectangle along x-axis a distance 1/sqrt(2).
     # 2. Rotate 45 degrees
@@ -73,8 +73,8 @@ def s96o2(self):
     #pin_radius = 0.028
     #pin_delta = 0.078
     
-    pin_radius = 0.0252*0.9
-    pin_delta = 0.07055*0.9
+    pin_radius = 0.02268
+    pin_delta = 0.063495
 
     # Draw enrichment level circles
     x = 1.06  # horizontal position of the circles
