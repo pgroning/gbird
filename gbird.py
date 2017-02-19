@@ -120,9 +120,9 @@ class cpin(object):
         # Set background
         d = r*2*1.35
         self.rectangle = mpatches.Rectangle((x-d/2, y-d/2), d, d,
-                                            fc=(1,1,0), alpha=0.5, ec=(0, 0, 0))
+                                            fc=(1,1,0), alpha=0.5, ec=(1, 1, 1))
         self.rectangle.set_fill(True)
-        self.rectangle.set_linewidth(0.0)
+        self.rectangle.set_linewidth(1.0)
         
     def set_text(self, string='', fsize=8):
         # if hasattr(self,'text'):
@@ -311,7 +311,8 @@ class MainWin(QtGui.QMainWindow):
         self.init_pinobjects()
 
         # Update case number list box
-        ncases = len(self.bundle.cases)
+        ncases = len(self.bundle.states[-1].segments)
+        #ncases = len(self.bundle.cases)
         for i in range(1, ncases + 1):
             self.case_cbox.addItem(str(i))
         self.connect(self.case_cbox, QtCore.SIGNAL('currentIndexChanged(int)'),
