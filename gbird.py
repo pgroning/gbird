@@ -737,6 +737,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
             if param_str == "ENR":
                 text = self.enrpinlist[iseg][j].text.get_text()
+                self.pinobjects[iseg][i].rectangle.set_facecolor((1,1,0))
                 
             elif param_str == "BTF":
                 btf_ratio = self.pinobjects[iseg][i].BTF / btf * 1000
@@ -744,16 +745,19 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                     text = "1e3"
                 else:
                     text = ('%.0f' % (btf_ratio))
-                
+                self.pinobjects[iseg][i].rectangle.set_facecolor((0,1,1))
+                    
             elif param_str == "EXP":
                 if self.pinobjects[iseg][i].EXP < 10:
                     text = ('%.1f' % (self.pinobjects[iseg][i].EXP))
                 else:
                     text = ('%.0f' % (self.pinobjects[iseg][i].EXP))
+                self.pinobjects[iseg][i].rectangle.set_facecolor((1,0,0))
 
             elif param_str == "FINT":
                 text = ('%.0f' % (self.pinobjects[iseg][i].FINT * 100))
-
+                self.pinobjects[iseg][i].rectangle.set_facecolor((0,1,0))
+                
             self.pinobjects[iseg][i].text.remove()
             self.pinobjects[iseg][i].set_text(text)
 
@@ -1114,7 +1118,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.axes.clear()
         self.draw_fuelmap()
         self.set_pinvalues()
-
+        self.toggle_pin_bgcolors()
+        
         # Update info field
         iseg = int(self.case_cbox.currentIndex())
         sim = self.bundle.states[0].segments[iseg].data.sim
@@ -1366,6 +1371,13 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         chanbow_hbox.addWidget(QtGui.QLabel("Channel bow:"))
         chanbow_hbox.addWidget(self.chanbow_sbox)
 
+        self.bgcolors_cb = QtGui.QCheckBox("Show background colors")
+        self.bgcolors_cb.setChecked(True)
+        bgcolors_hbox = QtGui.QHBoxLayout()
+        bgcolors_hbox.addWidget(self.bgcolors_cb)
+        self.connect(self.bgcolors_cb, QtCore.SIGNAL('clicked()'),
+                     self.toggle_pin_bgcolors)
+        
         type_label = QtGui.QLabel('Type:')
         self.type_cbox = QtGui.QComboBox()
         typelist = ['Hot', 'HCr', 'CCl', 'CCr']
@@ -1498,6 +1510,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         vbox.addLayout(enr_case_hbox)
         vbox.addLayout(calc_hbox)
         vbox.addLayout(chanbow_hbox)
+        vbox.addLayout(bgcolors_hbox)
 
         # spacerItem = QSpacerItem(1, 1, QSizePolicy.Minimum,
         # QSizePolicy.Minimum)
@@ -1675,7 +1688,19 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         else:
             self.init_pinobjects()
             self.fig_update()
-
+            
+    def toggle_pin_bgcolors(self):
+        """Toggle pin background colors"""
+        
+        iseg = int(self.case_cbox.currentIndex())
+        if self.bgcolors_cb.isChecked():
+            for pin in self.pinobjects[iseg]:
+                pin.rectangle.set_alpha(0.5)
+        else:
+            for pin in self.pinobjects[iseg]:
+                pin.rectangle.set_alpha(0.0)
+        self.canvas.draw()
+            
     def add_actions(self, target, actions):
         for action in actions:
             if action is None:
