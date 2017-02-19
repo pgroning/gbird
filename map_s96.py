@@ -33,20 +33,21 @@ def s96o2(self):
     poly.set_closed(False)
     self.axes.add_patch(poly)
     # South
-    pp = [[0.485, 0.088], [0.497, 0.1], [0.497, 0.13], [0.485, 0.15],
-          [0.485, 0.32], [0.497, 0.34], [0.497, 0.38], [0.503, 0.38],
-          [0.503, 0.34], [0.515, 0.32], [0.515, 0.15],[0.503, 0.13],
-          [0.503, 0.1],[0.515, 0.088]]
+    x0 = 0.004
+    pp = [[x0+0.485, 0.088], [x0+0.497, 0.1], [x0+0.497, 0.13], [x0+0.485, 0.15],
+          [x0+0.485, 0.32], [x0+0.497, 0.34], [x0+0.497, 0.38], [x0+0.503, 0.38],
+          [x0+0.503, 0.34], [x0+0.515, 0.32], [x0+0.515, 0.15],[x0+0.503, 0.13],
+          [x0+0.503, 0.1],[x0+0.515, 0.088]]
     poly = mpatches.Polygon(pp)
     poly.set_facecolor((0.8, 0.898, 1))
     poly.set_linewidth(1.5)
     poly.set_closed(False)
     self.axes.add_patch(poly)
     # North
-    pp = [[0.485, 0.922], [0.497, 0.91], [0.497, 0.88], [0.485, 0.86],
-          [0.485, 0.69], [0.497, 0.67], [0.497, 0.63], [0.503, 0.63],
-          [0.503,0.67], [0.515, 0.69], [0.515, 0.86], [0.503,0.88],
-          [0.503, 0.91], [0.515, 0.922]]
+    pp = [[x0+0.485, 0.922], [x0+0.497, 0.91], [x0+0.497, 0.88], [x0+0.485, 0.86],
+          [x0+0.485, 0.69], [x0+0.497, 0.67], [x0+0.497, 0.63], [x0+0.503, 0.63],
+          [x0+0.503,0.67], [x0+0.515, 0.69], [x0+0.515, 0.86], [x0+0.503,0.88],
+          [x0+0.503, 0.91], [x0+0.515, 0.922]]
     poly = mpatches.Polygon(pp)
     poly.set_facecolor((0.8, 0.898, 1))
     poly.set_linewidth(1.5)
@@ -55,14 +56,19 @@ def s96o2(self):
 
     # Draw water channel
     # Rectangle center at origo
-    y0 = 0.003
-    rect = mpatches.Rectangle((-0.095+y0, -0.095+y0), 0.19, 0.19,
+    d = 0.19
+    rect = mpatches.Rectangle((-d/2, -d/2), d, d,
                               fc=(0.8, 0.898, 1), ec=(0.3, 0.3, 0.3))
+    #rect = mpatches.Rectangle((-0.095+y0+0.005, -0.095-0.002), 0.19, 0.19,
+    #                          fc=(0.8, 0.898, 1), ec=(0.3, 0.3, 0.3))
     rect.set_linewidth(2.0)
     # 1. Translate rectangle along x-axis a distance 1/sqrt(2).
     # 2. Rotate 45 degrees
     rot45 = mpatches.transforms.Affine2D().rotate_deg(45) + self.axes.transData
-    transrot = mpatches.transforms.Affine2D().translate(0.70711, 0.0) + rot45
+    x0 = 0.70711+0.0055
+    transrot = mpatches.transforms.Affine2D().translate(x0, 0.0) + rot45
+    #transrot = mpatches.transforms.Affine2D().translate(0.70711, 0.0) + rot45
+
     rect.set_transform(transrot)
     self.axes.add_patch(rect)
 
@@ -117,8 +123,8 @@ def s96o2(self):
     k = 0
     for i in range(LFU.shape[0]):
         for j in range(LFU.shape[1]):
-            x = 0.13+j*pin_delta
-            y = 0.875-i*pin_delta
+            x = 0.133 + j*pin_delta
+            y = 0.875 - i*pin_delta
             if j > 4: x += 0.04
             if i > 4: y -= 0.04
             if LFU[i,j] > 0:
