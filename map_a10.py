@@ -7,7 +7,7 @@ from gbird import cpin
 def a10xm(self):
     
     # Draw water channel
-    p_fancy = mpatches.FancyBboxPatch((0.45, 0.365), 0.19, 0.19,
+    p_fancy = mpatches.FancyBboxPatch((0.445, 0.364), 0.2, 0.2,
                                           boxstyle="round,pad=0.02",
                                           fc=(0.8,0.898,1), ec=(0.3, 0.3, 0.3))
     p_fancy.set_linewidth(2.0)
@@ -58,8 +58,8 @@ def a10xm(self):
     k = 0
     for i in range(LFU.shape[0]):
         for j in range(LFU.shape[1]):
-            x = 0.13+j*pin_delta
-            y = 0.875-i*pin_delta
+            x = 0.13 + j*pin_delta
+            y = 0.879 - i*pin_delta
             if LFU[i,j] > 0:
                 self.pinobjects[case_num][k].set_circle(x,y,pin_radius,(1,1,1))
                 self.pinobjects[case_num][k].coord = (self.ylist[i]
