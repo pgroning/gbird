@@ -486,13 +486,38 @@ class MainWin(QtGui.QMainWindow):
             #                   QtGui.QMessageBox.Close)
             msgBox.information(self, "No data", msg.strip(), msgBox.Close)
 
+    #def get_colormap(self, num_enr_levels):
+    #    cvec = ["#FF00FF", "#CC00FF", "#AA00FF", "#0000FF", "#0066FF",
+    #            "#00AAFF", "#00CCFF", "#00FFFF", "#00FFCC", "#00FFAA",
+    #            "#00FF66", "#00FF00", "#AAFF00", "#CCFF00", "#FFFF00",
+    #            "#FFCC00", "#FFAA00", "#FF9900", "#FF5500", "#FF0000"]
+    #    ic = np.linspace(0, len(cvec) - 1, num_enr_levels).astype(int).tolist()
+    #    cmap = [cvec[i] for i in ic]
+    #    return cmap
+
     def get_colormap(self, num_enr_levels):
-        cvec = ["#FF00FF", "#CC00FF", "#AA00FF", "#0000FF", "#0066FF",
-                "#00AAFF", "#00CCFF", "#00FFFF", "#00FFCC", "#00FFAA",
-                "#00FF66", "#00FF00", "#AAFF00", "#CCFF00", "#FFFF00",
-                "#FFCC00", "#FFAA00", "#FF9900", "#FF5500", "#FF0000"]
-        ic = np.linspace(0, len(cvec) - 1, num_enr_levels).astype(int).tolist()
-        cmap = [cvec[i] for i in ic]
+            
+        n = np.ceil(num_enr_levels/4.0) + 1
+        v00 = np.zeros(n)
+        v11 = np.ones(n)
+        v01 = np.linspace(0, 1, n)
+        v10 = v01[::-1]  # revert array
+    
+        # magenta -> blue
+        cm_mb = np.vstack((v10, v00, v11)).transpose()[:-1]  # remove last elem
+        # blue -> cyan
+        # remove last element
+        cm_bc = np.vstack((v00, v01, v11)).transpose()[:-1]
+        # cyan -> green
+        cm_cg = np.vstack((v00, v11, v10)).transpose()[:-1]
+        # green -> yellow
+        cm_gy = np.vstack((v01, v11, v00)).transpose()[:-1]
+        # yellow -> red
+        cm_yr = np.vstack((v11, v10, v00)).transpose()
+        cm = np.vstack((cm_mb, cm_bc, cm_cg, cm_gy, cm_yr))
+        
+        ic = np.linspace(0, len(cm) - 1, num_enr_levels).astype(int).tolist()
+        cmap = [cm[i].tolist() for i in ic]
         return cmap
 
     def init_pinobjects(self):
@@ -1371,7 +1396,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         chanbow_hbox.addWidget(QtGui.QLabel("Channel bow:"))
         chanbow_hbox.addWidget(self.chanbow_sbox)
 
-        self.bgcolors_cb = QtGui.QCheckBox("Show background colors")
+        self.bgcolors_cb = QtGui.QCheckBox("Show color map")
         self.bgcolors_cb.setChecked(True)
         bgcolors_hbox = QtGui.QHBoxLayout()
         bgcolors_hbox.addWidget(self.bgcolors_cb)
