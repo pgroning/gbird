@@ -497,7 +497,7 @@ class MainWin(QtGui.QMainWindow):
 
     def get_colormap(self, num_enr_levels):
             
-        n = np.ceil(num_enr_levels/4.0) + 1
+        n = int(np.ceil(num_enr_levels/4.0)) + 1
         v00 = np.zeros(n)
         v11 = np.ones(n)
         v01 = np.linspace(0, 1, n)
@@ -748,17 +748,20 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         npins = len(self.pinobjects[iseg])
         cmap = self.get_colormap(npins)
 
-        # Color map sort
+        # Sort params and get color map
         if param_str == "FINT":
             v = np.array([pin.FINT for pin in self.pinobjects[iseg]])
-            i = np.argsort(v)  # sort v and get indicies
-            ic = np.argsort(i)  # get color map indicies
+            uni_fint = np.unique(v)
+            cmap = self.get_colormap(uni_fint.size)
         elif param_str == "BTF":
             v = np.array([pin.BTF for pin in self.pinobjects[iseg]])
-            i = np.argsort(v)
-            ic = np.argsort(i)
-
-
+            uni_btf = np.unique(v)
+            cmap = self.get_colormap(uni_btf.size)
+        elif param_str == "EXP":
+            v = np.array([pin.EXP for pin in self.pinobjects[iseg]])
+            uni_exp = np.unique(v)
+            cmap = self.get_colormap(uni_exp.size)
+            
         for i in xrange(npins):
             
             if self.pinobjects[iseg][i].BA < 0.00001:
@@ -783,18 +786,24 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                     text = "1e3"
                 else:
                     text = ('%.0f' % (btf_ratio))
-                self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic[i]])
+                pin_btf = self.pinobjects[iseg][i].BTF
+                ic = next(i for i, v in enumerate(uni_btf) if v == pin_btf)
+                self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic])
                 
             elif param_str == "EXP":
                 if self.pinobjects[iseg][i].EXP < 10:
                     text = ('%.1f' % (self.pinobjects[iseg][i].EXP))
                 else:
                     text = ('%.0f' % (self.pinobjects[iseg][i].EXP))
-                self.pinobjects[iseg][i].rectangle.set_facecolor((1,1,1))
+                pin_exp = self.pinobjects[iseg][i].EXP
+                ic = next(i for i, v in enumerate(uni_exp) if v == pin_exp)
+                self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic])
 
             elif param_str == "FINT":
                 text = ('%.0f' % (self.pinobjects[iseg][i].FINT * 100))
-                self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic[i]])
+                pin_fint = self.pinobjects[iseg][i].FINT
+                ic = next(i for i, v in enumerate(uni_fint) if v == pin_fint)
+                self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic])
                 
             self.pinobjects[iseg][i].text.remove()
             self.pinobjects[iseg][i].set_text(text)
