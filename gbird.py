@@ -707,8 +707,8 @@ class MainWin(QtGui.QMainWindow):
         self.setpincoords()
 
         k = 0
-        for i in range(npst):
-            for j in range(npst):
+        for i in xrange(npst):
+            for j in xrange(npst):
                 if LFU[i, j] > 0:
                     self.pinobjects[iseg][k].EXP = EXP[i, j]
                     self.pinobjects[iseg][k].FINT = FINT[i, j]
@@ -746,7 +746,19 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                                         tfu, tmo))
         
         npins = len(self.pinobjects[iseg])
-        
+        cmap = self.get_colormap(npins)
+
+        # Color map sort
+        if param_str == "FINT":
+            v = np.array([pin.FINT for pin in self.pinobjects[iseg]])
+            i = np.argsort(v)  # sort v and get indicies
+            ic = np.argsort(i)  # get color map indicies
+        elif param_str == "BTF":
+            v = np.array([pin.BTF for pin in self.pinobjects[iseg]])
+            i = np.argsort(v)
+            ic = np.argsort(i)
+
+
         for i in xrange(npins):
             
             if self.pinobjects[iseg][i].BA < 0.00001:
@@ -762,7 +774,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
             if param_str == "ENR":
                 text = self.enrpinlist[iseg][j].text.get_text()
-                self.pinobjects[iseg][i].rectangle.set_facecolor((1,1,0))
+                self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[i])
+                self.pinobjects[iseg][i].rectangle.set_facecolor((1,1,1))
                 
             elif param_str == "BTF":
                 btf_ratio = self.pinobjects[iseg][i].BTF / btf * 1000
@@ -770,18 +783,18 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                     text = "1e3"
                 else:
                     text = ('%.0f' % (btf_ratio))
-                self.pinobjects[iseg][i].rectangle.set_facecolor((0,1,1))
-                    
+                self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic[i]])
+                
             elif param_str == "EXP":
                 if self.pinobjects[iseg][i].EXP < 10:
                     text = ('%.1f' % (self.pinobjects[iseg][i].EXP))
                 else:
                     text = ('%.0f' % (self.pinobjects[iseg][i].EXP))
-                self.pinobjects[iseg][i].rectangle.set_facecolor((1,0,0))
+                self.pinobjects[iseg][i].rectangle.set_facecolor((1,1,1))
 
             elif param_str == "FINT":
                 text = ('%.0f' % (self.pinobjects[iseg][i].FINT * 100))
-                self.pinobjects[iseg][i].rectangle.set_facecolor((0,1,0))
+                self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic[i]])
                 
             self.pinobjects[iseg][i].text.remove()
             self.pinobjects[iseg][i].set_text(text)
@@ -1397,7 +1410,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         chanbow_hbox.addWidget(self.chanbow_sbox)
 
         self.bgcolors_cb = QtGui.QCheckBox("Show color map")
-        self.bgcolors_cb.setChecked(True)
+        self.bgcolors_cb.setChecked(False)
         bgcolors_hbox = QtGui.QHBoxLayout()
         bgcolors_hbox.addWidget(self.bgcolors_cb)
         self.connect(self.bgcolors_cb, QtCore.SIGNAL('clicked()'),
@@ -1720,7 +1733,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         iseg = int(self.case_cbox.currentIndex())
         if self.bgcolors_cb.isChecked():
             for pin in self.pinobjects[iseg]:
-                pin.rectangle.set_alpha(0.5)
+                pin.rectangle.set_alpha(1.0)
         else:
             for pin in self.pinobjects[iseg]:
                 pin.rectangle.set_alpha(0.0)
