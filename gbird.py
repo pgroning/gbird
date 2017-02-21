@@ -793,15 +793,19 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                 self.pinobjects[iseg][i].rectangle.set_facecolor((1,1,1))
                 
             elif param_str == "BTF":
-                btf_ratio = self.pinobjects[iseg][i].BTF / btf * 1000
-                if int(btf_ratio) == 1000:
-                    text = "1e3"
-                else:
-                    text = ('%.0f' % (btf_ratio))
                 pin_btf = self.pinobjects[iseg][i].BTF
-                ic = next(i for i, v in enumerate(uni_btf) if v == pin_btf)
-                self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic])
-                
+                if np.isnan(pin_btf):
+                    text = "nan"
+                    self.pinobjects[iseg][i].rectangle.set_facecolor((1,1,1))
+                else:
+                    btf_ratio = pin_btf / btf * 1000
+                    if int(btf_ratio) == 1000:
+                        text = "1e3"
+                    else:
+                        text = ('%.0f' % (btf_ratio))
+                    ic = next(i for i, v in enumerate(uni_btf) if v == pin_btf)
+                    self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic])
+            
             elif param_str == "EXP":
                 if self.pinobjects[iseg][i].EXP < 10:
                     text = ('%.1f' % (self.pinobjects[iseg][i].EXP))
