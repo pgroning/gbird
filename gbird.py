@@ -265,7 +265,7 @@ class MainWin(QtGui.QMainWindow):
                                            QtCore.QString("")).toString()
         self.settings.endGroup()
         # file_choices = "inp (*.inp);;pickle (*.p)"
-        file_choices = "Data files (*.inp *.p *.cax)"
+        file_choices = "Data files (*.inp *.gbd *.cax)"
         filename = unicode(QtGui.QFileDialog.getOpenFileName(self, 'Open file',
                                                              path_default,
                                                              file_choices))
@@ -277,7 +277,7 @@ class MainWin(QtGui.QMainWindow):
             self.settings.endGroup()
 
             filext = os.path.splitext(filename)[1]
-            if filext == ".p":
+            if filext == ".gbd":  # project file
                 self.state_index = -1
                 self.load_pickle(filename)
                 self.fig_update()
@@ -304,7 +304,7 @@ class MainWin(QtGui.QMainWindow):
     def load_pickle(self, filename):
         """Load bundle object from pickle file"""
 
-        self.statusBar().showMessage('Importing data from %s' % filename, 2000)
+        self.statusBar().showMessage('Load project from %s' % filename, 2000)
         # self.bundle = Bundle()
         # self.bundle.loadpic(filename)
         print "Loading data from file " + filename
@@ -475,12 +475,13 @@ class MainWin(QtGui.QMainWindow):
                                            QtCore.QString("")).toString()
         self.settings.endGroup()
 
-        file_choices = "Data files (*.p)"
+        file_choices = "Project files (*.gbd)"
         filename = unicode(QtGui.QFileDialog.getSaveFileName(self,
-                                                             "Save to file",
+                                                             "Save project",
                                                              path_default,
                                                              file_choices))
         # self.bundle.savepic(filename)
+        filename = os.path.splitext(filename)[0] + ".gbd"  # fix file ext
         with open(filename, 'wb') as fp:
             pickle.dump(self.bundle, fp, 1)
         print "Saved data to file " + filename
@@ -1648,25 +1649,33 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         quit_action = self.create_action("&Quit", slot=self.close,
                                          shortcut="Ctrl+Q",
                                          tip="Close the application")
+
+        new_project_action = self.create_action("&New project...",
+                                              #slot=self.openFile,
+                                              shortcut="Ctrl+N",
+                                              tip="Create new project")
         
-        open_file_action = self.create_action("&Open file...",
+        open_file_action = self.create_action("&Open...",
                                               slot=self.openFile,
-                                              shortcut="Ctrl+L",
+                                              shortcut="Ctrl+O",
                                               tip="Open file")
 
-        save_data_action = self.create_action("&Save data...",
+        save_data_action = self.create_action("&Save...",
                                               slot=self.saveData,
                                               shortcut="Ctrl+S",
                                               tip="Save data to file")
 
-        self.add_actions(self.file_menu, (open_file_action, save_data_action,
+        self.add_actions(self.file_menu, (new_project_action, open_file_action,
+                                          save_data_action,
                                           save_settings_action, None,
                                           quit_action))
 
         self.edit_menu = self.menuBar().addMenu("&Edit")
         preferences = self.create_action("Preferences...",
                                          tip="Preferences...")
-        self.add_actions(self.edit_menu, (None, preferences))
+        project = self.create_action("Project...",
+                                         tip="Edit project...")
+        self.add_actions(self.edit_menu, (project, None, preferences))
 
         self.tools_menu = self.menuBar().addMenu("&Tools")
         plot_action = self.create_action("Plot...", tip="Plot...",
