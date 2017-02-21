@@ -280,6 +280,7 @@ class MainWin(QtGui.QMainWindow):
             if filext == ".p":
                 self.state_index = -1
                 self.load_pickle(filename)
+                self.fig_update()
             else:
                 msgBox = QtGui.QMessageBox()
                 status = msgBox.information(self, "Importing data",
@@ -294,9 +295,10 @@ class MainWin(QtGui.QMainWindow):
                     self.state_index = 0
                     if filext == ".inp":
                         self.read_inp(filename)
-                        self.quick_calc(state_num=0)  # reference calculation
+                        #self.quick_calc(state_num=0)  # reference calculation
                     elif filext == ".cax":
                         self.read_cax(filename)
+                    self.fig_update()
                     self.setCursor(QtCore.Qt.ArrowCursor)
 
     def load_pickle(self, filename):
@@ -318,7 +320,7 @@ class MainWin(QtGui.QMainWindow):
             self.case_cbox.addItem(str(i))
         self.connect(self.case_cbox, QtCore.SIGNAL('currentIndexChanged(int)'),
                      self.fig_update)
-        self.fig_update()
+        #self.fig_update()
 
     def read_cax(self, filename):
         """Importing data from a single cax file"""
@@ -328,7 +330,7 @@ class MainWin(QtGui.QMainWindow):
         self.bundle.new_btf()
 
         self.init_pinobjects()
-        self.fig_update()
+        #self.fig_update()
 
     def dataobj_finished(self):
         print "dataobject constructed"
@@ -1415,7 +1417,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         enr_case_hbox = QtGui.QHBoxLayout()
         enr_case_hbox.addWidget(self.enr_case_cb)
 
-        self.calc_quick_button = QtGui.QPushButton("Quick calc")
+        self.calc_quick_button = QtGui.QPushButton("Pert. calc")
         self.calc_full_button = QtGui.QPushButton("Full calc")
         calc_hbox = QtGui.QHBoxLayout()
         calc_hbox.addWidget(self.calc_quick_button)
@@ -1725,9 +1727,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         """Back to previous state"""
         
         nstates = len(self.bundle.states)
-        #nstates = len(self.bundle.cases[0].states)
         if self.state_index < 0:
-            self.state_index = nstates - self.state_index
+            self.state_index = self.state_index + nstates
         self.state_index -= 1
         if self.state_index < 0:
             self.state_index = 0
@@ -1739,9 +1740,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         """Forward to next state"""
 
         nstates = len(self.bundle.states)
-        #nstates = len(self.bundle.cases[0].states)
         if self.state_index < 0:
-            self.state_index = nstates - self.state_index
+            self.state_index = self.state_index + nstates
         self.state_index += 1
         if self.state_index >= nstates:
             self.state_index = nstates - 1
