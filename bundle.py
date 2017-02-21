@@ -183,6 +183,23 @@ class Bundle(object):
         #     case.data.topnode = self.data.nodes[i]
         #     self.cases.append(case)
 
+    def read_single_cax(self, caxfile):
+        print "Reading single cax file..."
+        # Init data
+        self.data.caxfiles = [caxfile]
+        self.data.nodes = [25]  # max node
+        # BTF
+        self.data.btf_zones = [1] * len(self.data.nodes)
+        self.data.btf_nodes = self.data.nodes
+        # Read data
+        self.readcax()
+        # Guess fuel type
+        fuetype = self.states[0].segments[0].looks_like_fuetype()
+        if fuetype == "S96":
+            self.data.fuetype = "OPT2"
+        elif fuetype == "A10":
+            self.data.fuetype = "A10B"
+
     def new_calc(self, voi=None, maxdep=60, depthres=None, refcalc=False,
                  grid=False, model='c3', box_offset=0, neulib=False):
 

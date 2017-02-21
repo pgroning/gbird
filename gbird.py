@@ -121,7 +121,7 @@ class cpin(object):
         #d = 2*r*1.35
         d = 2*r + 0.019
         self.rectangle = mpatches.Rectangle((x-d/2, y-d/2), d, d,
-                                            fc=(1,1,0), alpha=0.5, ec=(1, 1, 1))
+                                            fc=(1,1,0), alpha=1.0, ec=(1, 1, 1))
         self.rectangle.set_fill(True)
         self.rectangle.set_linewidth(0.0)
         
@@ -265,7 +265,7 @@ class MainWin(QtGui.QMainWindow):
                                            QtCore.QString("")).toString()
         self.settings.endGroup()
         # file_choices = "inp (*.inp);;pickle (*.p)"
-        file_choices = "Data files (*.inp *.p)"
+        file_choices = "Data files (*.inp *.p *.cax)"
         filename = unicode(QtGui.QFileDialog.getOpenFileName(self, 'Open file',
                                                              path_default,
                                                              file_choices))
@@ -280,7 +280,7 @@ class MainWin(QtGui.QMainWindow):
             if filext == ".p":
                 self.state_index = -1
                 self.load_pickle(filename)
-            elif filext == ".inp":
+            else:
                 msgBox = QtGui.QMessageBox()
                 status = msgBox.information(self, "Importing data",
                                             "Continue?",
@@ -292,11 +292,11 @@ class MainWin(QtGui.QMainWindow):
                 if status == QtGui.QMessageBox.Yes:
                     self.setCursor(QtCore.Qt.WaitCursor)
                     self.state_index = 0
-                    self.read_cax(filename)
-                    #self.enr_update()
-                    self.quick_calc(state_num=0)  # reference calculation
-                    #self.state_index = 0
-                    #self.fig_update()
+                    if filext == ".inp":
+                        self.read_inp(filename)
+                        self.quick_calc(state_num=0)  # reference calculation
+                    elif filext == ".cax":
+                        self.read_cax(filename)
                     self.setCursor(QtCore.Qt.ArrowCursor)
 
     def load_pickle(self, filename):
@@ -318,6 +318,16 @@ class MainWin(QtGui.QMainWindow):
             self.case_cbox.addItem(str(i))
         self.connect(self.case_cbox, QtCore.SIGNAL('currentIndexChanged(int)'),
                      self.fig_update)
+        self.fig_update()
+
+    def read_cax(self, filename):
+        """Importing data from a single cax file"""
+        
+        self.bundle = Bundle()
+        self.bundle.read_single_cax(filename)
+        self.bundle.new_btf()
+
+        self.init_pinobjects()
         self.fig_update()
 
     def dataobj_finished(self):
@@ -371,7 +381,7 @@ class MainWin(QtGui.QMainWindow):
         # self.progressbar.close
         # self.thread.wait()
 
-    def read_cax(self, filename):
+    def read_inp(self, filename):
         #msg = "Continue?"
         #msgBox = QtGui.QMessageBox()
         #status = msgBox.information(self, "Importing data", msg.strip(),
@@ -804,6 +814,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                 pin_fint = self.pinobjects[iseg][i].FINT
                 ic = next(i for i, v in enumerate(uni_fint) if v == pin_fint)
                 self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic])
+            elif param_str == "ROD":
+                return
                 
             self.pinobjects[iseg][i].text.remove()
             self.pinobjects[iseg][i].set_text(text)
@@ -1352,8 +1364,9 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
  
         param_label = QtGui.QLabel('Parameter:')
         self.param_cbox = QtGui.QComboBox()
-        paramlist = ['ENR', 'FINT', 'EXP', 'BTF', 'BTFP', 'XFL1', 'XFL2',
-                     'ROD', 'LOCK']
+        paramlist = ['ENR', 'FINT', 'EXP', 'BTF', 'ROD']
+        #paramlist = ['ENR', 'FINT', 'EXP', 'BTF', 'BTFP', 'XFL1', 'XFL2',
+        #             'ROD', 'LOCK']
         for i in paramlist:
             self.param_cbox.addItem(i)
         # self.connect(self.param_cbox, SIGNAL('currentIndexChanged(int)'),

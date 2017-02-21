@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
 # Run from ipython:
-# > from casdata import casdata
-# > case = casdata('caxfile')
+# > from segment import Segment
+# > s = Segment('caxfile')
 #
 # or:
-# run casdata "caxfile"
+# run segment "caxfile"
 #
 # How to reach name mangling ("private") methods:
 # self._Segment__matchcontent()
@@ -1122,6 +1122,16 @@ class Segment(object):
             i += 1
         return burnlist
     
+    def looks_like_fuetype(self):
+        if hasattr(self.data, "slaline"):  # has water cross?
+            fuetype = "S96"
+        elif self.data.npst == 10:
+            fuetype = "A10"
+        elif self.data.npst == 11:
+            fuetype = "A11"
+        return fuetype
+
+
     # def burnpoints(self, voi=40, stateindex=0):
     #    """Return depletion vector for given voi (vhi=voi)"""
     #    statepoints = self.states[stateindex].statepoints
