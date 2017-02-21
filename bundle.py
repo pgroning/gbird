@@ -60,7 +60,7 @@ class Bundle(object):
 
         #self.parent = parent
         if inpfile:
-            self.readinp(inpfile)
+            self.readpro(inpfile)
 
         # self.readinpfile(inpfile)
         # self.readcas()
@@ -68,8 +68,9 @@ class Bundle(object):
         # self.loadcasobj(inpfile)
         # self.interp2(P1,P2,x1,x2,x)
 
-    def readinp(self, cfgfile):
-
+    def readpro(self, cfgfile):
+        """Read project setup file"""
+        
         config = ConfigParser.ConfigParser()
         try:
             if not config.read(cfgfile):

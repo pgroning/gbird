@@ -265,7 +265,7 @@ class MainWin(QtGui.QMainWindow):
                                            QtCore.QString("")).toString()
         self.settings.endGroup()
         # file_choices = "inp (*.inp);;pickle (*.p)"
-        file_choices = "Data files (*.inp *.gbd *.cax)"
+        file_choices = "Data files (*.gbd *.cax)"
         filename = unicode(QtGui.QFileDialog.getOpenFileName(self, 'Open file',
                                                              path_default,
                                                              file_choices))
@@ -293,14 +293,35 @@ class MainWin(QtGui.QMainWindow):
                 if status == QtGui.QMessageBox.Yes:
                     self.setCursor(QtCore.Qt.WaitCursor)
                     self.state_index = 0
-                    if filext == ".inp":
-                        self.read_inp(filename)
-                        #self.quick_calc(state_num=0)  # reference calculation
-                    elif filext == ".cax":
+                    #if filext == ".inp":
+                    #    self.read_inp(filename)
+                    #    #self.quick_calc(state_num=0)  # reference calculation
+                    if filext == ".cax":
                         self.read_cax(filename)
-                    self.fig_update()
+                        self.fig_update()
                     self.setCursor(QtCore.Qt.ArrowCursor)
 
+    def newProject(self):
+        """Open project setup file"""
+
+        # Import default path from config file
+        self.settings.beginGroup("PATH")
+        path_default = self.settings.value("path_default",
+                                           QtCore.QString("")).toString()
+        self.settings.endGroup()
+        file_choices = "*.pro (*.pro)"
+        filename = unicode(QtGui.QFileDialog.getOpenFileName(self,'Open file',
+                                                             path_default,
+                                                             file_choices))
+        if filename:
+            # Save default path to config file
+            path = os.path.split(filename)[0]
+            self.settings.beginGroup("PATH")
+            self.settings.setValue("path_default", QtCore.QString(path))
+            self.settings.endGroup()
+            self.state_index = 0
+            self.read_pro(filename)
+                    
     def load_pickle(self, filename):
         """Load bundle object from pickle file"""
 
@@ -383,36 +404,39 @@ class MainWin(QtGui.QMainWindow):
         # self.progressbar.close
         # self.thread.wait()
 
-    def read_inp(self, filename):
+    def read_pro(self, filename):
+        """Reading project setup file"""
+        
         #msg = "Continue?"
-        #msgBox = QtGui.QMessageBox()
-        #status = msgBox.information(self, "Importing data", msg.strip(),
-        #                            QtGui.QMessageBox.Yes |
-        #                            QtGui.QMessageBox.Cancel)
+        msgBox = QtGui.QMessageBox()
+        status = msgBox.information(self, "Importing data", "Continue?",
+                                    QtGui.QMessageBox.Yes |
+                                    QtGui.QMessageBox.Cancel)
         #self.statusBar().showMessage('Importing data from %s' % filename, 2000)
         #self._filename = filename
-        #if status == QtGui.QMessageBox.Yes:
-            #self.setCursor(QtCore.Qt.WaitCursor)
-
-        print "importing data"
+        if status == QtGui.QMessageBox.Yes:
+            self.setCursor(QtCore.Qt.WaitCursor)
         
-        self.bundle = Bundle()
-        self.bundle.readinp(filename)
-        self.bundle.readcax()  # inargs "all" reads the whole file content
-        self.bundle.new_btf()
+            self.bundle = Bundle()
+            self.bundle.readpro(filename)
+            self.bundle.readcax()  # inargs "all" reads the whole file content
+            self.bundle.new_btf()
+            
+            self.init_pinobjects()
         
-        self.init_pinobjects()
-        
-        # Update case number list box
-        state_num = self.state_index
-        nsegments = len(self.bundle.states[state_num].segments)
-        #ncases = len(self.bundle.cases)
-        for i in range(1, nsegments + 1):
-            self.case_cbox.addItem(str(i))
-        self.connect(self.case_cbox,
-                     QtCore.SIGNAL('currentIndexChanged(int)'),
-                     self.fig_update)
-
+            # Update case number list box
+            state_num = self.state_index
+            nsegments = len(self.bundle.states[state_num].segments)
+            for i in range(1, nsegments + 1):
+                self.case_cbox.addItem(str(i))
+            self.connect(self.case_cbox,
+                         QtCore.SIGNAL('currentIndexChanged(int)'),
+                         self.fig_update)
+            self.setCursor(QtCore.Qt.ArrowCursor)
+            self.fig_update()
+        else:
+            return
+            
         #self.fig_update()
             #self.setCursor(QtCore.Qt.ArrowCursor)
             # self.canvas.draw()
@@ -1651,7 +1675,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                                          tip="Close the application")
 
         new_project_action = self.create_action("&New project...",
-                                              #slot=self.openFile,
+                                              slot=self.newProject,
                                               shortcut="Ctrl+N",
                                               tip="Create new project")
         
