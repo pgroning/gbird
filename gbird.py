@@ -1190,7 +1190,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         sim = self.bundle.states[0].segments[iseg].data.sim
         #sim = self.bundle.cases[case_num].states[0].sim
         text = sim.replace("SIM", "").replace("'", "").strip()
-        self.sim_text.setText(text)
+        self.sim_info_field.setText(text)
+        #self.sim_text.setText(text)
 
         self.enr_update()
 
@@ -1368,6 +1369,13 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         # self.slider.setTickPosition(QSlider.TicksBothSides)
         # self.connect(self.slider, SIGNAL('valueChanged(int)'), self.on_draw)
  
+        self.sim_info_field = QtGui.QLineEdit()
+        self.sim_info_field.setSizePolicy(QtGui.QSizePolicy.Minimum,
+                                          QtGui.QSizePolicy.Minimum)
+        self.sim_info_field.setReadOnly(True)
+        sim_hbox = QtGui.QHBoxLayout()
+        sim_hbox.addWidget(self.sim_info_field)
+
         param_label = QtGui.QLabel('Parameter:')
         self.param_cbox = QtGui.QComboBox()
         paramlist = ['ENR', 'FINT', 'EXP', 'BTF', 'ROD']
@@ -1496,12 +1504,12 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         # sizePolicy.setVerticalStretch(0)
         # sizePolicy.setHeightForWidth(self.ave_enr_text.sizePolicy().
         # hasHeightForWidth())
-        self.sim_text = QtGui.QLineEdit()
-        self.sim_text.setSizePolicy(sizePolicy)
-        self.sim_text.setReadOnly(True)
+        #self.sim_text = QtGui.QLineEdit()
+        #self.sim_text.setSizePolicy(sizePolicy)
+        #self.sim_text.setReadOnly(True)
         # text = self.bundle.cases[0].states[0].sim
         # self.sim_text.setText(text)
-        info_flo.addRow("SIM", self.sim_text)
+        #info_flo.addRow("SIM", self.sim_text)
 
         self.rod_types_text = QtGui.QLineEdit()
         self.rod_types_text.setSizePolicy(sizePolicy)
@@ -1569,8 +1577,9 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
         # Layout with box sizers
         vbox = QtGui.QVBoxLayout()
-        vbox.addLayout(param_hbox)
+        vbox.addLayout(sim_hbox)
         vbox.addLayout(case_hbox)
+        vbox.addLayout(param_hbox)
         vbox.addLayout(point_hbox)
         vbox.addLayout(enr_hbox)
         vbox.addLayout(enr_case_hbox)

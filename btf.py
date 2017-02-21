@@ -90,7 +90,7 @@ class Btf(object):
     def calc_btf(self):
         """Calculating BTF"""
         print "Calculating BTF"
-        tic = time.time()
+        #tic = time.time()
         x = self.intersect_points()
         
         npst = self.bundle.states[0].segments[0].data.npst
@@ -119,8 +119,7 @@ class Btf(object):
             self.DOX[i, :, :] = rfact_fun(POW3)
             # self.DOX[i, :, :] = self.rfact(POW3)
         self.burnpoints = np.array(x).astype(float)
-        print "Done in "+str(time.time()-tic)+" seconds."
-
+        #print "Done in "+str(time.time()-tic)+" seconds."
 
     #def rfact(self, POW3):
     #    fuetype = self.bundle.data.fuetype

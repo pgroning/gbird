@@ -178,7 +178,7 @@ class Segment(object):
             flines = flines[:i]  # Reduce the number of lines in list
 
         # Search for regexp matches
-        print "Scanning file content..."
+        #print "Scanning file content..."
         '''
         # Loop through the whole file content
         #reglist = ['^TIT','^\s*FUE\s+']
@@ -218,7 +218,7 @@ class Segment(object):
             # print "Info: Could not find SLA card"
         iWRI = self.__matchcontent(flines, '^\s*WRI', 'next')
         iSTA = self.__matchcontent(flines, '^\s*STA', 'next')
-        print "Done."
+        #print "Done."
 
         #do = DataStruct()  # Init data container object
         # Read title
@@ -303,7 +303,7 @@ class Segment(object):
             self.data.slaline = flines[iSLA]
 
         # ------Step through the state points----------
-        print "Scanning state points..."
+        #print "Scanning state points..."
 
         # Tracer()()
         # Nburnpts = iTIT.size
@@ -373,7 +373,7 @@ class Segment(object):
                 XFL2[:, :, i] = self.__symmap(xfl2lines, npst)
                 # XFL2[:, :, i] = (self.__symtrans(
                 #        self.__map2mat(xfl2map[i], npst)))
-        print "Done."
+        #print "Done."
         # --------------------------------------------------------------------
         # Calculate radial burnup distributions
         EXP = self.__expcalc(POW, burnup)
