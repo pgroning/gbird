@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 """
 This is the main window of the program.
 This window embeds a matplotlib (mpl) plot into a PyQt4 GUI application
@@ -1047,15 +1048,19 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         #self.bundle.cases[case_num].ave_enr(state_num, LFU, FUE)
         
         ave_enr = self.bundle.states[istate].segments[iseg].data.ave_enr
-        #ave_enr = self.bundle.cases[case_num].states[state_num].ave_enr
-
         self.ave_enr_text.setText("%.5f" % ave_enr)
 
+        ave_denr = ave_enr - self.bundle.states[0].segments[iseg].data.ave_enr
+        self.ave_denr_text.setText("%.5f" % ave_denr)
+        
         self.bundle.ave_enr_calc(istate)
         #self.bundle.ave_enr(state_num)
         bundle_enr = self.bundle.states[istate].ave_enr
         self.bundle_enr_text.setText("%.5f" % bundle_enr)
 
+        bundle_denr = bundle_enr - self.bundle.states[0].ave_enr
+        self.bundle_denr_text.setText("%.5f" % bundle_denr)
+        
     def enr_modify(self, mod, case_num=None, ipin=None):
         halfsym = True
         if case_num is None:
@@ -1186,7 +1191,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             
             #self.bundle.cases[case_num].add_state(LFU, FUE, BA, voi, chanbow)
 
-        self.bundle.new_calc(model='c3')
+        self.bundle.new_calc(model='c3', depthres=20)
         self.bundle.new_btf()
         #if state_num:
         self.state_index = state_num
@@ -1582,13 +1587,24 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.ave_enr_text = QtGui.QLineEdit()
         self.ave_enr_text.setSizePolicy(sizePolicy)
         self.ave_enr_text.setReadOnly(True)
-        info_flo.addRow("Segment %U-235", self.ave_enr_text)
+        info_flo.addRow("Segment w/o U-235", self.ave_enr_text)
+
+        self.ave_denr_text = QtGui.QLineEdit()
+        self.ave_denr_text.setSizePolicy(sizePolicy)
+        self.ave_denr_text.setReadOnly(True)
+        info_flo.addRow(QtCore.QString("Segment %1 w/o")
+                        .arg(QtCore.QChar(0x0394)), self.ave_denr_text)
         
         self.bundle_enr_text = QtGui.QLineEdit()
         self.bundle_enr_text.setSizePolicy(sizePolicy)
         self.bundle_enr_text.setReadOnly(True)
-        info_flo.addRow("Bundle %U-235", self.bundle_enr_text)
-        # self.bundle_enr_text.setText('2.818')
+        info_flo.addRow("Bundle w/o U-235", self.bundle_enr_text)
+
+        self.bundle_denr_text = QtGui.QLineEdit()
+        self.bundle_denr_text.setSizePolicy(sizePolicy)
+        self.bundle_denr_text.setReadOnly(True)
+        info_flo.addRow(QtCore.QString("Bundle %1 w/o")
+                        .arg(QtCore.QChar(0x0394)), self.bundle_denr_text)
         
         # Define table widget
         self.table = QtGui.QTableWidget()
@@ -1640,7 +1656,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
         # Layout with box sizers
         vbox = QtGui.QVBoxLayout()
-        vbox.addLayout(sim_hbox)
+        #vbox.addLayout(sim_hbox)
         vbox.addLayout(case_hbox)
         vbox.addLayout(param_hbox)
         vbox.addLayout(point_hbox)
@@ -1655,6 +1671,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         # vbox.addItem(spacerItem)
         vbox.addStretch(1)
         vbox.addLayout(info_flo)
+        vbox.addLayout(sim_hbox)
         
         groupbox = QtGui.QGroupBox()
         groupbox.setStyleSheet("QGroupBox { background-color: rgb(200, 200,\
