@@ -265,7 +265,7 @@ class MainWin(QtGui.QMainWindow):
                                            QtCore.QString("")).toString()
         self.settings.endGroup()
         # file_choices = "inp (*.inp);;pickle (*.p)"
-        file_choices = "Data files (*.gbd *.cax)"
+        file_choices = "Data files (*.grb *.cax)"
         filename = unicode(QtGui.QFileDialog.getOpenFileName(self, 'Open file',
                                                              path_default,
                                                              file_choices))
@@ -277,7 +277,7 @@ class MainWin(QtGui.QMainWindow):
             self.settings.endGroup()
 
             filext = os.path.splitext(filename)[1]
-            if filext == ".gbd":  # project file
+            if filext == ".grb":  # project file
                 self.state_index = -1
                 self.load_pickle(filename)
                 self.fig_update()
@@ -499,13 +499,13 @@ class MainWin(QtGui.QMainWindow):
                                            QtCore.QString("")).toString()
         self.settings.endGroup()
 
-        file_choices = "Project files (*.gbd)"
+        file_choices = "Project files (*.grb)"
         filename = unicode(QtGui.QFileDialog.getSaveFileName(self,
                                                              "Save project",
                                                              path_default,
                                                              file_choices))
         # self.bundle.savepic(filename)
-        filename = os.path.splitext(filename)[0] + ".gbd"  # fix file ext
+        filename = os.path.splitext(filename)[0] + ".grb"  # fix file ext
         with open(filename, 'wb') as fp:
             pickle.dump(self.bundle, fp, 1)
         print "Saved data to file " + filename
