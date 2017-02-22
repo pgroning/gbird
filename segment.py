@@ -454,8 +454,6 @@ class Segment(object):
 
     # --------Calculate average enrichment----------
     def ave_enr_calc(self, LFU=None, FUE=None):
-
-        # Inargs: FUE, LFU
         
         # Translate LFU map to DENS and ENR map
         npst = self.data.npst

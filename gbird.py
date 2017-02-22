@@ -1040,10 +1040,10 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         LFU = self.__lfumap(iseg)
         FUE = self.__fuemap(iseg)
         istate = self.state_index
-        
-        self.bundle.states[istate].segments[iseg].ave_enr_calc()
-        #self.bundle.cases[case_num].ave_enr(state_num, LFU, FUE)
 
+        self.bundle.states[istate].segments[iseg].ave_enr_calc(LFU, FUE)
+        #self.bundle.cases[case_num].ave_enr(state_num, LFU, FUE)
+        
         ave_enr = self.bundle.states[istate].segments[iseg].data.ave_enr
         #ave_enr = self.bundle.cases[case_num].states[state_num].ave_enr
 
@@ -1221,7 +1221,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.enr_update()
 
     def on_draw(self):
-        """ Setup the figure axis"""
+        """Setup the figure axis"""
 
         # clear the axes and redraw the plot anew
         #
