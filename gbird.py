@@ -27,7 +27,6 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg \
 # from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg \
 # as NavigationToolbar
 from matplotlib.figure import Figure
-# from matplotlib.patches import FancyBboxPatch
 import matplotlib.patches as mpatches
 try:  # patheffects not available for older versions of matplotlib
     import matplotlib.patheffects as path_effects
@@ -117,8 +116,7 @@ class cpin(object):
         except:
             pass
 
-        # Set background
-        #d = 2*r*1.35
+        # Set background rectangle
         d = 2*r + 0.019
         self.rectangle = mpatches.Rectangle((x-d/2, y-d/2), d, d,
                                             fc=(1,1,0), alpha=1.0, ec=(1, 1, 1))
@@ -329,16 +327,18 @@ class MainWin(QtGui.QMainWindow):
         # self.bundle = Bundle()
         # self.bundle.loadpic(filename)
         print "Loading data from file " + filename
+        self.clear_data()
         with open(filename, 'rb') as fp:
             self.bundle = pickle.load(fp)
 
         self.init_pinobjects()
 
         # Update case number list box
-        ncases = len(self.bundle.states[-1].segments)
-        #ncases = len(self.bundle.cases)
-        for i in range(1, ncases + 1):
-            self.case_cbox.addItem(str(i))
+        nsegments = len(self.bundle.states[-1].segments)
+        seglist = map(str, range(1, nsegments + 1))
+        self.case_cbox.addItems(QtCore.QStringList(seglist))
+        #for i in range(1, ncases + 1):
+        #    self.case_cbox.addItem(str(i))
         self.connect(self.case_cbox, QtCore.SIGNAL('currentIndexChanged(int)'),
                      self.fig_update)
         #self.fig_update()
@@ -346,6 +346,7 @@ class MainWin(QtGui.QMainWindow):
     def read_cax(self, filename):
         """Importing data from a single cax file"""
         
+        self.clear_data()
         self.bundle = Bundle()
         self.bundle.read_single_cax(filename)
         self.bundle.new_btf()
@@ -369,7 +370,6 @@ class MainWin(QtGui.QMainWindow):
         self.timer.stop()
 
         # Update case number list box
-        # ncases = len(self.dataobj.cases)
         for i in range(1, ncases + 1):
             self.case_cbox.addItem(str(i))
         self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'),
@@ -407,7 +407,6 @@ class MainWin(QtGui.QMainWindow):
     def read_pro(self, filename):
         """Reading project setup file"""
         
-        #msg = "Continue?"
         msgBox = QtGui.QMessageBox()
         status = msgBox.information(self, "Importing data", "Continue?",
                                     QtGui.QMessageBox.Yes |
@@ -416,7 +415,7 @@ class MainWin(QtGui.QMainWindow):
         #self._filename = filename
         if status == QtGui.QMessageBox.Yes:
             self.setCursor(QtCore.Qt.WaitCursor)
-        
+            self.clear_data()
             self.bundle = Bundle()
             self.bundle.readpro(filename)
             self.bundle.readcax()  # inargs "all" reads the whole file content
@@ -424,11 +423,12 @@ class MainWin(QtGui.QMainWindow):
             
             self.init_pinobjects()
         
-            # Update case number list box
+            # Update segment number list box
             state_num = self.state_index
             nsegments = len(self.bundle.states[state_num].segments)
-            for i in range(1, nsegments + 1):
-                self.case_cbox.addItem(str(i))
+            seglist = map(str, range(1, nsegments + 1))
+            self.case_cbox.addItems(QtCore.QStringList(seglist))
+            
             self.connect(self.case_cbox,
                          QtCore.SIGNAL('currentIndexChanged(int)'),
                          self.fig_update)
@@ -1250,6 +1250,41 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         
         # self.canvas.draw()
 
+    def clear_project(self):
+        """Clear project"""
+        
+        msgBox = QtGui.QMessageBox()
+        status = msgBox.information(self, "Clear current project",
+                                    "Unsaved data will be lost!\n\nContinue?",
+                                    QtGui.QMessageBox.Yes |
+                                    QtGui.QMessageBox.Cancel)
+        if status == QtGui.QMessageBox.Yes:
+            self.clear_data()
+
+    def clear_data(self):
+        """Clear fuel map figure axes and delete bundle- and GUI field data"""
+
+        self.case_cbox.clear()
+        self.sim_info_field.clear()
+        self.rod_types_text.clear()
+        self.ave_enr_text.clear()
+        self.bundle_enr_text.clear()
+
+        self.bgcolors_cb.setChecked(False)
+        self.point_sbox.setValue(0)
+        self.chanbow_sbox.setValue(0)
+
+        self.table.clearContents()
+
+        if hasattr(self, "bundle"):
+            del self.bundle
+        
+        # Clear and restore figure
+        self.axes.clear() # Clears the figure axes
+        self.fig.set_facecolor('0.75')  # set facecolor to gray
+        #self.fig.clf()
+        #self.fig.clear()
+        
     def draw_fuelmap(self):
         """Draw fuel map"""
 
@@ -1340,7 +1375,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         # 5x4 inches, 100 dots-per-inch
         #
         self.dpi = 100
-        self.fig = Figure((6, 5), dpi=self.dpi, facecolor=None)
+        #self.fig = Figure((6, 5), dpi=self.dpi, facecolor=None)
+        self.fig = Figure((6, 5), dpi=self.dpi)
         # self.fig = Figure((6, 5), dpi=self.dpi, facecolor=(1,1,1))
         self.canvas = FigureCanvas(self.fig)
         self.canvas.mpl_connect('button_press_event', self.on_click)
@@ -1665,10 +1701,10 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
     def create_menu(self):
         self.file_menu = self.menuBar().addMenu("&File")
         
-        save_settings_action = self.create_action("&Save settings...",
-                                                  shortcut="Ctrl+E",
-                                                  slot=self.save_plot,
-                                                  tip="Save settings")
+        save_settings_action = self.create_action("&Clear project...",
+                                                  shortcut="Ctrl+C",
+                                                  slot=self.clear_project,
+                                                  tip="Clear current project")
 
         quit_action = self.create_action("&Quit", slot=self.close,
                                          shortcut="Ctrl+Q",
