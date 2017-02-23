@@ -618,7 +618,7 @@ class Segment(object):
         c3inp = file_base_name + ".inp"
         # c3inp = tempfile.NamedTemporaryFile(dir='.',
         # prefix="c3_",suffix=".inp",delete=False)
-        print "Writing c3 input file " + c3inp
+        #print "Writing c3 input file " + c3inp
 
         # Creating dep strings
         info = self.data
@@ -893,7 +893,8 @@ class Segment(object):
             print "Could not open file " + caxfile
             return
         else:
-            print "Reading file " + caxfile
+            pass
+            #print "Reading file " + caxfile
 
         # Read the whole file at once
         with open(caxfile) as f:

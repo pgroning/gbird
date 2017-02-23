@@ -280,6 +280,7 @@ class MainWin(QtGui.QMainWindow):
                 self.state_index = -1
                 self.load_pickle(filename)
                 self.fig_update()
+                self.chanbow_sbox_update()
             else:
                 msgBox = QtGui.QMessageBox()
                 status = msgBox.information(self, "Importing data",
@@ -1837,7 +1838,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
     def back_state(self):
         """Back to previous state"""
-        
+
         nstates = len(self.bundle.states)
         if self.state_index < 0:
             self.state_index = self.state_index + nstates
@@ -1847,10 +1848,11 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         else:
             self.init_pinobjects()
             self.fig_update()
+            self.chanbow_sbox_update()
         
     def forward_state(self):
         """Forward to next state"""
-
+        
         nstates = len(self.bundle.states)
         if self.state_index < 0:
             self.state_index = self.state_index + nstates
@@ -1860,6 +1862,18 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         else:
             self.init_pinobjects()
             self.fig_update()
+            self.chanbow_sbox_update()
+
+    def chanbow_sbox_update(self):
+        """Update chanbow spinbox value"""
+        
+        iseg = int(self.case_cbox.currentIndex())
+        segment = self.bundle.states[self.state_index].segments[iseg]
+        if hasattr(segment.data, "box_offset"):
+            box_offset = segment.data.box_offset * 10
+        else:
+            box_offset = 0
+        self.chanbow_sbox.setValue(box_offset)
             
     def toggle_pin_bgcolors(self):
         """Toggle pin background colors"""
