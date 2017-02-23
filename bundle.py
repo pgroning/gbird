@@ -290,7 +290,8 @@ class Bundle(object):
         
     def ave_enr_calc(self, state_num=-1):
         """The method calculates the average enrichment of the bundle.
-        This algorithm is likely naive and needs to be updated in the future"""
+        This algorithm is likely naive and may need to be updated in the 
+        future"""
 
         nodelist = self.data.nodes
         # nodelist.insert(0, 0)  # prepend 0
@@ -298,11 +299,14 @@ class Bundle(object):
         nodes = np.array([0]+nodelist)  # prepend 0
         dn = np.diff(nodes)
         segments = self.states[state_num].segments
-        enrlist = [seg.data.ave_enr for seg in segments]
+        #qtrace()
+        enrlist = [seg.ave_enr for seg in segments]
+        #enrlist = [seg.data.ave_enr for seg in segments]
         seg_enr = np.array(enrlist)
 
         ave_enr = sum(seg_enr*dn) / sum(dn)
-        self.states[state_num].ave_enr = ave_enr
+        #self.states[state_num].ave_enr = ave_enr
+        return ave_enr
 
     def pow3(self, POW, nodes):
         """Expanding a number of 2D pin power distributions into a 3D

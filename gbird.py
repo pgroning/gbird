@@ -1040,27 +1040,33 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         """Update enr value in info fields"""
 
         iseg = int(self.case_cbox.currentIndex())
-        LFU = self.__lfumap(iseg)
-        FUE = self.__fuemap(iseg)
         istate = self.state_index
+        state = self.bundle.states[istate]
 
-        self.bundle.states[istate].segments[iseg].ave_enr_calc(LFU, FUE)
-        #self.bundle.cases[case_num].ave_enr(state_num, LFU, FUE)
+        # Update enr for all segments
+        for i, segment in enumerate(state.segments):
+            LFU = self.__lfumap(i)
+            FUE = self.__fuemap(i)
+            segment.ave_enr_calc(LFU, FUE)
+            if not hasattr(segment.data, "ave_enr"):  # save orig. calc
+                segment.data.ave_enr = segment.ave_enr
         
-        ave_enr = self.bundle.states[istate].segments[iseg].data.ave_enr
-        self.ave_enr_text.setText("%.5f" % ave_enr)
-
-        ave_denr = ave_enr - self.bundle.states[0].segments[iseg].data.ave_enr
-        self.ave_denr_text.setText("%.5f" % ave_denr)
+        segment = state.segments[iseg]
+        self.ave_enr_text.setText("%.5f" % segment.ave_enr)
+        orig_seg_enr = self.bundle.states[0].segments[iseg].data.ave_enr
+        diff_seg_enr = segment.ave_enr - orig_seg_enr
+        self.ave_denr_text.setText("%.5f" % diff_seg_enr)
         
-        self.bundle.ave_enr_calc(istate)
-        #self.bundle.ave_enr(state_num)
-        bundle_enr = self.bundle.states[istate].ave_enr
+        # Update bundle enr
+        bundle_enr = self.bundle.ave_enr_calc(istate)
+        if not hasattr(self.bundle.states[istate], "ave_enr"):
+            self.bundle.states[istate].ave_enr = bundle_enr  # save orig. calc
+        
         self.bundle_enr_text.setText("%.5f" % bundle_enr)
+        orig_bundle_enr = self.bundle.states[0].ave_enr
+        diff_bundle_enr = bundle_enr - orig_bundle_enr
+        self.bundle_denr_text.setText("%.5f" % diff_bundle_enr)
 
-        bundle_denr = bundle_enr - self.bundle.states[0].ave_enr
-        self.bundle_denr_text.setText("%.5f" % bundle_denr)
-        
     def enr_modify(self, mod, case_num=None, ipin=None):
         halfsym = True
         if case_num is None:

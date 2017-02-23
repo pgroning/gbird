@@ -7,7 +7,7 @@
 # or:
 # run segment "caxfile"
 #
-# How to reach name mangling ("private") methods:
+# How to reach name mangling ("private") methods example:
 # self._Segment__matchcontent()
 #
 
@@ -34,7 +34,7 @@ import shlex  # used for splitting subprocess call argument string into a list
 
 
 class DataStruct(object):
-    """Initialize a class that can be used to structure data"""
+    """A class that can be used to organize data in its attributes"""
     pass
 
 
@@ -55,7 +55,8 @@ class Segment(object):
         '''
         if caxfile:
             self.readcax(caxfile, read_all)
-            self.ave_enr_calc()
+            #self.ave_enr_calc()
+            #self.data.ave_enr = self.ave_enr  # save orig. calculation
             # self.quickcalc(refcalc=True)
             # self.btfcalc()
 
@@ -386,55 +387,30 @@ class Segment(object):
         for i in range(Nburnpts):
             # append new instance to list
             self.statepoints.append(DataStruct())
-            #do.statepoints.append(DataStruct())
             self.statepoints[i].titcrd = titcrd[i]
-            #do.statepoints[i].titcrd = titcrd[i]
             self.statepoints[i].burnup = burnup[i]
-            #do.statepoints[i].burnup = burnup[i]
             self.statepoints[i].voi = voi[i]
-            #do.statepoints[i].voi = voi[i]
             self.statepoints[i].vhi = vhi[i]
-            #do.statepoints[i].vhi = vhi[i]
             self.statepoints[i].tfu = tfu[i]
-            #do.statepoints[i].tfu = tfu[i]
             self.statepoints[i].tmo = tmo[i]
-            #do.statepoints[i].tmo = tmo[i]
             self.statepoints[i].kinf = kinf[i]
-            #do.statepoints[i].kinf = kinf[i]
             self.statepoints[i].fint = fint[i]
-            #do.statepoints[i].fint = fint[i]
             self.statepoints[i].EXP = EXP[:, :, i]
-            #do.statepoints[i].EXP = EXP[:, :, i]
             if iXFL:
                 self.statepoints[i].XFL1 = XFL1[:, :, i]
-                #do.statepoints[i].XFL1 = XFL1[:, :, i]
                 self.statepoints[i].XFL2 = XFL2[:, :, i]
-                #do.statepoints[i].XFL2 = XFL2[:, :, i]
             self.statepoints[i].POW = POW[:, :, i]
-            #do.statepoints[i].POW = POW[:, :, i]
 
         # Saving geninfo
         self.data.caxfile = caxfile
-        #do.caxfile = caxfile
         self.data.ENR = ENR
-        #do.ENR = ENR
         self.data.BA = BA
-        #do.BA = BA
         self.data.PIN = PIN
-        #do.PIN = PIN
         self.data.LPI = LPI
-        #do.LPI = LPI
         self.data.FUE = FUE
-        #do.FUE = FUE
         self.data.LFU = LFU
-        #do.LFU = LFU
         self.data.npst = npst
-        #do.npst = npst
         self.data.voilist = voilist
-        #do.voivec = voivec
-        # Append data object to last list element
-        #self.states[-1] = do
-        #self.data = do
 
     def __map2mat(self, caxmap, dim):
         M = np.zeros((dim, dim))
@@ -484,7 +460,10 @@ class Segment(object):
         mass = np.sum(MASS)
         MASS_U235 = MASS*ENR
         mass_u235 = np.sum(MASS_U235)
-        self.data.ave_enr = mass_u235/mass
+        ave_enr = mass_u235/mass
+        #self.data.ave_enr = ave_enr
+        self.ave_enr = ave_enr
+        #return ave_enr
 
     # -------Write cai file------------
     def writecai(self, file_base_name):
