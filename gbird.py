@@ -1052,20 +1052,25 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                 segment.data.ave_enr = segment.ave_enr
         
         segment = state.segments[iseg]
-        self.ave_enr_text.setText("%.5f" % segment.ave_enr)
+        #self.ave_enr_text.setText("%.5f" % segment.ave_enr)
         orig_seg_enr = self.bundle.states[0].segments[iseg].data.ave_enr
         diff_seg_enr = segment.ave_enr - orig_seg_enr
-        self.ave_denr_text.setText("%.5f" % diff_seg_enr)
+        formstr = '{0:.4f} ({1:+.4f})'.format(segment.ave_enr, diff_seg_enr)
+        self.ave_enr_text.setText(formstr)
+        #self.ave_denr_text.setText("%.5f" % diff_seg_enr)
         
         # Update bundle enr
         bundle_enr = self.bundle.ave_enr_calc(istate)
         if not hasattr(self.bundle.states[istate], "ave_enr"):
             self.bundle.states[istate].ave_enr = bundle_enr  # save orig. calc
         
-        self.bundle_enr_text.setText("%.5f" % bundle_enr)
+        
+        #self.bundle_enr_text.setText("%.5f" % bundle_enr)
         orig_bundle_enr = self.bundle.states[0].ave_enr
         diff_bundle_enr = bundle_enr - orig_bundle_enr
-        self.bundle_denr_text.setText("%.5f" % diff_bundle_enr)
+        formstr = '{0:.4f} ({1:+.4f})'.format(bundle_enr, diff_bundle_enr)
+        self.bundle_enr_text.setText(formstr)
+        #self.bundle_denr_text.setText("%.5f" % diff_bundle_enr)
 
     def enr_modify(self, mod, case_num=None, ipin=None):
         halfsym = True
@@ -1595,22 +1600,22 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.ave_enr_text.setReadOnly(True)
         info_flo.addRow("Segment w/o U-235", self.ave_enr_text)
 
-        self.ave_denr_text = QtGui.QLineEdit()
-        self.ave_denr_text.setSizePolicy(sizePolicy)
-        self.ave_denr_text.setReadOnly(True)
-        info_flo.addRow(QtCore.QString("Segment %1 w/o")
-                        .arg(QtCore.QChar(0x0394)), self.ave_denr_text)
+        #self.ave_denr_text = QtGui.QLineEdit()
+        #self.ave_denr_text.setSizePolicy(sizePolicy)
+        #self.ave_denr_text.setReadOnly(True)
+        #info_flo.addRow(QtCore.QString("Segment %1 w/o")
+        #                .arg(QtCore.QChar(0x0394)), self.ave_denr_text)
         
         self.bundle_enr_text = QtGui.QLineEdit()
         self.bundle_enr_text.setSizePolicy(sizePolicy)
         self.bundle_enr_text.setReadOnly(True)
         info_flo.addRow("Bundle w/o U-235", self.bundle_enr_text)
 
-        self.bundle_denr_text = QtGui.QLineEdit()
-        self.bundle_denr_text.setSizePolicy(sizePolicy)
-        self.bundle_denr_text.setReadOnly(True)
-        info_flo.addRow(QtCore.QString("Bundle %1 w/o")
-                        .arg(QtCore.QChar(0x0394)), self.bundle_denr_text)
+        #self.bundle_denr_text = QtGui.QLineEdit()
+        #self.bundle_denr_text.setSizePolicy(sizePolicy)
+        #self.bundle_denr_text.setReadOnly(True)
+        #info_flo.addRow(QtCore.QString("Bundle %1 w/o")
+        #                .arg(QtCore.QChar(0x0394)), self.bundle_denr_text)
         
         # Define table widget
         self.table = QtGui.QTableWidget()
