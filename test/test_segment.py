@@ -79,7 +79,8 @@ class UnitTest(unittest.TestCase):
         s = Segment()
         s.readcax(testfile)
         s.ave_enr_calc()
-        ave_enr = s.data.ave_enr
+        ave_enr = s.ave_enr
+        #ave_enr = s.data.ave_enr
         self.assertTrue(ave_enr > 3.854 and ave_enr < 3.865)
     
     #@unittest.skip("skip this test")

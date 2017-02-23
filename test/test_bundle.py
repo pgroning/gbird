@@ -32,7 +32,7 @@ class UnitTest(unittest.TestCase):
 
     #@unittest.skip("skip this test")
     def test_readinp(self):
-        testfile = "test/topol/bundle_a10xm.inp"
+        testfile = "test/topol/bundle_a10xm.pro"
         b = Bundle(testfile)
         self.assertTrue(b.data.fuetype == "A10XM" and 
                         type(b.data.nodes) is list,
@@ -40,14 +40,14 @@ class UnitTest(unittest.TestCase):
 
     #@unittest.skip("skip this test")
     def test_readcax(self):
-        testfile = "test/topol/bundle_a10xm.inp"
+        testfile = "test/topol/bundle_a10xm.pro"
         b = Bundle(testfile)
         b.readcax()
         self.assertTrue(len(b.states[0].segments) == 5, "reading cax files failed")
     
     @unittest.skip("skip this test")
     def test_readrun_all(self):
-        testfile = 'test/topol/bundle_opt2.inp'
+        testfile = 'test/topol/bundle_opt2.pro'
         b = Bundle(testfile)
         b.readcax(read_all=True)
         b.append_state()
@@ -59,17 +59,22 @@ class UnitTest(unittest.TestCase):
 
     #@unittest.skip("skip this test")
     def test_bundle_ave_enr(self):
-        testfile = "test/topol/bundle_a10xm.inp"
+        testfile = "test/topol/bundle_a10xm.pro"
         b = Bundle(testfile)
         b.readcax()
-        b.ave_enr_calc()
-        self.assertTrue(b.states[0].ave_enr > 0, 
+        for s in b.states[0].segments:
+            s.ave_enr_calc()
+        bundle_enr = b.ave_enr_calc()
+        self.assertTrue(bundle_enr > 0, 
                         "bundle enrichment is invalid")
+        #b.ave_enr_calc()
+        #self.assertTrue(b.states[0].ave_enr > 0, 
+        #                "bundle enrichment is invalid")
 
     #@unittest.skip("skip this test")
     def test_new_calc(self):
         #testfile = "test/tosim/bundle_at11.inp"
-        testfile = "test/topol/bundle_a10xm.inp"
+        testfile = "test/topol/bundle_a10xm.pro"
         b = Bundle(testfile)
         b.readcax()
         b.append_state()
@@ -96,7 +101,7 @@ class UnitTest(unittest.TestCase):
     #@unittest.skip("skip test_new_calc_c4")
     def test_new_calc_c4(self):
         #testfile = "test/tosim/bundle_at11.inp"
-        testfile = "test/topol/bundle_a10xm.inp"
+        testfile = "test/topol/bundle_a10xm.pro"
         b = Bundle(testfile)
         b.readcax()
         b.append_state()
@@ -107,18 +112,23 @@ class UnitTest(unittest.TestCase):
     #@unittest.skip("skip this test")
     def test_new_ave_enr_calc(self):
         #testfile = "test/tosim/bundle_at11.inp"
-        testfile = 'test/tosim/bundle_a10b.inp'
+        testfile = "test/tosim/bundle_a10b.pro"
         b = Bundle(testfile)
         b.readcax()
         b.append_state()
         b.new_calc(grid=True)
-        b.ave_enr_calc()
-        self.assertTrue(b.states[1].ave_enr > 0, 
+        for s in b.states[1].segments:
+            s.ave_enr_calc()
+        bundle_enr = b.ave_enr_calc()
+        self.assertTrue(bundle_enr > 0, 
                         "bundle enrichment is invalid")
+        #b.ave_enr_calc()
+        #self.assertTrue(b.states[1].ave_enr > 0, 
+        #                "bundle enrichment is invalid")
 
     #@unittest.skip("skip this test")
     def test_btf_calc_a10xm(self):
-        testfile = 'test/topol/bundle_a10xm.inp'
+        testfile = "test/topol/bundle_a10xm.pro"
         b = Bundle(testfile)
         b.readcax()
         b.new_btf()
@@ -129,7 +139,7 @@ class UnitTest(unittest.TestCase):
 
     #@unittest.skip("skip this test")
     def test_btf_calc_a10b(self):
-        testfile = 'test/tosim/bundle_a10b.inp'
+        testfile = "test/tosim/bundle_a10b.pro"
         b = Bundle(testfile)
         b.readcax()
         b.new_btf()
@@ -140,7 +150,7 @@ class UnitTest(unittest.TestCase):
 
     #@unittest.skip("skip this test")
     def test_new_btf_calc(self):
-        testfile = 'test/tosim/bundle_opt2.inp'
+        testfile = "test/tosim/bundle_opt2.pro"
         b = Bundle(testfile)
         b.readcax()
         b.new_btf()
@@ -153,7 +163,7 @@ class UnitTest(unittest.TestCase):
         self.assertFalse(numpy.isnan(b.states[1].btf.DOX).any(), "Btf is NaN")
 
     def test_append_state(self):
-        testfile = 'test/tosim/bundle_opt2.inp'
+        testfile = "test/tosim/bundle_opt2.pro"
         b = Bundle(testfile)
         b.readcax()
         b.append_state()
