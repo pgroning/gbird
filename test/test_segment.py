@@ -102,7 +102,7 @@ class UnitTest(unittest.TestCase):
     #    s.add_state(LFU, FUE, voi)
     #    self.assertTrue((s.states[1].LFU == LFU).all())
     
-    @unittest.skip("test_writec3cai_at11")
+    #@unittest.skip("test_writec3cai_at11")
     def test_writec3cai_at11(self):
         testfile = "test/tosim/AT11/14g35top/exxAT11-384-14g35top-cas.cax"
         #testfile = "test/tosim/OPT2/12g30mid/e32OPT2-390-12g30mid-cas.cax"

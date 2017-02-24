@@ -729,12 +729,7 @@ class Segment(object):
 
         pde = info.pde.split('\'')[0]
         f.write(pde.strip() + '\n')
-        
-        # box corner radius (extra thickness). True for AT11
-        # Tracer()()
-        # if '/' in info.bwr:
-        #    bwr = info.bwr.replace('/','//')  # a // is needed for C3
-        
+                
         if hasattr(self.data, 'box_offset'):
             box_offset = self.data.box_offset
         bwr = self.__boxbow(box_offset)
@@ -1041,7 +1036,7 @@ class Segment(object):
     def __boxbow(self, box_offset=0.0):
         """Updating the BWR card to account for box bowing."""
         bwr = self.data.bwr
-        bwr_arr = bwr.split()
+        bwr_arr = re.split(',|\s+', bwr.strip())
         
         gaw = float(bwr_arr[5]) + box_offset
         gan = float(bwr_arr[6]) - box_offset  # gaw + gan = constant
