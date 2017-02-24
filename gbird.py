@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 """
 This is the main window of the program.
 This window embeds a matplotlib (mpl) plot into a PyQt4 GUI application
@@ -27,7 +28,6 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg \
 # from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg \
 # as NavigationToolbar
 from matplotlib.figure import Figure
-# from matplotlib.patches import FancyBboxPatch
 import matplotlib.patches as mpatches
 try:  # patheffects not available for older versions of matplotlib
     import matplotlib.patheffects as path_effects
@@ -117,6 +117,14 @@ class cpin(object):
         except:
             pass
 
+        # Set background rectangle
+        d = 2*r + 0.019
+        self.rectangle = mpatches.Rectangle((x - d/2, y - d/2), d, d,
+                                            fc=(1, 1, 0), alpha=1.0,
+                                            ec=(1, 1, 1))
+        self.rectangle.set_fill(True)
+        self.rectangle.set_linewidth(0.0)
+        
     def set_text(self, string='', fsize=8):
         # if hasattr(self,'text'):
         #    self.text.remove()
@@ -157,18 +165,18 @@ class EnrDialog(QtGui.QDialog):
         elif mode == "add":
             self.setWindowTitle("Add enrichment")
         self.enr_text = QtGui.QLineEdit("%.2f" % enr)
-        dens = parent.enrpinlist[case_num][ipin].DENS
-        self.dens_text = QtGui.QLineEdit("%.3f" % dens)
+        # dens = parent.enrpinlist[case_num][ipin].DENS
+        # self.dens_text = QtGui.QLineEdit("%.3f" % dens)
         self.ba_text = QtGui.QLineEdit("%.2f" % ba)
         validator = QtGui.QDoubleValidator(0, 9.99, 2, self)
         self.enr_text.setValidator(validator)
         self.ba_text.setValidator(validator)
-        validator = QtGui.QDoubleValidator(0, 9.99, 3, self)
-        self.dens_text.setValidator(validator)
+        # validator = QtGui.QDoubleValidator(0, 9.99, 3, self)
+        # self.dens_text.setValidator(validator)
 
         flo = QtGui.QFormLayout()
         flo.addRow("%U-235:", self.enr_text)
-        flo.addRow("Density:", self.dens_text)
+        #flo.addRow("Density (g/cm-3):", self.dens_text)
         flo.addRow("%Gd:", self.ba_text)
 
         hbox = QtGui.QHBoxLayout()
@@ -189,7 +197,7 @@ class EnrDialog(QtGui.QDialog):
     def action(self):
         self.close()
         self.enr = self.enr_text.text().toDouble()[0]
-        self.dens = self.dens_text.text().toDouble()[0]
+        #self.dens = self.dens_text.text().toDouble()[0]
         self.ba = self.ba_text.text().toDouble()[0]
         if self.mode == "edit":
             self.parent.enrpin_edit_callback()
@@ -257,7 +265,7 @@ class MainWin(QtGui.QMainWindow):
                                            QtCore.QString("")).toString()
         self.settings.endGroup()
         # file_choices = "inp (*.inp);;pickle (*.p)"
-        file_choices = "Data files (*.inp *.p)"
+        file_choices = "Data files (*.grb *.cax)"
         filename = unicode(QtGui.QFileDialog.getOpenFileName(self, 'Open file',
                                                              path_default,
                                                              file_choices))
@@ -269,10 +277,12 @@ class MainWin(QtGui.QMainWindow):
             self.settings.endGroup()
 
             filext = os.path.splitext(filename)[1]
-            if filext == ".p":
+            if filext == ".grb":  # project file
                 self.state_index = -1
                 self.load_pickle(filename)
-            elif filext == ".inp":
+                self.fig_update()
+                self.chanbow_sbox_update()
+            else:
                 msgBox = QtGui.QMessageBox()
                 status = msgBox.information(self, "Importing data",
                                             "Continue?",
@@ -284,32 +294,68 @@ class MainWin(QtGui.QMainWindow):
                 if status == QtGui.QMessageBox.Yes:
                     self.setCursor(QtCore.Qt.WaitCursor)
                     self.state_index = 0
-                    self.read_cax(filename)
-                    #self.enr_update()
-                    self.quick_calc(state_num=0)  # reference calculation
-                    #self.state_index = 0
-                    #self.fig_update()
+                    #if filext == ".inp":
+                    #    self.read_inp(filename)
+                    #    #self.quick_calc(state_num=0)  # reference calculation
+                    if filext == ".cax":
+                        self.read_cax(filename)
+                        self.fig_update()
                     self.setCursor(QtCore.Qt.ArrowCursor)
 
+    def newProject(self):
+        """Open project setup file"""
+
+        # Import default path from config file
+        self.settings.beginGroup("PATH")
+        path_default = self.settings.value("path_default",
+                                           QtCore.QString("")).toString()
+        self.settings.endGroup()
+        file_choices = "*.pro (*.pro)"
+        filename = unicode(QtGui.QFileDialog.getOpenFileName(self, 'Open file',
+                                                             path_default,
+                                                             file_choices))
+        if filename:
+            # Save default path to config file
+            path = os.path.split(filename)[0]
+            self.settings.beginGroup("PATH")
+            self.settings.setValue("path_default", QtCore.QString(path))
+            self.settings.endGroup()
+            self.state_index = 0
+            self.read_pro(filename)
+                    
     def load_pickle(self, filename):
         """Load bundle object from pickle file"""
 
-        self.statusBar().showMessage('Importing data from %s' % filename, 2000)
+        self.statusBar().showMessage('Load project from %s' % filename, 2000)
         # self.bundle = Bundle()
         # self.bundle.loadpic(filename)
         print "Loading data from file " + filename
+        self.clear_data()
         with open(filename, 'rb') as fp:
             self.bundle = pickle.load(fp)
 
         self.init_pinobjects()
 
         # Update case number list box
-        ncases = len(self.bundle.cases)
-        for i in range(1, ncases + 1):
-            self.case_cbox.addItem(str(i))
+        nsegments = len(self.bundle.states[-1].segments)
+        seglist = map(str, range(1, nsegments + 1))
+        self.case_cbox.addItems(QtCore.QStringList(seglist))
+        #for i in range(1, ncases + 1):
+        #    self.case_cbox.addItem(str(i))
         self.connect(self.case_cbox, QtCore.SIGNAL('currentIndexChanged(int)'),
                      self.fig_update)
-        self.fig_update()
+        #self.fig_update()
+
+    def read_cax(self, filename):
+        """Importing data from a single cax file"""
+        
+        self.clear_data()
+        self.bundle = Bundle()
+        self.bundle.read_single_cax(filename)
+        self.bundle.new_btf()
+
+        self.init_pinobjects()
+        #self.fig_update()
 
     def dataobj_finished(self):
         print "dataobject constructed"
@@ -327,7 +373,6 @@ class MainWin(QtGui.QMainWindow):
         self.timer.stop()
 
         # Update case number list box
-        # ncases = len(self.dataobj.cases)
         for i in range(1, ncases + 1):
             self.case_cbox.addItem(str(i))
         self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'),
@@ -362,34 +407,39 @@ class MainWin(QtGui.QMainWindow):
         # self.progressbar.close
         # self.thread.wait()
 
-    def read_cax(self, filename):
-        #msg = "Continue?"
-        #msgBox = QtGui.QMessageBox()
-        #status = msgBox.information(self, "Importing data", msg.strip(),
-        #                            QtGui.QMessageBox.Yes |
-        #                            QtGui.QMessageBox.Cancel)
+    def read_pro(self, filename):
+        """Reading project setup file"""
+        
+        msgBox = QtGui.QMessageBox()
+        status = msgBox.information(self, "Importing data", "Continue?",
+                                    QtGui.QMessageBox.Yes |
+                                    QtGui.QMessageBox.Cancel)
         #self.statusBar().showMessage('Importing data from %s' % filename, 2000)
         #self._filename = filename
-        #if status == QtGui.QMessageBox.Yes:
-            #self.setCursor(QtCore.Qt.WaitCursor)
-
-        print "importing data"
+        if status == QtGui.QMessageBox.Yes:
+            self.setCursor(QtCore.Qt.WaitCursor)
+            self.clear_data()
+            self.bundle = Bundle()
+            self.bundle.readpro(filename)
+            self.bundle.readcax()  # inargs "all" reads the whole file content
+            self.bundle.new_btf()
+            
+            self.init_pinobjects()
         
-        self.bundle = Bundle()
-        self.bundle.readinp(filename)
-        self.bundle.readcax()  # inargs "all" reads the whole file content
-        self.bundle.new_btf()
-        
-        self.init_pinobjects()
-        
-        # Update case number list box
-        ncases = len(self.bundle.cases)
-        for i in range(1, ncases + 1):
-            self.case_cbox.addItem(str(i))
-        self.connect(self.case_cbox,
-                     QtCore.SIGNAL('currentIndexChanged(int)'),
-                     self.fig_update)
-
+            # Update segment number list box
+            state_num = self.state_index
+            nsegments = len(self.bundle.states[state_num].segments)
+            seglist = map(str, range(1, nsegments + 1))
+            self.case_cbox.addItems(QtCore.QStringList(seglist))
+            
+            self.connect(self.case_cbox,
+                         QtCore.SIGNAL('currentIndexChanged(int)'),
+                         self.fig_update)
+            self.setCursor(QtCore.Qt.ArrowCursor)
+            self.fig_update()
+        else:
+            return
+            
         #self.fig_update()
             #self.setCursor(QtCore.Qt.ArrowCursor)
             # self.canvas.draw()
@@ -452,12 +502,13 @@ class MainWin(QtGui.QMainWindow):
                                            QtCore.QString("")).toString()
         self.settings.endGroup()
 
-        file_choices = "Data files (*.p)"
+        file_choices = "Project files (*.grb)"
         filename = unicode(QtGui.QFileDialog.getSaveFileName(self,
-                                                             "Save to file",
+                                                             "Save project",
                                                              path_default,
                                                              file_choices))
         # self.bundle.savepic(filename)
+        filename = os.path.splitext(filename)[0] + ".grb"  # fix file ext
         with open(filename, 'wb') as fp:
             pickle.dump(self.bundle, fp, 1)
         print "Saved data to file " + filename
@@ -475,27 +526,52 @@ class MainWin(QtGui.QMainWindow):
             #                   QtGui.QMessageBox.Close)
             msgBox.information(self, "No data", msg.strip(), msgBox.Close)
 
+    #def get_colormap(self, num_enr_levels):
+    #    cvec = ["#FF00FF", "#CC00FF", "#AA00FF", "#0000FF", "#0066FF",
+    #            "#00AAFF", "#00CCFF", "#00FFFF", "#00FFCC", "#00FFAA",
+    #            "#00FF66", "#00FF00", "#AAFF00", "#CCFF00", "#FFFF00",
+    #            "#FFCC00", "#FFAA00", "#FF9900", "#FF5500", "#FF0000"]
+    #    ic = np.linspace(0, len(cvec) - 1, num_enr_levels).astype(int).tolist()
+    #    cmap = [cvec[i] for i in ic]
+    #    return cmap
+
     def get_colormap(self, num_enr_levels):
-        cvec = ["#FF00FF", "#CC00FF", "#AA00FF", "#0000FF", "#0066FF",
-                "#00AAFF", "#00CCFF", "#00FFFF", "#00FFCC", "#00FFAA",
-                "#00FF66", "#00FF00", "#AAFF00", "#CCFF00", "#FFFF00",
-                "#FFCC00", "#FFAA00", "#FF9900", "#FF5500", "#FF0000"]
-        ic = np.linspace(0, len(cvec) - 1, num_enr_levels).astype(int).tolist()
-        cmap = [cvec[i] for i in ic]
+            
+        n = int(np.ceil(num_enr_levels / 4.0)) + 1
+        v00 = np.zeros(n)
+        v11 = np.ones(n)
+        v01 = np.linspace(0, 1, n)
+        v10 = v01[::-1]  # revert array
+    
+        # magenta -> blue
+        cm_mb = np.vstack((v10, v00, v11)).transpose()[:-1]  # remove last elem
+        # blue -> cyan
+        # remove last element
+        cm_bc = np.vstack((v00, v01, v11)).transpose()[:-1]
+        # cyan -> green
+        cm_cg = np.vstack((v00, v11, v10)).transpose()[:-1]
+        # green -> yellow
+        cm_gy = np.vstack((v01, v11, v00)).transpose()[:-1]
+        # yellow -> red
+        cm_yr = np.vstack((v11, v10, v00)).transpose()
+        cm = np.vstack((cm_mb, cm_bc, cm_cg, cm_gy, cm_yr))
+        
+        ic = np.linspace(0, len(cm) - 1, num_enr_levels).astype(int).tolist()
+        cmap = [cm[i].tolist() for i in ic]
         return cmap
 
     def init_pinobjects(self):
         self.pinobjects = []
         self.enrpinlist = []
-        ncases = len(self.bundle.cases)
 
         state_num = self.state_index
+        nsegments = len(self.bundle.states[state_num].segments)
 
-        for case_num in range(ncases):
-            LFU = self.bundle.cases[case_num].states[state_num].LFU
-            ENR = self.bundle.cases[case_num].states[state_num].ENR
-            BA = self.bundle.cases[case_num].states[state_num].BA
-
+        for iseg in range(nsegments):
+            LFU = self.bundle.states[state_num].segments[iseg].data.LFU
+            ENR = self.bundle.states[state_num].segments[iseg].data.ENR
+            BA = self.bundle.states[state_num].segments[iseg].data.BA
+            
             pinlist = []
             for i in range(LFU.shape[0]):
                 for j in range(LFU.shape[1]):
@@ -507,9 +583,9 @@ class MainWin(QtGui.QMainWindow):
                         pinobj.LFU = LFU[i, j]
                         pinlist.append(pinobj)
             self.pinobjects.append(pinlist)
-
+            
             enrlist = []
-            FUE = self.bundle.cases[case_num].states[state_num].FUE
+            FUE = self.bundle.states[state_num].segments[iseg].data.FUE
             enr_dens = FUE[:, 1]
             enr_levels = FUE[:, 2]
             enr_baindex = FUE[:, 3]
@@ -538,7 +614,8 @@ class MainWin(QtGui.QMainWindow):
 
         enrobj = cpin(self.axes)
         enrobj.facecolor = self.enrpinlist[case_num][ipin].facecolor
-        enrobj.DENS = self.enr_dlg.dens
+        enrobj.DENS = self.enrpinlist[case_num][ipin].DENS
+        #enrobj.DENS = self.enr_dlg.dens
         enrobj.ENR = self.enr_dlg.enr
         if self.enr_dlg.ba < 0.00001:
             enrobj.BA = np.nan
@@ -573,7 +650,8 @@ class MainWin(QtGui.QMainWindow):
         for pin in self.pinobjects[case_num]:
             if pin.LFU == ipin + 1:
                 pin.ENR = self.enr_dlg.enr
-                pin.DENS = self.enr_dlg.dens
+                pin.DENS = enrpin.DENS
+                #pin.DENS = self.enr_dlg.dens
                 pin.BA = self.enr_dlg.ba
 
         # second update enr level pin
@@ -638,17 +716,19 @@ class MainWin(QtGui.QMainWindow):
         """Update values"""
 
         param_str = str(self.param_cbox.currentText())
-        case_num = int(self.case_cbox.currentIndex())
+        iseg = int(self.case_cbox.currentIndex())
         point_num = int(self.point_sbox.value())
         state_num = self.state_index
 
-        state = self.bundle.cases[case_num].states[state_num]
+        segment = self.bundle.states[state_num].segments[iseg]
+        #state = self.bundle.cases[case_num].states[state_num]
+        
+        ENR = segment.data.ENR
+        
+        EXP = segment.statepoints[point_num].EXP
+        FINT = segment.statepoints[point_num].POW
 
-        ENR = state.ENR
-        EXP = state.statepoints[point_num].EXP
-        FINT = state.statepoints[point_num].POW
-
-        burnup = state.statepoints[point_num].burnup
+        burnup = segment.statepoints[point_num].burnup
         btf_burnpoints = self.bundle.states[state_num].btf.burnpoints
 
         index_array = np.where(btf_burnpoints == burnup)[0]
@@ -659,21 +739,22 @@ class MainWin(QtGui.QMainWindow):
             BTF = np.zeros(np.shape(self.bundle.states[state_num].btf.DOX)[1:])
             BTF.fill(np.nan)
 
-        npst = self.bundle.cases[case_num].states[0].npst
-        LFU = state.LFU
-        BA = state.BA
+        npst = segment.data.npst
+        #npst = self.bundle.cases[case_num].states[0].npst
+        LFU = segment.data.LFU
+        BA = segment.data.BA
 
         # Sorting table column 0 in ascending order
         self.table.sortItems(0, QtCore.Qt.AscendingOrder)
         self.setpincoords()
 
         k = 0
-        for i in range(npst):
-            for j in range(npst):
+        for i in xrange(npst):
+            for j in xrange(npst):
                 if LFU[i, j] > 0:
-                    self.pinobjects[case_num][k].EXP = EXP[i, j]
-                    self.pinobjects[case_num][k].FINT = FINT[i, j]
-                    self.pinobjects[case_num][k].BTF = BTF[i, j]
+                    self.pinobjects[iseg][k].EXP = EXP[i, j]
+                    self.pinobjects[iseg][k].FINT = FINT[i, j]
+                    self.pinobjects[iseg][k].BTF = BTF[i, j]
 
                     expItem = QtGui.QTableWidgetItem()
                     expItem.setData(QtCore.Qt.EditRole, QtCore.QVariant(
@@ -690,7 +771,8 @@ class MainWin(QtGui.QMainWindow):
                     self.table.setItem(k, 3, btfItem)
                     k += 1
         
-        statepoint = state.statepoints[point_num]
+        statepoint = segment.statepoints[point_num]
+        #statepoint = state.statepoints[point_num]
         burnup = statepoint.burnup
         voi = statepoint.voi
         vhi = statepoint.vhi
@@ -705,42 +787,74 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                                      % (burnup, voi, vhi, kinf, fint, btf,
                                         tfu, tmo))
         
-        npins = len(self.pinobjects[case_num])
-        
+        npins = len(self.pinobjects[iseg])
+        cmap = self.get_colormap(npins)
+
+        # Sort params and get color map
+        if param_str == "FINT":
+            v = np.array([pin.FINT for pin in self.pinobjects[iseg]])
+            uni_fint = np.unique(v)
+            cmap = self.get_colormap(uni_fint.size)
+        elif param_str == "BTF":
+            v = np.array([pin.BTF for pin in self.pinobjects[iseg]])
+            uni_btf = np.unique(v)
+            cmap = self.get_colormap(uni_btf.size)
+        elif param_str == "EXP":
+            v = np.array([pin.EXP for pin in self.pinobjects[iseg]])
+            uni_exp = np.unique(v)
+            cmap = self.get_colormap(uni_exp.size)
+            
         for i in xrange(npins):
             
-            if self.pinobjects[case_num][i].BA < 0.00001:
-                j = next(j for j, epin in enumerate(self.enrpinlist[case_num])
-                         if epin.ENR == self.pinobjects[case_num][i].ENR)
+            if self.pinobjects[iseg][i].BA < 0.00001:
+                j = next(j for j, epin in enumerate(self.enrpinlist[iseg])
+                         if epin.ENR == self.pinobjects[iseg][i].ENR)
             else:
-                j = next(j for j, epin in enumerate(self.enrpinlist[case_num])
-                         if epin.BA == self.pinobjects[case_num][i].BA
-                         and epin.ENR == self.pinobjects[case_num][i].ENR)
-            self.pinobjects[case_num][i].LFU = j + 1
-            fc = self.enrpinlist[case_num][j].circle.get_facecolor()
-            self.pinobjects[case_num][i].circle.set_facecolor(fc)
+                j = next(j for j, epin in enumerate(self.enrpinlist[iseg])
+                         if epin.BA == self.pinobjects[iseg][i].BA
+                         and epin.ENR == self.pinobjects[iseg][i].ENR)
+            self.pinobjects[iseg][i].LFU = j + 1
+            fc = self.enrpinlist[iseg][j].circle.get_facecolor()
+            self.pinobjects[iseg][i].circle.set_facecolor(fc)
 
             if param_str == "ENR":
-                text = self.enrpinlist[case_num][j].text.get_text()
+                text = self.enrpinlist[iseg][j].text.get_text()
+                self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[i])
+                self.pinobjects[iseg][i].rectangle.set_facecolor((1, 1, 1))
                 
             elif param_str == "BTF":
-                btf_ratio = self.pinobjects[case_num][i].BTF / btf * 1000
-                if int(btf_ratio) == 1000:
-                    text = "1e3"
+                pin_btf = self.pinobjects[iseg][i].BTF
+                if np.isnan(pin_btf):
+                    text = "nan"
+                    self.pinobjects[iseg][i].rectangle.set_facecolor((1, 1, 1))
                 else:
-                    text = ('%.0f' % (btf_ratio))
-                
+                    btf_ratio = pin_btf / btf * 1000
+                    if int(btf_ratio) == 1000:
+                        text = "1e3"
+                    else:
+                        text = ('%.0f' % (btf_ratio))
+                    ic = next(i for i, v in enumerate(uni_btf) if v == pin_btf)
+                    self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic])
+            
             elif param_str == "EXP":
-                if self.pinobjects[case_num][i].EXP < 10:
-                    text = ('%.1f' % (self.pinobjects[case_num][i].EXP))
+                if self.pinobjects[iseg][i].EXP < 10:
+                    text = ('%.1f' % (self.pinobjects[iseg][i].EXP))
                 else:
-                    text = ('%.0f' % (self.pinobjects[case_num][i].EXP))
+                    text = ('%.0f' % (self.pinobjects[iseg][i].EXP))
+                pin_exp = self.pinobjects[iseg][i].EXP
+                ic = next(i for i, v in enumerate(uni_exp) if v == pin_exp)
+                self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic])
 
             elif param_str == "FINT":
-                text = ('%.0f' % (self.pinobjects[case_num][i].FINT * 100))
-
-            self.pinobjects[case_num][i].text.remove()
-            self.pinobjects[case_num][i].set_text(text)
+                text = ('%.0f' % (self.pinobjects[iseg][i].FINT * 100))
+                pin_fint = self.pinobjects[iseg][i].FINT
+                ic = next(i for i, v in enumerate(uni_fint) if v == pin_fint)
+                self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic])
+            elif param_str == "ROD":
+                return
+                
+            self.pinobjects[iseg][i].text.remove()
+            self.pinobjects[iseg][i].set_text(text)
 
         self.canvas.draw()
 
@@ -927,22 +1041,37 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
     def enr_update(self):
         """Update enr value in info fields"""
 
-        case_num = int(self.case_cbox.currentIndex())
-        LFU = self.__lfumap(case_num)
-        FUE = self.__fuemap(case_num)
-        state_num = self.state_index
-        self.bundle.cases[case_num].ave_enr(state_num, LFU, FUE)
+        iseg = int(self.case_cbox.currentIndex())
+        istate = self.state_index
+        state = self.bundle.states[istate]
 
-        ave_enr = self.bundle.cases[case_num].states[state_num].ave_enr
-
-        #ave_enr = self.bundle.cases[case_num].states[state_num].ave_enr
-        self.ave_enr_text.setText("%.5f" % ave_enr)
-
-        #print "state num = " + str(state_num)
-        #qtrace()
-        self.bundle.ave_enr(state_num)
-        bundle_enr = self.bundle.states[state_num].ave_enr
-        self.bundle_enr_text.setText("%.5f" % bundle_enr)
+        # Update enr for all segments
+        for i, segment in enumerate(state.segments):
+            LFU = self.__lfumap(i)
+            FUE = self.__fuemap(i)
+            segment.ave_enr_calc(LFU, FUE)
+            if not hasattr(segment.data, "ave_enr"):  # save orig. calc
+                segment.data.ave_enr = segment.ave_enr
+        
+        segment = state.segments[iseg]
+        #self.ave_enr_text.setText("%.5f" % segment.ave_enr)
+        orig_seg_enr = self.bundle.states[0].segments[iseg].data.ave_enr
+        diff_seg_enr = segment.ave_enr - orig_seg_enr
+        formstr = '{0:.4f} ({1:+.4f})'.format(segment.ave_enr, diff_seg_enr)
+        self.ave_enr_text.setText(formstr)
+        #self.ave_denr_text.setText("%.5f" % diff_seg_enr)
+        
+        # Update bundle enr
+        bundle_enr = self.bundle.ave_enr_calc(istate)
+        if not hasattr(self.bundle.states[istate], "ave_enr"):
+            self.bundle.states[istate].ave_enr = bundle_enr  # save orig. calc
+         
+        # self.bundle_enr_text.setText("%.5f" % bundle_enr)
+        orig_bundle_enr = self.bundle.states[0].ave_enr
+        diff_bundle_enr = bundle_enr - orig_bundle_enr
+        formstr = '{0:.4f} ({1:+.4f})'.format(bundle_enr, diff_bundle_enr)
+        self.bundle_enr_text.setText(formstr)
+        #self.bundle_denr_text.setText("%.5f" % diff_bundle_enr)
 
     def enr_modify(self, mod, case_num=None, ipin=None):
         halfsym = True
@@ -1003,73 +1132,78 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         # self.dataobj.cases[case_num].qcalc[0].LFU = self.__lfumap(case_num)
         # self.canvas.draw()
 
-    def __lfumap(self, case_num):
+    def __lfumap(self, iseg):
         """Creating LFU map from pinobjects"""
         
         # print "Creating LFU map"
         # case_num = int(self.case_cbox.currentIndex())
         
         # Initialize new LFU map and fill with zeros
-        LFU_old = self.bundle.cases[case_num].states[-1].LFU
-        # LFU_old = self.dataobj.cases[case_num].data.LFU
-        # LFU = np.zeros((LFU_old.shape[0],LFU_old.shape[1]));
+        LFU_old = self.bundle.states[-1].segments[iseg].data.LFU
+        # LFU_old = self.bundle.cases[case_num].states[-1].LFU
         LFU = np.zeros(LFU_old.shape).astype(int)
         
         k = 0
-        for i in range(LFU.shape[0]):
-            for j in range(LFU.shape[1]):
+        for i in xrange(LFU.shape[0]):
+            for j in xrange(LFU.shape[1]):
                 if LFU_old[i, j] > 0:
-                    LFU[i, j] = self.pinobjects[case_num][k].LFU
+                    LFU[i, j] = self.pinobjects[iseg][k].LFU
                     k += 1
         return LFU
 
-    def __fuemap(self, case_num):
+    def __fuemap(self, iseg):
         """Creating FUE map from enr level pins"""
 
-        FUE_old = self.bundle.cases[case_num].states[-1].FUE
-        nfue = len(self.enrpinlist[case_num])
+        FUE_old = self.bundle.states[-1].segments[iseg].data.FUE
+        #FUE_old = self.bundle.cases[case_num].states[-1].FUE
+        nfue = len(self.enrpinlist[iseg])
         FUE = np.zeros((nfue, FUE_old.shape[1])).astype(float)
-        for i in range(nfue):
+        for i in xrange(nfue):
             FUE[i, 0] = i + 1
-            FUE[i, 1] = self.enrpinlist[case_num][i].DENS
-            FUE[i, 2] = self.enrpinlist[case_num][i].ENR
-            FUE[i, 3] = self.enrpinlist[case_num][i].BAindex
-            FUE[i, 4] = self.enrpinlist[case_num][i].BA
+            FUE[i, 1] = self.enrpinlist[iseg][i].DENS
+            FUE[i, 2] = self.enrpinlist[iseg][i].ENR
+            FUE[i, 3] = self.enrpinlist[iseg][i].BAindex
+            FUE[i, 4] = self.enrpinlist[iseg][i].BA
         return FUE
 
-    def __bamap(self, case_num):
+    def __bamap(self, iseg):
         """Creating BA map from pinobjects"""
 
         # Initialize new BA map and fill with zeros
-        LFU = self.bundle.cases[case_num].states[-1].LFU
+        LFU = self.bundle.states[-1].segments[iseg].data.LFU
+        #LFU = self.bundle.cases[case_num].states[-1].LFU
         BA = np.zeros(LFU.shape).astype(float)
 
         k = 0
         for i in range(BA.shape[0]):
             for j in range(BA.shape[1]):
                 if LFU[i, j] > 0:
-                    BA[i, j] = self.pinobjects[case_num][k].BA
+                    BA[i, j] = self.pinobjects[iseg][k].BA
                     k += 1
         return BA
 
     # def quick_calc(self,case_num):
     def quick_calc(self, state_num=-1):
         """Performing quick calculation"""
-        print "Performing quick calculation..."
+
         self.setCursor(QtCore.Qt.WaitCursor)
         
         chanbow = self.chanbow_sbox.value() / 10  # mm -> cm
 
-        for case_num in xrange(len(self.bundle.cases)):
-            LFU = self.__lfumap(case_num)
-            FUE = self.__fuemap(case_num)
-            BA = self.__bamap(case_num)
-            
-            # FUE = self.bundle.cases[case_num].states[-1].FUE
-            voi = None
-            self.bundle.cases[case_num].add_state(LFU, FUE, BA, voi, chanbow)
+        nsegments = len(self.bundle.states[state_num].segments)
+        self.bundle.append_state()
 
-        self.bundle.new_calc(model='c3')
+        for iseg in xrange(nsegments):
+            LFU = self.__lfumap(iseg)
+            FUE = self.__fuemap(iseg)
+            BA = self.__bamap(iseg)
+            voi = None
+            self.bundle.states[-1].segments[iseg].set_data(LFU, FUE, BA,
+                                                           voi, chanbow)
+            
+            #self.bundle.cases[case_num].add_state(LFU, FUE, BA, voi, chanbow)
+
+        self.bundle.new_calc(model='c3', depthres=20)
         self.bundle.new_btf()
         #if state_num:
         self.state_index = state_num
@@ -1093,17 +1227,20 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.axes.clear()
         self.draw_fuelmap()
         self.set_pinvalues()
-
+        self.toggle_pin_bgcolors()
+        
         # Update info field
-        case_num = int(self.case_cbox.currentIndex())
-        sim = self.bundle.cases[case_num].states[0].sim
+        iseg = int(self.case_cbox.currentIndex())
+        sim = self.bundle.states[0].segments[iseg].data.sim
+        #sim = self.bundle.cases[case_num].states[0].sim
         text = sim.replace("SIM", "").replace("'", "").strip()
-        self.sim_text.setText(text)
+        self.sim_info_field.setText(text)
+        #self.sim_text.setText(text)
 
         self.enr_update()
 
     def on_draw(self):
-        """ Setup the figure axis"""
+        """Setup the figure axis"""
 
         # clear the axes and redraw the plot anew
         #
@@ -1132,6 +1269,41 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         
         # self.canvas.draw()
 
+    def clear_project(self):
+        """Clear project"""
+        
+        msgBox = QtGui.QMessageBox()
+        status = msgBox.information(self, "Clear current project",
+                                    "Unsaved data will be lost!\n\nContinue?",
+                                    QtGui.QMessageBox.Yes |
+                                    QtGui.QMessageBox.Cancel)
+        if status == QtGui.QMessageBox.Yes:
+            self.clear_data()
+
+    def clear_data(self):
+        """Clear fuel map figure axes and delete bundle- and GUI field data"""
+
+        self.case_cbox.clear()
+        self.sim_info_field.clear()
+        self.rod_types_text.clear()
+        self.ave_enr_text.clear()
+        self.bundle_enr_text.clear()
+
+        self.bgcolors_cb.setChecked(False)
+        self.point_sbox.setValue(0)
+        self.chanbow_sbox.setValue(0)
+
+        self.table.clearContents()
+
+        if hasattr(self, "bundle"):
+            del self.bundle
+        
+        # Clear and restore figure
+        self.axes.clear()  # Clears the figure axes
+        self.fig.set_facecolor('0.75')  # set facecolor to gray
+        #self.fig.clf()
+        #self.fig.clear()
+        
     def draw_fuelmap(self):
         """Draw fuel map"""
 
@@ -1222,7 +1394,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         # 5x4 inches, 100 dots-per-inch
         #
         self.dpi = 100
-        self.fig = Figure((6, 5), dpi=self.dpi, facecolor=None)
+        #self.fig = Figure((6, 5), dpi=self.dpi, facecolor=None)
+        self.fig = Figure((6, 5), dpi=self.dpi)
         # self.fig = Figure((6, 5), dpi=self.dpi, facecolor=(1,1,1))
         self.canvas = FigureCanvas(self.fig)
         self.canvas.mpl_connect('button_press_event', self.on_click)
@@ -1276,10 +1449,18 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         # self.slider.setTickPosition(QSlider.TicksBothSides)
         # self.connect(self.slider, SIGNAL('valueChanged(int)'), self.on_draw)
  
+        self.sim_info_field = QtGui.QLineEdit()
+        self.sim_info_field.setSizePolicy(QtGui.QSizePolicy.Minimum,
+                                          QtGui.QSizePolicy.Minimum)
+        self.sim_info_field.setReadOnly(True)
+        sim_hbox = QtGui.QHBoxLayout()
+        sim_hbox.addWidget(self.sim_info_field)
+
         param_label = QtGui.QLabel('Parameter:')
         self.param_cbox = QtGui.QComboBox()
-        paramlist = ['ENR', 'FINT', 'EXP', 'BTF', 'BTFP', 'XFL1', 'XFL2',
-                     'ROD', 'LOCK']
+        paramlist = ['ENR', 'FINT', 'EXP', 'BTF', 'ROD']
+        #paramlist = ['ENR', 'FINT', 'EXP', 'BTF', 'BTFP', 'XFL1', 'XFL2',
+        #             'ROD', 'LOCK']
         for i in paramlist:
             self.param_cbox.addItem(i)
         # self.connect(self.param_cbox, SIGNAL('currentIndexChanged(int)'),
@@ -1328,7 +1509,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         enr_case_hbox = QtGui.QHBoxLayout()
         enr_case_hbox.addWidget(self.enr_case_cb)
 
-        self.calc_quick_button = QtGui.QPushButton("Quick calc")
+        self.calc_quick_button = QtGui.QPushButton("Pert. calc")
         self.calc_full_button = QtGui.QPushButton("Full calc")
         calc_hbox = QtGui.QHBoxLayout()
         calc_hbox.addWidget(self.calc_quick_button)
@@ -1344,6 +1525,13 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         chanbow_hbox.addWidget(QtGui.QLabel("Channel bow:"))
         chanbow_hbox.addWidget(self.chanbow_sbox)
 
+        self.bgcolors_cb = QtGui.QCheckBox("Show color map")
+        self.bgcolors_cb.setChecked(False)
+        bgcolors_hbox = QtGui.QHBoxLayout()
+        bgcolors_hbox.addWidget(self.bgcolors_cb)
+        self.connect(self.bgcolors_cb, QtCore.SIGNAL('clicked()'),
+                     self.toggle_pin_bgcolors)
+        
         type_label = QtGui.QLabel('Type:')
         self.type_cbox = QtGui.QComboBox()
         typelist = ['Hot', 'HCr', 'CCl', 'CCr']
@@ -1396,12 +1584,12 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         # sizePolicy.setVerticalStretch(0)
         # sizePolicy.setHeightForWidth(self.ave_enr_text.sizePolicy().
         # hasHeightForWidth())
-        self.sim_text = QtGui.QLineEdit()
-        self.sim_text.setSizePolicy(sizePolicy)
-        self.sim_text.setReadOnly(True)
+        #self.sim_text = QtGui.QLineEdit()
+        #self.sim_text.setSizePolicy(sizePolicy)
+        #self.sim_text.setReadOnly(True)
         # text = self.bundle.cases[0].states[0].sim
         # self.sim_text.setText(text)
-        info_flo.addRow("SIM", self.sim_text)
+        #info_flo.addRow("SIM", self.sim_text)
 
         self.rod_types_text = QtGui.QLineEdit()
         self.rod_types_text.setSizePolicy(sizePolicy)
@@ -1411,13 +1599,24 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.ave_enr_text = QtGui.QLineEdit()
         self.ave_enr_text.setSizePolicy(sizePolicy)
         self.ave_enr_text.setReadOnly(True)
-        info_flo.addRow("Segment %U-235", self.ave_enr_text)
+        info_flo.addRow("Segment w/o U-235", self.ave_enr_text)
+
+        #self.ave_denr_text = QtGui.QLineEdit()
+        #self.ave_denr_text.setSizePolicy(sizePolicy)
+        #self.ave_denr_text.setReadOnly(True)
+        #info_flo.addRow(QtCore.QString("Segment %1 w/o")
+        #                .arg(QtCore.QChar(0x0394)), self.ave_denr_text)
         
         self.bundle_enr_text = QtGui.QLineEdit()
         self.bundle_enr_text.setSizePolicy(sizePolicy)
         self.bundle_enr_text.setReadOnly(True)
-        info_flo.addRow("Bundle %U-235", self.bundle_enr_text)
-        # self.bundle_enr_text.setText('2.818')
+        info_flo.addRow("Bundle w/o U-235", self.bundle_enr_text)
+
+        #self.bundle_denr_text = QtGui.QLineEdit()
+        #self.bundle_denr_text.setSizePolicy(sizePolicy)
+        #self.bundle_denr_text.setReadOnly(True)
+        #info_flo.addRow(QtCore.QString("Bundle %1 w/o")
+        #                .arg(QtCore.QChar(0x0394)), self.bundle_denr_text)
         
         # Define table widget
         self.table = QtGui.QTableWidget()
@@ -1469,19 +1668,22 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
         # Layout with box sizers
         vbox = QtGui.QVBoxLayout()
-        vbox.addLayout(param_hbox)
+        #vbox.addLayout(sim_hbox)
         vbox.addLayout(case_hbox)
+        vbox.addLayout(param_hbox)
         vbox.addLayout(point_hbox)
         vbox.addLayout(enr_hbox)
         vbox.addLayout(enr_case_hbox)
         vbox.addLayout(calc_hbox)
         vbox.addLayout(chanbow_hbox)
+        vbox.addLayout(bgcolors_hbox)
 
         # spacerItem = QSpacerItem(1, 1, QSizePolicy.Minimum,
         # QSizePolicy.Minimum)
         # vbox.addItem(spacerItem)
         vbox.addStretch(1)
         vbox.addLayout(info_flo)
+        vbox.addLayout(sim_hbox)
         
         groupbox = QtGui.QGroupBox()
         groupbox.setStyleSheet("QGroupBox { background-color: rgb(200, 200,\
@@ -1530,33 +1732,41 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
     def create_menu(self):
         self.file_menu = self.menuBar().addMenu("&File")
         
-        save_settings_action = self.create_action("&Save settings...",
-                                                  shortcut="Ctrl+E",
-                                                  slot=self.save_plot,
-                                                  tip="Save settings")
+        save_settings_action = self.create_action("&Clear project...",
+                                                  shortcut="Ctrl+C",
+                                                  slot=self.clear_project,
+                                                  tip="Clear current project")
 
         quit_action = self.create_action("&Quit", slot=self.close,
                                          shortcut="Ctrl+Q",
                                          tip="Close the application")
+
+        new_project_action = self.create_action("&New project...",
+                                                slot=self.newProject,
+                                                shortcut="Ctrl+N",
+                                                tip="Create new project")
         
-        open_file_action = self.create_action("&Open file...",
+        open_file_action = self.create_action("&Open...",
                                               slot=self.openFile,
-                                              shortcut="Ctrl+L",
+                                              shortcut="Ctrl+O",
                                               tip="Open file")
 
-        save_data_action = self.create_action("&Save data...",
+        save_data_action = self.create_action("&Save...",
                                               slot=self.saveData,
                                               shortcut="Ctrl+S",
                                               tip="Save data to file")
 
-        self.add_actions(self.file_menu, (open_file_action, save_data_action,
+        self.add_actions(self.file_menu, (new_project_action, open_file_action,
+                                          save_data_action,
                                           save_settings_action, None,
                                           quit_action))
 
         self.edit_menu = self.menuBar().addMenu("&Edit")
         preferences = self.create_action("Preferences...",
                                          tip="Preferences...")
-        self.add_actions(self.edit_menu, (None, preferences))
+        project = self.create_action("Project...",
+                                     tip="Edit project...")
+        self.add_actions(self.edit_menu, (project, None, preferences))
 
         self.tools_menu = self.menuBar().addMenu("&Tools")
         plot_action = self.create_action("Plot...", tip="Plot...",
@@ -1628,30 +1838,55 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
     def back_state(self):
         """Back to previous state"""
-        nstates = len(self.bundle.cases[0].states)
+
+        nstates = len(self.bundle.states)
         if self.state_index < 0:
-            self.state_index = nstates - self.state_index
+            self.state_index = self.state_index + nstates
         self.state_index -= 1
         if self.state_index < 0:
             self.state_index = 0
         else:
             self.init_pinobjects()
             self.fig_update()
-        #print self.state_index
+            self.chanbow_sbox_update()
         
     def forward_state(self):
         """Forward to next state"""
-        nstates = len(self.bundle.cases[0].states)
+        
+        nstates = len(self.bundle.states)
         if self.state_index < 0:
-            self.state_index = nstates - self.state_index
+            self.state_index = self.state_index + nstates
         self.state_index += 1
         if self.state_index >= nstates:
             self.state_index = nstates - 1
         else:
             self.init_pinobjects()
             self.fig_update()
-        #print self.state_index
+            self.chanbow_sbox_update()
 
+    def chanbow_sbox_update(self):
+        """Update chanbow spinbox value"""
+        
+        iseg = int(self.case_cbox.currentIndex())
+        segment = self.bundle.states[self.state_index].segments[iseg]
+        if hasattr(segment.data, "box_offset"):
+            box_offset = segment.data.box_offset * 10
+        else:
+            box_offset = 0
+        self.chanbow_sbox.setValue(box_offset)
+            
+    def toggle_pin_bgcolors(self):
+        """Toggle pin background colors"""
+        
+        iseg = int(self.case_cbox.currentIndex())
+        if self.bgcolors_cb.isChecked():
+            for pin in self.pinobjects[iseg]:
+                pin.rectangle.set_alpha(1.0)
+        else:
+            for pin in self.pinobjects[iseg]:
+                pin.rectangle.set_alpha(0.0)
+        self.canvas.draw()
+            
     def add_actions(self, target, actions):
         for action in actions:
             if action is None:

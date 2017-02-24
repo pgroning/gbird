@@ -23,6 +23,7 @@ import os.path
 import re
 import numpy as np
 import ConfigParser
+import copy
 
 from multiprocessing import Pool
 from segment import Segment, DataStruct
@@ -38,9 +39,9 @@ def readcax_fun(tup):
 
 def quickcalc_fun(tup):
     """Wrapper function used for multithreaded quickcalc"""
-    case = tup[0]  # First argument should always be an instance of the class
-    case.quickcalc(*tup[1:])
-    return case
+    segment = tup[0]  # First arg should always be an instance of the class
+    segment.quickcalc(*tup[1:])
+    return segment
     # case, voi, maxdep, opt = tup
     # case.quickcalc(voi, maxdep, opt)
     # return case
@@ -52,14 +53,14 @@ class Bundle(object):
     #def __init__(self, parent=None):
     def __init__(self, inpfile=None):
         self.data = DataStruct()
-        self.cases = []
+        #self.cases = []
         # self.btf = Btf(self)
         self.states = []
         self.states.append(DataStruct())
 
         #self.parent = parent
         if inpfile:
-            self.readinp(inpfile)
+            self.readpro(inpfile)
 
         # self.readinpfile(inpfile)
         # self.readcas()
@@ -67,8 +68,9 @@ class Bundle(object):
         # self.loadcasobj(inpfile)
         # self.interp2(P1,P2,x1,x2,x)
 
-    def readinp(self, cfgfile):
-
+    def readpro(self, cfgfile):
+        """Read project setup file"""
+        
         config = ConfigParser.ConfigParser()
         try:
             if not config.read(cfgfile):
@@ -154,7 +156,7 @@ class Bundle(object):
         self.data.nodes = nodes
         self.data.btf_cases = btf_cases
     '''
-    def readcax(self, read_content=None):
+    def readcax(self, read_all=False):
         """Read multiple caxfiles using multithreading.
         Syntax:
         readcax() reads the first part of the file (where voi=vhi)
@@ -162,50 +164,98 @@ class Bundle(object):
 
         inlist = []  # Bundle input args
         for caxfile in self.data.caxfiles:
-            inlist.append((caxfile, read_content))
+            inlist.append((caxfile, read_all))
 
         n = len(self.data.caxfiles)  # Number of threads
         p = Pool(n)  # Make the Pool of workers
         # Start processes in their own threads and return the results
-        self.cases = p.map(readcax_fun, inlist)
+        self.states[-1].segments = p.map(readcax_fun, inlist)
+        #self.cases = p.map(readcax_fun, inlist)
         # self.cases = p.map(casdata, self.data.caxfiles)
         p.close()
         p.join()
+        
         for i, node in enumerate(self.data.nodes):
-            self.cases[i].topnode = node
+            self.states[0].segments[i].topnode = node
+            #self.cases[i].topnode = node
 
         # for i,f in enumerate(self.data.caxfiles):
         #     case = casdata(f)
         #     case.data.topnode = self.data.nodes[i]
         #     self.cases.append(case)
 
-    def new_calc(self, voi=None, maxdep=None, depthres=None, refcalc=False,
-                 grid=True, model='c3', box_offset=0, neulib=False):
+    def read_single_cax(self, caxfile):
+        print "Reading single cax file..."
+        # Init data
+        self.data.caxfiles = [caxfile]
+        self.data.nodes = [25]  # max node
+        # BTF
+        self.data.btf_zones = [1] * len(self.data.nodes)
+        self.data.btf_nodes = self.data.nodes
+        # Read data
+        self.readcax()
+        # Guess fuel type
+        fuetype = self.states[0].segments[0].looks_like_fuetype()
+        if fuetype == "S96":
+            self.data.fuetype = "OPT2"
+        elif fuetype == "A10":
+            self.data.fuetype = "A10B"
+
+    def new_calc(self, voi=None, maxdep=60, depthres=None, refcalc=False,
+                 grid=False, model='c3', box_offset=0, neulib=False):
 
         # For storage of new calculation
+        #self.new_state()
+
+        #for s in self.states[-1].segments:
+        #    s.set_data(box_offset=box_offset)
+            
         # self.cases[i].add_state() 
 
-        # self.states.append(DataStruct)  # For storage of new BTF calculation
         # ----Code block only for testing purpose-----
+        #segments = self.states[0].segments
         # if not refcalc:
-        #    for i in range(len(self.cases)):
-        #        LFU = self.cases[i].states[0].LFU
+        #for i in range(len(self.states[0].segments)):
+        #    LFU = self.states[0].segments[i].data.LFU
+        #    FUE = self.states[0].segments[i].data.FUE
+        #    BA = self.states[0].segments[i].data.BA
+        #    voivec = self.states[0].segments[i].data.voivec
+        #    
+        #    self.states[-1].segments[i].set_data(LFU, FUE, BA, voivec)
+        #    #self.states[-1].segments[i].data.LFU = LFU
+        #    self.states
         #        self.cases[i].add_calc(LFU)
         #        #self.cases[i].data[-1].data.LFU = \
         #        #self.cases[i].data[0].data.LFU
         # --------------------------------------------
         inlist = []  # Bundle input args
-        for case in self.cases:
-            inlist.append((case, voi, maxdep, depthres, refcalc, grid,
+        
+        segments = self.states[-1].segments
+        for s in segments:
+            inlist.append((s, voi, maxdep, depthres, refcalc, grid,
                            model, box_offset, neulib))
-
-        # quickcalc_fun(inlist[1])
-        n = len(self.cases)  # Number of threads
+        
+        #quickcalc_fun(inlist[0])
+        #Tracer()()
+        n = len(segments)  # Number of threads
         p = Pool(n)  # Make the Pool of workers
-        self.cases = p.map(quickcalc_fun, inlist)
+        
+        self.states[-1].segments = p.map(quickcalc_fun, inlist)
+        #self.cases = p.map(quickcalc_fun, inlist)
         # cases = p.map(quickcalc_fun, self.cases)
         p.close()
         p.join()
+
+    def append_state(self):
+        """Append a list element to store new segment instancies"""
+
+        self.states.append(DataStruct())  # Add an new state element
+        self.states[-1].segments = []
+        for s in self.states[0].segments:  # Add new segments
+            self.states[-1].segments.append(Segment())
+            # copy data from original state
+            self.states[-1].segments[-1].data = copy.copy(s.data)
+            #self.states[-1].segments[-1].data = copy.deepcopy(s.data)
 
     def savepic(self, pfile):
         """Save objects to a python pickle file"""
@@ -230,29 +280,33 @@ class Bundle(object):
     def new_btf(self):
         """Administrates btf calculation by composition of the Btf class"""
 
-        nstates = len(self.cases[0].states)
-        while len(self.states) < nstates:
-            self.states.append(DataStruct())
+        nstates = len(self.states)
+        #nstates = len(self.cases[0].states)
+        #while len(self.states) < nstates:
+        #    self.states.append(DataStruct())
 
         self.states[-1].btf = Btf(self)
         self.states[-1].btf.calc_btf()
-
-    def ave_enr(self, state_num=-1):
+        
+    def ave_enr_calc(self, state_num=-1):
         """The method calculates the average enrichment of the bundle.
-        This algorithm is likely naive and needs to be updated in the future"""
+        This algorithm is likely naive and may need to be updated in the 
+        future"""
 
         nodelist = self.data.nodes
         # nodelist.insert(0, 0)  # prepend 0
         # nodes = np.array(nodelist)
-        nodes = np.array([0]+nodelist)  # prepend 0
+        nodes = np.array([0] + nodelist)  # prepend 0
         dn = np.diff(nodes)
-        # Tracer()()
-        enrlist = [case.states[state_num].ave_enr for case in self.cases]
-        # Tracer()()
+        segments = self.states[state_num].segments
+        #qtrace()
+        enrlist = [seg.ave_enr for seg in segments]
+        #enrlist = [seg.data.ave_enr for seg in segments]
         seg_enr = np.array(enrlist)
 
-        ave_enr = sum(seg_enr*dn) / sum(dn)
-        self.states[state_num].ave_enr = ave_enr
+        ave_enr = sum(seg_enr * dn) / sum(dn)
+        #self.states[state_num].ave_enr = ave_enr
+        return ave_enr
 
     def pow3(self, POW, nodes):
         """Expanding a number of 2D pin power distributions into a 3D
@@ -281,8 +335,8 @@ class Bundle(object):
         Syntax: Pi = interp2(P1, P2, x1, x2, x)"""
 
         # Lagrange P2 polynomial
-        L1 = (x-x2)/(x1-x2)
-        L2 = (x-x1)/(x2-x1)
+        L1 = (x-x2) / (x1-x2)
+        L2 = (x-x1) / (x2-x1)
         Pi = L1*P1 + L2*P2
         return Pi
 
@@ -291,9 +345,9 @@ class Bundle(object):
         Syntax: Pi = interp3(P1, P2, P3, x1, x2, x3, x)"""
 
         # Lagrange P3 polynomial
-        L1 = ((x-x2)*(x-x3))/((x1-x2)*(x1-x3))
-        L2 = ((x-x1)*(x-x3))/((x2-x1)*(x2-x3))
-        L3 = ((x-x1)*(x-x2))/((x3-x1)*(x3-x2))
+        L1 = ((x-x2) * (x-x3)) / ((x1-x2) * (x1-x3))
+        L2 = ((x-x1) * (x-x3)) / ((x2-x1) * (x2-x3))
+        L3 = ((x-x1) * (x-x2)) / ((x3-x1) * (x3-x2))
         Pi = L1*P1 + L2*P2 + L3*P3
         return Pi
 

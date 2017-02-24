@@ -7,7 +7,7 @@ from gbird import cpin
 def a10xm(self):
     
     # Draw water channel
-    p_fancy = mpatches.FancyBboxPatch((0.45, 0.365), 0.19, 0.19,
+    p_fancy = mpatches.FancyBboxPatch((0.445, 0.364), 0.2, 0.2,
                                           boxstyle="round,pad=0.02",
                                           fc=(0.8,0.898,1), ec=(0.3, 0.3, 0.3))
     p_fancy.set_linewidth(2.0)
@@ -47,22 +47,28 @@ def a10xm(self):
     self.ylist  = ('A','B','C','D','E','F','G','H','I','J')
     
     # Draw pin circles
-    npst = self.bundle.cases[case_num].states[0].npst
-    LFU = self.bundle.cases[case_num].states[state_num].LFU
+    npst = self.bundle.states[0].segments[case_num].data.npst
+    #npst = self.bundle.cases[case_num].states[0].npst
+    LFU = self.bundle.states[0].segments[case_num].data.LFU
+    #LFU = self.bundle.cases[case_num].states[state_num].LFU
     
-    pin_radius = 0.028*1.1
-    pin_delta = 0.083
+    #pin_radius = 0.0308
+    pin_radius = 0.028+0.002
+    pin_delta = 0.078+0.0045
+    #pin_delta = 0.083
 
     k = 0
     for i in range(LFU.shape[0]):
         for j in range(LFU.shape[1]):
-            x = 0.13+j*pin_delta
+            x = 0.133 + j*pin_delta
+            #y = 0.879 - i*pin_delta
             y = 0.875-i*pin_delta
             if LFU[i,j] > 0:
                 self.pinobjects[case_num][k].set_circle(x,y,pin_radius,(1,1,1))
                 self.pinobjects[case_num][k].coord = (self.ylist[i]
                                                       + self.xlist[j])
                 self.pinobjects[case_num][k].set_text()
+                self.axes.add_patch(self.pinobjects[case_num][k].rectangle)
                 self.axes.add_patch(self.pinobjects[case_num][k].circle)
                 k += 1
 
