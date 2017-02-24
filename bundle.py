@@ -17,7 +17,7 @@ b0.readcax()
 b1 = Bundle()
 b1.setup(b0)
 b1.new_calc()
-b1.calc_btf()
+b1.new_btf()
 '''
 
 try:

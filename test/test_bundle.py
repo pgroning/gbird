@@ -43,18 +43,19 @@ class UnitTest(unittest.TestCase):
         testfile = "test/topol/bundle_a10xm.pro"
         b = Bundle(testfile)
         b.readcax()
-        self.assertTrue(len(b.states[0].segments) == 5, "reading cax files failed")
+        self.assertTrue(len(b.segments) == 5, "reading cax files failed")
     
     @unittest.skip("skip this test")
     def test_readrun_all(self):
         testfile = 'test/topol/bundle_opt2.pro'
         b = Bundle(testfile)
         b.readcax(read_all=True)
-        b.append_state()
-        b.new_calc()
-        self.assertEqual(18500, len(b.states[0].segments[2].statepoints), 
+        b1 = Bundle()
+        b1.setup(b)
+        b1.new_calc()
+        self.assertEqual(18500, len(b.segments[2].statepoints), 
                         "read all failed")
-        self.assertEqual(119, len(b.states[1].segments[2].statepoints), 
+        self.assertEqual(119, len(b1.segments[2].statepoints), 
                         "new calculation failed")
 
     #@unittest.skip("skip this test")
@@ -62,7 +63,7 @@ class UnitTest(unittest.TestCase):
         testfile = "test/topol/bundle_a10xm.pro"
         b = Bundle(testfile)
         b.readcax()
-        for s in b.states[0].segments:
+        for s in b.segments:
             s.ave_enr_calc()
         bundle_enr = b.ave_enr_calc()
         self.assertTrue(bundle_enr > 0, 
@@ -77,36 +78,41 @@ class UnitTest(unittest.TestCase):
         testfile = "test/topol/bundle_a10xm.pro"
         b = Bundle(testfile)
         b.readcax()
-        b.append_state()
-        b.new_calc(grid=False)
-        self.assertTrue(len(b.states[1].segments[4].statepoints) > 10, 
+        b1 = Bundle()
+        b1.setup(b)
+        b1.new_calc(grid=False)
+        self.assertTrue(len(b1.segments[4].statepoints) > 10, 
                         "new c3 calculation failed")
-        b.append_state()
-        b.new_calc(grid=False, voi=60, maxdep=20)
-        self.assertEqual(b.states[2].segments[2].data.voilist, [60],
+        b2 = Bundle()
+        b2.setup(b)
+        b2.new_calc(grid=False, voi=60, maxdep=20)
+        self.assertEqual(b2.segments[2].data.voilist, [60],
                         "void failed to update correctly")
-        self.assertEqual(b.states[2].segments[1].statepoints[-1].voi,
+        self.assertEqual(b2.segments[1].statepoints[-1].voi,
                          60, "Void is incorrect")
-        self.assertEqual(b.states[2].segments[1].statepoints[-1].burnup,
+        self.assertEqual(b2.segments[1].statepoints[-1].burnup,
                          20, "Max depletion is incorrect")
-        b.append_state()
-        b.new_calc(grid=False, depthres=20)
-        self.assertTrue(len(b.states[3].segments[3].statepoints) > 10, 
+        b3 = Bundle()
+        b3.setup(b)
+        b3.new_calc(grid=False, depthres=20)
+        self.assertTrue(len(b3.segments[3].statepoints) > 10, 
                         "new c3 calculation with depthres failed")
-        b.append_state()
-        b.new_calc(box_offset=0.2)
-        self.assertEqual(b.states[4].segments[1].data.box_offset, 0.2,
-                        "box offset calculation failed")
+        b4 = Bundle()
+        b4.setup(b)
+        b4.new_calc(box_offset=0.2)
+        self.assertEqual(b4.segments[1].data.box_offset, 0.2,
+                         "box offset calculation failed")
         
-    #@unittest.skip("skip test_new_calc_c4")
+    @unittest.skip("skip test_new_calc_c4")
     def test_new_calc_c4(self):
         #testfile = "test/tosim/bundle_at11.inp"
         testfile = "test/topol/bundle_a10xm.pro"
         b = Bundle(testfile)
         b.readcax()
-        b.append_state()
-        b.new_calc(grid=True, model='c4', voi=60)
-        self.assertTrue(len(b.states[1].segments[0].statepoints) > 10, 
+        b1 = Bundle()
+        b1.setup(b)
+        b1.new_calc(grid=True, model='c4', voi=60)
+        self.assertTrue(len(b1.segments[0].statepoints) > 10, 
                         "new c4 calculation failed")
 
     #@unittest.skip("skip this test")
@@ -115,11 +121,12 @@ class UnitTest(unittest.TestCase):
         testfile = "test/tosim/bundle_a10b.pro"
         b = Bundle(testfile)
         b.readcax()
-        b.append_state()
-        b.new_calc(grid=True)
-        for s in b.states[1].segments:
+        b1 = Bundle()
+        b1.setup(b)
+        b1.new_calc(grid=True)
+        for s in b1.segments:
             s.ave_enr_calc()
-        bundle_enr = b.ave_enr_calc()
+        bundle_enr = b1.ave_enr_calc()
         self.assertTrue(bundle_enr > 0, 
                         "bundle enrichment is invalid")
         #b.ave_enr_calc()
@@ -132,10 +139,10 @@ class UnitTest(unittest.TestCase):
         b = Bundle(testfile)
         b.readcax()
         b.new_btf()
-        self.assertTrue(hasattr(b.states[0].btf,"DOX") and 
-                        type(b.states[0].btf.DOX) is numpy.ndarray,
+        self.assertTrue(hasattr(b.btf,"DOX") and 
+                        type(b.btf.DOX) is numpy.ndarray,
                         "Btf calculation failed")
-        self.assertFalse(numpy.isnan(b.states[0].btf.DOX).any(), "Btf is NaN")
+        self.assertFalse(numpy.isnan(b.btf.DOX).any(), "Btf is NaN")
 
     #@unittest.skip("skip this test")
     def test_btf_calc_a10b(self):
@@ -143,10 +150,10 @@ class UnitTest(unittest.TestCase):
         b = Bundle(testfile)
         b.readcax()
         b.new_btf()
-        self.assertTrue(hasattr(b.states[0].btf,"DOX") and 
-                        type(b.states[0].btf.DOX) is numpy.ndarray,
+        self.assertTrue(hasattr(b.btf,"DOX") and 
+                        type(b.btf.DOX) is numpy.ndarray,
                         "Btf calculation failed")
-        self.assertFalse(numpy.isnan(b.states[0].btf.DOX).any(), "Btf is NaN")
+        self.assertFalse(numpy.isnan(b.btf.DOX).any(), "Btf is NaN")
 
     #@unittest.skip("skip this test")
     def test_new_btf_calc(self):
@@ -154,26 +161,28 @@ class UnitTest(unittest.TestCase):
         b = Bundle(testfile)
         b.readcax()
         b.new_btf()
-        b.append_state()
-        b.new_calc(grid=False, voi=50, depthres=20)
-        b.new_btf()
-        self.assertTrue(type(b.states[0].btf.DOX) is numpy.ndarray and 
-                        type(b.states[1].btf.DOX) is numpy.ndarray,
+        b1 = Bundle()
+        b1.setup(b)
+        b1.new_calc(grid=False, voi=50, depthres=20)
+        b1.new_btf()
+        self.assertTrue(type(b.btf.DOX) is numpy.ndarray and 
+                        type(b1.btf.DOX) is numpy.ndarray,
                         "new btf calculation failed")
-        self.assertFalse(numpy.isnan(b.states[1].btf.DOX).any(), "Btf is NaN")
+        self.assertFalse(numpy.isnan(b1.btf.DOX).any(), "Btf is NaN")
 
-    def test_append_state(self):
+    def test_bundle_setup(self):
         testfile = "test/tosim/bundle_opt2.pro"
         b = Bundle(testfile)
         b.readcax()
-        b.append_state()
-        self.assertEqual(b.states[0].segments[1].data.LFU.any(),
-                         b.states[1].segments[1].data.LFU.any(),
+        b1 = Bundle()
+        b1.setup(b)
+        self.assertEqual(b.segments[1].data.LFU.any(),
+                         b1.segments[1].data.LFU.any(),
                          "LFU is not equal")
         LFU_new = numpy.zeros((11, 11))
-        b.states[1].segments[1].set_data(LFU=LFU_new)
-        self.assertNotEqual(b.states[0].segments[1].data.LFU.any(),
-                         b.states[1].segments[1].data.LFU.any(),
+        b1.segments[1].set_data(LFU=LFU_new)
+        self.assertNotEqual(b.segments[1].data.LFU.any(),
+                         b1.segments[1].data.LFU.any(),
                          "LFU is equal")
         
         
