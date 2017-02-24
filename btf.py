@@ -30,7 +30,7 @@ class Btf(object):
     def lastindex(self, case_id):
         """Iterate over burnup points"""
         
-        statepoints = self.bundle.states[-1].segments[case_id].statepoints
+        statepoints = self.bundle.segments[case_id].statepoints
         burnup_old = 0.0
         for idx, p in enumerate(statepoints):
             if p.burnup < burnup_old:
@@ -41,7 +41,7 @@ class Btf(object):
     def intersect_points(self):
         """Find intersection burnup points for all cases"""
         
-        segments = self.bundle.states[-1].segments
+        segments = self.bundle.segments
         nsegments = len(segments)
         idx = self.lastindex(0)
         
@@ -57,7 +57,7 @@ class Btf(object):
         """Construct a 3D pin power distribution for specific void and burnup.
         Use interpolation if necessary."""
         
-        all_segments = self.bundle.states[-1].segments
+        all_segments = self.bundle.segments
         #all_segments = self.bundle.cases
 
         btf_zones = self.bundle.data.btf_zones
@@ -93,7 +93,7 @@ class Btf(object):
         #tic = time.time()
         x = self.intersect_points()
         
-        npst = self.bundle.states[0].segments[0].data.npst
+        npst = self.bundle.segments[0].data.npst
         self.DOX = np.zeros((len(x), npst, npst))
 
         fuetype = self.bundle.data.fuetype
