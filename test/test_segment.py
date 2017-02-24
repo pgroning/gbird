@@ -58,14 +58,14 @@ class UnitTest(unittest.TestCase):
         self.assertEqual(19482, Nstatepoints,
                         "Number of state points is incorrect")
 
-    @unittest.skip("skip this test")
+    #@unittest.skip("skip this test")
     def test_readcax_tosim_at11(self):
         testfile = "test/tosim/AT11/14g35top/exxAT11-384-14g35top-cas.cax"
         s = Segment(testfile)
-        Nstatepoints = len(s.data.statepoints)
+        Nstatepoints = len(s.statepoints)
         self.assertEqual(145, Nstatepoints,
                         "Number of state points is incorrect")
-        self.assertEqual(s.data.voivec, [0, 40, 80])
+        self.assertEqual(s.data.voilist, [0, 40, 80])
 
     #@unittest.skip("test_get_voilist")
     def test_get_voilist(self):
