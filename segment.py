@@ -560,10 +560,13 @@ class Segment(object):
         if grid:
             try:  # use linrsh if available
                 call(arglist, stdout=fout, stderr=STDOUT, shell=False)
-            except:
-                print "Warning: Grid is not available on the system."
+                c4cax = file_base_name + ".cax"
+                if not os.path.isfile(c4cax):
+                    raise Exception("Grid calculation failed!")
+            except:  # fallback to local machine
+                print "Warning: Grid is not available on the system. Using local machine."
                 call(arglist[3:], stdout=fout, stderr=STDOUT, shell=False)
-        else:
+        else:  # use local machine
             call(arglist[3:], stdout=fout, stderr=STDOUT, shell=False)
     
     def set_data(self, LFU=None, FUE=None, BA=None, voi=None, box_offset=0.0):
@@ -871,10 +874,13 @@ class Segment(object):
         if grid:
             try:  # use linrsh if available
                 call(arglist, shell=False)
-            except:
-                print "Warning: Grid is not available on the system."
+                if not os.path.isfile(c3cax):
+                    raise Exception("Grid calculation failed!")
+            except:  # fallback to local machine
+                print "Warning: Grid is not available on the system. Using local machine."
+                os.environ["TMPDIR"] = "/tmp" 
                 call(arglist[3:], shell=False)
-        else:
+        else:  # use local machine
             os.environ["TMPDIR"] = "/tmp"
             call(arglist[3:], shell=False)
 
