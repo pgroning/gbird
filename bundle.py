@@ -39,7 +39,7 @@ def readcax_fun(tup):
 
 def quickcalc_fun(tup):
     """Wrapper function used for multithreaded quickcalc"""
-    segment = tup[0]  # First argument should always be an instance of the class
+    segment = tup[0]  # First arg should always be an instance of the class
     segment.quickcalc(*tup[1:])
     return segment
     # case, voi, maxdep, opt = tup
@@ -251,7 +251,7 @@ class Bundle(object):
 
         self.states.append(DataStruct())  # Add an new state element
         self.states[-1].segments = []
-        for s in self.states[0].segments: # Add new segments
+        for s in self.states[0].segments:  # Add new segments
             self.states[-1].segments.append(Segment())
             # copy data from original state
             self.states[-1].segments[-1].data = copy.copy(s.data)
@@ -296,7 +296,7 @@ class Bundle(object):
         nodelist = self.data.nodes
         # nodelist.insert(0, 0)  # prepend 0
         # nodes = np.array(nodelist)
-        nodes = np.array([0]+nodelist)  # prepend 0
+        nodes = np.array([0] + nodelist)  # prepend 0
         dn = np.diff(nodes)
         segments = self.states[state_num].segments
         #qtrace()
@@ -304,7 +304,7 @@ class Bundle(object):
         #enrlist = [seg.data.ave_enr for seg in segments]
         seg_enr = np.array(enrlist)
 
-        ave_enr = sum(seg_enr*dn) / sum(dn)
+        ave_enr = sum(seg_enr * dn) / sum(dn)
         #self.states[state_num].ave_enr = ave_enr
         return ave_enr
 
@@ -335,8 +335,8 @@ class Bundle(object):
         Syntax: Pi = interp2(P1, P2, x1, x2, x)"""
 
         # Lagrange P2 polynomial
-        L1 = (x-x2)/(x1-x2)
-        L2 = (x-x1)/(x2-x1)
+        L1 = (x-x2) / (x1-x2)
+        L2 = (x-x1) / (x2-x1)
         Pi = L1*P1 + L2*P2
         return Pi
 
@@ -345,9 +345,9 @@ class Bundle(object):
         Syntax: Pi = interp3(P1, P2, P3, x1, x2, x3, x)"""
 
         # Lagrange P3 polynomial
-        L1 = ((x-x2)*(x-x3))/((x1-x2)*(x1-x3))
-        L2 = ((x-x1)*(x-x3))/((x2-x1)*(x2-x3))
-        L3 = ((x-x1)*(x-x2))/((x3-x1)*(x3-x2))
+        L1 = ((x-x2) * (x-x3)) / ((x1-x2) * (x1-x3))
+        L2 = ((x-x1) * (x-x3)) / ((x2-x1) * (x2-x3))
+        L3 = ((x-x1) * (x-x2)) / ((x3-x1) * (x3-x2))
         Pi = L1*P1 + L2*P2 + L3*P3
         return Pi
 

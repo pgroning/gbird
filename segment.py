@@ -1110,7 +1110,6 @@ class Segment(object):
             fuetype = "A11"
         return fuetype
 
-
     # def burnpoints(self, voi=40, stateindex=0):
     #    """Return depletion vector for given voi (vhi=voi)"""
     #    statepoints = self.states[stateindex].statepoints

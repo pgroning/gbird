@@ -119,8 +119,9 @@ class cpin(object):
 
         # Set background rectangle
         d = 2*r + 0.019
-        self.rectangle = mpatches.Rectangle((x-d/2, y-d/2), d, d,
-                                            fc=(1,1,0), alpha=1.0, ec=(1, 1, 1))
+        self.rectangle = mpatches.Rectangle((x - d/2, y - d/2), d, d,
+                                            fc=(1, 1, 0), alpha=1.0,
+                                            ec=(1, 1, 1))
         self.rectangle.set_fill(True)
         self.rectangle.set_linewidth(0.0)
         
@@ -164,14 +165,14 @@ class EnrDialog(QtGui.QDialog):
         elif mode == "add":
             self.setWindowTitle("Add enrichment")
         self.enr_text = QtGui.QLineEdit("%.2f" % enr)
-        #dens = parent.enrpinlist[case_num][ipin].DENS
-        #self.dens_text = QtGui.QLineEdit("%.3f" % dens)
+        # dens = parent.enrpinlist[case_num][ipin].DENS
+        # self.dens_text = QtGui.QLineEdit("%.3f" % dens)
         self.ba_text = QtGui.QLineEdit("%.2f" % ba)
         validator = QtGui.QDoubleValidator(0, 9.99, 2, self)
         self.enr_text.setValidator(validator)
         self.ba_text.setValidator(validator)
-        #validator = QtGui.QDoubleValidator(0, 9.99, 3, self)
-        #self.dens_text.setValidator(validator)
+        # validator = QtGui.QDoubleValidator(0, 9.99, 3, self)
+        # self.dens_text.setValidator(validator)
 
         flo = QtGui.QFormLayout()
         flo.addRow("%U-235:", self.enr_text)
@@ -310,7 +311,7 @@ class MainWin(QtGui.QMainWindow):
                                            QtCore.QString("")).toString()
         self.settings.endGroup()
         file_choices = "*.pro (*.pro)"
-        filename = unicode(QtGui.QFileDialog.getOpenFileName(self,'Open file',
+        filename = unicode(QtGui.QFileDialog.getOpenFileName(self, 'Open file',
                                                              path_default,
                                                              file_choices))
         if filename:
@@ -536,7 +537,7 @@ class MainWin(QtGui.QMainWindow):
 
     def get_colormap(self, num_enr_levels):
             
-        n = int(np.ceil(num_enr_levels/4.0)) + 1
+        n = int(np.ceil(num_enr_levels / 4.0)) + 1
         v00 = np.zeros(n)
         v11 = np.ones(n)
         v01 = np.linspace(0, 1, n)
@@ -819,13 +820,13 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             if param_str == "ENR":
                 text = self.enrpinlist[iseg][j].text.get_text()
                 self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[i])
-                self.pinobjects[iseg][i].rectangle.set_facecolor((1,1,1))
+                self.pinobjects[iseg][i].rectangle.set_facecolor((1, 1, 1))
                 
             elif param_str == "BTF":
                 pin_btf = self.pinobjects[iseg][i].BTF
                 if np.isnan(pin_btf):
                     text = "nan"
-                    self.pinobjects[iseg][i].rectangle.set_facecolor((1,1,1))
+                    self.pinobjects[iseg][i].rectangle.set_facecolor((1, 1, 1))
                 else:
                     btf_ratio = pin_btf / btf * 1000
                     if int(btf_ratio) == 1000:
@@ -1064,9 +1065,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         bundle_enr = self.bundle.ave_enr_calc(istate)
         if not hasattr(self.bundle.states[istate], "ave_enr"):
             self.bundle.states[istate].ave_enr = bundle_enr  # save orig. calc
-        
-        
-        #self.bundle_enr_text.setText("%.5f" % bundle_enr)
+         
+        # self.bundle_enr_text.setText("%.5f" % bundle_enr)
         orig_bundle_enr = self.bundle.states[0].ave_enr
         diff_bundle_enr = bundle_enr - orig_bundle_enr
         formstr = '{0:.4f} ({1:+.4f})'.format(bundle_enr, diff_bundle_enr)
@@ -1185,7 +1185,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
     # def quick_calc(self,case_num):
     def quick_calc(self, state_num=-1):
         """Performing quick calculation"""
-        print "Performing quick calculation..."
+
         self.setCursor(QtCore.Qt.WaitCursor)
         
         chanbow = self.chanbow_sbox.value() / 10  # mm -> cm
@@ -1299,7 +1299,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             del self.bundle
         
         # Clear and restore figure
-        self.axes.clear() # Clears the figure axes
+        self.axes.clear()  # Clears the figure axes
         self.fig.set_facecolor('0.75')  # set facecolor to gray
         #self.fig.clf()
         #self.fig.clear()
@@ -1742,9 +1742,9 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                                          tip="Close the application")
 
         new_project_action = self.create_action("&New project...",
-                                              slot=self.newProject,
-                                              shortcut="Ctrl+N",
-                                              tip="Create new project")
+                                                slot=self.newProject,
+                                                shortcut="Ctrl+N",
+                                                tip="Create new project")
         
         open_file_action = self.create_action("&Open...",
                                               slot=self.openFile,
@@ -1765,7 +1765,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         preferences = self.create_action("Preferences...",
                                          tip="Preferences...")
         project = self.create_action("Project...",
-                                         tip="Edit project...")
+                                     tip="Edit project...")
         self.add_actions(self.edit_menu, (project, None, preferences))
 
         self.tools_menu = self.menuBar().addMenu("&Tools")
