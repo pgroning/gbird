@@ -174,8 +174,7 @@ class UnitTest(unittest.TestCase):
         testfile = "test/tosim/bundle_opt2.pro"
         b = Bundle(testfile)
         b.readcax()
-        b1 = Bundle()
-        b1.setup(b)
+        b1 = Bundle(parent=b)
         self.assertEqual(b.segments[1].data.LFU.any(),
                          b1.segments[1].data.LFU.any(),
                          "LFU is not equal")

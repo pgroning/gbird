@@ -58,7 +58,7 @@ class Bundle(object):
     """Read, save and load cases"""
 
     #def __init__(self, parent=None):
-    def __init__(self, inpfile=None):
+    def __init__(self, profile=None, parent=None):
         self.data = DataStruct()
         #self.cases = []
         # self.btf = Btf(self)
@@ -66,8 +66,10 @@ class Bundle(object):
         #self.states.append(DataStruct())
 
         #self.parent = parent
-        if inpfile:
-            self.readpro(inpfile)
+        if profile:
+            self.readpro(profile)
+        elif parent:
+            self.setup(parent)
 
         # self.readinpfile(inpfile)
         # self.readcas()
