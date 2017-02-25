@@ -513,7 +513,7 @@ class MainWin(QtGui.QMainWindow):
         # self.bundle.savepic(filename)
         filename = os.path.splitext(filename)[0] + ".grb"  # fix file ext
         with open(filename, 'wb') as fp:
-            pickle.dump(self.bundle, fp, 1)
+            pickle.dump(self.bunlist, fp, 1)
         print "Saved data to file " + filename
 
     def plotWin(self):
