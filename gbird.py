@@ -1196,21 +1196,26 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         
         chanbow = self.chanbow_sbox.value() / 10  # mm -> cm
 
-        nsegments = len(self.bundle.states[state_num].segments)
-        self.bundle.append_state()
+        bundle = Bundle(parent=self.bunlist[state_num])
+        nsegments = len(bundle.segments)
+        #nsegments = len(self.bunlist[state_num].segments)
+        #self.bundle.append_state()
 
         for iseg in xrange(nsegments):
             LFU = self.__lfumap(iseg)
             FUE = self.__fuemap(iseg)
             BA = self.__bamap(iseg)
             voi = None
-            self.bundle.states[-1].segments[iseg].set_data(LFU, FUE, BA,
-                                                           voi, chanbow)
-            
+            bundle.segments[iseg].set_data(LFU, FUE, BA, voi, chanbow)
+            #self.bunlist[-1].segments[iseg].set_data(LFU, FUE, BA,
+            #                                               voi, chanbow)
             #self.bundle.cases[case_num].add_state(LFU, FUE, BA, voi, chanbow)
 
-        self.bundle.new_calc(model='c3', depthres=20)
-        self.bundle.new_btf()
+        bundle.new_calc(model='c3', depthres=20)
+        bundle.new_btf()
+        self.bunlist.append(bundle)
+        #self.bundle.new_calc(model='c3', depthres=20)
+        #self.bundle.new_btf()
         #if state_num:
         self.state_index = state_num
         #else:
