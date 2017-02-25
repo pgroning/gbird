@@ -531,15 +531,6 @@ class MainWin(QtGui.QMainWindow):
             #                   QtGui.QMessageBox.Close)
             msgBox.information(self, "No data", msg.strip(), msgBox.Close)
 
-    #def get_colormap(self, num_enr_levels):
-    #    cvec = ["#FF00FF", "#CC00FF", "#AA00FF", "#0000FF", "#0066FF",
-    #            "#00AAFF", "#00CCFF", "#00FFFF", "#00FFCC", "#00FFAA",
-    #            "#00FF66", "#00FF00", "#AAFF00", "#CCFF00", "#FFFF00",
-    #            "#FFCC00", "#FFAA00", "#FF9900", "#FF5500", "#FF0000"]
-    #    ic = np.linspace(0, len(cvec) - 1, num_enr_levels).astype(int).tolist()
-    #    cmap = [cvec[i] for i in ic]
-    #    return cmap
-
     def get_colormap(self, num_enr_levels, colormap="rainbow"):
 
         n = num_enr_levels + 1
@@ -562,12 +553,18 @@ class MainWin(QtGui.QMainWindow):
             # yellow -> red
             cm_yr = np.vstack((v11, v10, v00)).transpose()
             cm = np.vstack((cm_mb, cm_bc, cm_cg, cm_gy, cm_yr))
-        elif colormap == "heat":
+        elif colormap == "bmr":
             # blue -> magenta
             cm_bc = np.vstack((v01, v00, v11)).transpose()[:-1]
             # magenta -> red
             cm_mr = np.vstack((v11, v00, v10)).transpose()
             cm = np.vstack((cm_bc, cm_mr))
+        elif colormap == "byr":
+            # blue -> yellow
+            cm_by = np.vstack((v01, v01, v10)).transpose()[:-1]
+            # yellow -> red
+            cm_yr = np.vstack((v11, v10, v00)).transpose()
+            cm = np.vstack((cm_by, cm_yr))
             
         ic = np.linspace(0, len(cm) - 1, num_enr_levels).astype(int).tolist()
         cmap = [cm[i].tolist() for i in ic]
@@ -810,11 +807,11 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         if param_str == "FINT":
             v = np.array([pin.FINT for pin in self.pinobjects[iseg]])
             uni_fint = np.unique(v)
-            cmap = self.get_colormap(uni_fint.size, "heat")
+            cmap = self.get_colormap(uni_fint.size, "bmr")
         elif param_str == "BTF":
             v = np.array([pin.BTF for pin in self.pinobjects[iseg]])
             uni_btf = np.unique(v)
-            cmap = self.get_colormap(uni_btf.size)
+            cmap = self.get_colormap(uni_btf.size, "byr")
         elif param_str == "EXP":
             v = np.array([pin.EXP for pin in self.pinobjects[iseg]])
             uni_exp = np.unique(v)
