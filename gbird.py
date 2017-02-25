@@ -1850,9 +1850,9 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
     def back_state(self):
         """Back to previous state"""
 
-        nstates = len(self.bundle.states)
+        nbundles = len(self.bunlist)
         if self.state_index < 0:
-            self.state_index = self.state_index + nstates
+            self.state_index = self.state_index + nbundles
         self.state_index -= 1
         if self.state_index < 0:
             self.state_index = 0
@@ -1864,12 +1864,12 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
     def forward_state(self):
         """Forward to next state"""
         
-        nstates = len(self.bundle.states)
+        nbundles = len(self.bunlist)
         if self.state_index < 0:
-            self.state_index = self.state_index + nstates
+            self.state_index = self.state_index + nbundles
         self.state_index += 1
-        if self.state_index >= nstates:
-            self.state_index = nstates - 1
+        if self.state_index >= nbundles:
+            self.state_index = nbundles - 1
         else:
             self.init_pinobjects()
             self.fig_update()
