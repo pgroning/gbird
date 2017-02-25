@@ -350,9 +350,11 @@ class MainWin(QtGui.QMainWindow):
         """Importing data from a single cax file"""
         
         self.clear_data()
-        self.bundle = Bundle()
-        self.bundle.read_single_cax(filename)
-        self.bundle.new_btf()
+        bundle = Bundle()
+        bundle.read_single_cax(filename)
+        bundle.new_btf()
+        self.bunlist = []
+        self.bunlist.append(bundle)
 
         self.init_pinobjects()
         #self.fig_update()
