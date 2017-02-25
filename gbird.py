@@ -419,16 +419,19 @@ class MainWin(QtGui.QMainWindow):
         if status == QtGui.QMessageBox.Yes:
             self.setCursor(QtCore.Qt.WaitCursor)
             self.clear_data()
-            self.bundle = Bundle()
-            self.bundle.readpro(filename)
-            self.bundle.readcax()  # inargs "all" reads the whole file content
-            self.bundle.new_btf()
+            bundle = Bundle()
+            bundle.readpro(filename)
+            bundle.readcax()  # inargs "all" reads the whole file content
+            bundle.new_btf()
+            self.bunlist = []
+            self.bunlist.append(bundle)
             
             self.init_pinobjects()
         
             # Update segment number list box
-            state_num = self.state_index
-            nsegments = len(self.bundle.states[state_num].segments)
+            #state_num = self.state_index
+            nsegments = len(bundle.segments)
+            #nsegments = len(self.bundle.states[state_num].segments)
             seglist = map(str, range(1, nsegments + 1))
             self.case_cbox.addItems(QtCore.QStringList(seglist))
             
@@ -565,12 +568,14 @@ class MainWin(QtGui.QMainWindow):
         self.enrpinlist = []
 
         state_num = self.state_index
-        nsegments = len(self.bundle.states[state_num].segments)
+        bundle = self.bunlist[state_num]
+        
+        nsegments = len(bundle.segments)
 
         for iseg in range(nsegments):
-            LFU = self.bundle.states[state_num].segments[iseg].data.LFU
-            ENR = self.bundle.states[state_num].segments[iseg].data.ENR
-            BA = self.bundle.states[state_num].segments[iseg].data.BA
+            LFU = bundle.segments[iseg].data.LFU
+            ENR = bundle.segments[iseg].data.ENR
+            BA = bundle.segments[iseg].data.BA
             
             pinlist = []
             for i in range(LFU.shape[0]):
@@ -585,7 +590,7 @@ class MainWin(QtGui.QMainWindow):
             self.pinobjects.append(pinlist)
             
             enrlist = []
-            FUE = self.bundle.states[state_num].segments[iseg].data.FUE
+            FUE = bundle.segments[iseg].data.FUE
             enr_dens = FUE[:, 1]
             enr_levels = FUE[:, 2]
             enr_baindex = FUE[:, 3]
@@ -600,7 +605,7 @@ class MainWin(QtGui.QMainWindow):
                 enrobj.DENS = enr_dens[i]
                 enrlist.append(enrobj)
             self.enrpinlist.append(enrlist)
-
+            
     def enrpin_add(self):
         """add enr pin"""
         self.enr_dlg = EnrDialog(self, "add")
@@ -720,7 +725,8 @@ class MainWin(QtGui.QMainWindow):
         point_num = int(self.point_sbox.value())
         state_num = self.state_index
 
-        segment = self.bundle.states[state_num].segments[iseg]
+        bundle = self.bunlist[state_num]
+        segment = bundle.segments[iseg]
         #state = self.bundle.cases[case_num].states[state_num]
         
         ENR = segment.data.ENR
@@ -729,14 +735,14 @@ class MainWin(QtGui.QMainWindow):
         FINT = segment.statepoints[point_num].POW
 
         burnup = segment.statepoints[point_num].burnup
-        btf_burnpoints = self.bundle.states[state_num].btf.burnpoints
-
+        btf_burnpoints = bundle.btf.burnpoints
+        
         index_array = np.where(btf_burnpoints == burnup)[0]
         if len(index_array) > 0:  # is BTF calculated for the specific burnup?
             btf_num = index_array[0]
-            BTF = self.bundle.states[state_num].btf.DOX[btf_num, :, :]
+            BTF = bundle.btf.DOX[btf_num, :, :]
         else:
-            BTF = np.zeros(np.shape(self.bundle.states[state_num].btf.DOX)[1:])
+            BTF = np.zeros(np.shape(bundle.btf.DOX)[1:])
             BTF.fill(np.nan)
 
         npst = segment.data.npst
@@ -747,7 +753,7 @@ class MainWin(QtGui.QMainWindow):
         # Sorting table column 0 in ascending order
         self.table.sortItems(0, QtCore.Qt.AscendingOrder)
         self.setpincoords()
-
+        
         k = 0
         for i in xrange(npst):
             for j in xrange(npst):
@@ -1043,31 +1049,31 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
         iseg = int(self.case_cbox.currentIndex())
         istate = self.state_index
-        state = self.bundle.states[istate]
+        bundle = self.bunlist[istate]
 
         # Update enr for all segments
-        for i, segment in enumerate(state.segments):
+        for i, segment in enumerate(bundle.segments):
             LFU = self.__lfumap(i)
             FUE = self.__fuemap(i)
             segment.ave_enr_calc(LFU, FUE)
             if not hasattr(segment.data, "ave_enr"):  # save orig. calc
                 segment.data.ave_enr = segment.ave_enr
         
-        segment = state.segments[iseg]
+        segment = bundle.segments[iseg]
         #self.ave_enr_text.setText("%.5f" % segment.ave_enr)
-        orig_seg_enr = self.bundle.states[0].segments[iseg].data.ave_enr
+        orig_seg_enr = self.bunlist[0].segments[iseg].data.ave_enr
         diff_seg_enr = segment.ave_enr - orig_seg_enr
         formstr = '{0:.4f} ({1:+.4f})'.format(segment.ave_enr, diff_seg_enr)
         self.ave_enr_text.setText(formstr)
         #self.ave_denr_text.setText("%.5f" % diff_seg_enr)
         
         # Update bundle enr
-        bundle_enr = self.bundle.ave_enr_calc(istate)
-        if not hasattr(self.bundle.states[istate], "ave_enr"):
-            self.bundle.states[istate].ave_enr = bundle_enr  # save orig. calc
-         
+        bundle_enr = bundle.ave_enr_calc()
+        if not hasattr(bundle, "ave_enr"):
+            bundle.ave_enr = bundle_enr  # save orig. calc
+        
         # self.bundle_enr_text.setText("%.5f" % bundle_enr)
-        orig_bundle_enr = self.bundle.states[0].ave_enr
+        orig_bundle_enr = self.bunlist[0].ave_enr
         diff_bundle_enr = bundle_enr - orig_bundle_enr
         formstr = '{0:.4f} ({1:+.4f})'.format(bundle_enr, diff_bundle_enr)
         self.bundle_enr_text.setText(formstr)
@@ -1139,7 +1145,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         # case_num = int(self.case_cbox.currentIndex())
         
         # Initialize new LFU map and fill with zeros
-        LFU_old = self.bundle.states[-1].segments[iseg].data.LFU
+        LFU_old = self.bunlist[-1].segments[iseg].data.LFU
         # LFU_old = self.bundle.cases[case_num].states[-1].LFU
         LFU = np.zeros(LFU_old.shape).astype(int)
         
@@ -1154,7 +1160,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
     def __fuemap(self, iseg):
         """Creating FUE map from enr level pins"""
 
-        FUE_old = self.bundle.states[-1].segments[iseg].data.FUE
+        FUE_old = self.bunlist[-1].segments[iseg].data.FUE
         #FUE_old = self.bundle.cases[case_num].states[-1].FUE
         nfue = len(self.enrpinlist[iseg])
         FUE = np.zeros((nfue, FUE_old.shape[1])).astype(float)
@@ -1170,7 +1176,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         """Creating BA map from pinobjects"""
 
         # Initialize new BA map and fill with zeros
-        LFU = self.bundle.states[-1].segments[iseg].data.LFU
+        LFU = self.bunlist[-1].segments[iseg].data.LFU
         #LFU = self.bundle.cases[case_num].states[-1].LFU
         BA = np.zeros(LFU.shape).astype(float)
 
@@ -1231,7 +1237,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         
         # Update info field
         iseg = int(self.case_cbox.currentIndex())
-        sim = self.bundle.states[0].segments[iseg].data.sim
+        sim = self.bunlist[0].segments[iseg].data.sim
         #sim = self.bundle.cases[case_num].states[0].sim
         text = sim.replace("SIM", "").replace("'", "").strip()
         self.sim_info_field.setText(text)
@@ -1352,13 +1358,13 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         p_fancy.set_linewidth(4.0)
         self.axes.add_patch(p_fancy)
         
-        if self.bundle.data.fuetype == 'OPT2':
+        if self.bunlist[0].data.fuetype == 'OPT2':
             s96o2(self)
-        elif self.bundle.data.fuetype == 'OPT3':
+        elif self.bunlist[0].data.fuetype == 'OPT3':
             s96o2(self)
-        elif self.bundle.data.fuetype == 'A10XM':
+        elif self.bunlist[0].data.fuetype == 'A10XM':
             a10xm(self)
-        elif self.bundle.data.fuetype == 'A10B':
+        elif self.bunlist[0].data.fuetype == 'A10B':
             a10xm(self)
         
         # Draw symmetry line

@@ -47,9 +47,9 @@ def a10xm(self):
     self.ylist  = ('A','B','C','D','E','F','G','H','I','J')
     
     # Draw pin circles
-    npst = self.bundle.states[0].segments[case_num].data.npst
+    npst = self.bunlist[0].segments[case_num].data.npst
     #npst = self.bundle.cases[case_num].states[0].npst
-    LFU = self.bundle.states[0].segments[case_num].data.LFU
+    LFU = self.bunlist[0].segments[case_num].data.LFU
     #LFU = self.bundle.cases[case_num].states[state_num].LFU
     
     #pin_radius = 0.0308
