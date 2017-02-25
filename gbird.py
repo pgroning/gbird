@@ -332,12 +332,12 @@ class MainWin(QtGui.QMainWindow):
         print "Loading data from file " + filename
         self.clear_data()
         with open(filename, 'rb') as fp:
-            self.bundle = pickle.load(fp)
+            self.bunlist = pickle.load(fp)
 
         self.init_pinobjects()
 
         # Update case number list box
-        nsegments = len(self.bundle.states[-1].segments)
+        nsegments = len(self.bunlist[-1].segments)
         seglist = map(str, range(1, nsegments + 1))
         self.case_cbox.addItems(QtCore.QStringList(seglist))
         #for i in range(1, ncases + 1):
@@ -1874,7 +1874,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         """Update chanbow spinbox value"""
         
         iseg = int(self.case_cbox.currentIndex())
-        segment = self.bundle.states[self.state_index].segments[iseg]
+        segment = self.bunlist[self.state_index].segments[iseg]
         if hasattr(segment.data, "box_offset"):
             box_offset = segment.data.box_offset * 10
         else:
