@@ -68,9 +68,8 @@ def s96o2(self):
     x0 = 0.70711+0.0055
     transrot = mpatches.transforms.Affine2D().translate(x0, 0.0) + rot45
     #transrot = mpatches.transforms.Affine2D().translate(0.70711, 0.0) + rot45
-
     rect.set_transform(transrot)
-    self.axes.add_patch(rect)
+    #self.axes.add_patch(rect)
 
     # Draw enrichment levels
     case_num = int(self.case_cbox.currentIndex())
@@ -136,7 +135,10 @@ def s96o2(self):
                 self.axes.add_patch(self.pinobjects[case_num][k].rectangle)
                 self.axes.add_patch(self.pinobjects[case_num][k].circle)
                 k += 1
-    
+
+    # Add water channel patch
+    self.axes.add_patch(rect)
+                
     # Draw pin coordinates x-axis
     for i in range(5):
         self.axes.text(0.13 + i*pin_delta, 0.015, self.xlist[i],
