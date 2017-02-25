@@ -519,7 +519,7 @@ class MainWin(QtGui.QMainWindow):
     def plotWin(self):
         """Open plot window"""
 
-        if hasattr(self, "bundle"):
+        if hasattr(self, "bunlist"):
             plotwin = PlotWin(self)
             plotwin.show()
         else:

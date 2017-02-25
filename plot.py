@@ -67,7 +67,7 @@ class PlotWin(QtGui.QMainWindow):
 
     def plot_kinf(self, case_id, istate=-1, linestyle="-"):
         
-        segment = self.parent.bundle.states[istate].segments[case_id]
+        segment = self.parent.bunlist[istate].segments[case_id]
         #case = self.parent.bundle.cases[case_id]
         idx0 = self.startpoint(case_id, istate)
         statepoints = segment.statepoints[idx0:]
@@ -96,7 +96,7 @@ class PlotWin(QtGui.QMainWindow):
 
     def plot_fint(self, case_id, istate=-1, linestyle="-"):
 
-        segment = self.parent.bundle.states[istate].segments[case_id]
+        segment = self.parent.bunlist[istate].segments[case_id]
         idx0 = self.startpoint(case_id, istate)
         statepoints = segment.statepoints[idx0:]
 
@@ -125,9 +125,9 @@ class PlotWin(QtGui.QMainWindow):
     def plot_btf(self, case_id, istate=-1, linestyle="-"):
         
         # x = self.cas.btf.burnpoints
-        x = self.parent.bundle.states[istate].btf.burnpoints
+        x = self.parent.bunlist[istate].btf.burnpoints
         # DOX = self.cas.btf.DOX
-        DOX = self.parent.bundle.states[istate].btf.DOX
+        DOX = self.parent.bunlist[istate].btf.DOX
         y = [elem.max() for elem in DOX]
         self.axes.plot(x, y, linestyle=linestyle)
 
@@ -190,7 +190,7 @@ class PlotWin(QtGui.QMainWindow):
         vhi_val = int(self.vhi_cbox.currentText())
         type_val = str(self.type_cbox.currentText())
         
-        segment = self.parent.bundle.states[istate].segments[case_id]
+        segment = self.parent.bunlist[istate].segments[case_id]
         #case = self.parent.bundle.cases[case_id]
         
         if type_val == 'CCl':
@@ -210,7 +210,7 @@ class PlotWin(QtGui.QMainWindow):
     def on_plot(self):
         
         case_id = self.case_id_current
-        case_id_max = len(self.parent.bundle.states[-1].segments)
+        case_id_max = len(self.parent.bunlist[-1].segments)
         #case_id_max = len(self.parent.bundle.cases)
         param = self.param_cbox.currentText()
         
@@ -353,8 +353,7 @@ class PlotWin(QtGui.QMainWindow):
         self.voi_cbox = QtGui.QComboBox()
         # self.voilist = ['0', '40', '80']
         iseg = self.case_id_current
-        self.voilist = (self.parent.bundle.states[-1].
-                        segments[iseg].data.voilist)
+        self.voilist = (self.parent.bunlist[-1].segments[iseg].data.voilist)
 
         #self.voilist = (self.parent.bundle.cases[self.case_id_current]
         #                .states[-1].voivec)
@@ -363,7 +362,7 @@ class PlotWin(QtGui.QMainWindow):
         for v in self.voilist:
             self.voi_cbox.addItem(str(v))
         # Determine voi index
-        voi = (self.parent.bundle.states[-1].segments[iseg].statepoints[0].voi)
+        voi = self.parent.bunlist[-1].segments[iseg].statepoints[0].voi
         #voi = (self.parent.bundle.cases[self.case_id_current].states[-1]
         #       .statepoints[0].voi)
         # voi = self.cas.cases[self.case_id_current].statepts[0].voi
@@ -380,7 +379,7 @@ class PlotWin(QtGui.QMainWindow):
             self.vhi_cbox.addItem(str(v))
         
         # Determine vhi index
-        vhi = (self.parent.bundle.states[-1].segments[iseg].statepoints[0].vhi)
+        vhi = self.parent.bunlist[-1].segments[iseg].statepoints[0].vhi
         #vhi = (self.parent.bundle.cases[self.case_id_current].states[-1]
         #       .statepoints[0].vhi)
         vhi_index = [i for i, v in enumerate(self.vhilist) if int(v) == vhi]
