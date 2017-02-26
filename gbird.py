@@ -278,7 +278,7 @@ class MainWin(QtGui.QMainWindow):
 
             filext = os.path.splitext(filename)[1]
             if filext == ".gbi":  # pickle file
-                self.state_index = -1
+                self.ibundle = -1
                 self.load_pickle(filename)
                 self.fig_update()
                 self.chanbow_sbox_update()
@@ -293,7 +293,7 @@ class MainWin(QtGui.QMainWindow):
                 self._filename = filename
                 if status == QtGui.QMessageBox.Yes:
                     self.setCursor(QtCore.Qt.WaitCursor)
-                    self.state_index = 0
+                    self.ibundle = 0
                     #if filext == ".inp":
                     #    self.read_inp(filename)
                     #    #self.quick_calc(state_num=0)  # reference calculation
@@ -320,7 +320,7 @@ class MainWin(QtGui.QMainWindow):
             self.settings.beginGroup("PATH")
             self.settings.setValue("path_default", QtCore.QString(path))
             self.settings.endGroup()
-            self.state_index = 0
+            self.ibundle = 0
             self.read_pro(filename)
                     
     def load_pickle(self, filename):
@@ -431,7 +431,7 @@ class MainWin(QtGui.QMainWindow):
             self.init_pinobjects()
         
             # Update segment number list box
-            #state_num = self.state_index
+            #state_num = self.ibundle
             nsegments = len(bundle.segments)
             #nsegments = len(self.bundle.states[state_num].segments)
             seglist = map(str, range(1, nsegments + 1))
@@ -576,7 +576,7 @@ class MainWin(QtGui.QMainWindow):
         self.pinobjects = []
         self.enrpinlist = []
 
-        state_num = self.state_index
+        state_num = self.ibundle
         bundle = self.bunlist[state_num]
         
         nsegments = len(bundle.segments)
@@ -732,7 +732,7 @@ class MainWin(QtGui.QMainWindow):
         param_str = str(self.param_cbox.currentText())
         iseg = int(self.case_cbox.currentIndex())
         point_num = int(self.point_sbox.value())
-        state_num = self.state_index
+        state_num = self.ibundle
 
         bundle = self.bunlist[state_num]
         segment = bundle.segments[iseg]
@@ -1057,7 +1057,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         """Update enr value in info fields"""
 
         iseg = int(self.case_cbox.currentIndex())
-        istate = self.state_index
+        istate = self.ibundle
         bundle = self.bunlist[istate]
 
         # Update enr for all segments
@@ -1226,10 +1226,10 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         #self.bundle.new_calc(model='c3', depthres=20)
         #self.bundle.new_btf()
         #if state_num:
-        self.state_index = state_num
+        self.ibundle = state_num
         #else:
-        #    self.state_index = len(self.bundle.cases[0].states) - 1
-        #print self.state_index
+        #    self.ibundle = len(self.bundle.cases[0].states) - 1
+        #print self.ibundle
         self.fig_update()
         self.setCursor(QtCore.Qt.ArrowCursor)
         
@@ -1860,11 +1860,11 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         """Back to previous state"""
 
         nbundles = len(self.bunlist)
-        if self.state_index < 0:
-            self.state_index = self.state_index + nbundles
-        self.state_index -= 1
-        if self.state_index < 0:
-            self.state_index = 0
+        if self.ibundle < 0:
+            self.ibundle = self.ibundle + nbundles
+        self.ibundle -= 1
+        if self.ibundle < 0:
+            self.ibundle = 0
         else:
             self.init_pinobjects()
             self.fig_update()
@@ -1874,11 +1874,11 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         """Forward to next state"""
         
         nbundles = len(self.bunlist)
-        if self.state_index < 0:
-            self.state_index = self.state_index + nbundles
-        self.state_index += 1
-        if self.state_index >= nbundles:
-            self.state_index = nbundles - 1
+        if self.ibundle < 0:
+            self.ibundle = self.ibundle + nbundles
+        self.ibundle += 1
+        if self.ibundle >= nbundles:
+            self.ibundle = nbundles - 1
         else:
             self.init_pinobjects()
             self.fig_update()
@@ -1888,7 +1888,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         """Update chanbow spinbox value"""
         
         iseg = int(self.case_cbox.currentIndex())
-        segment = self.bunlist[self.state_index].segments[iseg]
+        segment = self.bunlist[self.ibundle].segments[iseg]
         if hasattr(segment.data, "box_offset"):
             box_offset = segment.data.box_offset * 10
         else:
