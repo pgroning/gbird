@@ -13,6 +13,7 @@
 
 # For debugging. Add Tracer()() inside the code to break at that line
 from IPython.core.debugger import Tracer
+from pyqt_trace import pyqt_trace as qtrace  # Break point that works with Qt
 # Inside iptyhon shell: run -d b<L> readfile.py
 # sets a break point add line L.
 
@@ -615,6 +616,28 @@ class Segment(object):
     #              .strip().split(' ')[1:])
     #    return voids
 
+    def sparse_burnpoints(self):
+        """Reduce number of depletion points"""
+
+        dep_thres1 = 1.0  # First depletion threshold
+        dep_thres2 = 20.0  # Second threshold
+        sparse_burnlist = []
+        for burnpoints in self.burnlist:
+            pts1 = [x for x in burnpoints if x <= dep_thres1]
+            pts2 = [x for x in burnpoints 
+                    if x > dep_thres1 and x <= dep_thres2]
+            sparse_pts2 = pts2[1::1]  # reduce number of points
+            if sparse_pts2[-1] < pts2[-1]:  # include last point
+                sparse_pts2.append(pts2[-1])
+            pts3 = [x for x in burnpoints if x > dep_thres2]
+            sparse_pts3 = pts3[5::5]  # take every 5:th step in list
+            if sparse_pts3[-1] < burnpoints[-1]:  # include last point
+                sparse_pts3.append(burnpoints[-1])
+            # concatenate lists
+            sparse_points = sum([pts1, sparse_pts2, sparse_pts3], [])
+            sparse_burnlist.append(sparse_points)
+        return sparse_burnlist
+    
     def writec3cai(self, file_base_name, voi=None, maxdep=60, depthres=None,
                    box_offset=0.0):
         # filebasename = "./" + str(uuid.uuid4())
@@ -651,18 +674,18 @@ class Segment(object):
         if not maxdep:
             maxdep = 60
 
-        burnlist = []
-        for v in voilist:
-            if depthres:
-                dep_points = [0, 0.001, -depthres]
-                dep_next = -dep_points[-1] + 10
-                while dep_next < maxdep:
-                    dep_points.append(dep_next)
-                    dep_next += 10
-                dep_points.append(maxdep)
-            else:
-                dep_points = [0, 0.001, -maxdep]
-            burnlist.append(dep_points)
+        #burnlist = []
+        #for v in voilist:
+        #    if depthres:
+        #        dep_points = [0, 0.001, -depthres]
+        #        dep_next = -dep_points[-1] + 10
+        #        while dep_next < maxdep:
+        #            dep_points.append(dep_next)
+        #            dep_next += 10
+        #        dep_points.append(maxdep)
+        #    else:
+        #        dep_points = [0, 0.001, -maxdep]
+        #    burnlist.append(dep_points)
         
         #burnlist = []
         #for i, v in enumerate(bp_voivec):
@@ -683,6 +706,10 @@ class Segment(object):
         #        burnlist.append(red_points)
         #    else:
         #        burnlist.append(all_points)
+        
+        if not hasattr(self, "burnlist"):
+            self.burnlist = [self.burnpoints(voi=v) for v in self.data.voilist]
+        burnlist = self.sparse_burnpoints()
         
         if hasattr(self.data, 'LFU'):
             LFU = self.data.LFU
@@ -1009,7 +1036,7 @@ class Segment(object):
         # # Append element to hold a new calculation
         # self.add_state(LFU, FUE, voi)
         # ---------------------------------
-
+        
         file_base_name = "./tmp." + str(uuid.uuid4()).split('-')[0]
         self.writec3cai(file_base_name, voi, maxdep, depthres, box_offset)
         
@@ -1080,9 +1107,9 @@ class Segment(object):
         if tfu is not None:
             pindex = next(i for i, p in enumerate(statepoints) if p.tfu == tfu)
         elif burnup is not None:
-            pindex = next(i for i, p in enumerate(statepoints)
-                          if p.burnup == burnup and
-                          p.vhi == vhi and p.voi == voi)
+                pindex = next(i for i, p in enumerate(statepoints)
+                              if p.burnup == burnup and
+                              p.vhi == vhi and p.voi == voi)
         else:
             pindex = next(i for i, p in enumerate(statepoints)
                           if p.vhi == vhi and p.voi == voi)
@@ -1091,7 +1118,7 @@ class Segment(object):
     def burnpoints(self, voi=40):
         """Return depletion vector for given voi (vhi=voi)"""
         
-        statepoints = self.data.statepoints
+        statepoints = self.statepoints
         i = self.findpoint(voi=voi, vhi=voi)
         burnlist = [statepoints[i].burnup]
         Nstatepoints = len(statepoints)

@@ -263,7 +263,9 @@ class Bundle(object):
             self.segments.append(Segment())
             self.segments[-1].data = copy.copy(s.data)
             self.segments[-1].topnode = s.topnode
-            self.segments[-1].statepoints = s.statepoints
+            #self.segments[-1].statepoints = s.statepoints
+            self.segments[-1].burnlist = [s.burnpoints(voi=v) 
+                                          for v in s.data.voilist]
 
 #    def append_state(self):
 #        """Append a list element to store new segment instancies"""
@@ -298,7 +300,7 @@ class Bundle(object):
 
     def new_btf(self):
         """Administrates btf calculation by composition of the Btf class"""
-
+        
         #nstates = len(self.states)
         #nstates = len(self.cases[0].states)
         #while len(self.states) < nstates:

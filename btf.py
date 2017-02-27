@@ -5,6 +5,7 @@
 # cProfile.run('b.rfact()')
 
 from IPython.core.debugger import Tracer
+from pyqt_trace import pyqt_trace as qtrace  # Break point that works with Qt
 
 import sys
 import time
@@ -46,6 +47,7 @@ class Btf(object):
         idx = self.lastindex(0)
         
         x = [segments[0].statepoints[i].burnup for i in range(idx)]
+        
         for j in range(1, nsegments):
             idx = self.lastindex(j)
             x2 = ([segments[j].statepoints[i].burnup

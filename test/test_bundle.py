@@ -188,14 +188,6 @@ class UnitTest(unittest.TestCase):
                                            b1.segments[1].data.LFU),
                          "LFU is equal")
         
-        self.assertTrue(numpy.array_equal(b.segments[1].statepoints[1].POW,
-                                          b1.segments[1].statepoints[1].POW),
-                        "POW is not equal")
-
-        b1.new_calc()
-        self.assertFalse(numpy.array_equal(b.segments[1].statepoints[1].POW,
-                                           b1.segments[1].statepoints[1].POW),
-                         "POW is equal")
         
 if __name__ == '__main__':
     unittest.main()

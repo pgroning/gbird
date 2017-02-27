@@ -1205,7 +1205,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         
         chanbow = self.chanbow_sbox.value() / 10  # mm -> cm
 
-        bundle = Bundle(parent=self.bunlist[state_num])
+        bundle = Bundle(parent=self.bunlist[0])  # parent is original bundle
         nsegments = len(bundle.segments)
         #nsegments = len(self.bunlist[state_num].segments)
         #self.bundle.append_state()
@@ -1220,7 +1220,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             #                                               voi, chanbow)
             #self.bundle.cases[case_num].add_state(LFU, FUE, BA, voi, chanbow)
 
-        bundle.new_calc(model='c3', depthres=20)
+        bundle.new_calc(model='c3')
         bundle.new_btf()
         self.bunlist.append(bundle)
         #self.bundle.new_calc(model='c3', depthres=20)
