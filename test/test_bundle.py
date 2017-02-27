@@ -45,7 +45,7 @@ class UnitTest(unittest.TestCase):
         b.readcax()
         self.assertTrue(len(b.segments) == 5, "reading cax files failed")
     
-    @unittest.skip("skip this test")
+    #@unittest.skip("skip this test")
     def test_readrun_all(self):
         testfile = 'test/topol/bundle_opt2.pro'
         b = Bundle(testfile)
@@ -103,7 +103,7 @@ class UnitTest(unittest.TestCase):
         self.assertEqual(b4.segments[1].data.box_offset, 0.2,
                          "box offset calculation failed")
         
-    @unittest.skip("skip test_new_calc_c4")
+    #@unittest.skip("skip test_new_calc_c4")
     def test_new_calc_c4(self):
         #testfile = "test/tosim/bundle_at11.inp"
         testfile = "test/topol/bundle_a10xm.pro"
