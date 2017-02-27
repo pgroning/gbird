@@ -13,6 +13,7 @@ if sys.version_info < (2, 7):
 else:
     import unittest
 import os
+import copy
 import numpy
 
 sys.path.append('./')
@@ -175,15 +176,26 @@ class UnitTest(unittest.TestCase):
         b = Bundle(testfile)
         b.readcax()
         b1 = Bundle(parent=b)
-        self.assertEqual(b.segments[1].data.LFU.any(),
-                         b1.segments[1].data.LFU.any(),
+        
+        self.assertTrue(numpy.array_equal(b.segments[1].data.LFU,
+                                           b1.segments[1].data.LFU),
                          "LFU is not equal")
-        LFU_new = numpy.zeros((11, 11))
+        
+        LFU_new = copy.copy(b.segments[1].data.LFU)
+        LFU_new[1, 1] += 1
         b1.segments[1].set_data(LFU=LFU_new)
-        self.assertNotEqual(b.segments[1].data.LFU.any(),
-                         b1.segments[1].data.LFU.any(),
+        self.assertFalse(numpy.array_equal(b.segments[1].data.LFU,
+                                           b1.segments[1].data.LFU),
                          "LFU is equal")
         
+        self.assertTrue(numpy.array_equal(b.segments[1].statepoints[1].POW,
+                                          b1.segments[1].statepoints[1].POW),
+                        "POW is not equal")
+
+        b1.new_calc()
+        self.assertFalse(numpy.array_equal(b.segments[1].statepoints[1].POW,
+                                           b1.segments[1].statepoints[1].POW),
+                         "POW is equal")
         
 if __name__ == '__main__':
     unittest.main()

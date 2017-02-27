@@ -255,7 +255,7 @@ class Bundle(object):
         p.join()
 
     def setup(self, parent):
-        """Setup new Bundle instance and copy data from parent"""
+        """Setup new Bundle instance and copy/link data from parent"""
 
         self.data = parent.data
         self.segments = []
@@ -263,6 +263,7 @@ class Bundle(object):
             self.segments.append(Segment())
             self.segments[-1].data = copy.copy(s.data)
             self.segments[-1].topnode = s.topnode
+            self.segments[-1].statepoints = s.statepoints
 
 #    def append_state(self):
 #        """Append a list element to store new segment instancies"""
