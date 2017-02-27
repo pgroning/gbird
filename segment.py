@@ -26,6 +26,7 @@ import time
 from subprocess import call, STDOUT
 import uuid  # used for random generated file names
 import shlex  # used for splitting subprocess call argument string into a list
+import copy
 
 '''
 #from multiprocessing import Pool
@@ -836,6 +837,19 @@ class Segment(object):
         f.close()
         # return filebasename
 
+    def fill_statepoints(self):
+        """Insert statepoints by interpolation of nearby points"""
+        
+        for j in range(len(self.data.voilist)):
+            sp_burnup = [s.burnup for s in self.statepoints
+                         if s.voi == self.data.voilist[j]]
+        
+            for i, burnpoint in enumerate(self.burnlist[j]):
+                if burnpoint not in sp_burnup:
+                    sp = copy.copy(self.statepoints[i-1])
+                    sp.burnup = burnpoint
+                    #self.statepoints.insert(i, sp)
+        
     def runc3(self, filebasename, grid=False):
         """Running C3 perturbation model"""
         
@@ -1048,6 +1062,7 @@ class Segment(object):
             print "Quickcalc model is unknown"
             return
         self.readc3cax(file_base_name, refcalc)
+        self.fill_statepoints()
         self.ave_enr_calc()
 
         os.remove(file_base_name + ".inp")
