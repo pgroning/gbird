@@ -813,11 +813,11 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         elif param_str == "BTF":
             v = np.array([pin.BTF for pin in self.pinobjects[iseg]])
             uni_btf = np.unique(v)
-            cmap = self.get_colormap(uni_btf.size, "byr")
+            cmap = self.get_colormap(uni_btf.size, "bmr")
         elif param_str == "EXP":
             v = np.array([pin.EXP for pin in self.pinobjects[iseg]])
             uni_exp = np.unique(v)
-            cmap = self.get_colormap(uni_exp.size)
+            cmap = self.get_colormap(uni_exp.size, "bmr")
             
         for i in xrange(npins):
             
