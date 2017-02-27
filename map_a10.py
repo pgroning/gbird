@@ -11,7 +11,7 @@ def a10xm(self):
                                           boxstyle="round,pad=0.02",
                                           fc=(0.8,0.898,1), ec=(0.3, 0.3, 0.3))
     p_fancy.set_linewidth(2.0)
-    self.axes.add_patch(p_fancy)
+    #self.axes.add_patch(p_fancy)
 
     # Draw enrichment levels
     case_num = int(self.case_cbox.currentIndex())
@@ -47,9 +47,9 @@ def a10xm(self):
     self.ylist  = ('A','B','C','D','E','F','G','H','I','J')
     
     # Draw pin circles
-    npst = self.bundle.states[0].segments[case_num].data.npst
+    npst = self.bunlist[0].segments[case_num].data.npst
     #npst = self.bundle.cases[case_num].states[0].npst
-    LFU = self.bundle.states[0].segments[case_num].data.LFU
+    LFU = self.bunlist[0].segments[case_num].data.LFU
     #LFU = self.bundle.cases[case_num].states[state_num].LFU
     
     #pin_radius = 0.0308
@@ -72,6 +72,9 @@ def a10xm(self):
                 self.axes.add_patch(self.pinobjects[case_num][k].circle)
                 k += 1
 
+    # Add water channel patch
+    self.axes.add_patch(p_fancy)
+                
     # Draw pin coordinates x-axis
     for i in range(10):
         self.axes.text(0.13 + i*pin_delta, 0.015, self.xlist[i],

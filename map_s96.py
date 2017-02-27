@@ -68,9 +68,8 @@ def s96o2(self):
     x0 = 0.70711+0.0055
     transrot = mpatches.transforms.Affine2D().translate(x0, 0.0) + rot45
     #transrot = mpatches.transforms.Affine2D().translate(0.70711, 0.0) + rot45
-
     rect.set_transform(transrot)
-    self.axes.add_patch(rect)
+    #self.axes.add_patch(rect)
 
     # Draw enrichment levels
     case_num = int(self.case_cbox.currentIndex())
@@ -109,9 +108,9 @@ def s96o2(self):
     self.ylist  = ('A','B','C','D','E','F','G','H','I','J')
     
     # Draw pin circles
-    npst = self.bundle.states[0].segments[case_num].data.npst
+    npst = self.bunlist[0].segments[case_num].data.npst
     #npst = self.bundle.cases[case_num].states[0].npst
-    LFU = self.bundle.states[0].segments[case_num].data.LFU
+    LFU = self.bunlist[0].segments[case_num].data.LFU
     #LFU = self.bundle.cases[case_num].states[state_num].LFU
     # Remove water cross rows and columns
     LFU = np.delete(LFU, (5), axis=0) # Delete row 6
@@ -136,7 +135,10 @@ def s96o2(self):
                 self.axes.add_patch(self.pinobjects[case_num][k].rectangle)
                 self.axes.add_patch(self.pinobjects[case_num][k].circle)
                 k += 1
-    
+
+    # Add water channel patch
+    self.axes.add_patch(rect)
+                
     # Draw pin coordinates x-axis
     for i in range(5):
         self.axes.text(0.13 + i*pin_delta, 0.015, self.xlist[i],

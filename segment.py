@@ -896,7 +896,7 @@ class Segment(object):
         else:
             pass
             #print "Reading file " + caxfile
-
+        
         # Read the whole file at once
         with open(caxfile) as f:
             flines = f.read().splitlines()  # exclude \n
@@ -905,7 +905,7 @@ class Segment(object):
         iTIT = self.__matchcontent(flines, '^TIT')
         iPOW = self.__matchcontent(flines, 'POW\s+')
         iPOL = self.__matchcontent(flines, '^POL')
-
+        
         # Read fuel dimension
         npst = int(flines[iPOW[0]+1][4:6])
 
@@ -983,7 +983,7 @@ class Segment(object):
         #else:
             # self.quickcalc_add(statepoints)
         self.statepoints = statepoints
-
+        
     #def quickcalc_add(self, statepoints):
     #    """Adds the quickcalc differencies to the initial state"""
     #    sp0 = self.states[0].statepoints

@@ -265,7 +265,7 @@ class MainWin(QtGui.QMainWindow):
                                            QtCore.QString("")).toString()
         self.settings.endGroup()
         # file_choices = "inp (*.inp);;pickle (*.p)"
-        file_choices = "Data files (*.grb *.cax)"
+        file_choices = "Data files (*.gbi *.cax)"
         filename = unicode(QtGui.QFileDialog.getOpenFileName(self, 'Open file',
                                                              path_default,
                                                              file_choices))
@@ -277,8 +277,8 @@ class MainWin(QtGui.QMainWindow):
             self.settings.endGroup()
 
             filext = os.path.splitext(filename)[1]
-            if filext == ".grb":  # project file
-                self.state_index = -1
+            if filext == ".gbi":  # pickle file
+                self.ibundle = -1
                 self.load_pickle(filename)
                 self.fig_update()
                 self.chanbow_sbox_update()
@@ -293,7 +293,7 @@ class MainWin(QtGui.QMainWindow):
                 self._filename = filename
                 if status == QtGui.QMessageBox.Yes:
                     self.setCursor(QtCore.Qt.WaitCursor)
-                    self.state_index = 0
+                    self.ibundle = 0
                     #if filext == ".inp":
                     #    self.read_inp(filename)
                     #    #self.quick_calc(state_num=0)  # reference calculation
@@ -320,7 +320,7 @@ class MainWin(QtGui.QMainWindow):
             self.settings.beginGroup("PATH")
             self.settings.setValue("path_default", QtCore.QString(path))
             self.settings.endGroup()
-            self.state_index = 0
+            self.ibundle = 0
             self.read_pro(filename)
                     
     def load_pickle(self, filename):
@@ -332,12 +332,12 @@ class MainWin(QtGui.QMainWindow):
         print "Loading data from file " + filename
         self.clear_data()
         with open(filename, 'rb') as fp:
-            self.bundle = pickle.load(fp)
+            self.bunlist = pickle.load(fp)
 
         self.init_pinobjects()
 
         # Update case number list box
-        nsegments = len(self.bundle.states[-1].segments)
+        nsegments = len(self.bunlist[-1].segments)
         seglist = map(str, range(1, nsegments + 1))
         self.case_cbox.addItems(QtCore.QStringList(seglist))
         #for i in range(1, ncases + 1):
@@ -350,9 +350,11 @@ class MainWin(QtGui.QMainWindow):
         """Importing data from a single cax file"""
         
         self.clear_data()
-        self.bundle = Bundle()
-        self.bundle.read_single_cax(filename)
-        self.bundle.new_btf()
+        bundle = Bundle()
+        bundle.read_single_cax(filename)
+        bundle.new_btf()
+        self.bunlist = []
+        self.bunlist.append(bundle)
 
         self.init_pinobjects()
         #self.fig_update()
@@ -419,16 +421,19 @@ class MainWin(QtGui.QMainWindow):
         if status == QtGui.QMessageBox.Yes:
             self.setCursor(QtCore.Qt.WaitCursor)
             self.clear_data()
-            self.bundle = Bundle()
-            self.bundle.readpro(filename)
-            self.bundle.readcax()  # inargs "all" reads the whole file content
-            self.bundle.new_btf()
+            bundle = Bundle()
+            bundle.readpro(filename)
+            bundle.readcax()  # inargs "all" reads the whole file content
+            bundle.new_btf()
+            self.bunlist = []
+            self.bunlist.append(bundle)
             
             self.init_pinobjects()
         
             # Update segment number list box
-            state_num = self.state_index
-            nsegments = len(self.bundle.states[state_num].segments)
+            #state_num = self.ibundle
+            nsegments = len(bundle.segments)
+            #nsegments = len(self.bundle.states[state_num].segments)
             seglist = map(str, range(1, nsegments + 1))
             self.case_cbox.addItems(QtCore.QStringList(seglist))
             
@@ -502,21 +507,23 @@ class MainWin(QtGui.QMainWindow):
                                            QtCore.QString("")).toString()
         self.settings.endGroup()
 
-        file_choices = "Project files (*.grb)"
+        file_choices = "Project files (*.gbi)"
         filename = unicode(QtGui.QFileDialog.getSaveFileName(self,
                                                              "Save project",
                                                              path_default,
                                                              file_choices))
         # self.bundle.savepic(filename)
-        filename = os.path.splitext(filename)[0] + ".grb"  # fix file ext
+        fname_split =  os.path.splitext(filename)
+        if fname_split[1] != ".gbi":
+            filename = filename + ".gbi"  # add file extension
         with open(filename, 'wb') as fp:
-            pickle.dump(self.bundle, fp, 1)
+            pickle.dump(self.bunlist, fp, 1)
         print "Saved data to file " + filename
 
     def plotWin(self):
         """Open plot window"""
 
-        if hasattr(self, "bundle"):
+        if hasattr(self, "bunlist"):
             plotwin = PlotWin(self)
             plotwin.show()
         else:
@@ -526,36 +533,41 @@ class MainWin(QtGui.QMainWindow):
             #                   QtGui.QMessageBox.Close)
             msgBox.information(self, "No data", msg.strip(), msgBox.Close)
 
-    #def get_colormap(self, num_enr_levels):
-    #    cvec = ["#FF00FF", "#CC00FF", "#AA00FF", "#0000FF", "#0066FF",
-    #            "#00AAFF", "#00CCFF", "#00FFFF", "#00FFCC", "#00FFAA",
-    #            "#00FF66", "#00FF00", "#AAFF00", "#CCFF00", "#FFFF00",
-    #            "#FFCC00", "#FFAA00", "#FF9900", "#FF5500", "#FF0000"]
-    #    ic = np.linspace(0, len(cvec) - 1, num_enr_levels).astype(int).tolist()
-    #    cmap = [cvec[i] for i in ic]
-    #    return cmap
+    def get_colormap(self, num_enr_levels, colormap="rainbow"):
 
-    def get_colormap(self, num_enr_levels):
-            
-        n = int(np.ceil(num_enr_levels / 4.0)) + 1
+        n = num_enr_levels + 1
+        #n = int(np.ceil(num_enr_levels / 4.0)) + 1
         v00 = np.zeros(n)
         v11 = np.ones(n)
         v01 = np.linspace(0, 1, n)
         v10 = v01[::-1]  # revert array
-    
-        # magenta -> blue
-        cm_mb = np.vstack((v10, v00, v11)).transpose()[:-1]  # remove last elem
-        # blue -> cyan
-        # remove last element
-        cm_bc = np.vstack((v00, v01, v11)).transpose()[:-1]
-        # cyan -> green
-        cm_cg = np.vstack((v00, v11, v10)).transpose()[:-1]
-        # green -> yellow
-        cm_gy = np.vstack((v01, v11, v00)).transpose()[:-1]
-        # yellow -> red
-        cm_yr = np.vstack((v11, v10, v00)).transpose()
-        cm = np.vstack((cm_mb, cm_bc, cm_cg, cm_gy, cm_yr))
-        
+
+        if colormap == "rainbow":
+            # magenta -> blue
+            cm_mb = np.vstack((v10, v00, v11)).transpose()[:-1]  # remove last elem
+            # blue -> cyan
+            # remove last element
+            cm_bc = np.vstack((v00, v01, v11)).transpose()[:-1]
+            # cyan -> green
+            cm_cg = np.vstack((v00, v11, v10)).transpose()[:-1]
+            # green -> yellow
+            cm_gy = np.vstack((v01, v11, v00)).transpose()[:-1]
+            # yellow -> red
+            cm_yr = np.vstack((v11, v10, v00)).transpose()
+            cm = np.vstack((cm_mb, cm_bc, cm_cg, cm_gy, cm_yr))
+        elif colormap == "bmr":
+            # blue -> magenta
+            cm_bc = np.vstack((v01, v00, v11)).transpose()[:-1]
+            # magenta -> red
+            cm_mr = np.vstack((v11, v00, v10)).transpose()
+            cm = np.vstack((cm_bc, cm_mr))
+        elif colormap == "byr":
+            # blue -> yellow
+            cm_by = np.vstack((v01, v01, v10)).transpose()[:-1]
+            # yellow -> red
+            cm_yr = np.vstack((v11, v10, v00)).transpose()
+            cm = np.vstack((cm_by, cm_yr))
+            
         ic = np.linspace(0, len(cm) - 1, num_enr_levels).astype(int).tolist()
         cmap = [cm[i].tolist() for i in ic]
         return cmap
@@ -564,13 +576,15 @@ class MainWin(QtGui.QMainWindow):
         self.pinobjects = []
         self.enrpinlist = []
 
-        state_num = self.state_index
-        nsegments = len(self.bundle.states[state_num].segments)
+        state_num = self.ibundle
+        bundle = self.bunlist[state_num]
+        
+        nsegments = len(bundle.segments)
 
         for iseg in range(nsegments):
-            LFU = self.bundle.states[state_num].segments[iseg].data.LFU
-            ENR = self.bundle.states[state_num].segments[iseg].data.ENR
-            BA = self.bundle.states[state_num].segments[iseg].data.BA
+            LFU = bundle.segments[iseg].data.LFU
+            ENR = bundle.segments[iseg].data.ENR
+            BA = bundle.segments[iseg].data.BA
             
             pinlist = []
             for i in range(LFU.shape[0]):
@@ -585,7 +599,7 @@ class MainWin(QtGui.QMainWindow):
             self.pinobjects.append(pinlist)
             
             enrlist = []
-            FUE = self.bundle.states[state_num].segments[iseg].data.FUE
+            FUE = bundle.segments[iseg].data.FUE
             enr_dens = FUE[:, 1]
             enr_levels = FUE[:, 2]
             enr_baindex = FUE[:, 3]
@@ -600,7 +614,7 @@ class MainWin(QtGui.QMainWindow):
                 enrobj.DENS = enr_dens[i]
                 enrlist.append(enrobj)
             self.enrpinlist.append(enrlist)
-
+            
     def enrpin_add(self):
         """add enr pin"""
         self.enr_dlg = EnrDialog(self, "add")
@@ -718,9 +732,10 @@ class MainWin(QtGui.QMainWindow):
         param_str = str(self.param_cbox.currentText())
         iseg = int(self.case_cbox.currentIndex())
         point_num = int(self.point_sbox.value())
-        state_num = self.state_index
+        state_num = self.ibundle
 
-        segment = self.bundle.states[state_num].segments[iseg]
+        bundle = self.bunlist[state_num]
+        segment = bundle.segments[iseg]
         #state = self.bundle.cases[case_num].states[state_num]
         
         ENR = segment.data.ENR
@@ -729,14 +744,14 @@ class MainWin(QtGui.QMainWindow):
         FINT = segment.statepoints[point_num].POW
 
         burnup = segment.statepoints[point_num].burnup
-        btf_burnpoints = self.bundle.states[state_num].btf.burnpoints
-
+        btf_burnpoints = bundle.btf.burnpoints
+        
         index_array = np.where(btf_burnpoints == burnup)[0]
         if len(index_array) > 0:  # is BTF calculated for the specific burnup?
             btf_num = index_array[0]
-            BTF = self.bundle.states[state_num].btf.DOX[btf_num, :, :]
+            BTF = bundle.btf.DOX[btf_num, :, :]
         else:
-            BTF = np.zeros(np.shape(self.bundle.states[state_num].btf.DOX)[1:])
+            BTF = np.zeros(np.shape(bundle.btf.DOX)[1:])
             BTF.fill(np.nan)
 
         npst = segment.data.npst
@@ -747,7 +762,7 @@ class MainWin(QtGui.QMainWindow):
         # Sorting table column 0 in ascending order
         self.table.sortItems(0, QtCore.Qt.AscendingOrder)
         self.setpincoords()
-
+        
         k = 0
         for i in xrange(npst):
             for j in xrange(npst):
@@ -794,11 +809,11 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         if param_str == "FINT":
             v = np.array([pin.FINT for pin in self.pinobjects[iseg]])
             uni_fint = np.unique(v)
-            cmap = self.get_colormap(uni_fint.size)
+            cmap = self.get_colormap(uni_fint.size, "bmr")
         elif param_str == "BTF":
             v = np.array([pin.BTF for pin in self.pinobjects[iseg]])
             uni_btf = np.unique(v)
-            cmap = self.get_colormap(uni_btf.size)
+            cmap = self.get_colormap(uni_btf.size, "byr")
         elif param_str == "EXP":
             v = np.array([pin.EXP for pin in self.pinobjects[iseg]])
             uni_exp = np.unique(v)
@@ -1042,32 +1057,32 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         """Update enr value in info fields"""
 
         iseg = int(self.case_cbox.currentIndex())
-        istate = self.state_index
-        state = self.bundle.states[istate]
+        istate = self.ibundle
+        bundle = self.bunlist[istate]
 
         # Update enr for all segments
-        for i, segment in enumerate(state.segments):
+        for i, segment in enumerate(bundle.segments):
             LFU = self.__lfumap(i)
             FUE = self.__fuemap(i)
             segment.ave_enr_calc(LFU, FUE)
             if not hasattr(segment.data, "ave_enr"):  # save orig. calc
                 segment.data.ave_enr = segment.ave_enr
         
-        segment = state.segments[iseg]
+        segment = bundle.segments[iseg]
         #self.ave_enr_text.setText("%.5f" % segment.ave_enr)
-        orig_seg_enr = self.bundle.states[0].segments[iseg].data.ave_enr
+        orig_seg_enr = self.bunlist[0].segments[iseg].data.ave_enr
         diff_seg_enr = segment.ave_enr - orig_seg_enr
         formstr = '{0:.4f} ({1:+.4f})'.format(segment.ave_enr, diff_seg_enr)
         self.ave_enr_text.setText(formstr)
         #self.ave_denr_text.setText("%.5f" % diff_seg_enr)
         
         # Update bundle enr
-        bundle_enr = self.bundle.ave_enr_calc(istate)
-        if not hasattr(self.bundle.states[istate], "ave_enr"):
-            self.bundle.states[istate].ave_enr = bundle_enr  # save orig. calc
-         
+        bundle_enr = bundle.ave_enr_calc()
+        if not hasattr(bundle, "ave_enr"):
+            bundle.ave_enr = bundle_enr  # save orig. calc
+        
         # self.bundle_enr_text.setText("%.5f" % bundle_enr)
-        orig_bundle_enr = self.bundle.states[0].ave_enr
+        orig_bundle_enr = self.bunlist[0].ave_enr
         diff_bundle_enr = bundle_enr - orig_bundle_enr
         formstr = '{0:.4f} ({1:+.4f})'.format(bundle_enr, diff_bundle_enr)
         self.bundle_enr_text.setText(formstr)
@@ -1139,7 +1154,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         # case_num = int(self.case_cbox.currentIndex())
         
         # Initialize new LFU map and fill with zeros
-        LFU_old = self.bundle.states[-1].segments[iseg].data.LFU
+        LFU_old = self.bunlist[-1].segments[iseg].data.LFU
         # LFU_old = self.bundle.cases[case_num].states[-1].LFU
         LFU = np.zeros(LFU_old.shape).astype(int)
         
@@ -1154,7 +1169,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
     def __fuemap(self, iseg):
         """Creating FUE map from enr level pins"""
 
-        FUE_old = self.bundle.states[-1].segments[iseg].data.FUE
+        FUE_old = self.bunlist[-1].segments[iseg].data.FUE
         #FUE_old = self.bundle.cases[case_num].states[-1].FUE
         nfue = len(self.enrpinlist[iseg])
         FUE = np.zeros((nfue, FUE_old.shape[1])).astype(float)
@@ -1170,7 +1185,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         """Creating BA map from pinobjects"""
 
         # Initialize new BA map and fill with zeros
-        LFU = self.bundle.states[-1].segments[iseg].data.LFU
+        LFU = self.bunlist[-1].segments[iseg].data.LFU
         #LFU = self.bundle.cases[case_num].states[-1].LFU
         BA = np.zeros(LFU.shape).astype(float)
 
@@ -1190,26 +1205,31 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         
         chanbow = self.chanbow_sbox.value() / 10  # mm -> cm
 
-        nsegments = len(self.bundle.states[state_num].segments)
-        self.bundle.append_state()
+        bundle = Bundle(parent=self.bunlist[state_num])
+        nsegments = len(bundle.segments)
+        #nsegments = len(self.bunlist[state_num].segments)
+        #self.bundle.append_state()
 
         for iseg in xrange(nsegments):
             LFU = self.__lfumap(iseg)
             FUE = self.__fuemap(iseg)
             BA = self.__bamap(iseg)
             voi = None
-            self.bundle.states[-1].segments[iseg].set_data(LFU, FUE, BA,
-                                                           voi, chanbow)
-            
+            bundle.segments[iseg].set_data(LFU, FUE, BA, voi, chanbow)
+            #self.bunlist[-1].segments[iseg].set_data(LFU, FUE, BA,
+            #                                               voi, chanbow)
             #self.bundle.cases[case_num].add_state(LFU, FUE, BA, voi, chanbow)
 
-        self.bundle.new_calc(model='c3', depthres=20)
-        self.bundle.new_btf()
+        bundle.new_calc(model='c3', depthres=20)
+        bundle.new_btf()
+        self.bunlist.append(bundle)
+        #self.bundle.new_calc(model='c3', depthres=20)
+        #self.bundle.new_btf()
         #if state_num:
-        self.state_index = state_num
+        self.ibundle = state_num
         #else:
-        #    self.state_index = len(self.bundle.cases[0].states) - 1
-        #print self.state_index
+        #    self.ibundle = len(self.bundle.cases[0].states) - 1
+        #print self.ibundle
         self.fig_update()
         self.setCursor(QtCore.Qt.ArrowCursor)
         
@@ -1231,7 +1251,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         
         # Update info field
         iseg = int(self.case_cbox.currentIndex())
-        sim = self.bundle.states[0].segments[iseg].data.sim
+        sim = self.bunlist[0].segments[iseg].data.sim
         #sim = self.bundle.cases[case_num].states[0].sim
         text = sim.replace("SIM", "").replace("'", "").strip()
         self.sim_info_field.setText(text)
@@ -1352,13 +1372,13 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         p_fancy.set_linewidth(4.0)
         self.axes.add_patch(p_fancy)
         
-        if self.bundle.data.fuetype == 'OPT2':
+        if self.bunlist[0].data.fuetype == 'OPT2':
             s96o2(self)
-        elif self.bundle.data.fuetype == 'OPT3':
+        elif self.bunlist[0].data.fuetype == 'OPT3':
             s96o2(self)
-        elif self.bundle.data.fuetype == 'A10XM':
+        elif self.bunlist[0].data.fuetype == 'A10XM':
             a10xm(self)
-        elif self.bundle.data.fuetype == 'A10B':
+        elif self.bunlist[0].data.fuetype == 'A10B':
             a10xm(self)
         
         # Draw symmetry line
@@ -1839,12 +1859,12 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
     def back_state(self):
         """Back to previous state"""
 
-        nstates = len(self.bundle.states)
-        if self.state_index < 0:
-            self.state_index = self.state_index + nstates
-        self.state_index -= 1
-        if self.state_index < 0:
-            self.state_index = 0
+        nbundles = len(self.bunlist)
+        if self.ibundle < 0:
+            self.ibundle = self.ibundle + nbundles
+        self.ibundle -= 1
+        if self.ibundle < 0:
+            self.ibundle = 0
         else:
             self.init_pinobjects()
             self.fig_update()
@@ -1853,12 +1873,12 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
     def forward_state(self):
         """Forward to next state"""
         
-        nstates = len(self.bundle.states)
-        if self.state_index < 0:
-            self.state_index = self.state_index + nstates
-        self.state_index += 1
-        if self.state_index >= nstates:
-            self.state_index = nstates - 1
+        nbundles = len(self.bunlist)
+        if self.ibundle < 0:
+            self.ibundle = self.ibundle + nbundles
+        self.ibundle += 1
+        if self.ibundle >= nbundles:
+            self.ibundle = nbundles - 1
         else:
             self.init_pinobjects()
             self.fig_update()
@@ -1868,7 +1888,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         """Update chanbow spinbox value"""
         
         iseg = int(self.case_cbox.currentIndex())
-        segment = self.bundle.states[self.state_index].segments[iseg]
+        segment = self.bunlist[self.ibundle].segments[iseg]
         if hasattr(segment.data, "box_offset"):
             box_offset = segment.data.box_offset * 10
         else:

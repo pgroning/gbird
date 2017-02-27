@@ -11,6 +11,13 @@ import bundle
 After some code modification:
 : reload(bundle)
 : obj.readcax()
+Usage:
+b0 = Bundle('file.pro')
+b0.readcax()
+b1 = Bundle()
+b1.setup(b0)
+b1.new_calc()
+b1.new_btf()
 '''
 
 try:
@@ -51,16 +58,18 @@ class Bundle(object):
     """Read, save and load cases"""
 
     #def __init__(self, parent=None):
-    def __init__(self, inpfile=None):
+    def __init__(self, profile=None, parent=None):
         self.data = DataStruct()
         #self.cases = []
         # self.btf = Btf(self)
-        self.states = []
-        self.states.append(DataStruct())
+        #self.states = []
+        #self.states.append(DataStruct())
 
         #self.parent = parent
-        if inpfile:
-            self.readpro(inpfile)
+        if profile:
+            self.readpro(profile)
+        elif parent:
+            self.setup(parent)
 
         # self.readinpfile(inpfile)
         # self.readcas()
@@ -169,15 +178,14 @@ class Bundle(object):
         n = len(self.data.caxfiles)  # Number of threads
         p = Pool(n)  # Make the Pool of workers
         # Start processes in their own threads and return the results
-        self.states[-1].segments = p.map(readcax_fun, inlist)
+        self.segments = p.map(readcax_fun, inlist)
         #self.cases = p.map(readcax_fun, inlist)
         # self.cases = p.map(casdata, self.data.caxfiles)
         p.close()
         p.join()
         
         for i, node in enumerate(self.data.nodes):
-            self.states[0].segments[i].topnode = node
-            #self.cases[i].topnode = node
+            self.segments[i].topnode = node
 
         # for i,f in enumerate(self.data.caxfiles):
         #     case = casdata(f)
@@ -195,7 +203,7 @@ class Bundle(object):
         # Read data
         self.readcax()
         # Guess fuel type
-        fuetype = self.states[0].segments[0].looks_like_fuetype()
+        fuetype = self.segments[0].looks_like_fuetype()
         if fuetype == "S96":
             self.data.fuetype = "OPT2"
         elif fuetype == "A10":
@@ -230,7 +238,7 @@ class Bundle(object):
         # --------------------------------------------
         inlist = []  # Bundle input args
         
-        segments = self.states[-1].segments
+        segments = self.segments
         for s in segments:
             inlist.append((s, voi, maxdep, depthres, refcalc, grid,
                            model, box_offset, neulib))
@@ -240,55 +248,64 @@ class Bundle(object):
         n = len(segments)  # Number of threads
         p = Pool(n)  # Make the Pool of workers
         
-        self.states[-1].segments = p.map(quickcalc_fun, inlist)
+        self.segments = p.map(quickcalc_fun, inlist)
         #self.cases = p.map(quickcalc_fun, inlist)
         # cases = p.map(quickcalc_fun, self.cases)
         p.close()
         p.join()
 
-    def append_state(self):
-        """Append a list element to store new segment instancies"""
+    def setup(self, parent):
+        """Setup new Bundle instance and copy data from parent"""
 
-        self.states.append(DataStruct())  # Add an new state element
-        self.states[-1].segments = []
-        for s in self.states[0].segments:  # Add new segments
-            self.states[-1].segments.append(Segment())
-            # copy data from original state
-            self.states[-1].segments[-1].data = copy.copy(s.data)
-            #self.states[-1].segments[-1].data = copy.deepcopy(s.data)
+        self.data = parent.data
+        self.segments = []
+        for s in parent.segments:
+            self.segments.append(Segment())
+            self.segments[-1].data = copy.copy(s.data)
+            self.segments[-1].topnode = s.topnode
 
-    def savepic(self, pfile):
-        """Save objects to a python pickle file"""
+#    def append_state(self):
+#        """Append a list element to store new segment instancies"""
+#
+#        self.states.append(DataStruct())  # Add an new state element
+#        self.states[-1].segments = []
+#        for s in self.states[0].segments:  # Add new segments
+#            self.states[-1].segments.append(Segment())
+#            # copy data from original state
+#            self.states[-1].segments[-1].data = copy.copy(s.data)
+#            #self.states[-1].segments[-1].data = copy.deepcopy(s.data)
 
-        with open(pfile, 'wb') as fp:
-            pickle.dump(self.data, fp, 1)
-            pickle.dump(self.cases, fp, 1)
-            pickle.dump(self.states, fp, 1)
-        print "Saved data to file " + pfile
+#    def savepic(self, pfile):
+#        """Save objects to a python pickle file"""
+#
+#        with open(pfile, 'wb') as fp:
+#            pickle.dump(self.data, fp, 1)
+#            pickle.dump(self.cases, fp, 1)
+#            pickle.dump(self.states, fp, 1)
+#        print "Saved data to file " + pfile
 
-    def loadpic(self, pfile):
-        """Save objects from a python pickle file"""
-
-        print "Loading data from file " + pfile
-        with open(pfile, 'rb') as fp:
-            self.data = pickle.load(fp)
-            self.cases = pickle.load(fp)
-            self.states = pickle.load(fp)
-            
-        self.data.pfile = pfile
+#    def loadpic(self, pfile):
+#        """Load objects from a python pickle file"""
+#
+#        print "Loading data from file " + pfile
+#        with open(pfile, 'rb') as fp:
+#            self.data = pickle.load(fp)
+#            self.cases = pickle.load(fp)
+#            self.states = pickle.load(fp)
+#           
+#        self.data.pfile = pfile
 
     def new_btf(self):
         """Administrates btf calculation by composition of the Btf class"""
 
-        nstates = len(self.states)
+        #nstates = len(self.states)
         #nstates = len(self.cases[0].states)
         #while len(self.states) < nstates:
         #    self.states.append(DataStruct())
-
-        self.states[-1].btf = Btf(self)
-        self.states[-1].btf.calc_btf()
+        self.btf = Btf(self)
+        self.btf.calc_btf()
         
-    def ave_enr_calc(self, state_num=-1):
+    def ave_enr_calc(self):
         """The method calculates the average enrichment of the bundle.
         This algorithm is likely naive and may need to be updated in the 
         future"""
@@ -298,7 +315,7 @@ class Bundle(object):
         # nodes = np.array(nodelist)
         nodes = np.array([0] + nodelist)  # prepend 0
         dn = np.diff(nodes)
-        segments = self.states[state_num].segments
+        segments = self.segments
         #qtrace()
         enrlist = [seg.ave_enr for seg in segments]
         #enrlist = [seg.data.ave_enr for seg in segments]
