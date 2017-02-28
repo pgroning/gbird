@@ -1225,24 +1225,45 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             #self.bundle.cases[case_num].add_state(LFU, FUE, BA, voi, chanbow)
 
         bundle.new_calc(model='c3')
+
+        # remove bias from perturbation calc
+        npst = bundle.segments[0].data.npst
+        pts = bundle.segments[0].statepoints
+        Nburnpts = len(pts)
+        POW = np.zeros((npst, npst, Nburnpts))
+        burnlist = [p.burnup for p in pts]
+        pts0 = [p for p in self.bunlist[0].segments[0].statepoints 
+                if p.burnup in burnlist]
+        pts1 = self.bunlist[1].segments[0].statepoints
+
+        for i, p in enumerate(pts):
+            POW0 = pts0[i].POW
+            POW1 = pts1[i].POW
+            dPOW = p.POW - POW1
+            POW[:, :, i] = POW0 + dPOW
+        
+        fint = bundle.segments[0].fintcalc(POW)
+        burnup = np.array(burnlist)
+        EXP = bundle.segments[0].expcalc(POW, burnup)
+        for i in xrange(Nburnpts):
+            bundle.segments[0].statepoints[i].POW = POW[:, :, i]
+            bundle.segments[0].statepoints[i].EXP = EXP[:, :, i]
+            bundle.segments[0].statepoints[i].fint = fint[i]
+
+
+        # ------------
+        qtrace()
         bundle.new_btf()
         self.bunlist.append(bundle)
         #self.bundle.new_calc(model='c3', depthres=20)
         #self.bundle.new_btf()
         #if state_num:
         self.ibundle = state_num
-        #else:
-        #    self.ibundle = len(self.bundle.cases[0].states) - 1
-        #print self.ibundle
+        
         self.fig_update()
         self.setCursor(QtCore.Qt.ArrowCursor)
         
-        #
-        # self.dataobj.cases[case_num].qcalc[0].LFU = LFU
-        # self.dataobj.cases[case_num].quickcalc()
         
-        # case_num = int(self.case_cbox.currentIndex())
-        # self.dataobj.cases[case_num].pertcalc()
 
     def fig_update(self):
         """ Redraw figure and update values"""

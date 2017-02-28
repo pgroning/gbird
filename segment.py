@@ -379,9 +379,9 @@ class Segment(object):
         #print "Done."
         # --------------------------------------------------------------------
         # Calculate radial burnup distributions
-        EXP = self.__expcalc(POW, burnup)
+        EXP = self.expcalc(POW, burnup)
         # Calculate Fint:
-        fint = self.__fintcalc(POW)
+        fint = self.fintcalc(POW)
 
         # Append state instancies
         #do.statepoints = []
@@ -994,9 +994,9 @@ class Segment(object):
             POW[:, :, i] = self.__symtrans(self.__map2mat(powmap[i], npst))
 
         # Calculate radial burnup distributions
-        EXP = self.__expcalc(POW, burnup)
+        EXP = self.expcalc(POW, burnup)
         # Calculate Fint:
-        fint = self.__fintcalc(POW)
+        fint = self.fintcalc(POW)
 
         # Append state instancies
         statepoints = []
@@ -1088,7 +1088,7 @@ class Segment(object):
         self.data.box_offset = box_offset
         return bwr_offset
 
-    def __expcalc(self, POW, burnup):
+    def expcalc(self, POW, burnup):
         Nburnpts = burnup.size
         npst = POW.shape[0]
         EXP = np.zeros((npst, npst, Nburnpts))
@@ -1104,7 +1104,7 @@ class Segment(object):
                     EXP[:, :, i] = EXP[:, :, i-1] + POW[:, :, i]*dburn
         return EXP
 
-    def __fintcalc(self, POW):
+    def fintcalc(self, POW):
         Nburnpts = POW.shape[2]
         fint = np.zeros(Nburnpts)
         fint.fill(np.nan)
