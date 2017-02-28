@@ -1203,13 +1203,14 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
         self.setCursor(QtCore.Qt.WaitCursor)
         
-        if len(self.bunlist) == 1:  # make reference calc?
-            print "Reference calculation..."
+        if len(self.bunlist) == 1:  # make bias calc?
+            print "Bias calculation..."
             bundle = Bundle(parent=self.bunlist[0])
             bundle.new_calc(model='c3')
             bundle.new_btf()
             self.bunlist.append(bundle)
 
+        # New perturbation calc
         bundle = Bundle(parent=self.bunlist[0])  # parent is set to orig bundle
         nsegments = len(bundle.segments)
 
@@ -1227,44 +1228,43 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         bundle.new_calc(model='c3')
 
         # remove bias from perturbation calc
-        npst = bundle.segments[0].data.npst
-        pts = bundle.segments[0].statepoints
-        Nburnpts = len(pts)
-        POW = np.zeros((npst, npst, Nburnpts))
-        burnlist = [p.burnup for p in pts]
-        pts0 = [p for p in self.bunlist[0].segments[0].statepoints 
-                if p.burnup in burnlist]
-        pts1 = self.bunlist[1].segments[0].statepoints
+        for iseg in xrange(len(bundle.segments)):
+            pts = bundle.segments[iseg].statepoints
+            burnlist = [p.burnup for p in pts]
+            pts0 = [p for p in self.bunlist[0].segments[iseg].statepoints 
+                    if p.burnup in burnlist]
+            pts1 = [p for p in self.bunlist[1].segments[iseg].statepoints 
+                    if p.burnup in burnlist]
+            npst = bundle.segments[iseg].data.npst
+            Nburnpts = len(pts)
+            POW = np.zeros((npst, npst, Nburnpts))
+            kinf = np.zeros(Nburnpts)
+            for i in xrange(len(pts)):  # bias subtraction
+                dPOW = pts[i].POW - pts1[i].POW
+                POW[:, :, i] = pts0[i].POW + dPOW
+                dkinf = pts[i].kinf - pts1[i].kinf
+                kinf[i] = pts0[i].kinf + dkinf
+                #if dPOW.any():
+                #    qtrace()
+                
+            fint = bundle.segments[iseg].fintcalc(POW)
+            burnup = np.array(burnlist)
+            EXP = bundle.segments[iseg].expcalc(POW, burnup)
+            for i in xrange(Nburnpts):
+                bundle.segments[iseg].statepoints[i].POW = POW[:, :, i]
+                bundle.segments[iseg].statepoints[i].EXP = EXP[:, :, i]
+                bundle.segments[iseg].statepoints[i].fint = fint[i]
+                bundle.segments[iseg].statepoints[i].kinf = kinf[i]
 
-        for i, p in enumerate(pts):
-            POW0 = pts0[i].POW
-            POW1 = pts1[i].POW
-            dPOW = p.POW - POW1
-            POW[:, :, i] = POW0 + dPOW
-        
-        fint = bundle.segments[0].fintcalc(POW)
-        burnup = np.array(burnlist)
-        EXP = bundle.segments[0].expcalc(POW, burnup)
-        for i in xrange(Nburnpts):
-            bundle.segments[0].statepoints[i].POW = POW[:, :, i]
-            bundle.segments[0].statepoints[i].EXP = EXP[:, :, i]
-            bundle.segments[0].statepoints[i].fint = fint[i]
-
-
-        # ------------
-        qtrace()
         bundle.new_btf()
         self.bunlist.append(bundle)
-        #self.bundle.new_calc(model='c3', depthres=20)
-        #self.bundle.new_btf()
+        
         #if state_num:
         self.ibundle = state_num
         
         self.fig_update()
         self.setCursor(QtCore.Qt.ArrowCursor)
         
-        
-
     def fig_update(self):
         """ Redraw figure and update values"""
 

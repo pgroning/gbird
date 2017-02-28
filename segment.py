@@ -631,7 +631,7 @@ class Segment(object):
             if sparse_pts2[-1] < pts2[-1]:  # include last point
                 sparse_pts2.append(pts2[-1])
             pts3 = [x for x in burnpoints if x > dep_thres2]
-            sparse_pts3 = pts3[5::5]  # take every 5:th step in list
+            sparse_pts3 = pts3[1::1]  # take every 5:th step in list
             if sparse_pts3[-1] < burnpoints[-1]:  # include last point
                 sparse_pts3.append(burnpoints[-1])
             # concatenate lists
@@ -710,7 +710,8 @@ class Segment(object):
         
         if not hasattr(self, "burnlist"):
             self.burnlist = [self.burnpoints(voi=v) for v in self.data.voilist]
-        burnlist = self.sparse_burnpoints()
+        #burnlist = self.sparse_burnpoints()
+        burnlist = self.burnlist
         
         if hasattr(self.data, 'LFU'):
             LFU = self.data.LFU
