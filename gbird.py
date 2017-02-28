@@ -1203,13 +1203,17 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
         self.setCursor(QtCore.Qt.WaitCursor)
         
-        chanbow = self.chanbow_sbox.value() / 10  # mm -> cm
+        if len(self.bunlist) == 1:  # make reference calc?
+            print "Reference calculation..."
+            bundle = Bundle(parent=self.bunlist[0])
+            bundle.new_calc(model='c3')
+            bundle.new_btf()
+            self.bunlist.append(bundle)
 
-        bundle = Bundle(parent=self.bunlist[0])  # parent is original bundle
+        bundle = Bundle(parent=self.bunlist[0])  # parent is set to orig bundle
         nsegments = len(bundle.segments)
-        #nsegments = len(self.bunlist[state_num].segments)
-        #self.bundle.append_state()
 
+        chanbow = self.chanbow_sbox.value() / 10  # mm -> cm
         for iseg in xrange(nsegments):
             LFU = self.__lfumap(iseg)
             FUE = self.__fuemap(iseg)
