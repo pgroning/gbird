@@ -617,27 +617,23 @@ class Segment(object):
     #              .strip().split(' ')[1:])
     #    return voids
 
-    def sparse_burnpoints(self):
+    def reduce_burnpoints(self, dep_thres=None):
         """Reduce number of depletion points"""
 
-        dep_thres1 = 1.0  # First depletion threshold
-        dep_thres2 = 20.0  # Second threshold
-        sparse_burnlist = []
+        #dep_thres = 20.0  # depletion threshold
+        red_burnlist = []
         for burnpoints in self.burnlist:
-            pts1 = [x for x in burnpoints if x <= dep_thres1]
-            pts2 = [x for x in burnpoints 
-                    if x > dep_thres1 and x <= dep_thres2]
-            sparse_pts2 = pts2[1::1]  # reduce number of points
-            if sparse_pts2[-1] < pts2[-1]:  # include last point
-                sparse_pts2.append(pts2[-1])
-            pts3 = [x for x in burnpoints if x > dep_thres2]
-            sparse_pts3 = pts3[1::1]  # take every 5:th step in list
-            if sparse_pts3[-1] < burnpoints[-1]:  # include last point
-                sparse_pts3.append(burnpoints[-1])
-            # concatenate lists
-            sparse_points = sum([pts1, sparse_pts2, sparse_pts3], [])
-            sparse_burnlist.append(sparse_points)
-        return sparse_burnlist
+            if dep_thres:
+                red_pts = [x for x in burnpoints if x <= dep_thres]
+                pts = [x for x in burnpoints if x >= red_pts[-1]]
+                red_pts2 = pts[6::6]  # reduce number of points
+                if red_pts2[-1] < pts[-1]:  # add last point if not included
+                    red_pts2.append(pts[-1])
+                red_pts.extend(red_pts2)
+                red_burnlist.append(red_pts)
+            else:
+                red_burnlist.append(burnpoints)
+        return red_burnlist
     
     def writec3cai(self, file_base_name, voi=None, maxdep=60, depthres=None,
                    box_offset=0.0):
@@ -710,8 +706,8 @@ class Segment(object):
         
         if not hasattr(self, "burnlist"):
             self.burnlist = [self.burnpoints(voi=v) for v in self.data.voilist]
-        #burnlist = self.sparse_burnpoints()
-        burnlist = self.burnlist
+        burnlist = self.reduce_burnpoints(dep_thres=20)
+        #burnlist = self.burnlist
         
         if hasattr(self.data, 'LFU'):
             LFU = self.data.LFU
