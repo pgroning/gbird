@@ -614,7 +614,7 @@ class MainWin(QtGui.QMainWindow):
                 enrobj.DENS = enr_dens[i]
                 enrlist.append(enrobj)
             self.enrpinlist.append(enrlist)
-            
+
     def enrpin_add(self):
         """add enr pin"""
         self.enr_dlg = EnrDialog(self, "add")
@@ -660,7 +660,7 @@ class MainWin(QtGui.QMainWindow):
         ipin = self.pinselection_index  # index of enr level pin to be edited
         enrpin = self.enrpinlist[case_num][ipin]
 
-        # first update fue pins
+        # update fue pins
         for pin in self.pinobjects[case_num]:
             if pin.LFU == ipin + 1:
                 pin.ENR = self.enr_dlg.enr
@@ -668,7 +668,7 @@ class MainWin(QtGui.QMainWindow):
                 #pin.DENS = self.enr_dlg.dens
                 pin.BA = self.enr_dlg.ba
 
-        # second update enr level pin
+        # update enr level pin
         self.enrpinlist[case_num][ipin].ENR = self.enr_dlg.enr
         if self.enr_dlg.ba < 0.00001:
             self.enrpinlist[case_num][ipin].BA = np.nan
@@ -687,14 +687,15 @@ class MainWin(QtGui.QMainWindow):
 
         case_num = int(self.case_cbox.currentIndex())
         ipin = self.pinselection_index  # index of enr level pin to be removed
-
+        
         del self.enrpinlist[case_num][ipin]  # remove the selected pin
-
-        if ipin >= len(self.enrpinlist[case_num]):
-            j = len(self.enrpinlist[case_num]) - 1
+        
+        enrpin_num = len(self.enrpinlist[case_num])
+        if ipin >= enrpin_num:
+            j = enrpin_num - 1
         else:
             j = ipin
-
+        
         for pin in self.pinobjects[case_num]:
             if pin.LFU == ipin + 1:
                 pin.ENR = self.enrpinlist[case_num][j].ENR
@@ -702,6 +703,8 @@ class MainWin(QtGui.QMainWindow):
                     pin.BA = 0.0
                 else:
                     pin.BA = self.enrpinlist[case_num][j].BA
+            if pin.LFU > enrpin_num:
+                pin.LFU = enrpin_num
         self.fig_update()
 
     def enrpin_sort(self):
@@ -717,13 +720,20 @@ class MainWin(QtGui.QMainWindow):
         case_num = int(self.case_cbox.currentIndex())
         enrlist = [pin.ENR for pin in self.enrpinlist[case_num]]
         isort = [i for i, e in sorted(enumerate(enrlist), key=lambda x:x[1])]
-
+        
         cmap = self.get_colormap(len(isort))
         pinlist_sorted = []
         for i, j in enumerate(isort):
             pinlist_sorted.append(self.enrpinlist[case_num][j])
             pinlist_sorted[-1].facecolor = cmap[i]
         self.enrpinlist[case_num] = pinlist_sorted
+
+        # Update pin LFU
+        rsort = [i for i, e in sorted(enumerate(isort), key=lambda x:x[1])]
+        for pin in self.pinobjects[case_num]:
+            i = pin.LFU - 1
+            pin.LFU = rsort[i] + 1
+        
         self.fig_update()
 
     def set_pinvalues(self):
@@ -758,7 +768,7 @@ class MainWin(QtGui.QMainWindow):
         #npst = self.bundle.cases[case_num].states[0].npst
         LFU = segment.data.LFU
         BA = segment.data.BA
-
+        
         # Sorting table column 0 in ascending order
         self.table.sortItems(0, QtCore.Qt.AscendingOrder)
         self.setpincoords()
@@ -821,14 +831,15 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             
         for i in xrange(npins):
             
-            if self.pinobjects[iseg][i].BA < 0.00001:
-                j = next(j for j, epin in enumerate(self.enrpinlist[iseg])
-                         if epin.ENR == self.pinobjects[iseg][i].ENR)
-            else:
-                j = next(j for j, epin in enumerate(self.enrpinlist[iseg])
-                         if epin.BA == self.pinobjects[iseg][i].BA
-                         and epin.ENR == self.pinobjects[iseg][i].ENR)
-            self.pinobjects[iseg][i].LFU = j + 1
+            #if self.pinobjects[iseg][i].BA < 0.00001:
+            #    j = next(j for j, epin in enumerate(self.enrpinlist[iseg])
+            #             if epin.ENR == self.pinobjects[iseg][i].ENR)
+            #else:
+            #    j = next(j for j, epin in enumerate(self.enrpinlist[iseg])
+            #             if epin.BA == self.pinobjects[iseg][i].BA
+            #             and epin.ENR == self.pinobjects[iseg][i].ENR)
+            #self.pinobjects[iseg][i].LFU = j + 1
+            j = self.pinobjects[iseg][i].LFU - 1
             fc = self.enrpinlist[iseg][j].circle.get_facecolor()
             self.pinobjects[iseg][i].circle.set_facecolor(fc)
 
@@ -1108,25 +1119,30 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             # print "Increase enrichment for pin " + str(i)
             pinEnr = self.pinobjects[case_num][i].ENR
             pinBA = self.pinobjects[case_num][i].BA
+            pinLFU = self.pinobjects[case_num][i].LFU
             
-            for j, x in enumerate(self.enrpinlist[case_num]):
-                if np.isnan(x.BA):
-                    x.BA = 0.0
-                if x.ENR == pinEnr and x.BA == pinBA:
-                    break
+            #for j, x in enumerate(self.enrpinlist[case_num]):
+            #    if np.isnan(x.BA):
+            #        x.BA = 0.0
+            #    if x.ENR == pinEnr and x.BA == pinBA:
+            #        break
             if mod == "add":
-                if j < len(self.enrpinlist[case_num]) - 1:
-                    self.__pinenr_update(i, j + 1, case_num)
+                if pinLFU < len(self.enrpinlist[case_num]):
+                    self.__pinenr_update(i, pinLFU + 1, case_num) 
+                #if j < len(self.enrpinlist[case_num]) - 1:
+                #    self.__pinenr_update(i, j + 1, case_num)
             elif mod == "sub":
-                if j > 0:
-                    self.__pinenr_update(i, j - 1, case_num)
+                if pinLFU > 1:
+                    self.__pinenr_update(i, pinLFU - 1, case_num)
+                #if j > 0:
+                #    self.__pinenr_update(i, j - 1, case_num)
 
-    def __pinenr_update(self, i, j, case_num=None):
+    def __pinenr_update(self, i, pinLFU, case_num=None):
         # i = self.pinselection_index
         if case_num is None:
             case_num = int(self.case_cbox.currentIndex())
-        
-        self.pinobjects[case_num][i].LFU = j + 1
+        j = pinLFU - 1
+        self.pinobjects[case_num][i].LFU = pinLFU
         self.pinobjects[case_num][i].ENR = self.enrpinlist[case_num][j].ENR
         
         if np.isnan(self.enrpinlist[case_num][j].BA):
@@ -1219,6 +1235,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             LFU = self.__lfumap(iseg)
             FUE = self.__fuemap(iseg)
             BA = self.__bamap(iseg)
+            
             voi = None
             bundle.segments[iseg].set_data(LFU, FUE, BA, voi, chanbow)
             #self.bunlist[-1].segments[iseg].set_data(LFU, FUE, BA,
