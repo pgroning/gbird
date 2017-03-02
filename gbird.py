@@ -532,6 +532,10 @@ class MainWin(QtGui.QMainWindow):
             msgBox = QtGui.QMessageBox()
             msgBox.information(self, "No data", msg.strip(), msgBox.Close)
 
+    def plot_update(self):
+        if hasattr(self, "plotwin"):  # plot win is open
+            self.plotwin.on_plot()
+
     def get_colormap(self, num_enr_levels, colormap="rainbow"):
 
         n = num_enr_levels + 1
@@ -880,6 +884,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             self.pinobjects[iseg][i].set_text(text)
 
         self.canvas.draw()
+        self.plot_update()
 
     def setpincoords(self):
         """Update table with pin coordinates"""
@@ -1539,8 +1544,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         case_hbox = QtGui.QHBoxLayout()
         case_hbox.addWidget(case_label)
         case_hbox.addWidget(self.case_cbox)
-        # self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'),
-        # self.set_pinvalues)
+        #self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'),
+        #             self.update_plot)
         # self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'),
         # self.fig_update)
 

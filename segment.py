@@ -702,7 +702,8 @@ class Segment(object):
         
         if not hasattr(self, "burnlist"):
             self.burnlist = [self.burnpoints(voi=v) for v in self.data.voilist]
-        dep_thres = 20.0
+        #dep_thres = 20.0
+        dep_thres = None
         if dep_thres:
             burnlist = self.reduce_burnpoints(dep_thres=dep_thres)
         else:
