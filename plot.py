@@ -59,9 +59,9 @@ class PlotWin(QtGui.QMainWindow):
         tfu = segment.statepoints[ipoint].tfu
         statepoints = segment.get_statepoints(voi, vhi, tfu)
         x = [s.burnup for s in statepoints]
-        if parameter == "Kinf":
+        if parameter == "KINF":
             y = [s.kinf for s in statepoints]
-        if parameter == "Fint":
+        if parameter == "FINT":
             y = [s.fint for s in statepoints]
         return x, y
 
@@ -89,7 +89,7 @@ class PlotWin(QtGui.QMainWindow):
         #x = [s.burnup for s in statepoints]
         #y = [s.kinf for s in statepoints]
         
-        x, y = self.get_xy(segment, "Kinf")
+        x, y = self.get_xy(segment, "KINF")
         
         labstr = segment.data.sim
         labstr = labstr.replace("SIM", "").replace("'", "").strip()
@@ -115,7 +115,7 @@ class PlotWin(QtGui.QMainWindow):
         #x = [statepoints[i].burnup for i in range(idx)]
         #y = [statepoints[i].fint for i in range(idx)]
 
-        x, y = self.get_xy(segment, "Fint")
+        x, y = self.get_xy(segment, "FINT")
 
         labstr = segment.data.sim
         labstr = labstr.replace("SIM", "").replace("'", "").strip()
@@ -214,6 +214,13 @@ class PlotWin(QtGui.QMainWindow):
         #case_id = self.case_id_current
         case_id_max = len(self.parent.bunlist[-1].segments)
         #case_id_max = len(self.parent.bundle.cases)
+        #parent_param = str(self.parent.param_cbox.currentText())
+        #if parent_param in ["KINF", "FINT", "BTF"]:
+        #    #qtrace()
+        #    self.param_cbox.setCurrentIndex(1)
+        #else:
+        #    self.param_cbox.setCurrentIndex(0)
+        #qtrace()
         param = self.param_cbox.currentText()
         ibundle = self.parent.ibundle
 
@@ -228,9 +235,8 @@ class PlotWin(QtGui.QMainWindow):
                   .format(voi, vhi, tfu, tmo))
         self.statusBar().showMessage(fmtstr)
         
-        #qtrace()
         self.axes.clear()
-        if param == 'Kinf':
+        if param == "KINF":
             if self.case_cb.isChecked():
                 for i in range(case_id_max):
                     self.plot_kinf(i, ibundle)
@@ -239,7 +245,7 @@ class PlotWin(QtGui.QMainWindow):
                 if self.original_cb.isChecked():
                     self.plot_kinf(case_id, ibundle=0, linestyle="--")
 
-        elif param == 'Fint':
+        elif param == "FINT":
             if self.case_cb.isChecked():
                 for i in range(case_id_max):
                     self.plot_fint(i, ibundle)
@@ -289,7 +295,7 @@ class PlotWin(QtGui.QMainWindow):
         # self.connect(self.textbox, SIGNAL('editingFinished ()'),
         # self.on_draw)
         
-        self.draw_button = QtGui.QPushButton("Redraw")
+        self.draw_button = QtGui.QPushButton("Update")
         self.connect(self.draw_button, QtCore.SIGNAL('clicked()'), 
                      self.on_plot)
         
@@ -309,21 +315,25 @@ class PlotWin(QtGui.QMainWindow):
         
         param_label = QtGui.QLabel('Param:')
         self.param_cbox = QtGui.QComboBox()
-        paramlist = ['Kinf', 'Fint', 'BTF']
+        paramlist = ["KINF", "FINT", "BTF"]
         for i in paramlist:
             self.param_cbox.addItem(i)
-        # self.connect(self.param_cbox, SIGNAL('currentIndexChanged(int)'),
-        # self.on_plot)
+
+        parent_param = str(self.parent.param_cbox.currentText())
+        if parent_param in paramlist:
+            i = paramlist.index(parent_param)
+            self.param_cbox.setCurrentIndex(i)
+        else:
+            self.param_cbox.setCurrentIndex(0)
+        
+        self.connect(self.param_cbox,
+                     QtCore.SIGNAL('currentIndexChanged(int)'), self.on_plot)
         
         # case_label = QLabel('All cases:')
         self.case_cb = QtGui.QCheckBox("All seg.")
         self.case_cb.setChecked(False)
         self.connect(self.case_cb, QtCore.SIGNAL('stateChanged(int)'), 
                      self.on_plot)
-#       self.case_cbox = QComboBox()
-#       caselist = ['1','2','3','All']
-#       for i in caselist:
-#            self.case_cbox.addItem(i)
         
         self.original_cb = QtGui.QCheckBox("Plot orig.")
         self.original_cb.setChecked(False)
