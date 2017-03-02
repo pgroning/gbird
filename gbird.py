@@ -520,17 +520,16 @@ class MainWin(QtGui.QMainWindow):
             pickle.dump(self.bunlist, fp, 1)
         print "Saved data to file " + filename
 
-    def plotWin(self):
+    def open_plotwin(self):
         """Open plot window"""
 
-        if hasattr(self, "bunlist"):
-            plotwin = PlotWin(self)
-            plotwin.show()
+        if hasattr(self, "bunlist"):  # data is imported
+            if not hasattr(self, "plotwin"):  # plot win is not already open
+                self.plotwin = PlotWin(self)
+                self.plotwin.show()
         else:
             msg = "There is no data to plot."
             msgBox = QtGui.QMessageBox()
-            # msgBox.information(self,"No data", msg.strip(),
-            #                   QtGui.QMessageBox.Close)
             msgBox.information(self, "No data", msg.strip(), msgBox.Close)
 
     def get_colormap(self, num_enr_levels, colormap="rainbow"):
@@ -746,7 +745,6 @@ class MainWin(QtGui.QMainWindow):
 
         bundle = self.bunlist[state_num]
         segment = bundle.segments[iseg]
-        #state = self.bundle.cases[case_num].states[state_num]
         
         ENR = segment.data.ENR
         
@@ -765,7 +763,6 @@ class MainWin(QtGui.QMainWindow):
             BTF.fill(np.nan)
 
         npst = segment.data.npst
-        #npst = self.bundle.cases[case_num].states[0].npst
         LFU = segment.data.LFU
         BA = segment.data.BA
         
@@ -1832,7 +1829,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
         self.tools_menu = self.menuBar().addMenu("&Tools")
         plot_action = self.create_action("Plot...", tip="Plot...",
-                                         slot=self.plotWin)
+                                         slot=self.open_plotwin)
         btf_action = self.create_action("BTF...", tip="BTF...")
         casmo_action = self.create_action("CASMO...", tip="CASMO...")
         data_action = self.create_action("Fuel data...", tip="Fuel data...")
@@ -1872,7 +1869,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         diagram_icon = "icons/diagram-icon_32x32.png"
         plotAction = QtGui.QAction(QtGui.QIcon(diagram_icon), 'Plot', self)
         plotAction.setStatusTip('Open plot window')
-        plotAction.triggered.connect(self.plotWin)
+        plotAction.triggered.connect(self.open_plotwin)
 
         arrow_left_icon = "icons/arrow-left-icon_32x32.png"
         backAction = QtGui.QAction(QtGui.QIcon(arrow_left_icon),

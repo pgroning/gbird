@@ -617,25 +617,21 @@ class Segment(object):
     #              .strip().split(' ')[1:])
     #    return voids
 
-    def reduce_burnpoints(self, dep_thres=None):
+    def reduce_burnpoints(self, dep_thres=20.0):
         """Reduce number of depletion points"""
-
-        #dep_thres = 20.0  # depletion threshold
+        
         red_burnlist = []
         for burnpoints in self.burnlist:
-            if dep_thres:
-                red_pts = [x for x in burnpoints if x <= dep_thres]
-                pts = [x for x in burnpoints if x >= red_pts[-1]]
-                red_pts2 = pts[6::6]  # reduce number of points
-                if red_pts2[-1] < pts[-1]:  # add last point if not included
-                    red_pts2.append(pts[-1])
-                red_pts.extend(red_pts2)
-                red_burnlist.append(red_pts)
-            else:
-                red_burnlist.append(burnpoints)
+            red_pts = [x for x in burnpoints if x <= dep_thres]
+            pts = [x for x in burnpoints if x >= red_pts[-1]]
+            red_pts2 = pts[6::6]  # reduce number of points
+            if red_pts2[-1] < pts[-1]:  # add last point if not included
+                red_pts2.append(pts[-1])
+            red_pts.extend(red_pts2)
+            red_burnlist.append(red_pts)
         return red_burnlist
     
-    def writec3cai(self, file_base_name, voi=None, maxdep=60, depthres=None,
+    def writec3cai(self, file_base_name, voi=None, maxdep=60, dep_thres=None,
                    box_offset=0.0):
         # filebasename = "./" + str(uuid.uuid4())
         c3inp = file_base_name + ".inp"
@@ -706,8 +702,11 @@ class Segment(object):
         
         if not hasattr(self, "burnlist"):
             self.burnlist = [self.burnpoints(voi=v) for v in self.data.voilist]
-        burnlist = self.reduce_burnpoints(dep_thres=20)
-        #burnlist = self.burnlist
+        dep_thres = 20.0
+        if dep_thres:
+            burnlist = self.reduce_burnpoints(dep_thres=dep_thres)
+        else:
+            burnlist = self.burnlist
         
         if hasattr(self.data, 'LFU'):
             LFU = self.data.LFU
@@ -1114,24 +1113,39 @@ class Segment(object):
         void and void history
         Syntax: pt = findpoint(burnup=burnup_val,vhi=vhi_val,voi=voi_val,
         tfu=tfu_val)"""
-        statepoints = self.statepoints
+        #statepoints = self.statepoints
         
         if tfu is not None:
-            pindex = next(i for i, p in enumerate(statepoints) if p.tfu == tfu)
+            pindex = next(i for i, p in enumerate(self.statepoints) 
+                          if p.tfu == tfu and p.vhi == vhi and p.voi == voi)
         elif burnup is not None:
-                pindex = next(i for i, p in enumerate(statepoints)
-                              if p.burnup == burnup and
-                              p.vhi == vhi and p.voi == voi)
+            pindex = next(i for i, p in enumerate(self.statepoints)
+                          if p.burnup == burnup and
+                          p.vhi == vhi and p.voi == voi)
         else:
-            pindex = next(i for i, p in enumerate(statepoints)
+            pindex = next(i for i, p in enumerate(self.statepoints)
                           if p.vhi == vhi and p.voi == voi)
         return pindex
 
-    def burnpoints(self, voi=40):
-        """Return depletion vector for given voi (vhi=voi)"""
+    def get_statepoints(self, voi, vhi, tfu):
+        """get a list of all state points for given voi, vhi, tfu"""
+
+        i = self.findpoint(voi=voi, vhi=vhi, tfu=tfu)  # first index
+        statelist = [self.statepoints[i]]
+        Nstatepoints = len(self.statepoints)
+        while ((i < Nstatepoints-1) and
+               (self.statepoints[i].burnup <= self.statepoints[i+1].burnup)):
+            statelist.append(self.statepoints[i+1])
+            i += 1
+        return statelist
+
+    def burnpoints(self, voi=40, vhi=None):
+        """Return depletion vector for given voi (and vhi)"""
         
+        if vhi is None:
+            vhi = voi
         statepoints = self.statepoints
-        i = self.findpoint(voi=voi, vhi=voi)
+        i = self.findpoint(voi=voi, vhi=vhi)
         burnlist = [statepoints[i].burnup]
         Nstatepoints = len(statepoints)
         while ((i < Nstatepoints-1) and
