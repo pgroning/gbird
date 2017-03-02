@@ -884,6 +884,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             self.pinobjects[iseg][i].set_text(text)
 
         self.canvas.draw()
+        self.point_sbox.setMaximum(len(segment.statepoints) - 1)
         self.plot_update()
 
     def setpincoords(self):
