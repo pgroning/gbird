@@ -744,11 +744,13 @@ class MainWin(QtGui.QMainWindow):
 
         param_str = str(self.param_cbox.currentText())
         iseg = int(self.case_cbox.currentIndex())
-        point_num = int(self.point_sbox.value())
-        state_num = self.ibundle
 
+        state_num = self.ibundle
         bundle = self.bunlist[state_num]
         segment = bundle.segments[iseg]
+        
+        self.point_sbox.setMaximum(len(segment.statepoints) - 1)
+        point_num = int(self.point_sbox.value())
         
         ENR = segment.data.ENR
         
@@ -884,7 +886,6 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             self.pinobjects[iseg][i].set_text(text)
 
         self.canvas.draw()
-        self.point_sbox.setMaximum(len(segment.statepoints) - 1)
         self.plot_update()
 
     def setpincoords(self):
