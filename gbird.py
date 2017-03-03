@@ -1217,12 +1217,15 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                     k += 1
         return BA
 
-    # def quick_calc(self,case_num):
-    def quick_calc(self, state_num=-1):
+    def quick_calc(self):
         """Performing quick calculation"""
 
         self.setCursor(QtCore.Qt.WaitCursor)
         
+        # remove irrelevant bundle calcs but keep bias calc
+        while len(self.bunlist) > self.ibundle + 1 and len(self.bunlist) > 2:
+            del self.bunlist[-1]
+
         if len(self.bunlist) == 1:  # make bias calc?
             print "Bias calculation..."
             bundle = Bundle(parent=self.bunlist[0])
@@ -1280,8 +1283,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         bundle.new_btf()
         self.bunlist.append(bundle)
         
-        #if state_num:
-        self.ibundle = state_num
+        self.ibundle = len(self.bunlist) - 1
         
         self.fig_update()
         self.setCursor(QtCore.Qt.ArrowCursor)
