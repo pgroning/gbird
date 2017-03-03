@@ -1600,20 +1600,26 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.connect(self.bgcolors_cb, QtCore.SIGNAL('clicked()'),
                      self.toggle_pin_bgcolors)
         
+        voi_hbox = QtGui.QHBoxLayout()
         type_label = QtGui.QLabel('Type:')
         self.type_cbox = QtGui.QComboBox()
         typelist = ['Hot', 'HCr', 'CCl', 'CCr']
         for i in typelist:
             self.type_cbox.addItem(i)
+        voi_hbox.addWidget(type_label)
+        voi_hbox.addWidget(self.type_cbox)
+
         # self.connect(self.type_cbox, SIGNAL('currentIndexChanged(int)'),
         # self.on_index)
 
+        voi_hbox = QtGui.QHBoxLayout()
         voi_label = QtGui.QLabel('VOI:')
         self.voi_cbox = QtGui.QComboBox()
-        
         self.voilist = ['0', '40', '80']
-        for i in self.voilist:
-            self.voi_cbox.addItem(i)
+        for v in self.voilist:
+            self.voi_cbox.addItem(str(v))
+        voi_hbox.addWidget(voi_label)
+        voi_hbox.addWidget(self.voi_cbox)
 
         # Determine voi index
         # voi = self.cas.cases[self.case_id_current].statepts[0].voi
@@ -1623,11 +1629,34 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         # self.connect(self.voi_cbox, SIGNAL('currentIndexChanged(int)'),
         # self.on_plot)
 
+        vhi_hbox = QtGui.QHBoxLayout()
         vhi_label = QtGui.QLabel('VHI:')
         self.vhi_cbox = QtGui.QComboBox()
         self.vhilist = ['0', '40', '80']
-        for i in self.vhilist:
-            self.vhi_cbox.addItem(i)
+        for v in self.vhilist:
+            self.vhi_cbox.addItem(str(v))
+        vhi_hbox.addWidget(vhi_label)
+        vhi_hbox.addWidget(self.vhi_cbox)
+
+        type_hbox = QtGui.QHBoxLayout()
+        type_label = QtGui.QLabel('Type:')
+        self.type_cbox = QtGui.QComboBox()
+        typelist = ['Hot', 'HCr', 'CCl', 'CCr']
+        for i in typelist:
+            self.type_cbox.addItem(i)
+        type_hbox.addWidget(type_label)
+        type_hbox.addWidget(self.type_cbox)
+
+        exp_hbox = QtGui.QHBoxLayout()
+        exp_label = QtGui.QLabel('EXP:')
+        self.exp_cbox = QtGui.QComboBox()
+        self.explist = [0, 0.001, 0.1, 0.5, 1.5, 2, 2.5]
+        for e in self.explist:
+            self.exp_cbox.addItem(str(e))
+        exp_hbox.addWidget(exp_label)
+        exp_hbox.addWidget(self.exp_cbox)
+
+
         # Determine vhi index
         # vhi = self.cas.cases[self.case_id_current].statepts[0].vhi
         # vhi_index = [i for i,v in enumerate(self.vhilist) if int(v) == vhi]
@@ -1740,6 +1769,10 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         vbox.addLayout(case_hbox)
         vbox.addLayout(param_hbox)
         vbox.addLayout(point_hbox)
+        vbox.addLayout(voi_hbox)
+        vbox.addLayout(vhi_hbox)
+        vbox.addLayout(exp_hbox)
+        vbox.addLayout(type_hbox)
         vbox.addLayout(enr_hbox)
         vbox.addLayout(enr_case_hbox)
         vbox.addLayout(calc_hbox)
