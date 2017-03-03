@@ -1744,7 +1744,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.table.cellActivated.connect(self.pinSelect)
         self.table.cellClicked.connect(self.pinSelect)
         # self.table.selectionModel().selectionChanged.connect(self.pinSelect)
-
+        
         tvbox = QtGui.QVBoxLayout()
         tvbox.addWidget(self.table)
         tableGbox = QtGui.QGroupBox()
@@ -1765,7 +1765,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
         # Layout with box sizers
         vbox = QtGui.QVBoxLayout()
-        #vbox.addLayout(sim_hbox)
+        vbox.addLayout(sim_hbox)
         vbox.addLayout(case_hbox)
         vbox.addLayout(param_hbox)
         vbox.addLayout(point_hbox)
@@ -1784,7 +1784,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         # vbox.addItem(spacerItem)
         vbox.addStretch(1)
         vbox.addLayout(info_flo)
-        vbox.addLayout(sim_hbox)
+        #vbox.addLayout(sim_hbox)
         
         groupbox = QtGui.QGroupBox()
         groupbox.setStyleSheet("QGroupBox { background-color: rgb(200, 200,\
