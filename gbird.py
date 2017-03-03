@@ -1223,15 +1223,14 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.setCursor(QtCore.Qt.WaitCursor)
         
         # remove irrelevant bundle calcs but keep bias calc
-        while len(self.bunlist) > self.ibundle + 1 and len(self.bunlist) > 2:
+        while len(self.bunlist) > self.ibundle + 1:
             del self.bunlist[-1]
 
-        if len(self.bunlist) == 1:  # make bias calc?
-            print "Bias calculation..."
-            bundle = Bundle(parent=self.bunlist[0])
-            bundle.new_calc(model='c3')
-            bundle.new_btf()
-            self.bunlist.append(bundle)
+        if not hasattr(self, "biascalc"):  # make bias calc?
+            print "Perturbation bias calculation..."
+            self.biascalc = Bundle(parent=self.bunlist[0])
+            self.biascalc.new_calc(model="c3")
+            #self.biascalc.new_btf()
 
         # New perturbation calc
         bundle = Bundle(parent=self.bunlist[0])  # parent is set to orig bundle
@@ -1245,9 +1244,6 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             
             voi = None
             bundle.segments[iseg].set_data(LFU, FUE, BA, voi, chanbow)
-            #self.bunlist[-1].segments[iseg].set_data(LFU, FUE, BA,
-            #                                               voi, chanbow)
-            #self.bundle.cases[case_num].add_state(LFU, FUE, BA, voi, chanbow)
 
         bundle.new_calc(model='c3')
 
@@ -1257,7 +1253,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             burnlist = [p.burnup for p in pts]
             pts0 = [p for p in self.bunlist[0].segments[iseg].statepoints 
                     if p.burnup in burnlist]
-            pts1 = [p for p in self.bunlist[1].segments[iseg].statepoints 
+            pts1 = [p for p in self.biascalc.segments[iseg].statepoints 
                     if p.burnup in burnlist]
             npst = bundle.segments[iseg].data.npst
             Nburnpts = len(pts)
