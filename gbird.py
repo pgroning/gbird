@@ -1651,9 +1651,9 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         exp_hbox = QtGui.QHBoxLayout()
         exp_label = QtGui.QLabel('EXP:')
         self.exp_cbox = QtGui.QComboBox()
-        self.explist = [0, 0.001, 0.1, 0.5, 1.5, 2, 2.5]
-        for e in self.explist:
-            self.exp_cbox.addItem(str(e))
+        #self.explist = [0, 0.001, 0.1, 0.5, 1.5, 2, 2.5]
+        #for e in self.explist:
+        #    self.exp_cbox.addItem(str(e))
         exp_hbox.addWidget(exp_label)
         exp_hbox.addWidget(self.exp_cbox)
 
