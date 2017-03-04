@@ -440,6 +440,11 @@ class MainWin(QtGui.QMainWindow):
             self.connect(self.case_cbox,
                          QtCore.SIGNAL('currentIndexChanged(int)'),
                          self.fig_update)
+
+            voilist = map(str, bundle.segments[0].data.voilist)
+            self.voi_cbox.addItems(QtCore.QStringList(voilist))
+            self.vhi_cbox.addItems(QtCore.QStringList(voilist))
+            
             self.setCursor(QtCore.Qt.ArrowCursor)
             self.fig_update()
         else:
@@ -1611,9 +1616,9 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         voi_hbox = QtGui.QHBoxLayout()
         voi_label = QtGui.QLabel('VOI:')
         self.voi_cbox = QtGui.QComboBox()
-        self.voilist = ['0', '40', '80']
-        for v in self.voilist:
-            self.voi_cbox.addItem(str(v))
+        #self.voilist = ['0', '40', '80']
+        #for v in self.voilist:
+        #    self.voi_cbox.addItem(str(v))
         voi_hbox.addWidget(voi_label)
         voi_hbox.addWidget(self.voi_cbox)
 
@@ -1628,9 +1633,9 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         vhi_hbox = QtGui.QHBoxLayout()
         vhi_label = QtGui.QLabel('VHI:')
         self.vhi_cbox = QtGui.QComboBox()
-        self.vhilist = ['0', '40', '80']
-        for v in self.vhilist:
-            self.vhi_cbox.addItem(str(v))
+        #self.vhilist = ['0', '40', '80']
+        #for v in self.vhilist:
+        #    self.vhi_cbox.addItem(str(v))
         vhi_hbox.addWidget(vhi_label)
         vhi_hbox.addWidget(self.vhi_cbox)
 
