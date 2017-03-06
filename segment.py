@@ -1114,19 +1114,19 @@ class Segment(object):
         void and void history
         Syntax: pt = findpoint(burnup=burnup_val,vhi=vhi_val,voi=voi_val,
         tfu=tfu_val)"""
-        #statepoints = self.statepoints
         
         if tfu is not None:
-            pindex = next(i for i, p in enumerate(self.statepoints) 
-                          if p.tfu == tfu and p.vhi == vhi and p.voi == voi)
+            ipoint = next((i for i, p in enumerate(self.statepoints) 
+                           if p.tfu == tfu and p.vhi == vhi and p.voi == voi),
+                          None)
         elif burnup is not None:
-            pindex = next(i for i, p in enumerate(self.statepoints)
-                          if p.burnup == burnup and
-                          p.vhi == vhi and p.voi == voi)
+            ipoint = next((i for i, p in enumerate(self.statepoints)
+                           if p.burnup == burnup and
+                           p.vhi == vhi and p.voi == voi), None)
         else:
-            pindex = next(i for i, p in enumerate(self.statepoints)
-                          if p.vhi == vhi and p.voi == voi)
-        return pindex
+            ipoint = next((i for i, p in enumerate(self.statepoints)
+                           if p.vhi == vhi and p.voi == voi), None)
+        return ipoint
 
     def get_statepoints(self, voi, vhi, tfu):
         """get a list of all state points for given voi, vhi, tfu"""

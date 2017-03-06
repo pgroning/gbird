@@ -335,17 +335,8 @@ class MainWin(QtGui.QMainWindow):
             self.bunlist = pickle.load(fp)
 
         self.init_pinobjects()
-
-        # Update case number list box
-        nsegments = len(self.bunlist[-1].segments)
-        seglist = map(str, range(1, nsegments + 1))
-        self.case_cbox.addItems(QtCore.QStringList(seglist))
-        #for i in range(1, ncases + 1):
-        #    self.case_cbox.addItem(str(i))
-        self.connect(self.case_cbox, QtCore.SIGNAL('currentIndexChanged(int)'),
-                     self.fig_update)
-        #self.fig_update()
-
+        self.init_cboxes()
+ 
     def read_cax(self, filename):
         """Importing data from a single cax file"""
         
@@ -429,22 +420,8 @@ class MainWin(QtGui.QMainWindow):
             self.bunlist.append(bundle)
             
             self.init_pinobjects()
-        
-            # Update segment number list box
-            #state_num = self.ibundle
-            nsegments = len(bundle.segments)
-            #nsegments = len(self.bundle.states[state_num].segments)
-            seglist = map(str, range(1, nsegments + 1))
-            self.case_cbox.addItems(QtCore.QStringList(seglist))
-            
-            self.connect(self.case_cbox,
-                         QtCore.SIGNAL('currentIndexChanged(int)'),
-                         self.fig_update)
+            self.init_cboxes()
 
-            voilist = map(str, bundle.segments[0].data.voilist)
-            self.voi_cbox.addItems(QtCore.QStringList(voilist))
-            self.vhi_cbox.addItems(QtCore.QStringList(voilist))
-            
             self.setCursor(QtCore.Qt.ArrowCursor)
             self.fig_update()
         else:
@@ -502,6 +479,24 @@ class MainWin(QtGui.QMainWindow):
         '''
         #else:
         #    return
+
+    def init_cboxes(self):
+        """Initiate combo boxes"""
+        
+        # init segment combo box
+        nsegments = len(self.bunlist[-1].segments)
+        seglist = map(str, range(1, nsegments + 1))
+        self.case_cbox.addItems(QtCore.QStringList(seglist))
+        self.connect(self.case_cbox, QtCore.SIGNAL('currentIndexChanged(int)'),
+                     self.fig_update)
+        # init voi combo box
+        voilist = map(str, self.bunlist[-1].segments[0].data.voilist)
+        self.voi_cbox.addItems(QtCore.QStringList(voilist))
+        self.vhi_cbox.addItems(QtCore.QStringList(voilist))
+        self.connect(self.voi_cbox, QtCore.SIGNAL('currentIndexChanged(int)'),
+                     self.set_point_number)
+        self.connect(self.vhi_cbox, QtCore.SIGNAL('currentIndexChanged(int)'),
+                     self.set_point_number) 
 
     def saveData(self):
         """Save bundle object to pickle file"""
@@ -737,16 +732,27 @@ class MainWin(QtGui.QMainWindow):
         self.enrpinlist[case_num] = pinlist_sorted
 
         # Update pin LFU
-        rsort = [i for i, e in sorted(enumerate(isort), key=lambda x:x[1])]
+        invsort = [i for i, e in sorted(enumerate(isort), key=lambda x:x[1])]
         for pin in self.pinobjects[case_num]:
             i = pin.LFU - 1
-            pin.LFU = rsort[i] + 1
+            pin.LFU = invsort[i] + 1
         
         self.fig_update()
 
+    def set_point_number(self):
+        iseg = int(self.case_cbox.currentIndex())
+        bundle = self.bunlist[self.ibundle]
+        segment = bundle.segments[iseg]
+
+        voi = int(self.voi_cbox.currentText())
+        vhi = int(self.vhi_cbox.currentText())
+        ipoint = segment.findpoint(voi=voi, vhi=vhi)
+        if ipoint is not None:
+            self.point_sbox.setValue(ipoint)
+
     def set_pinvalues(self):
         """Update values"""
-
+        
         param_str = str(self.param_cbox.currentText())
         iseg = int(self.case_cbox.currentIndex())
 
@@ -757,6 +763,13 @@ class MainWin(QtGui.QMainWindow):
         self.point_sbox.setMaximum(len(segment.statepoints) - 1)
         point_num = int(self.point_sbox.value())
         
+        #voi = segment.statepoints[point_num].voi
+        #i = segment.data.voilist.index(voi)
+        #self.voi_cbox.setCurrentIndex(i)
+        #vhi = segment.statepoints[point_num].vhi
+        #i = segment.data.voilist.index(vhi)
+        #self.vhi_cbox.setCurrentIndex(i)
+
         ENR = segment.data.ENR
         
         EXP = segment.statepoints[point_num].EXP
@@ -1291,7 +1304,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         
     def fig_update(self):
         """ Redraw figure and update values"""
-
+        
         # self.on_draw()
         self.axes.clear()
         self.draw_fuelmap()
@@ -1543,14 +1556,9 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
         case_label = QtGui.QLabel('Segment:')
         self.case_cbox = QtGui.QComboBox()
-        # caselist = ['1', '2', '3']
-        # for i in caselist:
-        #     self.case_cbox.addItem(i)
         case_hbox = QtGui.QHBoxLayout()
         case_hbox.addWidget(case_label)
         case_hbox.addWidget(self.case_cbox)
-        #self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'),
-        #             self.update_plot)
         # self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'),
         # self.fig_update)
 
@@ -1616,11 +1624,12 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         voi_hbox = QtGui.QHBoxLayout()
         voi_label = QtGui.QLabel('VOI:')
         self.voi_cbox = QtGui.QComboBox()
-        #self.voilist = ['0', '40', '80']
-        #for v in self.voilist:
-        #    self.voi_cbox.addItem(str(v))
         voi_hbox.addWidget(voi_label)
         voi_hbox.addWidget(self.voi_cbox)
+        #self.connect(self.voi_cbox, QtCore.SIGNAL('currentIndexChanged(int)'),
+        #             self.fig_update)
+        #self.connect(self.voi_cbox, QtCore.SIGNAL('currentIndexChanged(int)'),
+        #             self.set_pinvalues)
 
         # Determine voi index
         # voi = self.cas.cases[self.case_id_current].statepts[0].voi
