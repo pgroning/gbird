@@ -340,51 +340,51 @@ class PlotWin(QtGui.QMainWindow):
         self.connect(self.original_cb, QtCore.SIGNAL('stateChanged(int)'),
                      self.on_plot)
 
-        type_label = QtGui.QLabel('Type:')
-        self.type_cbox = QtGui.QComboBox()
-        typelist = ['Hot', 'HCr', 'CCl', 'CCr']
-        for i in typelist:
-            self.type_cbox.addItem(i)
+        #type_label = QtGui.QLabel('Type:')
+        #self.type_cbox = QtGui.QComboBox()
+        #typelist = ['Hot', 'HCr', 'CCl', 'CCr']
+        #for i in typelist:
+        #    self.type_cbox.addItem(i)
         # self.connect(self.type_cbox, SIGNAL('currentIndexChanged(int)'),
         # self.on_index)
 
-        voi_label = QtGui.QLabel('VOI:')
-        self.voi_cbox = QtGui.QComboBox()
-        # self.voilist = ['0', '40', '80']
-        iseg = int(self.parent.case_cbox.currentIndex())
-        #iseg = self.case_id_current
-        self.voilist = (self.parent.bunlist[-1].segments[iseg].data.voilist)
+        #voi_label = QtGui.QLabel('VOI:')
+        #self.voi_cbox = QtGui.QComboBox()
+        ## self.voilist = ['0', '40', '80']
+        #iseg = int(self.parent.case_cbox.currentIndex())
+        ##iseg = self.case_id_current
+        #self.voilist = (self.parent.bunlist[-1].segments[iseg].data.voilist)
 
         #self.voilist = (self.parent.bundle.cases[self.case_id_current]
         #                .states[-1].voivec)
         # self.voilist = map(str, self.voilist)
         
-        for v in self.voilist:
-            self.voi_cbox.addItem(str(v))
+        #for v in self.voilist:
+        #    self.voi_cbox.addItem(str(v))
         # Determine voi index
-        voi = self.parent.bunlist[-1].segments[iseg].statepoints[0].voi
+        #voi = self.parent.bunlist[-1].segments[iseg].statepoints[0].voi
         #voi = (self.parent.bundle.cases[self.case_id_current].states[-1]
         #       .statepoints[0].voi)
         # voi = self.cas.cases[self.case_id_current].statepts[0].voi
-        voi_index = [i for i, v in enumerate(self.voilist) if int(v) == voi]
-        voi_index = voi_index[0]
-        self.voi_cbox.setCurrentIndex(voi_index)
+        #voi_index = [i for i, v in enumerate(self.voilist) if int(v) == voi]
+        #voi_index = voi_index[0]
+        #self.voi_cbox.setCurrentIndex(voi_index)
         # self.connect(self.voi_cbox, SIGNAL('currentIndexChanged(int)'),
         # self.on_plot)
-        vhi_label = QtGui.QLabel('VHI:')
-        self.vhi_cbox = QtGui.QComboBox()
+        #vhi_label = QtGui.QLabel('VHI:')
+        #self.vhi_cbox = QtGui.QComboBox()
         # self.vhilist = ['0', '40', '80']
-        self.vhilist = self.voilist
-        for v in self.vhilist:
-            self.vhi_cbox.addItem(str(v))
+        #self.vhilist = self.voilist
+        #for v in self.vhilist:
+        #    self.vhi_cbox.addItem(str(v))
         
-        # Determine vhi index
-        vhi = self.parent.bunlist[-1].segments[iseg].statepoints[0].vhi
+        ## Determine vhi index
+        #vhi = self.parent.bunlist[-1].segments[iseg].statepoints[0].vhi
         #vhi = (self.parent.bundle.cases[self.case_id_current].states[-1]
         #       .statepoints[0].vhi)
-        vhi_index = [i for i, v in enumerate(self.vhilist) if int(v) == vhi]
-        vhi_index = vhi_index[0]
-        self.vhi_cbox.setCurrentIndex(vhi_index)
+        #vhi_index = [i for i, v in enumerate(self.vhilist) if int(v) == vhi]
+        #vhi_index = vhi_index[0]
+        #self.vhi_cbox.setCurrentIndex(vhi_index)
         # self.connect(self.vhi_cbox, SIGNAL('currentIndexChanged(int)'),
         # self.on_plot)
         
@@ -410,9 +410,8 @@ class PlotWin(QtGui.QMainWindow):
         #            slider_label, self.slider]:
         
         for w in [self.draw_button, self.grid_cb, slider_label, self.slider,
-                  self.case_cb, self.original_cb, param_label, self.param_cbox,
-                  type_label, self.type_cbox, voi_label, self.voi_cbox,
-                  vhi_label, self.vhi_cbox]:
+                  self.case_cb, self.original_cb, param_label,
+                  self.param_cbox]:
 
             hbox.addWidget(w)
             hbox.setAlignment(w, QtCore.Qt.AlignVCenter)

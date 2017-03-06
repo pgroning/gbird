@@ -1132,13 +1132,17 @@ class Segment(object):
         """get a list of all state points for given voi, vhi, tfu"""
 
         i = self.findpoint(voi=voi, vhi=vhi, tfu=tfu)  # first index
-        statelist = [self.statepoints[i]]
-        Nstatepoints = len(self.statepoints)
-        while ((i < Nstatepoints-1) and
-               (self.statepoints[i].burnup <= self.statepoints[i+1].burnup)):
-            statelist.append(self.statepoints[i+1])
-            i += 1
-        return statelist
+        if i is None:
+            splist = None
+        else:
+            splist = [self.statepoints[i]]
+            Nstatepoints = len(self.statepoints)
+            while ((i < Nstatepoints-1) and
+                   (self.statepoints[i].burnup <= 
+                    self.statepoints[i+1].burnup)):
+                splist.append(self.statepoints[i+1])
+                i += 1
+        return splist
 
     def burnpoints(self, voi=40, vhi=None):
         """Return depletion vector for given voi (and vhi)"""
