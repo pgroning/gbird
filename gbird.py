@@ -740,15 +740,19 @@ class MainWin(QtGui.QMainWindow):
         self.fig_update()
 
     def set_point_number(self):
+        ipoint = int(self.point_sbox.value())
         iseg = int(self.case_cbox.currentIndex())
         bundle = self.bunlist[self.ibundle]
         segment = bundle.segments[iseg]
-
+        statepoint = segment.statepoints[ipoint]
+        
         voi = int(self.voi_cbox.currentText())
         vhi = int(self.vhi_cbox.currentText())
-        ipoint = segment.findpoint(voi=voi, vhi=vhi)
-        if ipoint is not None:
-            self.point_sbox.setValue(ipoint)
+
+        if statepoint.voi != voi or statepoint.vhi != vhi:
+            ipoint = segment.findpoint(voi=voi, vhi=vhi)
+            if ipoint is not None:
+                self.point_sbox.setValue(ipoint)
 
     def set_pinvalues(self):
         """Update values"""
@@ -763,12 +767,14 @@ class MainWin(QtGui.QMainWindow):
         self.point_sbox.setMaximum(len(segment.statepoints) - 1)
         point_num = int(self.point_sbox.value())
         
-        #voi = segment.statepoints[point_num].voi
-        #i = segment.data.voilist.index(voi)
-        #self.voi_cbox.setCurrentIndex(i)
-        #vhi = segment.statepoints[point_num].vhi
-        #i = segment.data.voilist.index(vhi)
-        #self.vhi_cbox.setCurrentIndex(i)
+        voi = segment.statepoints[point_num].voi
+        ivoi = segment.data.voilist.index(voi)
+        if ivoi != self.voi_cbox.currentIndex():
+            self.voi_cbox.setCurrentIndex(ivoi)
+        vhi = segment.statepoints[point_num].vhi
+        ivhi = segment.data.voilist.index(vhi)
+        if ivhi != self.vhi_cbox.currentIndex():
+            self.vhi_cbox.setCurrentIndex(ivhi)
 
         ENR = segment.data.ENR
         
