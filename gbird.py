@@ -767,14 +767,14 @@ class MainWin(QtGui.QMainWindow):
         self.point_sbox.setMaximum(len(segment.statepoints) - 1)
         point_num = int(self.point_sbox.value())
         
-        voi = segment.statepoints[point_num].voi
-        ivoi = segment.data.voilist.index(voi)
-        if ivoi != self.voi_cbox.currentIndex():
-            self.voi_cbox.setCurrentIndex(ivoi)
-        vhi = segment.statepoints[point_num].vhi
-        ivhi = segment.data.voilist.index(vhi)
-        if ivhi != self.vhi_cbox.currentIndex():
-            self.vhi_cbox.setCurrentIndex(ivhi)
+        #voi = segment.statepoints[point_num].voi
+        #ivoi = segment.data.voilist.index(voi)
+        #if ivoi != self.voi_cbox.currentIndex():
+        #    self.voi_cbox.setCurrentIndex(ivoi)
+        #vhi = segment.statepoints[point_num].vhi
+        #ivhi = segment.data.voilist.index(vhi)
+        #if ivhi != self.vhi_cbox.currentIndex():
+        #    self.vhi_cbox.setCurrentIndex(ivhi)
 
         ENR = segment.data.ENR
         
