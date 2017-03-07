@@ -617,22 +617,28 @@ class Segment(object):
     #              .strip().split(' ')[1:])
     #    return voids
 
-    def reduce_burnpoints(self, dep_thres=20.0):
+    def reduce_burnpoints(self, maxdep=20.0):
         """Reduce number of depletion points"""
         
         red_burnlist = []
         for burnpoints in self.burnlist:
-            red_pts = [x for x in burnpoints if x <= dep_thres]
-            pts = [x for x in burnpoints if x >= red_pts[-1]]
-            red_pts2 = pts[6::6]  # reduce number of points
-            if red_pts2[-1] < pts[-1]:  # add last point if not included
-                red_pts2.append(pts[-1])
-            red_pts.extend(red_pts2)
+            red_pts = [x for x in burnpoints if x <= maxdep]
             red_burnlist.append(red_pts)
+
+        #red_burnlist = []
+        #for burnpoints in self.burnlist:
+        #    red_pts = [x for x in burnpoints if x <= dep_thres]
+        #    pts = [x for x in burnpoints if x >= red_pts[-1]]
+        #    red_pts2 = pts[6::6]  # reduce number of points
+        #    if red_pts2[-1] < pts[-1]:  # add last point if not included
+        #        red_pts2.append(pts[-1])
+        #    red_pts.extend(red_pts2)
+        #    red_burnlist.append(red_pts)
         return red_burnlist
     
-    def writec3cai(self, file_base_name, voi=None, maxdep=60, dep_thres=None,
+    def writec3cai(self, file_base_name, voi=None, maxdep=None, dep_thres=None,
                    box_offset=0.0):
+        
         # filebasename = "./" + str(uuid.uuid4())
         c3inp = file_base_name + ".inp"
         # c3inp = tempfile.NamedTemporaryFile(dir='.',
@@ -664,8 +670,8 @@ class Segment(object):
         #    voivec = [int(voi)]
         #    self.data.voivec = voivec
 
-        if not maxdep:
-            maxdep = 60
+        #if not maxdep:
+        #    maxdep = 60
 
         #burnlist = []
         #for v in voilist:
@@ -702,10 +708,9 @@ class Segment(object):
         
         if not hasattr(self, "burnlist"):
             self.burnlist = [self.burnpoints(voi=v) for v in self.data.voilist]
-        #dep_thres = 20.0
-        dep_thres = None
-        if dep_thres:
-            burnlist = self.reduce_burnpoints(dep_thres=dep_thres)
+        
+        if maxdep is not None:
+            burnlist = self.reduce_burnpoints(maxdep=maxdep)
         else:
             burnlist = self.burnlist
         
@@ -1037,7 +1042,7 @@ class Segment(object):
     #    # EXP = self.__expcalc(POW, burnup)
     #    # Tracer()()
 
-    def quickcalc(self, voi=None, maxdep=60, depthres=None, refcalc=False,
+    def quickcalc(self, voi=None, maxdep=None, depthres=None, refcalc=False,
                   grid=True, model='c3', box_offset=0.0, neulib=False):
 
         tic = time.time()

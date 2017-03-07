@@ -413,8 +413,11 @@ class MainWin(QtGui.QMainWindow):
             self.setCursor(QtCore.Qt.WaitCursor)
             self.clear_data()
             bundle = Bundle()
-            bundle.readpro(filename)
-            bundle.readcax(content=bundle.data.content)  # inargs "all" reads the whole file content
+            if not bundle.readpro(filename):  # stop if error is encountered
+                self.setCursor(QtCore.Qt.ArrowCursor)
+                return
+            # inarg content="unfiltered" reads the whole file content
+            bundle.readcax(content=bundle.data.content)
             bundle.new_btf()
             self.bunlist = []
             self.bunlist.append(bundle)
@@ -1249,27 +1252,30 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         # remove irrelevant bundle calcs but keep bias calc
         while len(self.bunlist) > self.ibundle + 1:
             del self.bunlist[-1]
-
+        
         if not hasattr(self, "biascalc"):  # make bias calc?
             print "Perturbation bias calculation..."
             self.biascalc = Bundle(parent=self.bunlist[0])
-            self.biascalc.new_calc(model="c3")
+            if self.biascalc.data.voi is not None:
+                for s in self.biascalc.segments:
+                    s.set_data(voi=self.biascalc.data.voi)
+            maxdep = self.biascalc.data.maxdep
+            self.biascalc.new_calc(model="c3", maxdep=maxdep)
             #self.biascalc.new_btf()
 
         # New perturbation calc
         bundle = Bundle(parent=self.bunlist[0])  # parent is set to orig bundle
         nsegments = len(bundle.segments)
 
+        voi = bundle.data.voi
         chanbow = self.chanbow_sbox.value() / 10  # mm -> cm
         for iseg in xrange(nsegments):
             LFU = self.__lfumap(iseg)
             FUE = self.__fuemap(iseg)
             BA = self.__bamap(iseg)
-            
-            voi = None
             bundle.segments[iseg].set_data(LFU, FUE, BA, voi, chanbow)
-
-        bundle.new_calc(model='c3')
+        maxdep = bundle.data.maxdep
+        bundle.new_calc(model='c3', maxdep=maxdep)
 
         # remove bias from perturbation calc
         for iseg in xrange(len(bundle.segments)):

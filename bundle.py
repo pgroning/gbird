@@ -82,16 +82,16 @@ class Bundle(object):
         try:
             if not config.read(cfgfile):
                 print "Could not open file '" + cfgfile + "'"
-                return
+                return False
         except:
             print "An error occured trying to read the file '" + cfgfile + "'"
-            return
+            return False
 
         # Get fuel type
         self.data.fuetype = config.get("Bundle", "fuetype")
         if self.data.fuetype not in ('A10XM', 'A10B', 'AT11', 'OPT2', 'OPT3'):
             print("Error: Unknown fuel type.")
-            return
+            return False
 
         # cax files
         files = config.get("Bundle", "files")
@@ -103,17 +103,18 @@ class Bundle(object):
         self.data.nodes = map(int, nodes)
         if len(self.data.nodes) != len(self.data.caxfiles):
             print "Error: Invalid node list."
-            return
+            return False
 
         # content read option
-        try:
+        if config.has_option("Bundle", "content"):
             self.data.content = config.get("Bundle", "content")
-        except ConfigParser.NoOptionError:
-            self.data.content =  "filtered"
+        else:
+            self.data.content = "filtered"
         if self.data.content not in ("filtered", "unfiltered"):
             print "Error: Unknown content option."
             return False
 
+        # BTF options
         if config.has_section("BTF"):
             # BTF zone vector
             btf_zones = re.split("\s+|,\s*", config.get("BTF", "zones"))
@@ -126,6 +127,23 @@ class Bundle(object):
         else:
             self.data.btf_zones = [1] * len(self.data.nodes)
             self.data.btf_nodes = self.data.nodes
+
+        # Perturbation calculation
+        self.data.maxdep = None
+        self.data.voi = None
+
+        if config.has_section("Pertcalc"):
+            if config.has_option("Pertcalc", "maxdep"):
+                maxdep = config.get("Pertcalc", "maxdep")
+                if maxdep != "undef":
+                    self.data.maxdep = float(maxdep)
+            if config.has_option("Pertcalc", "voi"):
+                voi = config.get("Pertcalc", "voi")
+                if voi != "undef":
+                    self.data.voi = int(voi)
+        
+        return True
+    
 
     '''
     def readinp(self, inpfile):
@@ -216,7 +234,7 @@ class Bundle(object):
         elif fuetype == "A10":
             self.data.fuetype = "A10B"
 
-    def new_calc(self, voi=None, maxdep=60, depthres=None, refcalc=False,
+    def new_calc(self, voi=None, maxdep=None, depthres=None, refcalc=False,
                  grid=False, model='c3', box_offset=0, neulib=False):
 
         # For storage of new calculation
