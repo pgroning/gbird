@@ -42,7 +42,7 @@ class DataStruct(object):
 
 class Segment(object):
 
-    def __init__(self, caxfile=None, read_all=False):
+    def __init__(self, caxfile=None, content="filtered"):
         self.data = DataStruct()
         #self.states = []
         #self.states.append(DataStruct())
@@ -56,7 +56,7 @@ class Segment(object):
         #self.pert = DataStruct()
         '''
         if caxfile:
-            self.readcax(caxfile, read_all)
+            self.readcax(caxfile, content)
             #self.ave_enr_calc()
             #self.data.ave_enr = self.ave_enr  # save orig. calculation
             # self.quickcalc(refcalc=True)
@@ -128,7 +128,7 @@ class Segment(object):
                 BA[LFU == ifu] = FUE[i, 4]
         return BA
 
-    def readcax(self, caxfile, read_all=False):
+    def readcax(self, caxfile, content="filtered"):
 
         if not os.path.isfile(caxfile):
             print "Could not open file " + caxfile
@@ -176,8 +176,8 @@ class Segment(object):
         tmp_voilist = [x for x in tmp_voilist if x not in tmp and (tmp.append(x)
                                                                    or True)]
         voilist = map(int, map(float, tmp_voilist))
-
-        if not read_all:
+        
+        if content == "filtered":
             flines = flines[:i]  # Reduce the number of lines in list
 
         # Search for regexp matches

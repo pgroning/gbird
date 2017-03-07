@@ -38,10 +38,8 @@ from btf import Btf
 
 
 def readcax_fun(tup):
-    """Unpack input arguments for use with the casdata class"""
+    """Unpack input arguments for use with the Segment class"""
     return Segment(*tup)
-    # caxfile, opt = tup
-    # return casdata(caxfile, opt)
 
 
 def quickcalc_fun(tup):
@@ -80,7 +78,7 @@ class Bundle(object):
     def readpro(self, cfgfile):
         """Read project setup file"""
         
-        config = ConfigParser.ConfigParser()
+        config = ConfigParser.SafeConfigParser()
         try:
             if not config.read(cfgfile):
                 print "Could not open file '" + cfgfile + "'"
@@ -106,6 +104,15 @@ class Bundle(object):
         if len(self.data.nodes) != len(self.data.caxfiles):
             print "Error: Invalid node list."
             return
+
+        # content read option
+        try:
+            self.data.content = config.get("Bundle", "content")
+        except ConfigParser.NoOptionError:
+            self.data.content =  "filtered"
+        if self.data.content not in ("filtered", "unfiltered"):
+            print "Error: Unknown content option."
+            return False
 
         if config.has_section("BTF"):
             # BTF zone vector
@@ -165,7 +172,7 @@ class Bundle(object):
         self.data.nodes = nodes
         self.data.btf_cases = btf_cases
     '''
-    def readcax(self, read_all=False):
+    def readcax(self, content="filtered"):
         """Read multiple caxfiles using multithreading.
         Syntax:
         readcax() reads the first part of the file (where voi=vhi)
@@ -173,7 +180,7 @@ class Bundle(object):
 
         inlist = []  # Bundle input args
         for caxfile in self.data.caxfiles:
-            inlist.append((caxfile, read_all))
+            inlist.append((caxfile, content))
 
         n = len(self.data.caxfiles)  # Number of threads
         p = Pool(n)  # Make the Pool of workers

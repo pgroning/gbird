@@ -414,7 +414,7 @@ class MainWin(QtGui.QMainWindow):
             self.clear_data()
             bundle = Bundle()
             bundle.readpro(filename)
-            bundle.readcax()  # inargs "all" reads the whole file content
+            bundle.readcax(content=bundle.data.content)  # inargs "all" reads the whole file content
             bundle.new_btf()
             self.bunlist = []
             self.bunlist.append(bundle)
