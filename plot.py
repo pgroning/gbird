@@ -57,6 +57,8 @@ class PlotWin(QtGui.QMainWindow):
         voi = segment.statepoints[ipoint].voi
         vhi = segment.statepoints[ipoint].vhi
         tfu = segment.statepoints[ipoint].tfu
+        print voi, vhi, tfu
+        print " "
         statepoints = segment.get_statepoints(voi, vhi, tfu)
         x = [s.burnup for s in statepoints]
         if parameter == "KINF":
@@ -65,31 +67,12 @@ class PlotWin(QtGui.QMainWindow):
             y = [s.fint for s in statepoints]
         return x, y
 
-    def plot_kinf(self, iseg, ibundle=-1, linestyle="-"):
+    def plot_kinf(self, segment, voi, vhi, tfu, linestyle="-"):
+        """Plot kinf as a function of burnup"""
         
-        segment = self.parent.bunlist[ibundle].segments[iseg]
-        #case = self.parent.bundle.cases[case_id]
-        #idx0 = self.startpoint(case_id, istate)
-        #statepoints = segment.statepoints[idx0:]
-        #
-        #burnup_old = 0.0
-        #for idx, p in enumerate(statepoints):
-        #    if p.burnup < burnup_old:
-        #        break
-        #    burnup_old = p.burnup
-        #
-        #x = [statepoints[i].burnup for i in range(idx)]
-        #y = [statepoints[i].kinf for i in range(idx)]
-
-        #ipoint = self.parent.point_sbox.value()
-        #voi = segment.statepoints[ipoint].voi
-        #vhi = segment.statepoints[ipoint].vhi
-        #tfu = segment.statepoints[ipoint].tfu
-        #statepoints = segment.get_statepoints(voi, vhi, tfu)
-        #x = [s.burnup for s in statepoints]
-        #y = [s.kinf for s in statepoints]
-        
-        x, y = self.get_xy(segment, "KINF")
+        statepoints = segment.get_statepoints(voi, vhi, tfu)
+        x = [s.burnup for s in statepoints]
+        y = [s.kinf for s in statepoints]
         
         labstr = segment.data.sim
         labstr = labstr.replace("SIM", "").replace("'", "").strip()
@@ -100,22 +83,11 @@ class PlotWin(QtGui.QMainWindow):
         self.axes.legend(loc='best', prop={'size': 8})
         self.on_draw()
 
-    def plot_fint(self, iseg, ibundle=-1, linestyle="-"):
+    def plot_fint(self, segment, voi, vhi, tfu, linestyle="-"):
 
-        segment = self.parent.bunlist[ibundle].segments[iseg]
-        #idx0 = self.startpoint(case_id, istate)
-        #statepoints = segment.statepoints[idx0:]
-        #
-        #burnup_old = 0.0
-        #for idx, p in enumerate(statepoints):
-        #    if p.burnup < burnup_old:
-        #        break
-        #    burnup_old = p.burnup
-        #
-        #x = [statepoints[i].burnup for i in range(idx)]
-        #y = [statepoints[i].fint for i in range(idx)]
-
-        x, y = self.get_xy(segment, "FINT")
+        statepoints = segment.get_statepoints(voi, vhi, tfu)
+        x = [s.burnup for s in statepoints]
+        y = [s.fint for s in statepoints]
 
         labstr = segment.data.sim
         labstr = labstr.replace("SIM", "").replace("'", "").strip()
@@ -126,13 +98,13 @@ class PlotWin(QtGui.QMainWindow):
         self.axes.legend(loc='best', prop={'size': 8})
         self.on_draw()
 
-    def plot_btf(self, ibundle=-1, linestyle="-"):
-        
-        x = self.parent.bunlist[ibundle].btf.burnpoints
-        DOX = self.parent.bunlist[ibundle].btf.DOX
-        y = [e.max() for e in DOX]
-        self.axes.plot(x, y, linestyle=linestyle)
+    def plot_btf(self, bundle, linestyle="-"):
 
+        x = bundle.btf.burnpoints
+        DOX = bundle.btf.DOX
+        y = [e.max() for e in DOX]
+                
+        self.axes.plot(x, y, linestyle=linestyle)
         self.axes.set_xlabel('Burnup (MWd/kgU)')
         self.axes.set_ylabel('BTF')
         self.on_draw()
@@ -211,16 +183,8 @@ class PlotWin(QtGui.QMainWindow):
     def on_plot(self):
 
         case_id = int(self.parent.case_cbox.currentIndex())
-        #case_id = self.case_id_current
         case_id_max = len(self.parent.bunlist[-1].segments)
-        #case_id_max = len(self.parent.bundle.cases)
-        #parent_param = str(self.parent.param_cbox.currentText())
-        #if parent_param in ["KINF", "FINT", "BTF"]:
-        #    #qtrace()
-        #    self.param_cbox.setCurrentIndex(1)
-        #else:
-        #    self.param_cbox.setCurrentIndex(0)
-        #qtrace()
+        
         param = self.param_cbox.currentText()
         ibundle = self.parent.ibundle
 
@@ -238,26 +202,36 @@ class PlotWin(QtGui.QMainWindow):
         self.axes.clear()
         if param == "KINF":
             if self.case_cb.isChecked():
-                for i in range(case_id_max):
-                    self.plot_kinf(i, ibundle)
+                for iseg in range(case_id_max):
+                    segment = self.parent.bunlist[ibundle].segments[iseg]
+                    self.plot_kinf(segment, voi=voi, vhi=vhi, tfu=tfu)
             else:
-                self.plot_kinf(case_id, ibundle)
+                segment = self.parent.bunlist[ibundle].segments[case_id]
+                self.plot_kinf(segment, voi=voi, vhi=vhi, tfu=tfu)
                 if self.original_cb.isChecked():
-                    self.plot_kinf(case_id, ibundle=0, linestyle="--")
+                    segment = self.parent.bunlist[0].segments[case_id]
+                    self.plot_kinf(segment, voi=voi, vhi=vhi, tfu=tfu,
+                                   linestyle="--")
 
         elif param == "FINT":
             if self.case_cb.isChecked():
-                for i in range(case_id_max):
-                    self.plot_fint(i, ibundle)
+                for iseg in range(case_id_max):
+                    segment = self.parent.bunlist[ibundle].segments[iseg]
+                    self.plot_fint(segment, voi=voi, vhi=vhi, tfu=tfu)
             else:
-                self.plot_fint(case_id, ibundle)
+                segment = self.parent.bunlist[ibundle].segments[case_id]
+                self.plot_fint(segment, voi=voi, vhi=vhi, tfu=tfu)
                 if self.original_cb.isChecked():
-                    self.plot_fint(case_id, ibundle=0, linestyle="--")
+                    segment = self.parent.bunlist[0].segments[case_id]
+                    self.plot_fint(segment, voi=voi, vhi=vhi, tfu=tfu,
+                                   linestyle="--")
 
         elif param == 'BTF':
-            self.plot_btf(ibundle)
+            bundle = self.parent.bunlist[ibundle]
+            self.plot_btf(bundle)
             if self.original_cb.isChecked():
-                self.plot_btf(ibundle=0, linestyle="--")
+                bundle = self.parent.bunlist[0]
+                self.plot_btf(bundle, linestyle="--")
  
     def create_main_frame(self):
         self.main_frame = QtGui.QWidget()
