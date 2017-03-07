@@ -1276,7 +1276,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             bundle.segments[iseg].set_data(LFU, FUE, BA, voi, chanbow)
         maxdep = bundle.data.maxdep
         bundle.new_calc(model='c3', maxdep=maxdep)
-
+        
         # remove bias from perturbation calc
         for iseg in xrange(len(bundle.segments)):
             pts = bundle.segments[iseg].statepoints
@@ -1296,7 +1296,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                 kinf[i] = pts0[i].kinf + dkinf
                 #if dPOW.any():
                 #    qtrace()
-                
+          
             fint = bundle.segments[iseg].fintcalc(POW)
             burnup = np.array(burnlist)
             EXP = bundle.segments[iseg].expcalc(POW, burnup)
@@ -1305,12 +1305,10 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                 bundle.segments[iseg].statepoints[i].EXP = EXP[:, :, i]
                 bundle.segments[iseg].statepoints[i].fint = fint[i]
                 bundle.segments[iseg].statepoints[i].kinf = kinf[i]
-
+        
         bundle.new_btf()
         self.bunlist.append(bundle)
-        
         self.ibundle = len(self.bunlist) - 1
-        
         self.fig_update()
         self.setCursor(QtCore.Qt.ArrowCursor)
         

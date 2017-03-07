@@ -1064,7 +1064,7 @@ class Segment(object):
             print "Quickcalc model is unknown"
             return
         self.readc3cax(file_base_name, refcalc)
-        self.fill_statepoints()
+        #self.fill_statepoints()
         self.ave_enr_calc()
 
         os.remove(file_base_name + ".inp")
