@@ -1260,7 +1260,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                 for s in self.biascalc.segments:
                     s.set_data(voi=self.biascalc.data.voi)
             dep_max = self.biascalc.data.dep_max
-            self.biascalc.new_calc(model="c3", dep_max=dep_max)
+            model = self.biascalc.data.model
+            self.biascalc.new_calc(model=model, dep_max=dep_max)
             #self.biascalc.new_btf()
 
         # New perturbation calc
@@ -1275,7 +1276,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             BA = self.__bamap(iseg)
             bundle.segments[iseg].set_data(LFU, FUE, BA, voi, chanbow)
         dep_max = bundle.data.dep_max
-        bundle.new_calc(model='c3', dep_max=dep_max)
+        model = bundle.data.model
+        bundle.new_calc(model=model, dep_max=dep_max)
         
         # remove bias from perturbation calc
         for iseg in xrange(len(bundle.segments)):

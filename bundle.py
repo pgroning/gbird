@@ -131,6 +131,7 @@ class Bundle(object):
         # Perturbation calculation
         self.data.dep_max = None
         self.data.voi = None
+        self.data.model = "c3"
 
         if config.has_section("Pertcalc"):
             if config.has_option("Pertcalc", "dep_max"):
@@ -141,7 +142,11 @@ class Bundle(object):
                 voi = config.get("Pertcalc", "voi")
                 if voi != "undef":
                     self.data.voi = int(voi)
-        
+            if config.has_option("Pertcalc", "model"):
+                model = config.get("Pertcalc", "model")
+                if model != "undef":
+                    self.data.model = model
+
         return True
     
 

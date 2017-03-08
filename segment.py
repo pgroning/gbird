@@ -617,12 +617,12 @@ class Segment(object):
     #              .strip().split(' ')[1:])
     #    return voids
 
-    def reduce_burnpoints(self, maxdep=20.0):
+    def reduce_burnpoints(self, dep_max=20.0):
         """Reduce number of depletion points"""
         
         red_burnlist = []
         for burnpoints in self.burnlist:
-            red_pts = [x for x in burnpoints if x <= maxdep]
+            red_pts = [x for x in burnpoints if x <= dep_max]
             red_burnlist.append(red_pts)
 
         #red_burnlist = []
@@ -636,7 +636,7 @@ class Segment(object):
         #    red_burnlist.append(red_pts)
         return red_burnlist
     
-    def writec3cai(self, file_base_name, voi=None, maxdep=None, dep_thres=None,
+    def writec3cai(self, file_base_name, voi=None, dep_max=None, dep_thres=None,
                    box_offset=0.0):
         
         # filebasename = "./" + str(uuid.uuid4())
@@ -709,8 +709,8 @@ class Segment(object):
         if not hasattr(self, "burnlist"):
             self.burnlist = [self.burnpoints(voi=v) for v in self.data.voilist]
         
-        if maxdep is not None:
-            burnlist = self.reduce_burnpoints(maxdep=maxdep)
+        if dep_max is not None:
+            burnlist = self.reduce_burnpoints(dep_max=dep_max)
         else:
             burnlist = self.burnlist
         
