@@ -472,9 +472,9 @@ class Segment(object):
         # print "Writing to file " + caifile
 
         cainp = file_base_name + ".inp"
-        print "Writing C input file " + cainp
+        print "Writing c4 input file " + cainp
 
-        info = self.states[0]
+        info = self.data
         f = open(cainp, 'w')
         f.write(info.title + '\n')
         f.write(info.sim + '\n')
@@ -570,6 +570,7 @@ class Segment(object):
                 call(arglist[3:], stdout=fout, stderr=STDOUT, shell=False)
         else:  # use local machine
             call(arglist[3:], stdout=fout, stderr=STDOUT, shell=False)
+            #call(arglist[3:])
     
     def set_data(self, LFU=None, FUE=None, BA=None, voi=None, box_offset=0.0):
         """Append a list element to store result of new calculation"""
@@ -637,20 +638,14 @@ class Segment(object):
         return red_burnlist
     
     def writec3cai(self, file_base_name, voi=None, dep_max=None, dep_thres=None,
-                   box_offset=0.0):
+                   box_offset=0.0, model="c3"):
         
-        # filebasename = "./" + str(uuid.uuid4())
         c3inp = file_base_name + ".inp"
         # c3inp = tempfile.NamedTemporaryFile(dir='.',
         # prefix="c3_",suffix=".inp",delete=False)
-        #print "Writing c3 input file " + c3inp
 
         # Creating dep strings
         info = self.data
-        #voivec = info.voivec
-        # voivec = self.voivec()
-        # voivec = (info.voi.split('*')[0].replace(',', ' ')
-        #          .strip().split(' ')[1:])
         
         if voi:
             voilist = [int(voi)]
@@ -714,24 +709,20 @@ class Segment(object):
         else:
             burnlist = self.burnlist
         
-        if hasattr(self.data, 'LFU'):
+        if hasattr(self.data, "LFU"):
             LFU = self.data.LFU
         else:
             print "Error: LFU is missing."
             return
         
-        f = open(c3inp, 'w')
+        f = open(c3inp, "w")
 
         tit_1 = "TIT "
-        # tit_2 = info.tfu.split('*')[0].replace(',', '=').strip() + " "
         tit_2 = re.sub('\s+=|=\s+|,', '=', info.tfu.split('*')[0]
                        .strip()) + " "
-        # tit_3 = info.tmo.split('*')[0].replace(',', '=').strip() + " "
         tit_3 = re.sub('\s+|,', '=', info.tmo.split('*')[0].strip()) + " "
         tit = tit_1 + tit_2 + tit_3
         if voi is None:
-            # voivec = info.voi.split('*')[0].replace(',', ' ')\
-            #                                      .strip().split(' ')[1:]
             tit = tit + "VOI=" + str(voilist[0]) + " "
             ide = ["'BD" + str(x) + "'" for x in voilist]
             f.write(tit + "IDE=" + ide[0] + '\n')
@@ -742,7 +733,7 @@ class Segment(object):
         
         FUE = info.FUE
         Nfue = FUE.shape[0]
-        baid_offset = 0  # The same BA id must not occur more than once
+        baid_offset = 0  # The same BA id must not occur more than once in c3
         for i in xrange(Nfue):
             f.write('FUE  %d ' % (FUE[i, 0]))
             f.write('%5.3f/%5.3f' % (FUE[i, 1], FUE[i, 2]))
@@ -764,29 +755,24 @@ class Segment(object):
             box_offset = self.data.box_offset
         bwr = self.__boxbow(box_offset)
         
-        #if box_offset:
-        #    bwr = self.__boxbow(box_offset)
-        #    # f.write(bwr + '\n')
-        #else:
-        #    bwr = info.bwr.strip()
-        #    # f.write(info.bwr.strip() + '\n')
-
         # box corner radius (extra thickness). Valid for AT11
         if '/' in bwr:
-            bwr = bwr.replace('/', '//')  # a // is needed for C3
+            bwr = bwr.replace('/', '//')  # a '//' is needed for c3
 
         f.write(bwr + '\n')
 
         Npin = np.size(info.pinlines)
         for i in xrange(Npin):
-            # Remove coments etc
+            # Remove comments etc
             tmpstr = re.split('\*|/', info.pinlines[i].strip())[0]
             pinarr = re.split(',|\s+', tmpstr.strip())  # Split for segments
             npinsegs = len(pinarr)-2
             if npinsegs > 3:
+                # c3 can handle no more than 3 radial pin segments
                 red_pinstr = ' '.join(pinarr[0:3]+pinarr[-2:])
             else:
                 red_pinstr = info.pinlines[i].strip()
+            print red_pinstr
             f.write(red_pinstr.strip() + '\n')
         
         if hasattr(info, 'slaline'):  # has water cross?
@@ -804,11 +790,6 @@ class Segment(object):
         f.write("DEP" + '\n')
         for x in burnlist[0]:
             f.write(str(x) + '\n')
-        # if maxdep is None:
-        #    f.write(info.dep.strip() + '\n')
-        # else:
-        #    depstr = "DEP 0, 0.001, -" + str(maxdep)
-        #    f.write(depstr + '\n')
         
         f.write('NLI\n')
         f.write('STA\n')
@@ -817,7 +798,6 @@ class Segment(object):
             N = len(ide)
             for i in xrange(1, N):
                 f.write("TIT " + "IDE=" + ide[i] + '\n')
-                # f.write(tit + "IDE=" + ide[i] + '\n')
                 res = "RES," + ide[i-1] + ",0"
                 f.write(res + '\n')
                 f.write("VOI " + str(voilist[i]) + '\n')
@@ -826,18 +806,10 @@ class Segment(object):
                 for x in burnlist[i]:
                     f.write(str(x) + '\n')
 
-                # if maxdep is None:
-                #    f.write(info.dep.strip() + '\n')
-                # else:
-                #    depstr = "DEP 0, 0.001, -" + str(maxdep)
-                #    f.write(depstr + '\n')
-
                 f.write('STA\n')
 
         f.write('END\n')
-        # c3inp.close()
         f.close()
-        # return filebasename
 
     def fill_statepoints(self):
         """Insert statepoints by interpolation of nearby points"""
@@ -1042,26 +1014,21 @@ class Segment(object):
     #    # EXP = self.__expcalc(POW, burnup)
     #    # Tracer()()
 
-    def quickcalc(self, voi=None, dep_max=None, dep_thres=None, grid=True,
-                  model='c3', box_offset=0.0, neulib=False):
+    def quickcalc(self, voi=None, dep_max=None, dep_thres=None, grid=False,
+                  model="c3", box_offset=0.0, neulib=False):
 
         tic = time.time()
-        # # LFU is set to original state only for testing purpose
-        # LFU = self.states[0].LFU
-        # FUE = self.states[0].FUE
-        # # Append element to hold a new calculation
-        # self.add_state(LFU, FUE, voi)
-        # ---------------------------------
         
         file_base_name = "./tmp." + str(uuid.uuid4()).split('-')[0]
-        self.writec3cai(file_base_name, voi, dep_max, dep_thres, box_offset)
+        self.writec3cai(file_base_name, voi, dep_max, dep_thres, box_offset, 
+                        model)
         
-        if model == 'c3':
+        if model == "c3":
             self.runc3(file_base_name, grid)
-        elif model == 'c4':
+        elif model == "c4":
             self.runc4(file_base_name, neulib, grid)
         else:
-            print "Quickcalc model is unknown"
+            print "Perturbation model is unknown"
             return
         self.readc3cax(file_base_name)
         #self.fill_statepoints()
