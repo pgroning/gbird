@@ -772,7 +772,6 @@ class Segment(object):
                 red_pinstr = ' '.join(pinarr[0:3]+pinarr[-2:])
             else:
                 red_pinstr = info.pinlines[i].strip()
-            print red_pinstr
             f.write(red_pinstr.strip() + '\n')
         
         if hasattr(info, 'slaline'):  # has water cross?

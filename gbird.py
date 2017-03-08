@@ -278,7 +278,7 @@ class MainWin(QtGui.QMainWindow):
 
             filext = os.path.splitext(filename)[1]
             if filext == ".gbi":  # pickle file
-                self.ibundle = -1
+                #self.ibundle = -1
                 self.load_pickle(filename)
                 self.fig_update()
                 self.chanbow_sbox_update()
@@ -333,7 +333,12 @@ class MainWin(QtGui.QMainWindow):
         self.clear_data()
         with open(filename, 'rb') as fp:
             self.bunlist = pickle.load(fp)
+            try:
+                self.biascalc = pickle.load(fp)
+            except EOFError:  # biascalc exists?
+                pass
 
+        self.ibundle = len(self.bunlist) - 1
         self.init_pinobjects()
         self.init_cboxes()
  
@@ -521,6 +526,8 @@ class MainWin(QtGui.QMainWindow):
             filename = filename + ".gbi"  # add file extension
         with open(filename, 'wb') as fp:
             pickle.dump(self.bunlist, fp, 1)
+            if hasattr(self, "biascalc"):
+                pickle.dump(self.biascalc, fp, 1)
         print "Saved data to file " + filename
 
     def open_plotwin(self):
