@@ -234,8 +234,8 @@ class Bundle(object):
         elif fuetype == "A10":
             self.data.fuetype = "A10B"
 
-    def new_calc(self, voi=None, dep_max=None, dep_thres=None, refcalc=False,
-                 grid=False, model='c3', box_offset=0, neulib=False):
+    def new_calc(self, voi=None, dep_max=None, dep_thres=None, grid=False,
+                 model='c3', box_offset=0, neulib=False):
 
         # For storage of new calculation
         #self.new_state()
@@ -265,8 +265,8 @@ class Bundle(object):
         
         segments = self.segments
         for s in segments:
-            inlist.append((s, voi, dep_max, dep_thres, refcalc, grid,
-                           model, box_offset, neulib))
+            inlist.append((s, voi, dep_max, dep_thres, grid, model,
+                           box_offset, neulib))
         
         #quickcalc_fun(inlist[0])
         #Tracer()()

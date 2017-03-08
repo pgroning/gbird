@@ -929,7 +929,7 @@ class Segment(object):
         # c3out.unlink(c3out.name)
         # os.remove(c3out)
 
-    def readc3cax(self, file_base_name, refcalc=False):
+    def readc3cax(self, file_base_name):
 
         # caxfile = "./c3.cax"
         caxfile = file_base_name + ".cax"
@@ -1042,8 +1042,8 @@ class Segment(object):
     #    # EXP = self.__expcalc(POW, burnup)
     #    # Tracer()()
 
-    def quickcalc(self, voi=None, dep_max=None, dep_thres=None, refcalc=False,
-                  grid=True, model='c3', box_offset=0.0, neulib=False):
+    def quickcalc(self, voi=None, dep_max=None, dep_thres=None, grid=True,
+                  model='c3', box_offset=0.0, neulib=False):
 
         tic = time.time()
         # # LFU is set to original state only for testing purpose
@@ -1063,7 +1063,7 @@ class Segment(object):
         else:
             print "Quickcalc model is unknown"
             return
-        self.readc3cax(file_base_name, refcalc)
+        self.readc3cax(file_base_name)
         #self.fill_statepoints()
         self.ave_enr_calc()
 
