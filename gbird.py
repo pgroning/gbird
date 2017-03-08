@@ -1246,7 +1246,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
     def quick_calc(self):
         """Performing quick calculation"""
-
+        
         self.setCursor(QtCore.Qt.WaitCursor)
         
         # remove irrelevant bundle calcs but keep bias calc
@@ -1259,8 +1259,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             if self.biascalc.data.voi is not None:
                 for s in self.biascalc.segments:
                     s.set_data(voi=self.biascalc.data.voi)
-            maxdep = self.biascalc.data.maxdep
-            self.biascalc.new_calc(model="c3", maxdep=maxdep)
+            dep_max = self.biascalc.data.dep_max
+            self.biascalc.new_calc(model="c3", dep_max=dep_max)
             #self.biascalc.new_btf()
 
         # New perturbation calc
@@ -1274,8 +1274,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             FUE = self.__fuemap(iseg)
             BA = self.__bamap(iseg)
             bundle.segments[iseg].set_data(LFU, FUE, BA, voi, chanbow)
-        maxdep = bundle.data.maxdep
-        bundle.new_calc(model='c3', maxdep=maxdep)
+        dep_max = bundle.data.dep_max
+        bundle.new_calc(model='c3', dep_max=dep_max)
         
         # remove bias from perturbation calc
         for iseg in xrange(len(bundle.segments)):

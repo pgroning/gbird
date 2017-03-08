@@ -1042,7 +1042,7 @@ class Segment(object):
     #    # EXP = self.__expcalc(POW, burnup)
     #    # Tracer()()
 
-    def quickcalc(self, voi=None, maxdep=None, depthres=None, refcalc=False,
+    def quickcalc(self, voi=None, dep_max=None, dep_thres=None, refcalc=False,
                   grid=True, model='c3', box_offset=0.0, neulib=False):
 
         tic = time.time()
@@ -1054,7 +1054,7 @@ class Segment(object):
         # ---------------------------------
         
         file_base_name = "./tmp." + str(uuid.uuid4()).split('-')[0]
-        self.writec3cai(file_base_name, voi, maxdep, depthres, box_offset)
+        self.writec3cai(file_base_name, voi, dep_max, dep_thres, box_offset)
         
         if model == 'c3':
             self.runc3(file_base_name, grid)

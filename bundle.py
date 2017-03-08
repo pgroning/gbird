@@ -129,14 +129,14 @@ class Bundle(object):
             self.data.btf_nodes = self.data.nodes
 
         # Perturbation calculation
-        self.data.maxdep = None
+        self.data.dep_max = None
         self.data.voi = None
 
         if config.has_section("Pertcalc"):
-            if config.has_option("Pertcalc", "maxdep"):
-                maxdep = config.get("Pertcalc", "maxdep")
-                if maxdep != "undef":
-                    self.data.maxdep = float(maxdep)
+            if config.has_option("Pertcalc", "dep_max"):
+                dep_max = config.get("Pertcalc", "dep_max")
+                if dep_max != "undef":
+                    self.data.dep_max = float(dep_max)
             if config.has_option("Pertcalc", "voi"):
                 voi = config.get("Pertcalc", "voi")
                 if voi != "undef":
@@ -234,7 +234,7 @@ class Bundle(object):
         elif fuetype == "A10":
             self.data.fuetype = "A10B"
 
-    def new_calc(self, voi=None, maxdep=None, depthres=None, refcalc=False,
+    def new_calc(self, voi=None, dep_max=None, dep_thres=None, refcalc=False,
                  grid=False, model='c3', box_offset=0, neulib=False):
 
         # For storage of new calculation
@@ -265,7 +265,7 @@ class Bundle(object):
         
         segments = self.segments
         for s in segments:
-            inlist.append((s, voi, maxdep, depthres, refcalc, grid,
+            inlist.append((s, voi, dep_max, dep_thres, refcalc, grid,
                            model, box_offset, neulib))
         
         #quickcalc_fun(inlist[0])
