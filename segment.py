@@ -639,11 +639,11 @@ class Segment(object):
         #    red_burnlist.append(red_pts)
         return red_burnlist
     
-    def writec3cai(self, file_base_name, voi=None, dep_max=None, dep_thres=None,
+    def writecai(self, file_base_name, voi=None, dep_max=None, dep_thres=None,
                    box_offset=0.0, model="c3"):
         """Write cai file for models c3 or c4"""
 
-        c3inp = file_base_name + ".inp"
+        cinp = file_base_name + ".inp"
         # c3inp = tempfile.NamedTemporaryFile(dir='.',
         # prefix="c3_",suffix=".inp",delete=False)
 
@@ -718,7 +718,7 @@ class Segment(object):
             print "Error: LFU is missing."
             return
         
-        f = open(c3inp, "w")
+        f = open(cinp, "w")
 
         tit_1 = "TIT "
         tit_2 = re.sub('\s+=|=\s+|,', '=', info.tfu.split('*')[0]
@@ -1028,7 +1028,7 @@ class Segment(object):
         tic = time.time()
         
         file_base_name = "./tmp." + str(uuid.uuid4()).split('-')[0]
-        self.writec3cai(file_base_name, voi, dep_max, dep_thres, box_offset, 
+        self.writecai(file_base_name, voi, dep_max, dep_thres, box_offset, 
                         model)
         
         if model == "c3":
