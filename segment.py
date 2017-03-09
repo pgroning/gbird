@@ -205,7 +205,7 @@ class Segment(object):
         iTTL = self.__matchcontent(flines, '^\s*TTL')
         iVOI = self.__matchcontent(flines, '^\s*VOI')
         iDEP = self.__matchcontent(flines, '^\s*DEP')
-
+        
         # Stop looping at first finding
         iEND = self.__matchcontent(flines, '^\s*END', 'next')
         iBWR = self.__matchcontent(flines, '^\s*BWR', 'next')
@@ -221,9 +221,10 @@ class Segment(object):
             # print "Info: Could not find SLA card"
         iWRI = self.__matchcontent(flines, '^\s*WRI', 'next')
         iSTA = self.__matchcontent(flines, '^\s*STA', 'next')
-        #print "Done."
 
-        #do = DataStruct()  # Init data container object
+        # Miscellaneous compositions
+        iMIx = self.__matchcontent(flines[:iLPI], '^\s*MI[1-9]')
+
         # Read title
         self.data.title = flines[iTTL[0]]
         #do.title = flines[iTTL[0]]
@@ -272,6 +273,9 @@ class Segment(object):
         LFU = self.__symmap(maplines, npst, int)
         # LFU = self.__symmetry_map(flines, iLFU, npst)
 
+        # Get MIx strings
+        self.data.milines = [flines[i] for i in iMIx]
+        
         # Read LPI map
         maplines = flines[iLPI+1:iLPI+1+npst]
         # LPI = self.__symtrans(self.__map2mat(caxmap, npst)).astype(int)
@@ -296,11 +300,9 @@ class Segment(object):
 
         # Read PIN (pin radius)
         PIN = self.__get_pin(flines, iPIN)
-
         Npin = PIN.shape[0]
-        # self.pinlines = flines[iPIN[0]:iPIN[0]+Npin]
         self.data.pinlines = flines[iPIN[0]:iPIN[0]+Npin]
-
+        
         # Read SLA
         if iSLA is not None:
             self.data.slaline = flines[iSLA]
@@ -467,72 +469,72 @@ class Segment(object):
         self.ave_enr = ave_enr
         #return ave_enr
 
-    # -------Write cai file------------
-    def writecai(self, file_base_name):
-        # print "Writing to file " + caifile
-
-        cainp = file_base_name + ".inp"
-        print "Writing c4 input file " + cainp
-
-        info = self.data
-        f = open(cainp, 'w')
-        f.write(info.title + '\n')
-        f.write(info.sim + '\n')
-        f.write(info.tfu + '\n')
-        f.write(info.tmo + '\n')
-        f.write(info.voi + '\n')
-
-        Nfue = info.FUE.shape[0]
-        for i in range(Nfue):
-            f.write(' FUE  %d ' % (info.FUE[i, 0]))
-            f.write('%5.3f/%5.3f' % (info.FUE[i, 1], info.FUE[i, 2]))
-            if ~np.isnan(info.FUE[i, 3]):
-                f.write(' %d=%4.2f' % (info.FUE[i, 3],
-                                       info.FUE[i, 4]))
-            f.write('\n')
-
-        f.write(' LFU\n')
-        for i in range(info.npst):
-            for j in range(i+1):
-                f.write(' %d' % info.LFU[i, j])
-                # if j < i: f.write(' ')
-            f.write('\n')
-
-        f.write(info.pde + '\n')
-        f.write(info.bwr + '\n')
-
-        Npin = np.size(info.pinlines)
-        for i in range(Npin):
-            f.write(info.pinlines[i] + '\n')
-
-        if hasattr(info, 'slaline'):
-            f.write(info.slaline.strip() + '\n')
-
-        f.write(' LPI\n')
-        for i in range(info.npst):
-            for j in range(i+1):
-                f.write(' %d' % info.LPI[i, j])
-                # if j < i: f.write(' ')
-            f.write('\n')
-
-        f.write(info.spa + '\n')
-        f.write(info.dep + '\n')
-        f.write(info.gam + '\n')
-        f.write(info.wri + '\n')
-        f.write(info.sta + '\n')
-
-        f.write(' TTL\n')
-
-        depstr = re.split('DEP', info.dep)[1].replace(',', '').strip()
-        f.write(' RES,,%s\n' % (depstr))
-
-        # f.write(' RES,,0 0.5 1.5 2.5 5.0 7.5 10.0 12.5 15.0 17.5 20.0 25
-        # 30 40 50 60 70\n')
-        f.write(info.crd + '\n')
-        f.write(' NLI\n')
-        f.write(' STA\n')
-        f.write(' END\n')
-        f.close()
+    ## -------Write cai file------------
+    #def writecai(self, file_base_name):
+    #    # print "Writing to file " + caifile
+    #
+    #    cainp = file_base_name + ".inp"
+    #    print "Writing c4 input file " + cainp
+    #
+    #    info = self.data
+    #    f = open(cainp, 'w')
+    #    f.write(info.title + '\n')
+    #    f.write(info.sim + '\n')
+    #    f.write(info.tfu + '\n')
+    #    f.write(info.tmo + '\n')
+    #    f.write(info.voi + '\n')
+    #
+    #    Nfue = info.FUE.shape[0]
+    #    for i in range(Nfue):
+    #        f.write(' FUE  %d ' % (info.FUE[i, 0]))
+    #        f.write('%5.3f/%5.3f' % (info.FUE[i, 1], info.FUE[i, 2]))
+    #        if ~np.isnan(info.FUE[i, 3]):
+    #            f.write(' %d=%4.2f' % (info.FUE[i, 3],
+    #                                   info.FUE[i, 4]))
+    #        f.write('\n')
+    #
+    #    f.write(' LFU\n')
+    #    for i in range(info.npst):
+    #        for j in range(i+1):
+    #            f.write(' %d' % info.LFU[i, j])
+    #            # if j < i: f.write(' ')
+    #        f.write('\n')
+    #
+    #    f.write(info.pde + '\n')
+    #    f.write(info.bwr + '\n')
+    #
+    #    Npin = np.size(info.pinlines)
+    #    for i in range(Npin):
+    #        f.write(info.pinlines[i] + '\n')
+    #
+    #    if hasattr(info, 'slaline'):
+    #        f.write(info.slaline.strip() + '\n')
+    #
+    #    f.write(' LPI\n')
+    #    for i in range(info.npst):
+    #        for j in range(i+1):
+    #            f.write(' %d' % info.LPI[i, j])
+    #            # if j < i: f.write(' ')
+    #        f.write('\n')
+    #
+    #    f.write(info.spa + '\n')
+    #    f.write(info.dep + '\n')
+    #    f.write(info.gam + '\n')
+    #    f.write(info.wri + '\n')
+    #    f.write(info.sta + '\n')
+    #
+    #    f.write(' TTL\n')
+    #
+    #    depstr = re.split('DEP', info.dep)[1].replace(',', '').strip()
+    #    f.write(' RES,,%s\n' % (depstr))
+    #
+    #    # f.write(' RES,,0 0.5 1.5 2.5 5.0 7.5 10.0 12.5 15.0 17.5 20.0 25
+    #    # 30 40 50 60 70\n')
+    #    f.write(info.crd + '\n')
+    #    f.write(' NLI\n')
+    #    f.write(' STA\n')
+    #    f.write(' END\n')
+    #    f.close()
 
     def runc4(self, file_base_name, neulib=False, grid=False):
         """Running C4 model"""
@@ -639,7 +641,8 @@ class Segment(object):
     
     def writec3cai(self, file_base_name, voi=None, dep_max=None, dep_thres=None,
                    box_offset=0.0, model="c3"):
-        
+        """Write cai file for models c3 or c4"""
+
         c3inp = file_base_name + ".inp"
         # c3inp = tempfile.NamedTemporaryFile(dir='.',
         # prefix="c3_",suffix=".inp",delete=False)
@@ -756,24 +759,30 @@ class Segment(object):
         bwr = self.__boxbow(box_offset)
         
         # box corner radius (extra thickness). Valid for AT11
-        if '/' in bwr:
-            bwr = bwr.replace('/', '//')  # a '//' is needed for c3
-
+        if model == "c3":
+            if '/' in bwr:
+                bwr = bwr.replace('/', '//')  # a '//' is needed for c3
         f.write(bwr + '\n')
 
         Npin = np.size(info.pinlines)
-        for i in xrange(Npin):
-            # Remove comments etc
-            tmpstr = re.split('\*|/', info.pinlines[i].strip())[0]
-            pinarr = re.split(',|\s+', tmpstr.strip())  # Split for segments
-            npinsegs = len(pinarr)-2
-            if npinsegs > 3:
-                # c3 can handle no more than 3 radial pin segments
-                red_pinstr = ' '.join(pinarr[0:3]+pinarr[-2:])
-            else:
-                red_pinstr = info.pinlines[i].strip()
-            f.write(red_pinstr.strip() + '\n')
-        
+        if model == "c3":
+            for i in xrange(Npin):
+                # Remove comments etc
+                tmpstr = re.split('\*|/', info.pinlines[i].strip())[0]
+                pinarr = re.split(',|\s+', tmpstr.strip())  # Split for segments
+                npinsegs = len(pinarr)-2
+                if npinsegs > 3:
+                    # c3 can handle no more than 3 radial pin segments
+                    red_pinstr = ' '.join(pinarr[0:3]+pinarr[-2:])
+                else:
+                    red_pinstr = info.pinlines[i].strip()
+                f.write(red_pinstr.strip() + '\n')
+        elif model == "c4":
+            for i in xrange(Npin):
+                f.write(info.pinlines[i] + '\n')
+            for line in info.milines:
+                f.write(line + '\n')
+                
         if hasattr(info, 'slaline'):  # has water cross?
             if info.slaline:  # check that it is not empty
                 f.write(info.slaline.strip() + '\n')
