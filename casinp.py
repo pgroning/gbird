@@ -27,7 +27,7 @@ class Casinp(object):
       self.caxfiles.append(seglist[i].data.caxfile)
       self.LFU.append(seglist[i].data.LFU)
       self.FUE.append(seglist[i].data.FUE)
-      self.TIT.append(seglist[i].data.TIT)
+      self.TIT.append(seglist[i].data.title)
 
   def existfiles(self,verbose=False):
     """
