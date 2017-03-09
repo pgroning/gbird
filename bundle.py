@@ -130,6 +130,7 @@ class Bundle(object):
 
         # Perturbation calculation
         self.data.dep_max = None
+        self.data.dep_thres = None
         self.data.voi = None
         self.data.model = "c3"
 
@@ -138,6 +139,10 @@ class Bundle(object):
                 dep_max = config.get("Pertcalc", "dep_max")
                 if dep_max != "undef":
                     self.data.dep_max = float(dep_max)
+            if config.has_option("Pertcalc", "dep_thres"):
+                dep_thres = config.get("Pertcalc", "dep_thres")
+                if dep_thres != "undef":
+                    self.data.dep_thres = float(dep_thres)
             if config.has_option("Pertcalc", "voi"):
                 voi = config.get("Pertcalc", "voi")
                 if voi != "undef":

@@ -635,7 +635,7 @@ class Segment(object):
     def writecai(self, file_base_name, voi=None, dep_max=None, dep_thres=None,
                    box_offset=0.0, model="c3"):
         """Write cai file for models c3 or c4"""
-
+        
         cinp = file_base_name + ".inp"
         # c3inp = tempfile.NamedTemporaryFile(dir='.',
         # prefix="c3_",suffix=".inp",delete=False)
@@ -700,8 +700,8 @@ class Segment(object):
         if not hasattr(self, "burnlist"):
             self.burnlist = [self.burnpoints(voi=v) for v in self.data.voilist]
         
-        if dep_max is not None:
-            burnlist = self.reduce_burnpoints(dep_max=dep_max)
+        if dep_max or dep_thres:
+            burnlist = self.reduce_burnpoints(dep_max, dep_thres)
         else:
             burnlist = self.burnlist
         
