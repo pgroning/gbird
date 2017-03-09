@@ -227,43 +227,30 @@ class Segment(object):
 
         # Read title
         self.data.title = flines[iTTL[0]]
-        #do.title = flines[iTTL[0]]
         # SIM
         self.data.sim = flines[iSIM[0]]
-        #do.sim = flines[iSIM[0]]
         # TFU
         self.data.tfu = flines[iTFU]
-        #do.tfu = flines[iTFU]
         # TMO
         self.data.tmo = flines[iTMO]
-        #do.tmo = flines[iTMO]
         # VOI
         self.data.voi = flines[iVOI[0]]
-        #do.voi = flines[iVOI[0]]
         # PDE
         self.data.pde = flines[iPDE]
-        #do.pde = flines[iPDE]
         # BWR
         self.data.bwr = flines[iBWR]
-        #do.bwr = flines[iBWR]
         # SPA
         self.data.spa = flines[iSPA[0]]
-        #do.spa = flines[iSPA[0]]
         # DEP
         self.data.dep = flines[iDEP[0]]
-        #do.dep = flines[iDEP[0]]
         # GAM
         self.data.gam = flines[iGAM[0]]
-        #do.gam = flines[iGAM[0]]
         # WRI
         self.data.wri = flines[iWRI]
-        #do.wri = flines[iWRI]
         # STA
         self.data.sta = flines[iSTA]
-        #do.sta = flines[iSTA]
         # CRD
         self.data.crd = flines[iCRD[0]]
-        #do.crd = flines[iCRD[0]]
 
         # get fuel dimension
         npst = int(flines[iBWR][5:7])
@@ -310,7 +297,6 @@ class Segment(object):
         # ------Step through the state points----------
         #print "Scanning state points..."
 
-        # Tracer()()
         # Nburnpts = iTIT.size
         Nburnpts = len(iTIT)
         # titcrd = []
@@ -620,25 +606,32 @@ class Segment(object):
     #              .strip().split(' ')[1:])
     #    return voids
 
-    def reduce_burnpoints(self, dep_max=20.0):
+    def reduce_burnpoints(self, dep_max=None, dep_thres=None):
         """Reduce number of depletion points"""
         
-        red_burnlist = []
-        for burnpoints in self.burnlist:
-            red_pts = [x for x in burnpoints if x <= dep_max]
-            red_burnlist.append(red_pts)
+        if dep_max is not None:
+            burnlist = []
+            for burnpoints in self.burnlist:
+                red_pts = [x for x in burnpoints if x <= dep_max]
+                burnlist.append(red_pts)
+        else:
+            burnlist = self.burnlist
 
-        #red_burnlist = []
-        #for burnpoints in self.burnlist:
-        #    red_pts = [x for x in burnpoints if x <= dep_thres]
-        #    pts = [x for x in burnpoints if x >= red_pts[-1]]
-        #    red_pts2 = pts[6::6]  # reduce number of points
-        #    if red_pts2[-1] < pts[-1]:  # add last point if not included
-        #        red_pts2.append(pts[-1])
-        #    red_pts.extend(red_pts2)
-        #    red_burnlist.append(red_pts)
-        return red_burnlist
-    
+        if dep_thres is not None:
+            thres_burnlist = []
+            for burnpoints in burnlist:
+                red_pts = [x for x in burnpoints if x <= dep_thres]
+                pts = [x for x in burnpoints if x >= red_pts[-1]]
+                red_pts2 = pts[6::6]  # reduce number of points
+                if red_pts2[-1] < pts[-1]:  # add last point if not included
+                    red_pts2.append(pts[-1])
+                red_pts.extend(red_pts2)
+                thres_burnlist.append(red_pts)
+            return thres_burnlist
+        else:
+            return burnlist
+        
+
     def writecai(self, file_base_name, voi=None, dep_max=None, dep_thres=None,
                    box_offset=0.0, model="c3"):
         """Write cai file for models c3 or c4"""
