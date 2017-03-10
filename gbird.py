@@ -1252,13 +1252,17 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         return BA
 
     def quick_calc(self):
-        """Performing quick calculation"""
+        """Performing perturbation calculation"""
         
         self.setCursor(QtCore.Qt.WaitCursor)
         
-        # remove irrelevant bundle calcs but keep bias calc
+        # remove irrelevant bundle calcs
         while len(self.bunlist) > self.ibundle + 1:
             del self.bunlist[-1]
+        
+        while len(self.bunlist) > 2:  # limit num of bundles stored in memory
+            del self.bunlist[1]
+            self.ibundle = len(self.bunlist) - 1
         
         if not hasattr(self, "biascalc"):  # make bias calc?
             print "Perturbation bias calculation..."
