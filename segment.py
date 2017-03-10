@@ -623,14 +623,14 @@ class Segment(object):
                 red_pts = [x for x in burnpoints if x <= dep_thres]
                 pts = [x for x in burnpoints if x >= red_pts[-1]]
                 red_pts2 = pts[6::6]  # reduce number of points
-                if red_pts2[-1] < pts[-1]:  # add last point if not included
+                if not red_pts2 or red_pts2[-1] < pts[-1]:
+                    # add last point if list is empty or not included
                     red_pts2.append(pts[-1])
                 red_pts.extend(red_pts2)
                 thres_burnlist.append(red_pts)
             return thres_burnlist
         else:
             return burnlist
-        
 
     def writecai(self, file_base_name, voi=None, dep_max=None, dep_thres=None,
                    box_offset=0.0, model="c3"):
