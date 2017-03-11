@@ -1878,10 +1878,10 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                                          shortcut="Ctrl+Q",
                                          tip="Close the application")
 
-        new_project_action = self.create_action("&New project...",
+        new_project_action = self.create_action("&New...",
                                                 slot=self.newProject,
                                                 shortcut="Ctrl+N",
-                                                tip="Create new project")
+                                                tip="Create a new bundle")
         
         open_file_action = self.create_action("&Open...",
                                               slot=self.openFile,
@@ -1935,6 +1935,12 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         exitAction.setStatusTip('Exit application')
         exitAction.triggered.connect(self.close)
 
+        new_icon = "icons/new-green-icon_32x32.png"
+        newAction = QtGui.QAction(QtGui.QIcon(new_icon),
+                                   'Create a new bundle', self)
+        newAction.setStatusTip('Create a new bundle')
+        newAction.triggered.connect(self.newProject)
+        
         file_icon = "icons/open-file-icon_32x32.png"
         fileAction = QtGui.QAction(QtGui.QIcon(file_icon), 'Open file', self)
         fileAction.setStatusTip('Open file')
@@ -1962,6 +1968,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         forwardAction.triggered.connect(self.forward_state)
         
         toolbar = self.addToolBar('Toolbar')
+        toolbar.addAction(newAction)
         toolbar.addAction(fileAction)
         toolbar.addAction(settingsAction)
         toolbar.addAction(plotAction)
