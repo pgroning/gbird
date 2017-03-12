@@ -1881,7 +1881,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         new_project_action = self.create_action("&New...",
                                                 slot=self.newProject,
                                                 shortcut="Ctrl+N",
-                                                tip="Create a new bundle")
+                                                tip="Create new bundle")
         
         open_file_action = self.create_action("&Open...",
                                               slot=self.openFile,
@@ -1937,7 +1937,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
         new_icon = "icons/new-green-icon_32x32.png"
         newAction = QtGui.QAction(QtGui.QIcon(new_icon),
-                                   'Create a new bundle', self)
+                                   'Create new bundle', self)
         newAction.setStatusTip('Create a new bundle')
         newAction.triggered.connect(self.newProject)
         
@@ -1945,6 +1945,12 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         fileAction = QtGui.QAction(QtGui.QIcon(file_icon), 'Open file', self)
         fileAction.setStatusTip('Open file')
         fileAction.triggered.connect(self.openFile)
+
+        calc_icon = "icons/nuclear-icon_32x32.png"
+        calcAction = QtGui.QAction(QtGui.QIcon(calc_icon),
+                                   'Run simulation', self)
+        calcAction.setStatusTip('Run simulation')
+        calcAction.triggered.connect(self.quick_calc)
 
         pre_icon = "icons/preferences-icon_32x32.png"
         settingsAction = QtGui.QAction(QtGui.QIcon(pre_icon), 'Settings', self)
@@ -1970,6 +1976,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         toolbar = self.addToolBar('Toolbar')
         toolbar.addAction(newAction)
         toolbar.addAction(fileAction)
+        toolbar.addAction(calcAction)
         toolbar.addAction(settingsAction)
         toolbar.addAction(plotAction)
         toolbar.addAction(backAction)
