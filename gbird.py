@@ -1899,11 +1899,20 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                                           quit_action))
 
         self.edit_menu = self.menuBar().addMenu("&Edit")
+
+        back = self.create_action("Back", slot=self.back_state,
+                                  tip="Back to previous design")
+
+        forward = self.create_action("Forward", slot=self.forward_state,
+                                         tip="Forward to next  design")
+        
         preferences = self.create_action("Preferences...",
                                          tip="Preferences...")
+        
         project = self.create_action("Project...",
                                      tip="Edit project...")
-        self.add_actions(self.edit_menu, (project, None, preferences))
+        self.add_actions(self.edit_menu, (back, forward, project,
+                                          None, preferences))
 
         self.tools_menu = self.menuBar().addMenu("&Tools")
         plot_action = self.create_action("Plot...", tip="Plot...",
