@@ -37,6 +37,7 @@ except:
 from bundle import Bundle
 from btf import Btf
 from plot import PlotWin
+from dlg_cascalc import CasDialog
 from progbar import ProgressBar
 # from map_s96 import s96o2
 # from map_a10 import a10xm
@@ -749,6 +750,11 @@ class MainWin(QtGui.QMainWindow):
         
         self.fig_update()
 
+    def open_cas_dlg(self):
+        print "open casdlg..."
+        self.cas_dlg = CasDialog(self)
+        self.cas_dlg.exec_()  # Make dialog modal
+        
     def set_point_number(self):
         ipoint = int(self.point_sbox.value())
         iseg = int(self.case_cbox.currentIndex())
@@ -1918,7 +1924,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         plot_action = self.create_action("Plot...", tip="Plot...",
                                          slot=self.open_plotwin)
         btf_action = self.create_action("BTF...", tip="BTF...")
-        casmo_action = self.create_action("CASMO...", tip="CASMO...")
+        casmo_action = self.create_action("CASMO...", tip="CASMO...",
+                                          slot=self.open_cas_dlg)
         data_action = self.create_action("Fuel data...", tip="Fuel data...")
         table_action = self.create_action("Point table...",
                                           tip="Point table...")
