@@ -1970,16 +1970,18 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         plotAction.setStatusTip('Open plot window')
         plotAction.triggered.connect(self.open_plotwin)
 
-        arrow_left_icon = "icons/arrow-left-icon_32x32.png"
-        backAction = QtGui.QAction(QtGui.QIcon(arrow_left_icon),
-                                   'Back to previous state', self)
-        backAction.setStatusTip('Back to previous state')
+        #arrow_left_icon = "icons/arrow-left-icon_32x32.png"
+        arrow_undo_icon =  "icons/arrow-undo-icon_32x32.png"
+        backAction = QtGui.QAction(QtGui.QIcon(arrow_undo_icon),
+                                   'Back to previous design', self)
+        backAction.setStatusTip('Back to previous design')
         backAction.triggered.connect(self.back_state)
 
-        arrow_forward_icon = "icons/arrow-right-icon_32x32.png"
-        forwardAction = QtGui.QAction(QtGui.QIcon(arrow_forward_icon),
-                                      'Forward to next state', self)
-        forwardAction.setStatusTip('Forward to next state')
+        #arrow_forward_icon = "icons/arrow-right-icon_32x32.png"
+        arrow_redo_icon =  "icons/arrow-redo-icon_32x32.png"
+        forwardAction = QtGui.QAction(QtGui.QIcon(arrow_redo_icon),
+                                      'Forward to next design', self)
+        forwardAction.setStatusTip('Forward to next design')
         forwardAction.triggered.connect(self.forward_state)
         
         toolbar = self.addToolBar('Toolbar')
