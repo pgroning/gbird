@@ -751,7 +751,7 @@ class MainWin(QtGui.QMainWindow):
         self.fig_update()
 
     def open_cas_dlg(self):
-        print "open casdlg..."
+        #print "open casdlg..."
         self.cas_dlg = CasDialog(self)
         self.cas_dlg.exec_()  # Make dialog modal
         

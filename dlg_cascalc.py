@@ -11,10 +11,29 @@ class CasDialog(QtGui.QDialog):
         self.setGeometry(QtCore.QRect(xpos, ypos, 150, 120))
 
         flo = QtGui.QFormLayout()
-        self.text1 = QtGui.QLineEdit("%.2f" % 3.14)
-        self.text2 = QtGui.QLineEdit("%.2f" % 3.14)
-        flo.addRow("Maximum depletion:", self.text1)
-        flo.addRow("Depletion threshold:", self.text2)
+        self.model_cbox = QtGui.QComboBox()
+        self.model_cbox.addItems(QtCore.QStringList(["C3", "C4"]))
+
+        self.depmax_cbox = QtGui.QComboBox()
+        self.depmax_cbox.addItems(QtCore.QStringList(["undef", "10", "15",
+                                                      "20", "30", "40"]))
+
+        self.depthres_cbox = QtGui.QComboBox()
+        self.depthres_cbox.addItems(QtCore.QStringList(["undef", "10", "15",
+                                                      "20", "30", "40"]))
+
+        self.void_cbox = QtGui.QComboBox()
+        self.void_cbox.addItems(QtCore.QStringList(["undef", "0", "40",
+                                                      "50", "60", "80"]))
+
+        flo.addRow("Model:", self.model_cbox)
+        flo.addRow("Maximum depletion:", self.depmax_cbox)
+        flo.addRow("Depletion threshold:", self.depthres_cbox)
+        flo.addRow("Void:", self.void_cbox)
+
+        #groupbox = QtGui.QGroupBox()
+        #grid = QtGui.QGridLayout()
+
 
         hbox = QtGui.QHBoxLayout()
         self.ok_button = QtGui.QPushButton("Ok")
