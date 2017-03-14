@@ -1,11 +1,11 @@
 from PyQt4 import QtGui, QtCore
 
-class CasDialog(QtGui.QDialog):
+class PertDialog(QtGui.QDialog):
     def __init__(self, parent):
         QtGui.QDialog.__init__(self)
         self.parent = parent
 
-        self.setWindowTitle("CASMO")
+        self.setWindowTitle("Perturbation")
         xpos = parent.pos().x() + parent.size().width() / 2
         ypos = parent.pos().y() + parent.size().height() / 2
         self.setGeometry(QtCore.QRect(xpos, ypos, 150, 120))
@@ -32,7 +32,7 @@ class CasDialog(QtGui.QDialog):
         flo.addRow("Void:", self.void_cbox)
 
         groupbox = QtGui.QGroupBox()
-        groupbox.setTitle("CASMO settings")
+        groupbox.setTitle("Perturbation settings")
         groupbox.setStyleSheet("QGroupBox {border: 1px solid silver;\
         border-radius:5px; font: bold; subcontrol-origin: margin;\
         padding: 10px 0px 0px 0px}")

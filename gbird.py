@@ -37,6 +37,7 @@ except:
 from bundle import Bundle
 from btf import Btf
 from plot import PlotWin
+from dlg_pertcalc import PertDialog
 from dlg_cascalc import CasDialog
 from progbar import ProgressBar
 # from map_s96 import s96o2
@@ -750,8 +751,13 @@ class MainWin(QtGui.QMainWindow):
         
         self.fig_update()
 
+    def open_pert_dlg(self):
+        """open perturbation settings dialog"""
+        self.pert_dlg = PertDialog(self)
+        self.pert_dlg.exec_()  # Make dialog modal
+
     def open_cas_dlg(self):
-        #print "open casdlg..."
+        """open perturbation settings dialog"""
         self.cas_dlg = CasDialog(self)
         self.cas_dlg.exec_()  # Make dialog modal
         
@@ -1924,6 +1930,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         plot_action = self.create_action("Plot...", tip="Plot...",
                                          slot=self.open_plotwin)
         btf_action = self.create_action("BTF...", tip="BTF...")
+        pert_action = self.create_action("Perturbation...", tip="Pert...",
+                                          slot=self.open_pert_dlg)
         casmo_action = self.create_action("CASMO...", tip="CASMO...",
                                           slot=self.open_cas_dlg)
         data_action = self.create_action("Fuel data...", tip="Fuel data...")
@@ -1933,7 +1941,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                                           tip="BTF optimization...")
         egv_action = self.create_action("EGV...", tip="EGV...")
         self.add_actions(self.tools_menu,
-                         (plot_action, btf_action, casmo_action, data_action,
+                         (plot_action, btf_action, pert_action, casmo_action, data_action,
                           table_action, optim_action, egv_action))
         
         self.help_menu = self.menuBar().addMenu("&Help")
