@@ -6,10 +6,12 @@ class CasDialog(QtGui.QDialog):
     def __init__(self, parent):
         QtGui.QDialog.__init__(self)
         self.parent = parent
+        self.setup()
 
+    def setup(self):
         self.setWindowTitle("CASMO")
-        xpos = parent.pos().x() + parent.size().width() / 2
-        ypos = parent.pos().y() + parent.size().height() / 2
+        xpos = self.parent.pos().x() + self.parent.size().width() / 2
+        ypos = self.parent.pos().y() + self.parent.size().height() / 2
         self.setGeometry(QtCore.QRect(xpos, ypos, 150, 120))
 
         flo = QtGui.QFormLayout()
