@@ -49,6 +49,7 @@ class CasDialog(QtGui.QDialog):
         hbox = QtGui.QHBoxLayout()
         self.ok_button = QtGui.QPushButton("Ok")
         self.cancel_button = QtGui.QPushButton("Cancel")
+        hbox.addStretch()
         hbox.addWidget(self.ok_button)
         hbox.addWidget(self.cancel_button)
         self.connect(self.cancel_button, QtCore.SIGNAL('clicked()'),

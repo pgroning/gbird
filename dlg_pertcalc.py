@@ -12,7 +12,7 @@ class PertDialog(QtGui.QDialog):
 
         flo = QtGui.QFormLayout()
         self.model_cbox = QtGui.QComboBox()
-        self.model_cbox.addItems(QtCore.QStringList(["C3", "C4"]))
+        self.model_cbox.addItems(QtCore.QStringList(["C3", "C4E"]))
 
         self.depmax_cbox = QtGui.QComboBox()
         self.depmax_cbox.addItems(QtCore.QStringList(["undef", "10", "15",
@@ -44,6 +44,7 @@ class PertDialog(QtGui.QDialog):
         hbox = QtGui.QHBoxLayout()
         self.ok_button = QtGui.QPushButton("Ok")
         self.cancel_button = QtGui.QPushButton("Cancel")
+        hbox.addStretch()
         hbox.addWidget(self.ok_button)
         hbox.addWidget(self.cancel_button)
         self.connect(self.cancel_button, QtCore.SIGNAL('clicked()'),
