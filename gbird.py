@@ -1921,11 +1921,9 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         preferences = self.create_action("Preferences...",
                                          tip="Preferences...")
         
-        project = self.create_action("Project...",
-                                     tip="Edit project...")
-        self.add_actions(self.edit_menu, (back, forward, project,
+        self.add_actions(self.edit_menu, (back, forward,
                                           None, preferences))
-
+        
         self.tools_menu = self.menuBar().addMenu("&Tools")
         plot_action = self.create_action("Plot...", tip="Plot...",
                                          slot=self.open_plotwin)
@@ -1942,6 +1940,15 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.add_actions(self.tools_menu,
                          (plot_action, bundle_action, casmo_action, data_action,
                           table_action, optim_action, egv_action))
+
+        self.run_menu = self.menuBar().addMenu("&Run")
+        pert_action = self.create_action("&Perturbation", shortcut="F10",
+                                          slot=self.quick_calc,
+                                          tip="Run perturbation")
+        fullcalc_action = self.create_action("&Full calculation...",
+                                             slot=self.quick_calc,
+                                             tip="Run perturbation")
+        self.add_actions(self.run_menu, (pert_action, fullcalc_action))
         
         self.help_menu = self.menuBar().addMenu("&Help")
         about_action = self.create_action("&About", shortcut='F1',
