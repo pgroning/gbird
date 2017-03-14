@@ -39,6 +39,7 @@ from btf import Btf
 from plot import PlotWin
 from dlg_pertcalc import PertDialog
 from dlg_cascalc import CasDialog
+from dlg_bundle import BundleDialog
 from progbar import ProgressBar
 # from map_s96 import s96o2
 # from map_a10 import a10xm
@@ -751,15 +752,20 @@ class MainWin(QtGui.QMainWindow):
         
         self.fig_update()
 
+    def open_bundle_dlg(self):
+        """open bundle settings dialog"""
+        self.bundle_dlg = BundleDialog(self)
+        self.bundle_dlg.exec_()  # Make dialog modal
+
     def open_pert_dlg(self):
         """open perturbation settings dialog"""
         self.pert_dlg = PertDialog(self)
-        self.pert_dlg.exec_()  # Make dialog modal
+        self.pert_dlg.exec_()
 
     def open_cas_dlg(self):
         """open perturbation settings dialog"""
         self.cas_dlg = CasDialog(self)
-        self.cas_dlg.exec_()  # Make dialog modal
+        self.cas_dlg.exec_()
         
     def set_point_number(self):
         ipoint = int(self.point_sbox.value())
@@ -1929,7 +1935,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.tools_menu = self.menuBar().addMenu("&Tools")
         plot_action = self.create_action("Plot...", tip="Plot...",
                                          slot=self.open_plotwin)
-        bundle_action = self.create_action("Bundle...", tip="Bundle...")
+        bundle_action = self.create_action("Bundle...", tip="Bundle...",
+                                           slot=self.open_bundle_dlg)
         pert_action = self.create_action("Perturbation...", tip="Pert...",
                                           slot=self.open_pert_dlg)
         casmo_action = self.create_action("CASMO...", tip="CASMO...",
