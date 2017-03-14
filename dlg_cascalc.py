@@ -5,7 +5,7 @@ class CasDialog(QtGui.QDialog):
         QtGui.QDialog.__init__(self)
         self.parent = parent
 
-        self.setWindowTitle("CASMO settings")
+        self.setWindowTitle("Perturbation")
         xpos = parent.pos().x() + parent.size().width() / 2
         ypos = parent.pos().y() + parent.size().height() / 2
         self.setGeometry(QtCore.QRect(xpos, ypos, 150, 120))
@@ -31,21 +31,28 @@ class CasDialog(QtGui.QDialog):
         flo.addRow("Depletion threshold:", self.depthres_cbox)
         flo.addRow("Void:", self.void_cbox)
 
-        #groupbox = QtGui.QGroupBox()
-        #grid = QtGui.QGridLayout()
-
+        groupbox = QtGui.QGroupBox()
+        groupbox.setTitle("Perturbation settings")
+        groupbox.setStyleSheet("QGroupBox {border: 1px solid silver;\
+        border-radius:5px; font: bold; subcontrol-origin: margin;\
+        padding: 10px 0px 0px 0px}")
+        groupbox.setLayout(flo)
+        grid = QtGui.QGridLayout()
+        grid.addWidget(groupbox, 0, 0)
+        
 
         hbox = QtGui.QHBoxLayout()
         self.ok_button = QtGui.QPushButton("Ok")
         self.cancel_button = QtGui.QPushButton("Cancel")
-        hbox.addWidget(self.cancel_button)
         hbox.addWidget(self.ok_button)
+        hbox.addWidget(self.cancel_button)
         self.connect(self.cancel_button, QtCore.SIGNAL('clicked()'),
                      self.close)
         self.connect(self.ok_button, QtCore.SIGNAL('clicked()'), self.action)
 
         vbox = QtGui.QVBoxLayout()
-        vbox.addLayout(flo)
+        #vbox.addLayout(flo)
+        vbox.addLayout(grid)
         vbox.addStretch()
         vbox.addLayout(hbox)
         self.setLayout(vbox)
