@@ -9,11 +9,38 @@ class CasDialog(QtGui.QDialog):
         self.setup()
 
     def setup(self):
-        self.setWindowTitle("CASMO")
+        self.setWindowTitle("CASMO settings")
         xpos = self.parent.pos().x() + self.parent.size().width() / 2
         ypos = self.parent.pos().y() + self.parent.size().height() / 2
-        self.setGeometry(QtCore.QRect(xpos, ypos, 150, 120))
+        self.setGeometry(QtCore.QRect(0.8*xpos, 0.9*ypos, 150, 120))
 
+        self.grid = QtGui.QGridLayout()
+        pert_gbox = self.pert_group()
+        cas_gbox = self.cas_group()
+        self.grid.addWidget(pert_gbox, 0, 0)
+        self.grid.addWidget(cas_gbox, 0, 1)
+        
+        hbox = QtGui.QHBoxLayout()
+        self.ok_button = QtGui.QPushButton("Ok")
+        self.cancel_button = QtGui.QPushButton("Cancel")
+        hbox.addStretch()
+        hbox.addWidget(self.ok_button)
+        hbox.addWidget(self.cancel_button)
+        self.connect(self.cancel_button, QtCore.SIGNAL('clicked()'),
+                     self.close)
+        self.connect(self.ok_button, QtCore.SIGNAL('clicked()'), self.action)
+
+        vbox = QtGui.QVBoxLayout()
+        #vbox.addLayout(flo)
+        vbox.addLayout(self.grid)
+        vbox.addStretch()
+        vbox.addLayout(hbox)
+        self.setLayout(vbox)
+
+    def action(self):
+        self.close()
+
+    def cas_group(self):
         flo = QtGui.QFormLayout()
 
         self.version_cbox = QtGui.QComboBox()
@@ -40,34 +67,47 @@ class CasDialog(QtGui.QDialog):
         flo.addRow("CPU:", self.cpu_cbox)
 
         groupbox = QtGui.QGroupBox()
-        groupbox.setTitle("CASMO-4E settings")
+        groupbox.setTitle("CASMO-4E")
         groupbox.setStyleSheet("QGroupBox {border: 1px solid silver;\
         border-radius:5px; font: bold; subcontrol-origin: margin;\
         padding: 10px 0px 0px 0px}")
         groupbox.setLayout(flo)
-        grid = QtGui.QGridLayout()
-        grid.addWidget(groupbox, 0, 0)
+        #grid = QtGui.QGridLayout()
+        #self.grid.addWidget(groupbox, 0, 1)
+        return groupbox
         
-        hbox = QtGui.QHBoxLayout()
-        self.ok_button = QtGui.QPushButton("Ok")
-        self.cancel_button = QtGui.QPushButton("Cancel")
-        hbox.addStretch()
-        hbox.addWidget(self.ok_button)
-        hbox.addWidget(self.cancel_button)
-        self.connect(self.cancel_button, QtCore.SIGNAL('clicked()'),
-                     self.close)
-        self.connect(self.ok_button, QtCore.SIGNAL('clicked()'), self.action)
+    def pert_group(self):
+        flo = QtGui.QFormLayout()
+        self.model_cbox = QtGui.QComboBox()
+        self.model_cbox.addItems(QtCore.QStringList(["C3", "C4E"]))
 
-        vbox = QtGui.QVBoxLayout()
-        #vbox.addLayout(flo)
-        vbox.addLayout(grid)
-        vbox.addStretch()
-        vbox.addLayout(hbox)
-        self.setLayout(vbox)
+        self.depmax_cbox = QtGui.QComboBox()
+        self.depmax_cbox.addItems(QtCore.QStringList(["undef", "10", "15",
+                                                      "20", "30", "40"]))
 
-    def action(self):
-        self.close()
+        self.depthres_cbox = QtGui.QComboBox()
+        self.depthres_cbox.addItems(QtCore.QStringList(["undef", "10", "15",
+                                                      "20", "30", "40"]))
 
+        self.void_cbox = QtGui.QComboBox()
+        self.void_cbox.addItems(QtCore.QStringList(["undef", "0", "40",
+                                                      "50", "60", "80"]))
+
+        flo.addRow("Model:", self.model_cbox)
+        flo.addRow("Maximum depletion:", self.depmax_cbox)
+        flo.addRow("Depletion threshold:", self.depthres_cbox)
+        flo.addRow("Void:", self.void_cbox)
+
+        groupbox = QtGui.QGroupBox()
+        groupbox.setTitle("Perturbation")
+        groupbox.setStyleSheet("QGroupBox {border: 1px solid silver;\
+        border-radius:5px; font: bold; subcontrol-origin: margin;\
+        padding: 10px 0px 0px 0px}")
+        groupbox.setLayout(flo)
+        #grid = QtGui.QGridLayout()
+        #self.grid.addWidget(groupbox, 0, 0)
+        return groupbox
+        
     def get_versions(self):
         """List available C4E versions"""
 
