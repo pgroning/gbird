@@ -1929,7 +1929,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.tools_menu = self.menuBar().addMenu("&Tools")
         plot_action = self.create_action("Plot...", tip="Plot...",
                                          slot=self.open_plotwin)
-        btf_action = self.create_action("BTF...", tip="BTF...")
+        bundle_action = self.create_action("Bundle...", tip="Bundle...")
         pert_action = self.create_action("Perturbation...", tip="Pert...",
                                           slot=self.open_pert_dlg)
         casmo_action = self.create_action("CASMO...", tip="CASMO...",
@@ -1941,7 +1941,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                                           tip="BTF optimization...")
         egv_action = self.create_action("EGV...", tip="EGV...")
         self.add_actions(self.tools_menu,
-                         (plot_action, btf_action, pert_action, casmo_action, data_action,
+                         (plot_action, bundle_action, pert_action, casmo_action, data_action,
                           table_action, optim_action, egv_action))
         
         self.help_menu = self.menuBar().addMenu("&Help")
