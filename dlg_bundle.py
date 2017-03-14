@@ -7,10 +7,10 @@ class BundleDialog(QtGui.QDialog):
         self.setup()
 
     def setup(self):
-        self.setWindowTitle("Edit bundle")
+        self.setWindowTitle("New bundle")
         xpos = self.parent.pos().x() + self.parent.size().width() / 2
         ypos = self.parent.pos().y() + self.parent.size().height() / 2
-        self.setGeometry(QtCore.QRect(xpos, ypos, 150, 120))
+        self.setGeometry(QtCore.QRect(0.8*xpos, 0.9*ypos, 150, 120))
 
         flo = QtGui.QFormLayout()
         self.fuetype_cbox = QtGui.QComboBox()
@@ -28,7 +28,7 @@ class BundleDialog(QtGui.QDialog):
         flo.addRow("Nodes:", self.nodes_cbox)
 
         groupbox = QtGui.QGroupBox()
-        groupbox.setTitle("Bundle settings")
+        groupbox.setTitle("Bundle")
         groupbox.setStyleSheet("QGroupBox {border: 1px solid silver;\
         border-radius:5px; font: bold; subcontrol-origin: margin;\
         padding: 10px 0px 0px 0px}")
@@ -37,8 +37,12 @@ class BundleDialog(QtGui.QDialog):
         grid.addWidget(groupbox, 0, 0)
         
         hbox = QtGui.QHBoxLayout()
-        self.ok_button = QtGui.QPushButton("Ok")
+        self.save_button = QtGui.QPushButton("Save As...")
+        self.load_button = QtGui.QPushButton("Load...")
+        self.ok_button = QtGui.QPushButton("Import")
         self.cancel_button = QtGui.QPushButton("Cancel")
+        hbox.addWidget(self.save_button)
+        hbox.addWidget(self.load_button)
         hbox.addStretch()
         hbox.addWidget(self.ok_button)
         hbox.addWidget(self.cancel_button)
