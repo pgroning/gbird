@@ -1976,9 +1976,14 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         fileAction.setStatusTip('Open file')
         fileAction.triggered.connect(self.openFile)
 
+        save_icon = "icons/save-icon_32x32.png"
+        saveAction = QtGui.QAction(QtGui.QIcon(save_icon), 'Save to file', self)
+        saveAction.setStatusTip('Save to file')
+        saveAction.triggered.connect(self.saveData)
+        
         calc_icon = "icons/flame-red-icon_32x32.png"
         calcAction = QtGui.QAction(QtGui.QIcon(calc_icon),
-                                   'Run simulation', self)
+                                   'Run perturbation', self)
         calcAction.setStatusTip('Run simulation')
         calcAction.triggered.connect(self.quick_calc)
 
@@ -2008,6 +2013,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         toolbar = self.addToolBar('Toolbar')
         toolbar.addAction(newAction)
         toolbar.addAction(fileAction)
+        toolbar.addAction(saveAction)
         toolbar.addAction(calcAction)
         toolbar.addAction(settingsAction)
         toolbar.addAction(plotAction)
