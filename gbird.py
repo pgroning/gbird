@@ -764,8 +764,10 @@ class MainWin(QtGui.QMainWindow):
         
     def open_report_dlg(self):
         """open fuel report dialog"""
-        self.report_dlg = ReportDialog(self)
-        self.report_dlg.exec_()
+        if hasattr(self, "bunlist"):  # check that data has been imported
+            #bundle = self.bunlist[self.ibundle]
+            self.report_dlg = ReportDialog(self)
+            self.report_dlg.exec_()
 
     def set_point_number(self):
         ipoint = int(self.point_sbox.value())
