@@ -61,10 +61,13 @@ class CasDialog(QtGui.QDialog):
         self.cpu_cbox = QtGui.QComboBox()
         self.cpu_cbox.addItems(QtCore.QStringList(["local", "grid"]))
 
+        self.owrite_chbox = QtGui.QCheckBox()
+        
         flo.addRow("Version:", self.version_cbox)
         flo.addRow("Neutron library:", self.neulib_cbox)
         flo.addRow("Gamma library:", self.gamlib_cbox)
         flo.addRow("CPU:", self.cpu_cbox)
+        flo.addRow("Overwrite orig. inp. file:", self.owrite_chbox)
 
         groupbox = QtGui.QGroupBox()
         groupbox.setTitle("CASMO-4E")
@@ -72,8 +75,6 @@ class CasDialog(QtGui.QDialog):
         border-radius:5px; font: bold; subcontrol-origin: margin;\
         padding: 10px 0px 0px 0px}")
         groupbox.setLayout(flo)
-        #grid = QtGui.QGridLayout()
-        #self.grid.addWidget(groupbox, 0, 1)
         return groupbox
         
     def pert_group(self):
@@ -104,8 +105,6 @@ class CasDialog(QtGui.QDialog):
         border-radius:5px; font: bold; subcontrol-origin: margin;\
         padding: 10px 0px 0px 0px}")
         groupbox.setLayout(flo)
-        #grid = QtGui.QGridLayout()
-        #self.grid.addWidget(groupbox, 0, 0)
         return groupbox
         
     def get_versions(self):
