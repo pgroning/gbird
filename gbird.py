@@ -2125,6 +2125,11 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.settings.setValue("size", QtCore.QVariant(self.size()))
         self.settings.setValue("pos", QtCore.QVariant(self.pos()))
         self.settings.endGroup()
+
+        # Close windows before exit
+        if hasattr(self, "report_dlg"):
+            self.report_dlg.close()
+
         print "Good bye!"
 
 
