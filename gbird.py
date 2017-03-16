@@ -549,6 +549,10 @@ class MainWin(QtGui.QMainWindow):
         if hasattr(self, "plotwin"):  # plot win is open
             self.plotwin.on_plot()
 
+    def report_update(self):
+        if hasattr(self, "report_dlg"):
+            self.report_dlg.update()
+
     def get_colormap(self, num_enr_levels, colormap="rainbow"):
 
         n = num_enr_levels + 1
@@ -765,9 +769,11 @@ class MainWin(QtGui.QMainWindow):
     def open_report_dlg(self):
         """open fuel report dialog"""
         if hasattr(self, "bunlist"):  # check that data has been imported
-            #bundle = self.bunlist[self.ibundle]
-            self.report_dlg = ReportDialog(self)
-            self.report_dlg.exec_()
+            if not hasattr(self, "report_dlg"):  # not already open?
+                self.report_dlg = ReportDialog(self)
+                #self.report_dlg.setModal(False)
+                self.report_dlg.show()  # Make dialog non-modal
+                #self.report_dlg.exec_()
 
     def set_point_number(self):
         ipoint = int(self.point_sbox.value())
@@ -941,6 +947,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
         self.canvas.draw()
         self.plot_update()
+        self.report_update()
 
     def setpincoords(self):
         """Update table with pin coordinates"""
@@ -1156,6 +1163,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         formstr = '{0:.4f} ({1:+.4f})'.format(bundle_enr, diff_bundle_enr)
         self.bundle_enr_text.setText(formstr)
         #self.bundle_denr_text.setText("%.5f" % diff_bundle_enr)
+        self.report_update()
 
     def enr_modify(self, mod, case_num=None, ipin=None):
         halfsym = True
