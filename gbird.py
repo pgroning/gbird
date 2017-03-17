@@ -1954,16 +1954,27 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.edit_menu = self.menuBar().addMenu("&Edit")
 
         back = self.create_action("Back", slot=self.back_state,
-                                  tip="Back to previous design")
+                                  tip="Back to previous")
 
         forward = self.create_action("Forward", slot=self.forward_state,
-                                         tip="Forward to next  design")
+                                         tip="Forward to next")
+
+        reset = self.create_action("Reset...",
+                                         tip="Reset all changes")
+
+        enr_plus = self.create_action("Increase enr", slot=self.enr_add,
+                                      tip="Increase enrichment",
+                                      shortcut="F6")
+
+        enr_minus = self.create_action("Decrease enr", slot=self.enr_sub,
+                                       tip="Decrease enrichment",
+                                       shortcut="F5")
         
         preferences = self.create_action("Preferences...",
                                          tip="Preferences...")
         
-        self.add_actions(self.edit_menu, (back, forward,
-                                          None, preferences))
+        self.add_actions(self.edit_menu, (back, forward, None, enr_plus,
+                                          enr_minus, None, reset, preferences))
         
         self.tools_menu = self.menuBar().addMenu("&Tools")
         plot_action = self.create_action("Plot...", tip="Plot...",
