@@ -37,7 +37,7 @@ except:
 from bundle import Bundle
 from btf import Btf
 from plot import PlotWin
-from dlg_cascalc import CasDialog
+from dlg_cascalc import CasDialog, CasRunDialog
 from dlg_bundle import BundleDialog
 from dlg_report import ReportDialog
 from progbar import ProgressBar
@@ -766,6 +766,11 @@ class MainWin(QtGui.QMainWindow):
         self.cas_dlg = CasDialog(self)
         self.cas_dlg.exec_()
         
+    def open_fullcalc_dlg(self):
+        """open run fullcalc dialog"""
+        self.fullcalc_dlg = CasRunDialog(self)
+        self.fullcalc_dlg.exec_()
+
     def open_report_dlg(self):
         """open fuel report dialog"""
         if hasattr(self, "bunlist"):  # check that data has been imported
@@ -1959,12 +1964,12 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                           table_action, optim_action, egv_action))
 
         self.run_menu = self.menuBar().addMenu("&Run")
-        pert_action = self.create_action("&Perturbation", shortcut="F10",
+        pert_action = self.create_action("&Perturbation", shortcut="F9",
                                           slot=self.quick_calc,
                                           tip="Run perturbation")
         fullcalc_action = self.create_action("&Full calculation...",
-                                             slot=self.quick_calc,
-                                             tip="Run perturbation")
+                                             slot=self.open_fullcalc_dlg,
+                                             tip="Run full calculation")
         self.add_actions(self.run_menu, (pert_action, fullcalc_action))
         
         self.help_menu = self.menuBar().addMenu("&Help")

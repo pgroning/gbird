@@ -66,8 +66,8 @@ class CasDialog(QtGui.QDialog):
         flo.addRow("Version:", self.version_cbox)
         flo.addRow("Neutron library:", self.neulib_cbox)
         flo.addRow("Gamma library:", self.gamlib_cbox)
-        flo.addRow("CPU:", self.cpu_cbox)
-        flo.addRow("Overwrite orig. inp. file:", self.owrite_chbox)
+        #flo.addRow("CPU:", self.cpu_cbox)
+        #flo.addRow("Overwrite orig. inp. file:", self.owrite_chbox)
 
         groupbox = QtGui.QGroupBox()
         groupbox.setTitle("CASMO-4E")
@@ -140,3 +140,45 @@ class CasDialog(QtGui.QDialog):
         else:
             gamlib_list = []
         return gamlib_list
+
+
+class CasRunDialog(QtGui.QDialog):
+    def __init__(self, parent):
+        QtGui.QDialog.__init__(self)
+        self.parent = parent
+        self.setup()
+
+    def setup(self):
+        self.setWindowTitle("Run CASMO")
+        xpos = self.parent.pos().x() + self.parent.size().width() / 2
+        ypos = self.parent.pos().y() + self.parent.size().height() / 2
+        self.setGeometry(QtCore.QRect(0.8*xpos, 0.9*ypos, 150, 120))
+
+        flo = QtGui.QFormLayout()
+        self.cpu_cbox = QtGui.QComboBox()
+        self.cpu_cbox.addItems(QtCore.QStringList(["local", "grid"]))
+        flo.addRow("CPU:", self.cpu_cbox)
+
+        self.owrite_chbox = QtGui.QCheckBox("")
+        flo.addRow("Overwrite orig. inp. file:", self.owrite_chbox)
+
+        hbox = QtGui.QHBoxLayout()
+        self.run_button = QtGui.QPushButton("Run")
+        self.cancel_button = QtGui.QPushButton("Cancel")
+        hbox.addWidget(self.run_button)
+        hbox.addWidget(self.cancel_button)
+        self.connect(self.cancel_button, QtCore.SIGNAL('clicked()'),
+                     self.close)
+        self.connect(self.run_button, QtCore.SIGNAL('clicked()'), self.action)
+
+        vbox = QtGui.QVBoxLayout()
+        vbox.addLayout(flo)
+        #vbox.addWidget(self.owrite_chbox)
+        vbox.addStretch()
+        vbox.addLayout(hbox)
+        self.setLayout(vbox)
+
+    def action(self):
+        self.close()
+        self.parent.quick_calc()
+    
