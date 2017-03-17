@@ -523,15 +523,15 @@ class MainWin(QtGui.QMainWindow):
                                                              "Save project",
                                                              path_default,
                                                              file_choices))
-        # self.bundle.savepic(filename)
-        fname_split =  os.path.splitext(filename)
-        if fname_split[1] != ".gbi":
-            filename = filename + ".gbi"  # add file extension
-        with open(filename, 'wb') as fp:
-            pickle.dump(self.bunlist, fp, 1)
-            if hasattr(self, "biascalc"):
-                pickle.dump(self.biascalc, fp, 1)
-        print "Saved data to file " + filename
+        if filename:  # ok button clicked
+            fname_split =  os.path.splitext(filename)
+            if fname_split[1] != ".gbi":
+                filename = filename + ".gbi"  # add file extension
+            with open(filename, 'wb') as fp:
+                pickle.dump(self.bunlist, fp, 1)
+                if hasattr(self, "biascalc"):
+                    pickle.dump(self.biascalc, fp, 1)
+            print "Project saved to file " + filename
 
     def open_plotwin(self):
         """Open plot window"""
