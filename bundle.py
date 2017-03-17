@@ -47,9 +47,6 @@ def quickcalc_fun(tup):
     segment = tup[0]  # First arg should always be an instance of the class
     segment.quickcalc(*tup[1:])
     return segment
-    # case, voi, maxdep, opt = tup
-    # case.quickcalc(voi, maxdep, opt)
-    # return case
 
 
 class Bundle(object):
@@ -129,28 +126,28 @@ class Bundle(object):
             self.data.btf_nodes = self.data.nodes
 
         # Perturbation calculation
-        self.data.dep_max = None
-        self.data.dep_thres = None
-        self.data.voi = None
-        self.data.model = "c3"
-
-        if config.has_section("Pertcalc"):
-            if config.has_option("Pertcalc", "dep_max"):
-                dep_max = config.get("Pertcalc", "dep_max")
-                if dep_max != "undef":
-                    self.data.dep_max = float(dep_max)
-            if config.has_option("Pertcalc", "dep_thres"):
-                dep_thres = config.get("Pertcalc", "dep_thres")
-                if dep_thres != "undef":
-                    self.data.dep_thres = float(dep_thres)
-            if config.has_option("Pertcalc", "voi"):
-                voi = config.get("Pertcalc", "voi")
-                if voi != "undef":
-                    self.data.voi = int(voi)
-            if config.has_option("Pertcalc", "model"):
-                model = config.get("Pertcalc", "model")
-                if model != "undef":
-                    self.data.model = model
+        #self.data.dep_max = None
+        #self.data.dep_thres = None
+        #self.data.voi = None
+        #self.data.model = "c3"
+        #
+        #if config.has_section("Pertcalc"):
+        #    if config.has_option("Pertcalc", "dep_max"):
+        #        dep_max = config.get("Pertcalc", "dep_max")
+        #        if dep_max != "undef":
+        #            self.data.dep_max = float(dep_max)
+        #    if config.has_option("Pertcalc", "dep_thres"):
+        #        dep_thres = config.get("Pertcalc", "dep_thres")
+        #        if dep_thres != "undef":
+        #            self.data.dep_thres = float(dep_thres)
+        #    if config.has_option("Pertcalc", "voi"):
+        #        voi = config.get("Pertcalc", "voi")
+        #        if voi != "undef":
+        #            self.data.voi = int(voi)
+        #    if config.has_option("Pertcalc", "model"):
+        #        model = config.get("Pertcalc", "model")
+        #        if model != "undef":
+        #            self.data.model = model
 
         return True
     
@@ -245,8 +242,8 @@ class Bundle(object):
             self.data.fuetype = "A10B"
 
     def new_calc(self, voi=None, dep_max=None, dep_thres=None, grid=False,
-                 model='c3', box_offset=0, neulib=False):
-
+                 model="c3", box_offset=0, neulib=False):
+        
         # For storage of new calculation
         #self.new_state()
 
@@ -279,7 +276,7 @@ class Bundle(object):
                            box_offset, neulib))
         
         #quickcalc_fun(inlist[0])
-        #Tracer()()
+        
         n = len(segments)  # Number of threads
         p = Pool(n)  # Make the Pool of workers
         

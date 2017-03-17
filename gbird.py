@@ -1297,34 +1297,54 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             del self.bunlist[1]
             self.ibundle = len(self.bunlist) - 1
         
+        # Set pert. calc parameters
+        if hasattr(self, "pert_model"):
+            pert_model = self.pert_model
+        else:
+            pert_model = "C3"
+        if hasattr(self, "pert_depmax"):
+            pert_depmax = self.pert_depmax
+        else:
+            pert_depmax = None
+        if hasattr(self, "pert_depthres"):
+            pert_depthres = self.pert_depthres
+        else:
+            pert_depthres = None
+        if hasattr(self, "pert_voi"):
+            pert_voi = self.pert_voi
+        else:
+            pert_voi = None
+        
         if not hasattr(self, "biascalc"):  # make bias calc?
-            print "Perturbation bias calculation..."
+            print "Bias calibration calculation..."
             self.biascalc = Bundle(parent=self.bunlist[0])
-            if self.biascalc.data.voi is not None:
-                for s in self.biascalc.segments:
-                    s.set_data(voi=self.biascalc.data.voi)
-            dep_max = self.biascalc.data.dep_max
-            dep_thres = self.biascalc.data.dep_thres
-            model = self.biascalc.data.model
-            self.biascalc.new_calc(model=model, dep_max=dep_max,
-                                   dep_thres=dep_thres)
+            #if self.biascalc.data.voi is not None:
+            #    for s in self.biascalc.segments:
+            #        s.set_data(voi=self.biascalc.data.voi)
+            #dep_max = self.biascalc.data.dep_max
+            #dep_thres = self.biascalc.data.dep_thres
+            #model = self.biascalc.data.model
+            self.biascalc.new_calc(model=pert_model, dep_max=pert_depmax,
+                                   dep_thres=pert_depthres)
             #self.biascalc.new_btf()
-
+        
         # New perturbation calc
         bundle = Bundle(parent=self.bunlist[0])  # parent is set to orig bundle
         nsegments = len(bundle.segments)
 
-        voi = bundle.data.voi
+        #voi = bundle.data.voi
+        voi = None
         chanbow = self.chanbow_sbox.value() / 10  # mm -> cm
         for iseg in xrange(nsegments):
             LFU = self.__lfumap(iseg)
             FUE = self.__fuemap(iseg)
             BA = self.__bamap(iseg)
             bundle.segments[iseg].set_data(LFU, FUE, BA, voi, chanbow)
-        dep_max = bundle.data.dep_max
-        dep_thres = bundle.data.dep_thres
-        model = bundle.data.model
-        bundle.new_calc(model=model, dep_max=dep_max, dep_thres=dep_thres)
+        #dep_max = bundle.data.dep_max
+        #dep_thres = bundle.data.dep_thres
+        #model = bundle.data.model
+        bundle.new_calc(model=pert_model, dep_max=pert_depmax, 
+                        dep_thres=pert_depthres)
         
         # remove bias from perturbation calc
         for iseg in xrange(len(bundle.segments)):

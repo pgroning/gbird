@@ -523,7 +523,7 @@ class Segment(object):
     #    f.close()
 
     def runc4(self, file_base_name, neulib=False, grid=False):
-        """Running C4 model"""
+        """Running C4E model"""
         c4inp = file_base_name + ".inp"
         # C4 executable
         c4exe = "cas4 -e"
@@ -546,7 +546,7 @@ class Segment(object):
         # Tracer()()
         # fout = open('c4.stdout', 'wb')
         fout = open('/dev/null', 'wb')
-        print "Running c4 model"
+        print "Running c4e model"
         if grid:
             try:  # use linrsh if available
                 call(arglist, stdout=fout, stderr=STDOUT, shell=False)
@@ -770,7 +770,7 @@ class Segment(object):
                 else:
                     red_pinstr = info.pinlines[i].strip()
                 f.write(red_pinstr.strip() + '\n')
-        elif model == "c4":
+        elif model == "c4e":
             for i in xrange(Npin):
                 f.write(info.pinlines[i] + '\n')
             for line in info.milines:
@@ -1022,11 +1022,11 @@ class Segment(object):
         
         file_base_name = "./tmp." + str(uuid.uuid4()).split('-')[0]
         self.writecai(file_base_name, voi, dep_max, dep_thres, box_offset, 
-                        model)
+                        model.lower())
         
-        if model == "c3":
+        if model.lower() == "c3":
             self.runc3(file_base_name, grid)
-        elif model == "c4":
+        elif model.lower() == "c4e":
             self.runc4(file_base_name, neulib, grid)
         else:
             print "Perturbation model is unknown"

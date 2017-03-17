@@ -39,6 +39,21 @@ class CasDialog(QtGui.QDialog):
 
     def action(self):
         self.close()
+        self.parent.pert_model = str(self.model_cbox.currentText())
+        if self.depmax_cbox.currentText() == "undef":
+            self.parent.pert_depmax = None
+        else:
+            self.parent.pert_depmax = float(self.depmax_cbox.currentText())
+        if self.depthres_cbox.currentText() == "undef":
+            self.parent.pert_depthres = None
+        else:
+            self.parent.pert_depthres = float(self.depthres_cbox.currentText())
+        if self.void_cbox.currentText() == "undef":
+            self.parent.pert_voi = None
+        else:
+            self.parent.pert_voi = float(self.void_cbox.currentText())
+        if hasattr(self.parent, "biascalc"):
+            del self.parent.biascalc  # bias calc must be updated
 
     def cas_group(self):
         flo = QtGui.QFormLayout()
