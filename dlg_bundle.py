@@ -10,21 +10,34 @@ class BundleDialog(QtGui.QDialog):
         self.setWindowTitle("New bundle")
         xpos = self.parent.pos().x() + self.parent.size().width() / 2
         ypos = self.parent.pos().y() + self.parent.size().height() / 2
-        self.setGeometry(QtCore.QRect(0.8*xpos, 0.9*ypos, 150, 120))
+        self.setGeometry(QtCore.QRect(0.8*xpos, 0.9*ypos, 800, 300))
 
+        #lview = QtGui.QListView()
+        self.listwidget = QtGui.QListWidget()
+        #lview.setAcceptDrops(True)
+        
         flo = QtGui.QFormLayout()
         self.fuetype_cbox = QtGui.QComboBox()
         fue_list = ["OPT2", "OPT3", "A10B", "A10XM", "AT11"]
         self.fuetype_cbox.addItems(QtCore.QStringList(fue_list))
 
-        self.files_cbox = QtGui.QComboBox()
-        self.files_cbox.addItems(QtCore.QStringList([]))
+        self.add_button = QtGui.QPushButton("Add...")
+        self.connect(self.add_button, QtCore.SIGNAL('clicked()'),
+                     self.add_file)
+
+        self.delete_button = QtGui.QPushButton("Delete")
+        self.connect(self.delete_button, QtCore.SIGNAL('clicked()'),
+                     self.delete_file)
+        
+        #self.files_cbox = QtGui.QComboBox()
+        #self.files_cbox.addItems(QtCore.QStringList([]))
 
         self.nodes_cbox = QtGui.QComboBox()
         self.nodes_cbox.addItems(QtCore.QStringList([]))
 
         flo.addRow("Fuel type:", self.fuetype_cbox)
-        flo.addRow("Files:", self.files_cbox)
+        flo.addRow("Files:", self.add_button)
+        flo.addRow("Files:", self.delete_button)
         flo.addRow("Nodes:", self.nodes_cbox)
 
         groupbox = QtGui.QGroupBox()
@@ -35,6 +48,7 @@ class BundleDialog(QtGui.QDialog):
         groupbox.setLayout(flo)
         grid = QtGui.QGridLayout()
         grid.addWidget(groupbox, 0, 0)
+        grid.addWidget(self.listwidget, 0, 1)
         
         hbox = QtGui.QHBoxLayout()
         self.save_button = QtGui.QPushButton("Save As...")
@@ -59,3 +73,19 @@ class BundleDialog(QtGui.QDialog):
 
     def action(self):
         self.close()
+
+    def add_file(self):
+        # Import default path from config file
+        path_default = "."
+        
+        file_choices = "*.cax (*.cax)"
+        filename = unicode(QtGui.QFileDialog.getOpenFileName(self,
+                                                             'Select file',
+                                                             path_default,
+                                                             file_choices))
+        if filename:
+            self.listwidget.addItem(filename)
+
+    def delete_file(self):
+        row = self.listwidget.currentRow()
+        self.listwidget.takeItem(row)
