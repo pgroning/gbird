@@ -1998,10 +1998,16 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         pert_action = self.create_action("&Perturbation", shortcut="F9",
                                           slot=self.quick_calc,
                                           tip="Run perturbation")
-        fullcalc_action = self.create_action("&Full calculation...",
+
+        smallcalc_action = self.create_action("&Small calc",
+                                          slot=self.quick_calc,
+                                          tip="Run small calculation")
+        
+        fullcalc_action = self.create_action("&Full calc...",
                                              slot=self.open_fullcalc_dlg,
                                              tip="Run full calculation")
-        self.add_actions(self.run_menu, (pert_action, fullcalc_action))
+        self.add_actions(self.run_menu, (pert_action, smallcalc_action,
+                                         fullcalc_action))
         
         self.help_menu = self.menuBar().addMenu("&Help")
         about_action = self.create_action("&About", shortcut='F1',

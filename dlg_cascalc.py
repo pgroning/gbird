@@ -81,7 +81,7 @@ class CasDialog(QtGui.QDialog):
         flo.addRow("Version:", self.version_cbox)
         flo.addRow("Neutron library:", self.neulib_cbox)
         flo.addRow("Gamma library:", self.gamlib_cbox)
-        #flo.addRow("CPU:", self.cpu_cbox)
+        flo.addRow("CPU:", self.cpu_cbox)
         #flo.addRow("Overwrite orig. inp. file:", self.owrite_chbox)
 
         groupbox = QtGui.QGroupBox()
@@ -170,10 +170,13 @@ class CasRunDialog(QtGui.QDialog):
         self.setGeometry(QtCore.QRect(0.8*xpos, 0.9*ypos, 150, 120))
 
         flo = QtGui.QFormLayout()
-        self.cpu_cbox = QtGui.QComboBox()
-        self.cpu_cbox.addItems(QtCore.QStringList(["local", "grid"]))
-        flo.addRow("CPU:", self.cpu_cbox)
+        #self.cpu_cbox = QtGui.QComboBox()
+        #self.cpu_cbox.addItems(QtCore.QStringList(["local", "grid"]))
+        #flo.addRow("CPU:", self.cpu_cbox)
 
+        self.replace_chbox = QtGui.QCheckBox("")
+        flo.addRow("Replace original:", self.replace_chbox)
+        
         self.owrite_chbox = QtGui.QCheckBox("")
         flo.addRow("Overwrite orig. inp. file:", self.owrite_chbox)
 
