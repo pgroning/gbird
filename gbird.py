@@ -2003,9 +2003,9 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                                           slot=self.quick_calc,
                                           tip="Run small calculation")
         
-        fullcalc_action = self.create_action("&Full calc...",
+        fullcalc_action = self.create_action("&Complete calc...",
                                              slot=self.open_fullcalc_dlg,
-                                             tip="Run full calculation")
+                                             tip="Run complete calculation")
         self.add_actions(self.run_menu, (pert_action, smallcalc_action,
                                          fullcalc_action))
         
