@@ -12,15 +12,26 @@ class BundleDialog(QtGui.QDialog):
         ypos = self.parent.pos().y() + self.parent.size().height() / 2
         self.setGeometry(QtCore.QRect(0.8*xpos, 0.9*ypos, 800, 300))
 
-        self.listview = QtGui.QListView()
+        self.tabview = QtGui.QTableView()
+        
+        #self.listview = QtGui.QListView()
         #self.listview.setModelColumn(1)
         #self.listview.setWindowTitle('Example List')
         #self.listview.setMinimumSize(600, 400)
-        self.listmodel = QtGui.QStandardItemModel(self.listview)
-        self.selectmodel = QtGui.QItemSelectionModel(self.listmodel)
-        self.listview.setModel(self.listmodel)
+        self.model = QtGui.QStandardItemModel(2, 3, self.tabview)
+        self.selectmodel = QtGui.QItemSelectionModel(self.model)
+        self.tabview.setModel(self.model)
+        self.tabview.setSelectionModel(self.selectmodel)
 
-        self.listwidget = QtGui.QListWidget()
+        self.model.setHorizontalHeaderItem(0, QtGui.QStandardItem("Files"))
+        self.model.setHorizontalHeaderItem(1, QtGui.QStandardItem("Height"))
+        self.model.setHorizontalHeaderItem(2, QtGui.QStandardItem(
+            "Height (BTF)"))
+        
+        #self.listview.setModel(self.listmodel)
+        #self.listview.setSelectionModel(self.selectmodel)
+
+        #self.listwidget = QtGui.QListWidget()
         #lview.setAcceptDrops(True)
         
         flo = QtGui.QFormLayout()
@@ -71,8 +82,9 @@ class BundleDialog(QtGui.QDialog):
         groupbox.setLayout(flo)
         grid = QtGui.QGridLayout()
         grid.addWidget(groupbox, 0, 0)
-        grid.addWidget(self.listwidget, 0, 1)
-        grid.addWidget(self.listview, 0, 2)
+        #grid.addWidget(self.listwidget, 0, 1)
+        #grid.addWidget(self.listview, 0, 2)
+        grid.addWidget(self.tabview, 0, 1)
         
         hbox = QtGui.QHBoxLayout()
         self.save_button = QtGui.QPushButton("Save As...")
@@ -104,7 +116,8 @@ class BundleDialog(QtGui.QDialog):
         arrow_up_icon = "icons/arrow-up-icon_32x32.png"
         moveUpAction = QtGui.QAction(QtGui.QIcon(arrow_up_icon),
                                      'Move selected file up', self)
-
+        moveUpAction.triggered.connect(self.move_up)
+        
         arrow_down_icon = "icons/arrow-down-icon_32x32.png"
         moveDownAction = QtGui.QAction(QtGui.QIcon(arrow_down_icon),
                                        'Move selected file down', self)
@@ -148,17 +161,20 @@ class BundleDialog(QtGui.QDialog):
     def load_bundle(self):
         """Load settings from project setup file"""
         self.parent.newProject()  # Create a bundle instance
-        self.listmodel.clear()
+        self.model.clear()
         caxfiles = self.parent.bunlist[0].data.caxfiles
         #self.listwidget.addItems(QtCore.QStringList(caxfiles))
 
         for caxfile in caxfiles:
             item = QtGui.QStandardItem(caxfile)
-            item.setCheckable(True)
+            #item.setCheckable(True)
             #item.setCheckState(QtCore.Qt.Unchecked)
-            item.setCheckState(QtCore.Qt.Checked)
-            self.listmodel.appendRow(item)
-
+            #item.setCheckState(QtCore.Qt.Checked)
+            self.model.setItem(0, 0, item)
+            self.model.setItem(0, 1, QtGui.QStandardItem(""))
+            self.model.setItem(0, 2, QtGui.QStandardItem(""))
+        self.tabview.resizeColumnToContents(0)
+            
         fuetype = self.parent.bunlist[0].data.fuetype
         ifue = self.fue_list.index(fuetype)
         self.fuetype_cbox.setCurrentIndex(ifue)
@@ -169,3 +185,8 @@ class BundleDialog(QtGui.QDialog):
         self.parent.import_data()
         #self.close()
         
+    def move_up(self):
+        print "move up"
+        print self.selectmodel.hasSelection()
+        ci = self.selectmodel.currentIndex()
+        print self.listmodel.itemFromIndex(ci)
