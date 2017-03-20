@@ -18,8 +18,8 @@ class BundleDialog(QtGui.QDialog):
         
         flo = QtGui.QFormLayout()
         self.fuetype_cbox = QtGui.QComboBox()
-        fue_list = ["OPT2", "OPT3", "A10B", "A10XM", "AT11"]
-        self.fuetype_cbox.addItems(QtCore.QStringList(fue_list))
+        self.fue_list = ["OPT2", "OPT3", "A10B", "A10XM", "AT11"]
+        self.fuetype_cbox.addItems(QtCore.QStringList(self.fue_list))
 
         self.add_button = QtGui.QPushButton("Add...")
         self.connect(self.add_button, QtCore.SIGNAL('clicked()'),
@@ -140,9 +140,10 @@ class BundleDialog(QtGui.QDialog):
         self.listwidget.clear()
         caxfiles = self.parent.bunlist[0].data.caxfiles
         self.listwidget.addItems(QtCore.QStringList(caxfiles))
+
         fuetype = self.parent.bunlist[0].data.fuetype
-        print fuetype
-        self.fuetype_cbox.setIndex()
+        ifue = self.fue_list.index(fuetype)
+        self.fuetype_cbox.setCurrentIndex(ifue)
 
     def import_data(self):
         """Import data from cax files"""
