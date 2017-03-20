@@ -12,7 +12,14 @@ class BundleDialog(QtGui.QDialog):
         ypos = self.parent.pos().y() + self.parent.size().height() / 2
         self.setGeometry(QtCore.QRect(0.8*xpos, 0.9*ypos, 800, 300))
 
-        #lview = QtGui.QListView()
+        self.listview = QtGui.QListView()
+        #self.listview.setModelColumn(1)
+        #self.listview.setWindowTitle('Example List')
+        #self.listview.setMinimumSize(600, 400)
+        self.listmodel = QtGui.QStandardItemModel(self.listview)
+        self.selectmodel = QtGui.QItemSelectionModel(self.listmodel)
+        self.listview.setModel(self.listmodel)
+
         self.listwidget = QtGui.QListWidget()
         #lview.setAcceptDrops(True)
         
@@ -65,6 +72,7 @@ class BundleDialog(QtGui.QDialog):
         grid = QtGui.QGridLayout()
         grid.addWidget(groupbox, 0, 0)
         grid.addWidget(self.listwidget, 0, 1)
+        grid.addWidget(self.listview, 0, 2)
         
         hbox = QtGui.QHBoxLayout()
         self.save_button = QtGui.QPushButton("Save As...")
@@ -131,15 +139,25 @@ class BundleDialog(QtGui.QDialog):
             self.listwidget.addItem(filename)
 
     def delete_file(self):
-        row = self.listwidget.currentRow()
-        self.listwidget.takeItem(row)
+        #row = self.listwidget.currentRow()
+        #self.listwidget.takeItem(row)
+        print self.selectmodel.currentIndex()
+        row = 1
+        self.listmodel.takeRow(row)
 
     def load_bundle(self):
         """Load settings from project setup file"""
         self.parent.newProject()  # Create a bundle instance
-        self.listwidget.clear()
+        self.listmodel.clear()
         caxfiles = self.parent.bunlist[0].data.caxfiles
-        self.listwidget.addItems(QtCore.QStringList(caxfiles))
+        #self.listwidget.addItems(QtCore.QStringList(caxfiles))
+
+        for caxfile in caxfiles:
+            item = QtGui.QStandardItem(caxfile)
+            item.setCheckable(True)
+            #item.setCheckState(QtCore.Qt.Unchecked)
+            item.setCheckState(QtCore.Qt.Checked)
+            self.listmodel.appendRow(item)
 
         fuetype = self.parent.bunlist[0].data.fuetype
         ifue = self.fue_list.index(fuetype)
