@@ -410,6 +410,15 @@ class MainWin(QtGui.QMainWindow):
 
     def read_pro(self, filename):
         """Reading project setup file"""
+        self.clear_data()
+        bundle = Bundle()
+        if not bundle.readpro(filename):  # stop if error is encountered
+            return
+        self.bunlist = []
+        self.bunlist.append(bundle)
+
+    def import_data(self):
+        """Reading project setup file"""
         
         msgBox = QtGui.QMessageBox()
         status = msgBox.information(self, "Importing data", "Continue?",
@@ -419,16 +428,17 @@ class MainWin(QtGui.QMainWindow):
         #self._filename = filename
         if status == QtGui.QMessageBox.Yes:
             self.setCursor(QtCore.Qt.WaitCursor)
-            self.clear_data()
-            bundle = Bundle()
-            if not bundle.readpro(filename):  # stop if error is encountered
-                self.setCursor(QtCore.Qt.ArrowCursor)
-                return
+            #self.clear_data()
+            #bundle = Bundle()
+            #if not bundle.readpro(filename):  # stop if error is encountered
+            #    self.setCursor(QtCore.Qt.ArrowCursor)
+            #    return
             # inarg content="unfiltered" reads the whole file content
+            bundle = self.bunlist[0]
             bundle.readcax(content=bundle.data.content)
             bundle.new_btf()
-            self.bunlist = []
-            self.bunlist.append(bundle)
+            #self.bunlist = []
+            #self.bunlist.append(bundle)
             
             self.init_pinobjects()
             self.init_cboxes()
@@ -438,6 +448,10 @@ class MainWin(QtGui.QMainWindow):
         else:
             return
             
+
+
+
+
         #self.fig_update()
             #self.setCursor(QtCore.Qt.ArrowCursor)
             # self.canvas.draw()
@@ -1959,8 +1973,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         forward = self.create_action("Forward", slot=self.forward_state,
                                          tip="Forward to next")
 
-        reset = self.create_action("Reset...",
-                                         tip="Reset all changes")
+        reset = self.create_action("Undo changes...",
+                                         tip="Undo all changes...")
 
         enr_plus = self.create_action("Increase enr", slot=self.enr_add,
                                       tip="Increase enrichment",

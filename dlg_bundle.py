@@ -7,7 +7,7 @@ class BundleDialog(QtGui.QDialog):
         self.setup()
 
     def setup(self):
-        self.setWindowTitle("New bundle")
+        self.setWindowTitle("Bundle")
         xpos = self.parent.pos().x() + self.parent.size().width() / 2
         ypos = self.parent.pos().y() + self.parent.size().height() / 2
         self.setGeometry(QtCore.QRect(0.8*xpos, 0.9*ypos, 800, 300))
@@ -29,16 +29,32 @@ class BundleDialog(QtGui.QDialog):
         self.connect(self.delete_button, QtCore.SIGNAL('clicked()'),
                      self.delete_file)
         
+        #print self.delete_button.size()
         #self.files_cbox = QtGui.QComboBox()
         #self.files_cbox.addItems(QtCore.QStringList([]))
 
-        self.nodes_cbox = QtGui.QComboBox()
-        self.nodes_cbox.addItems(QtCore.QStringList([]))
+        #self.nodes_cbox = QtGui.QComboBox()
+        #self.nodes_cbox.addItems(QtCore.QStringList([]))
+
+        self.move_down_button = QtGui.QPushButton("Down")
+        self.move_up_button = QtGui.QPushButton("Up")
+        self.move_down_button.setMaximumWidth(40)
+        self.move_up_button.setMaximumWidth(40)
+        #self.move_down_button.setFlat(True)
+
+        #self.move_down_button.setSizeHint(40)
+        #self.move_down_button.setSizePolicy(QtGui.QSizePolicy.Maximum,
+        #                                    QtGui.QSizePolicy.Maximum)
+
+        move_hbox = QtGui.QHBoxLayout()
+        move_hbox.addWidget(self.move_down_button)
+        move_hbox.addWidget(self.move_up_button)
 
         flo.addRow("Fuel type:", self.fuetype_cbox)
-        flo.addRow("Files:", self.add_button)
-        flo.addRow("Files:", self.delete_button)
-        flo.addRow("Nodes:", self.nodes_cbox)
+        flo.addRow("File:", self.add_button)
+        flo.addRow("File:", self.delete_button)
+        #flo.addRow("Move:", self.move_up_button)
+        flo.addRow("Move:", move_hbox)
 
         groupbox = QtGui.QGroupBox()
         groupbox.setTitle("Bundle")
@@ -53,21 +69,49 @@ class BundleDialog(QtGui.QDialog):
         hbox = QtGui.QHBoxLayout()
         self.save_button = QtGui.QPushButton("Save As...")
         self.load_button = QtGui.QPushButton("Load...")
-        self.ok_button = QtGui.QPushButton("Import")
+        self.import_button = QtGui.QPushButton("Import")
         self.cancel_button = QtGui.QPushButton("Cancel")
         hbox.addWidget(self.save_button)
         hbox.addWidget(self.load_button)
         hbox.addStretch()
-        hbox.addWidget(self.ok_button)
+        hbox.addWidget(self.import_button)
         hbox.addWidget(self.cancel_button)
         self.connect(self.cancel_button, QtCore.SIGNAL('clicked()'),
                      self.close)
-        self.connect(self.ok_button, QtCore.SIGNAL('clicked()'), self.action)
+        self.connect(self.load_button, QtCore.SIGNAL('clicked()'), 
+                     self.load_bundle)
+        self.connect(self.import_button, QtCore.SIGNAL('clicked()'), 
+                     self.import_data)
+
+        add_icon = "icons/add-icon_32x32.png"
+        addFileAction = QtGui.QAction(QtGui.QIcon(add_icon),
+                                      'Add file', self)
+        addFileAction.triggered.connect(self.add_file)
+        
+        delete_icon = "icons/delete-icon_32x32.png"
+        deleteFileAction = QtGui.QAction(QtGui.QIcon(delete_icon),
+                                         'Delete file', self)
+        deleteFileAction.triggered.connect(self.delete_file)
+
+        arrow_up_icon = "icons/arrow-up-icon_32x32.png"
+        moveUpAction = QtGui.QAction(QtGui.QIcon(arrow_up_icon),
+                                     'Move selected file up', self)
+
+        arrow_down_icon = "icons/arrow-down-icon_32x32.png"
+        moveDownAction = QtGui.QAction(QtGui.QIcon(arrow_down_icon),
+                                       'Move selected file down', self)
+
+        toolbar = QtGui.QToolBar()
+        toolbar.addAction(addFileAction)
+        toolbar.addAction(deleteFileAction)
+        toolbar.addAction(moveUpAction)
+        toolbar.addAction(moveDownAction)
 
         vbox = QtGui.QVBoxLayout()
+        vbox.addWidget(toolbar)
         #vbox.addLayout(flo)
         vbox.addLayout(grid)
-        vbox.addStretch()
+        #vbox.addStretch()
         vbox.addLayout(hbox)
         self.setLayout(vbox)
 
@@ -89,3 +133,19 @@ class BundleDialog(QtGui.QDialog):
     def delete_file(self):
         row = self.listwidget.currentRow()
         self.listwidget.takeItem(row)
+
+    def load_bundle(self):
+        """Load settings from project setup file"""
+        self.parent.newProject()  # Create a bundle instance
+        self.listwidget.clear()
+        caxfiles = self.parent.bunlist[0].data.caxfiles
+        self.listwidget.addItems(QtCore.QStringList(caxfiles))
+        fuetype = self.parent.bunlist[0].data.fuetype
+        print fuetype
+
+    def import_data(self):
+        """Import data from cax files"""
+        self.close()
+        self.parent.import_data()
+        #self.close()
+        
