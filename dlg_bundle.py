@@ -88,7 +88,7 @@ class BundleDialog(QtGui.QDialog):
                                       'Add file', self)
         addFileAction.triggered.connect(self.add_file)
         
-        delete_icon = "icons/delete-icon_32x32.png"
+        delete_icon = "icons/delete3-icon_32x32.png"
         deleteFileAction = QtGui.QAction(QtGui.QIcon(delete_icon),
                                          'Delete file', self)
         deleteFileAction.triggered.connect(self.delete_file)
@@ -142,6 +142,7 @@ class BundleDialog(QtGui.QDialog):
         self.listwidget.addItems(QtCore.QStringList(caxfiles))
         fuetype = self.parent.bunlist[0].data.fuetype
         print fuetype
+        self.fuetype_cbox.setIndex()
 
     def import_data(self):
         """Import data from cax files"""
