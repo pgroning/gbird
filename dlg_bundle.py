@@ -12,28 +12,29 @@ class BundleDialog(QtGui.QDialog):
         ypos = self.parent.pos().y() + self.parent.size().height() / 2
         self.setGeometry(QtCore.QRect(0.8*xpos, 0.9*ypos, 800, 300))
 
-        self.tabview = QtGui.QTableView()
-        
+        self.table_view = QtGui.QTableView()
+        #self.table_view.setShowGrid(False)
+
         #self.listview = QtGui.QListView()
         #self.listview.setModelColumn(1)
         #self.listview.setWindowTitle('Example List')
         #self.listview.setMinimumSize(600, 400)
-        self.model = QtGui.QStandardItemModel(2, 3, self.tabview)
-        self.selectmodel = QtGui.QItemSelectionModel(self.model)
-        self.tabview.setModel(self.model)
-        self.tabview.setSelectionModel(self.selectmodel)
+        model = QtGui.QStandardItemModel(0, 3, self.table_view)
+        selection_model = QtGui.QItemSelectionModel(model)
+        self.table_view.setModel(model)
+        self.table_view.setSelectionModel(selection_model)
 
-        self.model.setHorizontalHeaderItem(0, QtGui.QStandardItem("Files"))
-        self.model.setHorizontalHeaderItem(1, QtGui.QStandardItem("Height"))
-        self.model.setHorizontalHeaderItem(2, QtGui.QStandardItem(
-            "Height (BTF)"))
-        
-        #self.listview.setModel(self.listmodel)
-        #self.listview.setSelectionModel(self.selectmodel)
+        model.setHorizontalHeaderItem(0, QtGui.QStandardItem(
+                "Level"))
+        model.setHorizontalHeaderItem(1, QtGui.QStandardItem(
+                "Level (BTF)"))
+        model.setHorizontalHeaderItem(2, QtGui.QStandardItem(
+                "Files"))
 
-        #self.listwidget = QtGui.QListWidget()
-        #lview.setAcceptDrops(True)
-        
+        verticalheader = self.table_view.verticalHeader()
+        verticalheader.setResizeMode(QtGui.QHeaderView.Fixed)
+        verticalheader.setDefaultSectionSize(25)
+
         flo = QtGui.QFormLayout()
         self.fuetype_cbox = QtGui.QComboBox()
         self.fue_list = ["OPT2", "OPT3", "A10B", "A10XM", "AT11"]
@@ -84,7 +85,7 @@ class BundleDialog(QtGui.QDialog):
         grid.addWidget(groupbox, 0, 0)
         #grid.addWidget(self.listwidget, 0, 1)
         #grid.addWidget(self.listview, 0, 2)
-        grid.addWidget(self.tabview, 0, 1)
+        grid.addWidget(self.table_view, 0, 1)
         
         hbox = QtGui.QHBoxLayout()
         self.save_button = QtGui.QPushButton("Save As...")
@@ -121,6 +122,7 @@ class BundleDialog(QtGui.QDialog):
         arrow_down_icon = "icons/arrow-down-icon_32x32.png"
         moveDownAction = QtGui.QAction(QtGui.QIcon(arrow_down_icon),
                                        'Move selected file down', self)
+        moveDownAction.triggered.connect(self.move_down)
 
         toolbar = QtGui.QToolBar()
         toolbar.addAction(addFileAction)
@@ -144,37 +146,47 @@ class BundleDialog(QtGui.QDialog):
         path_default = "."
         
         file_choices = "*.cax (*.cax)"
-        filename = unicode(QtGui.QFileDialog.getOpenFileName(self,
-                                                             'Select file',
-                                                             path_default,
-                                                             file_choices))
-        if filename:
-            self.listwidget.addItem(filename)
+        caxfile = unicode(QtGui.QFileDialog.getOpenFileName(self,
+                                                            'Select file',
+                                                            path_default,
+                                                            file_choices))
+        if caxfile:
+            i = self.item_model.rowCount()
+            item = QtGui.QStandardItem(caxfile)
+            self.item_model.setItem(i, 2, item)
+            self.table_view.resizeColumnToContents(2)
 
     def delete_file(self):
         #row = self.listwidget.currentRow()
         #self.listwidget.takeItem(row)
-        print self.selectmodel.currentIndex()
-        row = 1
-        self.listmodel.takeRow(row)
+        row = self.table_view.selectionModel().currentIndex().row()
+        print row
+        self.table_view.model().takeRow(row)
+        #self.item_model.removeRows(row, row)
 
     def load_bundle(self):
         """Load settings from project setup file"""
         self.parent.newProject()  # Create a bundle instance
-        self.model.clear()
+        self.clear_all()
+        #self.item_model.clear()
         caxfiles = self.parent.bunlist[0].data.caxfiles
-        #self.listwidget.addItems(QtCore.QStringList(caxfiles))
 
-        for caxfile in caxfiles:
-            item = QtGui.QStandardItem(caxfile)
+        for i, caxfile in enumerate(caxfiles):
+            item1 = QtGui.QStandardItem("")
+            item2 = QtGui.QStandardItem("")
+            item3 = QtGui.QStandardItem(caxfile)
+            self.table_view.model().setItem(i, 0, item1)
+            self.table_view.model().setItem(i, 1, item2)
+            self.table_view.model().setItem(i, 2, item3)
+            #self.table_view.setRowHeight(i, 25)
+            #self.table_view.model().setRowHeight(i, 25)
             #item.setCheckable(True)
             #item.setCheckState(QtCore.Qt.Unchecked)
             #item.setCheckState(QtCore.Qt.Checked)
-            self.model.setItem(0, 0, item)
-            self.model.setItem(0, 1, QtGui.QStandardItem(""))
-            self.model.setItem(0, 2, QtGui.QStandardItem(""))
-        self.tabview.resizeColumnToContents(0)
-            
+        #self.table_view.setColumnWidth(0, 80)
+        #self.table_view.setColumnWidth(1, 80)
+        self.table_view.resizeColumnToContents(2)
+        
         fuetype = self.parent.bunlist[0].data.fuetype
         ifue = self.fue_list.index(fuetype)
         self.fuetype_cbox.setCurrentIndex(ifue)
@@ -187,6 +199,47 @@ class BundleDialog(QtGui.QDialog):
         
     def move_up(self):
         print "move up"
-        print self.selectmodel.hasSelection()
-        ci = self.selectmodel.currentIndex()
-        print self.listmodel.itemFromIndex(ci)
+        #print self.table_view.selectionModel().selectedRows()[0].row()
+        print self.table_view.selectionModel().hasSelection()
+        ci = self.table_view.selectionModel().currentIndex()  # QModelIndex
+        #ci = self.selection_model.currentIndex()  # QModelIndex
+        print ci.row()
+        print self.table_view.model().rowCount()
+
+    def move_down(self):
+        """Swap rows in order to move selected data down one step"""
+        if self.table_view.selectionModel().hasSelection():
+            # get current index
+            icur = self.table_view.selectionModel().currentIndex()
+            irow = icur.row()
+            if irow == self.table_view.model().rowCount() - 1:  #last row
+                return
+            mi = QtCore.QModelIndex()  # dummy model index
+            rselect = self.table_view.selectionModel().isRowSelected(irow, mi)
+            if rselect:  # entire row is selected
+                ncols = self.table_view.model().columnCount()
+                for c in range(ncols):
+                    val1 = self.table_view.model().item(irow, c).text()
+                    val2 = self.table_view.model().item(irow + 1, c).text()
+                    item1 = QtGui.QStandardItem(val1)
+                    item2 = QtGui.QStandardItem(val2)
+                    self.table_view.model().setItem(irow, c, item2)
+                    self.table_view.model().setItem(irow + 1, c, item1)
+            else:
+                val1 = self.table_view.model().item(irow, 2).text()
+                val2 = self.table_view.model().item(irow + 1, 2).text()
+                item1 = QtGui.QStandardItem(val1)
+                item2 = QtGui.QStandardItem(val2)
+                self.table_view.model().setItem(irow, 2, item2)
+                self.table_view.model().setItem(irow + 1, 2, item1)
+                
+            cmi = self.table_view.model().item(irow + 1, 2).index()
+            select = QtGui.QItemSelectionModel.Select
+            self.table_view.selectionModel().setCurrentIndex(cmi, select)
+            #self.table_view.selectionModel().select(cmi, select)
+
+    def clear_all(self):
+        """Remove all rows"""
+        nrows = self.table_view.model().rowCount()
+        self.table_view.model().removeRows(0, nrows)
+        

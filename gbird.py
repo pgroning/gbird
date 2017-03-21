@@ -2038,7 +2038,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         exitAction.setStatusTip('Exit application')
         exitAction.triggered.connect(self.close)
 
-        new_icon = "icons/new-green-icon_32x32.png"
+        new_icon = "icons/new-icon_32x32.png"
         newAction = QtGui.QAction(QtGui.QIcon(new_icon),
                                    'Create new bundle', self)
         newAction.setStatusTip('Create a new bundle')
