@@ -1,8 +1,11 @@
+import os
 from PyQt4 import QtGui, QtCore
 
 class BundleDialog(QtGui.QDialog):
     def __init__(self, parent):
         QtGui.QDialog.__init__(self)
+
+        self.settings = QtCore.QSettings("greenbird")
         self.parent = parent
         self.setup()
 
@@ -26,74 +29,49 @@ class BundleDialog(QtGui.QDialog):
         self.table_view.setModel(model)
         self.table_view.setSelectionModel(selection_model)
 
-        model.setHorizontalHeaderItem(0, QtGui.QStandardItem(
-                "Height"))
-        model.setHorizontalHeaderItem(1, QtGui.QStandardItem(
-                "BTF"))
-        model.setHorizontalHeaderItem(2, QtGui.QStandardItem(
-                "Files"))
+        model.setHorizontalHeaderItem(0, QtGui.QStandardItem("Height"))
+        model.setHorizontalHeaderItem(1, QtGui.QStandardItem("BTF"))
+        model.setHorizontalHeaderItem(2, QtGui.QStandardItem("Files"))
 
         verticalheader = self.table_view.verticalHeader()
         verticalheader.setResizeMode(QtGui.QHeaderView.Fixed)
         verticalheader.setDefaultSectionSize(25)
 
-        flo = QtGui.QFormLayout()
+        #flo = QtGui.QFormLayout()
         self.fuetype_cbox = QtGui.QComboBox()
         self.fue_list = ["OPT2", "OPT3", "A10B", "A10XM", "AT11"]
         self.fuetype_cbox.addItems(QtCore.QStringList(self.fue_list))
 
-        #self.add_button = QtGui.QPushButton("Add...")
-        #self.connect(self.add_button, QtCore.SIGNAL('clicked()'),
-        #             self.add_file)
+        self.save_button = QtGui.QPushButton("Save As...")
+        self.load_button = QtGui.QPushButton("Load...")
 
-        #self.delete_button = QtGui.QPushButton("Delete")
-        #self.connect(self.delete_button, QtCore.SIGNAL('clicked()'),
-        #             self.delete_file)
-        
-        #print self.delete_button.size()
-        #self.files_cbox = QtGui.QComboBox()
-        #self.files_cbox.addItems(QtCore.QStringList([]))
+        flo = QtGui.QFormLayout()
+        flo.addRow("Fuel:", self.fuetype_cbox)
 
-        #self.nodes_cbox = QtGui.QComboBox()
-        #self.nodes_cbox.addItems(QtCore.QStringList([]))
-
-        #self.move_down_button = QtGui.QPushButton("Down")
-        #self.move_up_button = QtGui.QPushButton("Up")
-        #self.move_down_button.setMaximumWidth(40)
-        #self.move_up_button.setMaximumWidth(40)
-        #self.move_down_button.setFlat(True)
-
-        #self.move_down_button.setSizeHint(40)
-        #self.move_down_button.setSizePolicy(QtGui.QSizePolicy.Maximum,
-        #                                    QtGui.QSizePolicy.Maximum)
-
-        #move_hbox = QtGui.QHBoxLayout()
-        #move_hbox.addWidget(self.move_down_button)
-        #move_hbox.addWidget(self.move_up_button)
-
-        flo.addRow("Fuel type:", self.fuetype_cbox)
-        #flo.addRow("File:", self.add_button)
-        #flo.addRow("File:", self.delete_button)
-        #flo.addRow("Move:", self.move_up_button)
-        #flo.addRow("Move:", move_hbox)
+        vbox = QtGui.QVBoxLayout()
+        vbox.addLayout(flo)
+        #vbox.addWidget(self.fuetype_cbox)
+        vbox.addStretch()
+        vbox.addWidget(self.save_button)
+        vbox.addWidget(self.load_button)
 
         groupbox = QtGui.QGroupBox()
-        groupbox.setTitle("Bundle")
+        #groupbox.setTitle("Bundle")
         groupbox.setStyleSheet("QGroupBox {border: 1px solid silver;\
         border-radius:5px; font: bold; subcontrol-origin: margin;\
         padding: 10px 0px 0px 0px}")
-        groupbox.setLayout(flo)
+        groupbox.setLayout(vbox)
         grid = QtGui.QGridLayout()
         grid.addWidget(groupbox, 0, 0)
         grid.addWidget(self.table_view, 0, 1)
         
         hbox = QtGui.QHBoxLayout()
-        self.save_button = QtGui.QPushButton("Save As...")
-        self.load_button = QtGui.QPushButton("Load...")
+        #self.save_button = QtGui.QPushButton("Save As...")
+        #self.load_button = QtGui.QPushButton("Load...")
         self.import_button = QtGui.QPushButton("Import")
         self.cancel_button = QtGui.QPushButton("Cancel")
-        hbox.addWidget(self.save_button)
-        hbox.addWidget(self.load_button)
+        #hbox.addWidget(self.save_button)
+        #hbox.addWidget(self.load_button)
         hbox.addStretch()
         hbox.addWidget(self.import_button)
         hbox.addWidget(self.cancel_button)
@@ -142,16 +120,32 @@ class BundleDialog(QtGui.QDialog):
         self.close()
 
     def add_file(self):
+        """Add single cax file to table"""
+
         # Import default path from config file
-        path_default = "."
-        
+        self.settings.beginGroup("PATH")
+        path_default = self.settings.value("path_default",
+                                           QtCore.QString("")).toString()
+        self.settings.endGroup()
         file_choices = "*.cax (*.cax)"
-        caxfile = unicode(QtGui.QFileDialog.getOpenFileName(self,
-                                                            'Select file',
-                                                            path_default,
-                                                            file_choices))
+        dialog = QtGui.QFileDialog()
+        #url = QtCore.QUrl()
+        #dialog.setSidebarUrls(url)
+        caxfile = unicode(dialog.getOpenFileName(self,
+                                                 'Select file',
+                                                 path_default,
+                                                 file_choices))
         if caxfile:
-            i = self.table_view.model().rowCount()
+            # Save default path to config file
+            path = os.path.split(caxfile)[0]
+            self.settings.beginGroup("PATH")
+            self.settings.setValue("path_default", QtCore.QString(path))
+            self.settings.endGroup()
+
+            i = 0
+            empty_item = QtGui.QStandardItem("")
+            self.table_view.model().insertRow(i, empty_item)
+
             item0 = QtGui.QStandardItem("")
             item1 = QtGui.QStandardItem("")
             item2 = QtGui.QStandardItem(caxfile)
@@ -159,6 +153,11 @@ class BundleDialog(QtGui.QDialog):
             self.table_view.model().setItem(i, 1, item1)
             self.table_view.model().setItem(i, 2, item2)
             self.table_view.resizeColumnToContents(2)
+
+            nrows = self.table_view.model().rowCount()
+            for i in range(nrows):
+                vheader = QtGui.QStandardItem(str(nrows - i))
+                self.table_view.model().setVerticalHeaderItem(i, vheader)
 
     def delete_file(self):
         row = self.table_view.selectionModel().currentIndex().row()
@@ -172,6 +171,7 @@ class BundleDialog(QtGui.QDialog):
         #self.item_model.clear()
         caxfiles = self.parent.bunlist[0].data.caxfiles
         height = self.parent.bunlist[0].data.nodes
+        nsegs = len(caxfiles)
         
         for i, caxfile in enumerate(caxfiles):
             item0 = QtGui.QStandardItem(str(height[i]))
@@ -180,6 +180,8 @@ class BundleDialog(QtGui.QDialog):
             self.table_view.model().setItem(i, 0, item0)
             self.table_view.model().setItem(i, 1, item1)
             self.table_view.model().setItem(i, 2, item2)
+            vheader = QtGui.QStandardItem(str(nsegs - i))
+            self.table_view.model().setVerticalHeaderItem(i, vheader)
             #self.table_view.setRowHeight(i, 25)
             #self.table_view.model().setRowHeight(i, 25)
             #item.setCheckable(True)
@@ -302,4 +304,11 @@ class BundleDialog(QtGui.QDialog):
         """Remove all rows"""
         nrows = self.table_view.model().rowCount()
         self.table_view.model().removeRows(0, nrows)
+
+    def read_project_file(self):
+        """Reading project setup file"""
+
+        
+        # Read project data and create bundle instance
+        self.parent.read_pro(filename)
         
