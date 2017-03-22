@@ -1,4 +1,5 @@
 import os
+import ConfigParser
 from PyQt4 import QtGui, QtCore
 
 class BundleDialog(QtGui.QDialog):
@@ -326,7 +327,60 @@ class BundleDialog(QtGui.QDialog):
 
     def save_bundle(self):
         """Save data to project file"""
-        print "Saving data to file"
         
+        filename = self.select_write_file()
+        if not filename:
+            return
+        
+        config = ConfigParser.SafeConfigParser()
+        config.add_section("Bundle")
+        fuetype = str(self.fuetype_cbox.currentText())
+        config.set("Bundle", "fuel", fuetype)
 
+        nrows = self.table_view.model().rowCount()
+        file_list = []
+        height_list = []
+        btf_list = []
+        for irow in range(nrows):
+            height_item = self.table_view.model().item(irow, 0)
+            btf_item = self.table_view.model().item(irow, 1)
+            file_item = self.table_view.model().item(irow, 2)
+            height_list.append(str(height_item.text()))
+            if str(btf_item.text()):
+                btf_list.append(str(btf_item.text()))
+            else:
+                btf_list.append("-")
+            file_list.append(str(file_item.text()))
         
+        file_str = "\n".join(file_list)
+        config.set("Bundle", "files", file_str)
+
+        height_str = "\n".join(height_list)
+        config.set("Bundle", "height", height_str)
+
+        config.add_section("BTF")
+        btf_str = "\n".join(btf_list)
+        config.set("BTF", "height", btf_str)
+        
+        with open(filename, "wb") as configfile:
+            config.write(configfile)
+
+    def select_write_file(self):
+        # Import default path from config file
+        self.settings.beginGroup("PATH")
+        path_default = self.settings.value("path_default",
+                                           QtCore.QString("")).toString()
+        self.settings.endGroup()
+        file_choices = "*.pro (*.pro)"
+        filename = unicode(QtGui.QFileDialog.getSaveFileName(self, 'Save file',
+                                                             path_default,
+                                                             file_choices))
+        if filename:
+            # Save default path to config file
+            path = os.path.split(filename)[0]
+            self.settings.beginGroup("PATH")
+            self.settings.setValue("path_default", QtCore.QString(path))
+            self.settings.endGroup()
+            
+        return filename
+    
