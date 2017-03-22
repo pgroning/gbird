@@ -241,38 +241,62 @@ class BundleDialog(QtGui.QDialog):
             icol = icur.column()
             if irow == self.table_view.model().rowCount() - 1:  # last row
                 return
-            mi = QtCore.QModelIndex()  # dummy model index
-            rselect = self.table_view.selectionModel().isRowSelected(irow, mi)
-            if rselect:  # entire row is selected
-                ncols = self.table_view.model().columnCount()
-                for c in range(ncols):
-                    val1 = self.table_view.model().item(irow, c).text()
-                    val2 = self.table_view.model().item(irow + 1, c).text()
-                    item1 = QtGui.QStandardItem(val1)
-                    item2 = QtGui.QStandardItem(val2)
-                    self.table_view.model().setItem(irow, c, item2)
-                    self.table_view.model().setItem(irow + 1, c, item1)
-                    flag1 = QtGui.QItemSelectionModel.Select
-                    flag2 = QtGui.QItemSelectionModel.Rows
-                    idx = self.table_view.model().item(irow + 1, 2).index()
-                    
-                    self.table_view.selectionModel().select(idx, flag1 | flag2)
-            else:
-                val1 = self.table_view.model().item(irow, icol).text()
-                val2 = self.table_view.model().item(irow + 1, icol).text()
-                item1 = QtGui.QStandardItem(val1)
-                item2 = QtGui.QStandardItem(val2)
-                self.table_view.model().setItem(irow, icol, item2)
-                self.table_view.model().setItem(irow + 1, icol, item1)
-                flag1 = QtGui.QItemSelectionModel.Select
-                idx = self.table_view.model().item(irow + 1, icol).index()
-                self.table_view.selectionModel().select(idx, flag1)
 
-            #sel_flag2 = QtGui.QItemSelectionModel.Rows
-            #cmi = self.table_view.model().item(irow + 1, 2).index()
-            #select = QtGui.QItemSelectionModel.Select
-            self.table_view.selectionModel().setCurrentIndex(idx, flag1)
-            #self.table_view.selectionModel().select(cmi, sel_flag | sel_flag2)
+            select_items = []
+            ncols = self.table_view.model().columnCount()
+            for c in range(ncols):
+                item1 = self.table_view.model().item(irow, c)
+                item2 = self.table_view.model().item(irow + 1, c)
+                idx = item1.index()
+                if self.table_view.selectionModel().isSelected(idx):
+                    t1 = item1.text()
+                    t2 = item2.text()
+                    i1 = QtGui.QStandardItem(t1)
+                    i2 = QtGui.QStandardItem(t2)
+                    self.table_view.model().setItem(irow, c, i2)
+                    self.table_view.model().setItem(irow + 1, c, i1)
+                    item = self.table_view.model().item(irow + 1, c)
+                    select_items.append(item)
+            
+            select = QtGui.QItemSelectionModel.Select
+            noupdate = QtGui.QItemSelectionModel.NoUpdate
+            for item in select_items:
+                idx = item.index()
+                self.table_view.selectionModel().select(idx, select)
+            self.table_view.selectionModel().setCurrentIndex(idx, noupdate)
+
+#            mi = QtCore.QModelIndex()  # dummy model index
+#            rselect = self.table_view.selectionModel().isRowSelected(irow, mi)
+#            if rselect:  # entire row is selected
+#                ncols = self.table_view.model().columnCount()
+#                for c in range(ncols):
+#                    val1 = self.table_view.model().item(irow, c).text()
+#                    val2 = self.table_view.model().item(irow + 1, c).text()
+#                    item1 = QtGui.QStandardItem(val1)
+#                    item2 = QtGui.QStandardItem(val2)
+#                    self.table_view.model().setItem(irow, c, item2)
+#                    self.table_view.model().setItem(irow + 1, c, item1)
+#                    flag1 = QtGui.QItemSelectionModel.Select
+#                    flag2 = QtGui.QItemSelectionModel.Rows
+#                    idx = self.table_view.model().item(irow + 1, 2).index()
+#                    
+#                    self.table_view.selectionModel().select(idx, flag1 | flag2)
+#            else:
+#                val1 = self.table_view.model().item(irow, icol).text()
+#                val2 = self.table_view.model().item(irow + 1, icol).text()
+#                item1 = QtGui.QStandardItem(val1)
+#                item2 = QtGui.QStandardItem(val2)
+#                self.table_view.model().setItem(irow, icol, item2)
+#                self.table_view.model().setItem(irow + 1, icol, item1)
+#                flag1 = QtGui.QItemSelectionModel.Select
+#                idx = self.table_view.model().item(irow + 1, icol).index()
+#                self.table_view.selectionModel().select(idx, flag1)
+#
+#            #sel_flag2 = QtGui.QItemSelectionModel.Rows
+#            #cmi = self.table_view.model().item(irow + 1, 2).index()
+#            #select = QtGui.QItemSelectionModel.Select
+#            self.table_view.selectionModel().setCurrentIndex(idx, flag1)
+#            #self.table_view.selectionModel().select(cmi, sel_flag | sel_flag2)
 
     def clear_all(self):
         """Remove all rows"""
