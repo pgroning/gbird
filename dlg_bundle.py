@@ -42,7 +42,7 @@ class BundleDialog(QtGui.QDialog):
         self.fue_list = ["OPT2", "OPT3", "A10B", "A10XM", "AT11"]
         self.fuetype_cbox.addItems(QtCore.QStringList(self.fue_list))
 
-        self.save_button = QtGui.QPushButton("Save As...")
+        self.save_button = QtGui.QPushButton("Save...")
         self.load_button = QtGui.QPushButton("Load...")
 
         flo = QtGui.QFormLayout()
@@ -77,6 +77,8 @@ class BundleDialog(QtGui.QDialog):
         hbox.addWidget(self.cancel_button)
         self.connect(self.cancel_button, QtCore.SIGNAL('clicked()'),
                      self.close)
+        self.connect(self.save_button, QtCore.SIGNAL('clicked()'), 
+                     self.save_bundle)
         self.connect(self.load_button, QtCore.SIGNAL('clicked()'), 
                      self.load_bundle)
         self.connect(self.import_button, QtCore.SIGNAL('clicked()'), 
@@ -164,9 +166,9 @@ class BundleDialog(QtGui.QDialog):
         self.table_view.model().takeRow(row)
         #self.table_view.removeRow(row)
 
-    def load_bundle(self):
+    def update_table(self):
         """Load settings from project setup file"""
-        self.parent.newProject()  # Create a bundle instance
+        #self.parent.newProject()  # Create a bundle instance
         self.clear_all()
         #self.item_model.clear()
         caxfiles = self.parent.bunlist[0].data.caxfiles
@@ -305,10 +307,26 @@ class BundleDialog(QtGui.QDialog):
         nrows = self.table_view.model().rowCount()
         self.table_view.model().removeRows(0, nrows)
 
-    def read_project_file(self):
+    def load_bundle(self):
         """Reading project setup file"""
 
+        # Import default path from config file
+        self.settings.beginGroup("PATH")
+        path_default = self.settings.value("path_default",
+                                           QtCore.QString("")).toString()
+        self.settings.endGroup()
+        file_choices = "*.pro (*.pro)"
+        filename = unicode(QtGui.QFileDialog.getOpenFileName(self, 'Open file',
+                                                             path_default,
+                                                             file_choices))
+        if filename:
+            # Read project data and create bundle instance
+            self.parent.read_pro(filename)
+            self.update_table()
+
+    def save_bundle(self):
+        """Save data to project file"""
+        print "Saving data to file"
         
-        # Read project data and create bundle instance
-        self.parent.read_pro(filename)
+
         

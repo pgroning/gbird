@@ -416,6 +416,7 @@ class MainWin(QtGui.QMainWindow):
             return
         self.bunlist = []
         self.bunlist.append(bundle)
+        self.ibundle = 0
 
     def import_data(self):
         """Reading project setup file"""
