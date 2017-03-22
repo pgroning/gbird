@@ -14,10 +14,12 @@ class BundleDialog(QtGui.QDialog):
 
         self.table_view = QtGui.QTableView()
         #self.table_view.setShowGrid(False)
-        self.table_view.setSelectionBehavior(
-            QtGui.QAbstractItemView.SelectRows)
-        self.table_view.setSelectionMode(
-            QtGui.QAbstractItemView.SingleSelection)
+        #self.table_view.setSelectionBehavior(
+        #    QtGui.QAbstractItemView.SelectRows)
+        #self.table_view.setSelectionMode(
+        #    QtGui.QAbstractItemView.SingleSelection)
+        #self.table_view.setDragDropMode(
+        #    QtGui.QAbstractItemView.DragDrop)
         
         model = QtGui.QStandardItemModel(0, 3, self.table_view)
         selection_model = QtGui.QItemSelectionModel(model)
@@ -27,7 +29,7 @@ class BundleDialog(QtGui.QDialog):
         model.setHorizontalHeaderItem(0, QtGui.QStandardItem(
                 "Height"))
         model.setHorizontalHeaderItem(1, QtGui.QStandardItem(
-                "Height (BTF)"))
+                "BTF"))
         model.setHorizontalHeaderItem(2, QtGui.QStandardItem(
                 "Files"))
 
@@ -198,14 +200,38 @@ class BundleDialog(QtGui.QDialog):
         #self.close()
         
     def move_up(self):
-        print "move up"
-        #print self.table_view.selectionModel().selectedRows()[0].row()
-        print self.table_view.selectionModel().hasSelection()
-        ci = self.table_view.selectionModel().currentIndex()  # QModelIndex
-        #ci = self.selection_model.currentIndex()  # QModelIndex
-        print ci.row()
-        print self.table_view.model().rowCount()
+        """Swap rows in order to move selected item up one step"""
+        if self.table_view.selectionModel().hasSelection():
+            # get current index
+            icur = self.table_view.selectionModel().currentIndex()
+            irow = icur.row()
+            icol = icur.column()
+            if irow == 0:  # first row. do nothing
+                return
 
+            select_items = []
+            ncols = self.table_view.model().columnCount()
+            for c in range(ncols):
+                item1 = self.table_view.model().item(irow, c)
+                item2 = self.table_view.model().item(irow - 1, c)
+                idx = item1.index()
+                if self.table_view.selectionModel().isSelected(idx):
+                    t1 = item1.text()
+                    t2 = item2.text()
+                    i1 = QtGui.QStandardItem(t1)
+                    i2 = QtGui.QStandardItem(t2)
+                    self.table_view.model().setItem(irow, c, i2)
+                    self.table_view.model().setItem(irow - 1, c, i1)
+                    item = self.table_view.model().item(irow - 1, c)
+                    select_items.append(item)
+            
+            select = QtGui.QItemSelectionModel.Select
+            noupdate = QtGui.QItemSelectionModel.NoUpdate
+            for item in select_items:
+                idx = item.index()
+                self.table_view.selectionModel().select(idx, select)
+            self.table_view.selectionModel().setCurrentIndex(idx, noupdate)
+            
     def move_down(self):
         """Swap rows in order to move selected data down one step"""
         if self.table_view.selectionModel().hasSelection():
