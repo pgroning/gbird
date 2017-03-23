@@ -418,6 +418,10 @@ class MainWin(QtGui.QMainWindow):
         self.bunlist.append(bundle)
         self.ibundle = 0
 
+    def init_bundle(self):
+        """initiate a bundle instance"""
+        self.bunlist = [Bundle()]
+        
     def import_data(self):
         """Reading project setup file"""
         
@@ -435,6 +439,7 @@ class MainWin(QtGui.QMainWindow):
             #    self.setCursor(QtCore.Qt.ArrowCursor)
             #    return
             # inarg content="unfiltered" reads the whole file content
+            self.ibundle = 0
             bundle = self.bunlist[0]
             bundle.readcax(content=bundle.data.content)
             bundle.new_btf()

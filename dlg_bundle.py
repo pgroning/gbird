@@ -1,6 +1,11 @@
+from pyqt_trace import pyqt_trace as qtrace  # Break point that works with Qt
 import os
 import ConfigParser
 from PyQt4 import QtGui, QtCore
+
+class Data(object):
+    """A class that can be used to organize data in its attributes"""
+    pass
 
 class BundleDialog(QtGui.QDialog):
     def __init__(self, parent):
@@ -38,23 +43,27 @@ class BundleDialog(QtGui.QDialog):
         verticalheader.setResizeMode(QtGui.QHeaderView.Fixed)
         verticalheader.setDefaultSectionSize(25)
 
-        #flo = QtGui.QFormLayout()
         self.fuetype_cbox = QtGui.QComboBox()
         self.fue_list = ["OPT2", "OPT3", "A10B", "A10XM", "AT11"]
         self.fuetype_cbox.addItems(QtCore.QStringList(self.fue_list))
+
+        self.content_cbox = QtGui.QComboBox()
+        self.content_list = ["filt.", "unfilt."]
+        self.content_cbox.addItems(QtCore.QStringList(self.content_list))
 
         self.save_button = QtGui.QPushButton("Save...")
         self.load_button = QtGui.QPushButton("Load...")
 
         flo = QtGui.QFormLayout()
         flo.addRow("Fuel:", self.fuetype_cbox)
+        flo.addRow("Content:", self.content_cbox)
 
         vbox = QtGui.QVBoxLayout()
         vbox.addLayout(flo)
         #vbox.addWidget(self.fuetype_cbox)
         vbox.addStretch()
-        vbox.addWidget(self.save_button)
         vbox.addWidget(self.load_button)
+        vbox.addWidget(self.save_button)
 
         groupbox = QtGui.QGroupBox()
         #groupbox.setTitle("Bundle")
@@ -79,31 +88,31 @@ class BundleDialog(QtGui.QDialog):
         self.connect(self.cancel_button, QtCore.SIGNAL('clicked()'),
                      self.close)
         self.connect(self.save_button, QtCore.SIGNAL('clicked()'), 
-                     self.save_bundle)
+                     self.save_bundle_action)
         self.connect(self.load_button, QtCore.SIGNAL('clicked()'), 
-                     self.load_bundle)
+                     self.load_bundle_action)
         self.connect(self.import_button, QtCore.SIGNAL('clicked()'), 
-                     self.import_data)
+                     self.import_data_action)
 
         add_icon = "icons/add-icon_32x32.png"
         addFileAction = QtGui.QAction(QtGui.QIcon(add_icon),
-                                      'Add file', self)
-        addFileAction.triggered.connect(self.add_file)
+                                      'Add file...', self)
+        addFileAction.triggered.connect(self.add_file_action)
         
         delete_icon = "icons/delete3-icon_32x32.png"
         deleteFileAction = QtGui.QAction(QtGui.QIcon(delete_icon),
-                                         'Delete file', self)
-        deleteFileAction.triggered.connect(self.delete_file)
+                                         'Delete row', self)
+        deleteFileAction.triggered.connect(self.delete_row_action)
 
         arrow_up_icon = "icons/arrow-up-icon_32x32.png"
         moveUpAction = QtGui.QAction(QtGui.QIcon(arrow_up_icon),
-                                     'Move selected file up', self)
-        moveUpAction.triggered.connect(self.move_up)
+                                     'Move selected cells up', self)
+        moveUpAction.triggered.connect(self.move_up_action)
         
         arrow_down_icon = "icons/arrow-down-icon_32x32.png"
         moveDownAction = QtGui.QAction(QtGui.QIcon(arrow_down_icon),
-                                       'Move selected file down', self)
-        moveDownAction.triggered.connect(self.move_down)
+                                       'Move selected cells down', self)
+        moveDownAction.triggered.connect(self.move_down_action)
 
         toolbar = QtGui.QToolBar()
         toolbar.addAction(addFileAction)
@@ -122,7 +131,7 @@ class BundleDialog(QtGui.QDialog):
     def action(self):
         self.close()
 
-    def add_file(self):
+    def add_file_action(self):
         """Add single cax file to table"""
 
         # Import default path from config file
@@ -162,12 +171,12 @@ class BundleDialog(QtGui.QDialog):
                 vheader = QtGui.QStandardItem(str(nrows - i))
                 self.table_view.model().setVerticalHeaderItem(i, vheader)
 
-    def delete_file(self):
+    def delete_row_action(self):
         row = self.table_view.selectionModel().currentIndex().row()
         self.table_view.model().takeRow(row)
         #self.table_view.removeRow(row)
 
-    def update_table(self):
+    def set_table_data(self):
         """Load settings from project setup file"""
         #self.parent.newProject()  # Create a bundle instance
         self.clear_all()
@@ -177,6 +186,7 @@ class BundleDialog(QtGui.QDialog):
         
         nodes = self.parent.bunlist[0].data.nodes
         btf_nodes = self.parent.bunlist[0].data.btf_nodes
+        content = self.parent.bunlist[0].data.content
         nfiles = len(caxfiles)
         
         for i, caxfile in enumerate(caxfiles):
@@ -201,13 +211,66 @@ class BundleDialog(QtGui.QDialog):
         ifue = self.fue_list.index(fuetype)
         self.fuetype_cbox.setCurrentIndex(ifue)
 
-    def import_data(self):
+        if content == "filtered":
+            self.content_cbox.setCurrentIndex(0)
+        else:
+            self.content_cbox.setCurrentIndex(1)
+        
+    def import_data_action(self):
         """Import data from cax files"""
+
+        self.get_table_data()
+        self.parent.init_bundle()
+        bundle = self.parent.bunlist[0]
+        bundle.data.fuetype = self.data.fuetype
+        bundle.data.caxfiles = self.data.caxfiles
+        bundle.data.nodes = self.data.nodes
+        bundle.data.btf_nodes = self.data.btf_nodes
+        bundle.data.content = self.data.content
         self.close()
         self.parent.import_data()
+
+    def get_table_data(self):
+        """Get data from dialog widgets"""
+        
+        # data.fuetype
+        # data.caxfiles
+        # data.nodes
+        # data.btf_nodes
+        # data.content
+        
+        fuetype = str(self.fuetype_cbox.currentText())
+        if self.content_cbox.currentIndex() == 0:
+            content = "filtered"
+        else:
+            content = "unfiltered"
+
+        node_list = []
+        btf_list = []
+        file_list = []
+        nrows = self.table_view.model().rowCount()
+        for i in range(nrows):
+            node_item = self.table_view.model().item(i, 0)
+            node_list.append(int(node_item.text()))
+            btf_item = self.table_view.model().item(i, 1)
+            btf_list.append(int(btf_item.text()))
+            file_item = self.table_view.model().item(i, 2)
+            file_list.append(str(file_item.text()))
+        node_list.reverse()
+        btf_list.reverse()
+        file_list.reverse()
+        
+        self.data = Data()
+        self.data.fuetype = fuetype
+        self.data.content = content
+        self.data.nodes = node_list
+        self.data.btf_nodes = btf_list
+        self.data.caxfiles = file_list
+        
+        #self.parent.import_data()
         #self.close()
         
-    def move_up(self):
+    def move_up_action(self):
         """Swap rows in order to move selected item up one step"""
         if self.table_view.selectionModel().hasSelection():
             # get current index
@@ -240,7 +303,7 @@ class BundleDialog(QtGui.QDialog):
                 self.table_view.selectionModel().select(idx, select)
             self.table_view.selectionModel().setCurrentIndex(idx, noupdate)
             
-    def move_down(self):
+    def move_down_action(self):
         """Swap rows in order to move selected data down one step"""
         if self.table_view.selectionModel().hasSelection():
             # get current index
@@ -311,7 +374,7 @@ class BundleDialog(QtGui.QDialog):
         nrows = self.table_view.model().rowCount()
         self.table_view.model().removeRows(0, nrows)
 
-    def load_bundle(self):
+    def load_bundle_action(self):
         """Reading project setup file"""
 
         # Import default path from config file
@@ -326,43 +389,33 @@ class BundleDialog(QtGui.QDialog):
         if filename:
             # Read project data and create bundle instance
             self.parent.read_pro(filename)
-            self.update_table()
+            self.set_table_data()
 
-    def save_bundle(self):
+    def save_bundle_action(self):
         """Save data to project file"""
         
         filename = self.select_write_file()
         if not filename:
             return
         
+        self.get_table_data()
+
         config = ConfigParser.SafeConfigParser()
         config.add_section("Bundle")
-        fuetype = str(self.fuetype_cbox.currentText())
-        config.set("Bundle", "fuel", fuetype)
+        config.set("Bundle", "fuel", self.data.fuetype)
 
-        nrows = self.table_view.model().rowCount()
-        file_list = []
-        height_list = []
-        btf_list = []
-        for irow in range(nrows):
-            height_item = self.table_view.model().item(irow, 0)
-            btf_item = self.table_view.model().item(irow, 1)
-            file_item = self.table_view.model().item(irow, 2)
-            height_list.append(str(height_item.text()))
-            if str(btf_item.text()):
-                btf_list.append(str(btf_item.text()))
-            else:
-                btf_list.append(str(0))
-            file_list.append(str(file_item.text()))
-        
-        file_str = "\n".join(file_list)
+        file_str = "\n".join(self.data.caxfiles[::-1])  # save reverse order
         config.set("Bundle", "files", file_str)
 
-        height_str = "\n".join(height_list)
-        config.set("Bundle", "nodes", height_str)
+        nodes = map(str, self.data.nodes[::-1])
+        node_str = "\n".join(nodes)
+        config.set("Bundle", "nodes", node_str)
+
+        config.set("Bundle", "content", self.data.content)
 
         config.add_section("BTF")
-        btf_str = "\n".join(btf_list)
+        btf_nodes = map(str, self.data.btf_nodes[::-1])
+        btf_str = "\n".join(btf_nodes)
         config.set("BTF", "nodes", btf_str)
         
         with open(filename, "wb") as configfile:
