@@ -60,11 +60,11 @@ class Btf(object):
         Use interpolation if necessary."""
         
         all_segments = self.bundle.segments
-        #all_segments = self.bundle.cases
 
-        btf_zones = self.bundle.data.btf_zones
-        segments = [s for i, s in enumerate(all_segments) if btf_zones[i]]
+        #btf_zones = self.bundle.data.btf_zones
+        #segments = [s for i, s in enumerate(all_segments) if btf_zones[i]]
         nodes = self.bundle.data.btf_nodes
+        segments = [s for i, s in enumerate(all_segments) if nodes[i]]
         
         nsegments = len(segments)
         npst = segments[0].data.npst

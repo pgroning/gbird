@@ -30,7 +30,7 @@ class BundleDialog(QtGui.QDialog):
         self.table_view.setModel(model)
         self.table_view.setSelectionModel(selection_model)
 
-        model.setHorizontalHeaderItem(0, QtGui.QStandardItem("Height"))
+        model.setHorizontalHeaderItem(0, QtGui.QStandardItem("Nodes"))
         model.setHorizontalHeaderItem(1, QtGui.QStandardItem("BTF"))
         model.setHorizontalHeaderItem(2, QtGui.QStandardItem("Files"))
 
@@ -173,17 +173,20 @@ class BundleDialog(QtGui.QDialog):
         self.clear_all()
         #self.item_model.clear()
         caxfiles = self.parent.bunlist[0].data.caxfiles
-        height = self.parent.bunlist[0].data.nodes
-        nsegs = len(caxfiles)
+        caxfiles = caxfiles[::-1]  # make copy and reverse order
+        
+        nodes = self.parent.bunlist[0].data.nodes
+        btf_nodes = self.parent.bunlist[0].data.btf_nodes
+        nfiles = len(caxfiles)
         
         for i, caxfile in enumerate(caxfiles):
-            item0 = QtGui.QStandardItem(str(height[i]))
-            item1 = QtGui.QStandardItem(str(height[i]))
+            item0 = QtGui.QStandardItem(str(nodes[i]))
+            item1 = QtGui.QStandardItem(str(btf_nodes[i]))
             item2 = QtGui.QStandardItem(caxfile)
             self.table_view.model().setItem(i, 0, item0)
             self.table_view.model().setItem(i, 1, item1)
             self.table_view.model().setItem(i, 2, item2)
-            vheader = QtGui.QStandardItem(str(nsegs - i))
+            vheader = QtGui.QStandardItem(str(nfiles - i))
             self.table_view.model().setVerticalHeaderItem(i, vheader)
             #self.table_view.setRowHeight(i, 25)
             #self.table_view.model().setRowHeight(i, 25)
@@ -349,18 +352,18 @@ class BundleDialog(QtGui.QDialog):
             if str(btf_item.text()):
                 btf_list.append(str(btf_item.text()))
             else:
-                btf_list.append("-")
+                btf_list.append(str(0))
             file_list.append(str(file_item.text()))
         
         file_str = "\n".join(file_list)
         config.set("Bundle", "files", file_str)
 
         height_str = "\n".join(height_list)
-        config.set("Bundle", "height", height_str)
+        config.set("Bundle", "nodes", height_str)
 
         config.add_section("BTF")
         btf_str = "\n".join(btf_list)
-        config.set("BTF", "height", btf_str)
+        config.set("BTF", "nodes", btf_str)
         
         with open(filename, "wb") as configfile:
             config.write(configfile)
