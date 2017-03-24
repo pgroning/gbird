@@ -419,7 +419,7 @@ class MainWin(QtGui.QMainWindow):
         self.ibundle = 0
 
     def init_bundle(self):
-        """initiate a bundle instance"""
+        """initialize a bundle instance"""
         self.bunlist = [Bundle()]
         
     def import_data(self):

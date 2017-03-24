@@ -3,6 +3,8 @@ import os
 import ConfigParser
 from PyQt4 import QtGui, QtCore
 
+from fileio import ProFileParser
+
 class Data(object):
     """A class that can be used to organize data in its attributes"""
     pass
@@ -165,12 +167,16 @@ class BundleDialog(QtGui.QDialog):
         
         self.clear_all()
         
-        caxfiles = self.parent.bunlist[0].data.caxfiles
+        #caxfiles = self.parent.bunlist[0].data.caxfiles
+        caxfiles = self.data.caxfiles
         caxfiles = caxfiles[::-1]  # make copy and reverse order
         
-        nodes = self.parent.bunlist[0].data.nodes
-        btf_nodes = self.parent.bunlist[0].data.btf_nodes
-        content = self.parent.bunlist[0].data.content
+        #nodes = self.parent.bunlist[0].data.nodes
+        nodes = self.data.nodes
+        #btf_nodes = self.parent.bunlist[0].data.btf_nodes
+        btf_nodes = self.data.btf_nodes
+        #content = self.parent.bunlist[0].data.content
+        content = self.data.content
         nfiles = len(caxfiles)
         
         for i, caxfile in enumerate(caxfiles):
@@ -191,7 +197,8 @@ class BundleDialog(QtGui.QDialog):
         #self.table_view.setColumnWidth(1, 80)
         self.table_view.resizeColumnToContents(2)
         
-        fuetype = self.parent.bunlist[0].data.fuetype
+        #fuetype = self.parent.bunlist[0].data.fuetype
+        fuetype = self.data.fuetype
         ifue = self.fue_list.index(fuetype)
         self.fuetype_cbox.setCurrentIndex(ifue)
 
@@ -323,7 +330,11 @@ class BundleDialog(QtGui.QDialog):
         if not filename:
             return
 
-        self.parent.read_pro(filename)
+        self.data = Data()
+        pfile = ProFileParser(self.data)
+        pfile.read(filename)
+        
+        #self.parent.read_pro(filename)
         self.set_table_data()
 
     def save_bundle_action(self):
