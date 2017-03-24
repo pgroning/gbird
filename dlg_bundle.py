@@ -128,48 +128,32 @@ class BundleDialog(QtGui.QDialog):
         vbox.addLayout(hbox)
         self.setLayout(vbox)
 
-    def action(self):
-        self.close()
+    #def action(self):
+    #    self.close()
 
     def add_file_action(self):
-        """Add single cax file to table"""
+        """Add single cax file to table cell"""
 
-        # Import default path from config file
-        self.settings.beginGroup("PATH")
-        path_default = self.settings.value("path_default",
-                                           QtCore.QString("")).toString()
-        self.settings.endGroup()
-        file_choices = "*.cax (*.cax)"
-        dialog = QtGui.QFileDialog()
-        #url = QtCore.QUrl()
-        #dialog.setSidebarUrls(url)
-        caxfile = unicode(dialog.getOpenFileName(self,
-                                                 'Select file',
-                                                 path_default,
-                                                 file_choices))
-        if caxfile:
-            # Save default path to config file
-            path = os.path.split(caxfile)[0]
-            self.settings.beginGroup("PATH")
-            self.settings.setValue("path_default", QtCore.QString(path))
-            self.settings.endGroup()
+        caxfile = self.select_read_file(file_choices="*.cax (*.cax)")
+        if not caxfile:
+            return
 
-            i = 0
-            empty_item = QtGui.QStandardItem("")
-            self.table_view.model().insertRow(i, empty_item)
-
-            item0 = QtGui.QStandardItem("")
-            item1 = QtGui.QStandardItem("")
-            item2 = QtGui.QStandardItem(caxfile)
-            self.table_view.model().setItem(i, 0, item0)
-            self.table_view.model().setItem(i, 1, item1)
-            self.table_view.model().setItem(i, 2, item2)
-            self.table_view.resizeColumnToContents(2)
-
-            nrows = self.table_view.model().rowCount()
-            for i in range(nrows):
-                vheader = QtGui.QStandardItem(str(nrows - i))
-                self.table_view.model().setVerticalHeaderItem(i, vheader)
+        i = 0
+        empty_item = QtGui.QStandardItem("")
+        self.table_view.model().insertRow(i, empty_item)
+        
+        item0 = QtGui.QStandardItem("")
+        item1 = QtGui.QStandardItem("")
+        item2 = QtGui.QStandardItem(caxfile)
+        self.table_view.model().setItem(i, 0, item0)
+        self.table_view.model().setItem(i, 1, item1)
+        self.table_view.model().setItem(i, 2, item2)
+        self.table_view.resizeColumnToContents(2)
+        
+        nrows = self.table_view.model().rowCount()
+        for i in range(nrows):
+            vheader = QtGui.QStandardItem(str(nrows - i))
+            self.table_view.model().setVerticalHeaderItem(i, vheader)
 
     def delete_row_action(self):
         row = self.table_view.selectionModel().currentIndex().row()
@@ -178,9 +162,9 @@ class BundleDialog(QtGui.QDialog):
 
     def set_table_data(self):
         """Load settings from project setup file"""
-        #self.parent.newProject()  # Create a bundle instance
+        
         self.clear_all()
-        #self.item_model.clear()
+        
         caxfiles = self.parent.bunlist[0].data.caxfiles
         caxfiles = caxfiles[::-1]  # make copy and reverse order
         
@@ -232,13 +216,7 @@ class BundleDialog(QtGui.QDialog):
 
     def get_table_data(self):
         """Get data from dialog widgets"""
-        
-        # data.fuetype
-        # data.caxfiles
-        # data.nodes
-        # data.btf_nodes
-        # data.content
-        
+                
         fuetype = str(self.fuetype_cbox.currentText())
         if self.content_cbox.currentIndex() == 0:
             content = "filtered"
@@ -266,10 +244,7 @@ class BundleDialog(QtGui.QDialog):
         self.data.nodes = node_list
         self.data.btf_nodes = btf_list
         self.data.caxfiles = file_list
-        
-        #self.parent.import_data()
-        #self.close()
-        
+                
     def move_up_action(self):
         """Swap rows in order to move selected item up one step"""
         if self.table_view.selectionModel().hasSelection():
@@ -277,7 +252,7 @@ class BundleDialog(QtGui.QDialog):
             icur = self.table_view.selectionModel().currentIndex()
             irow = icur.row()
             icol = icur.column()
-            if irow == 0:  # first row. do nothing
+            if irow == 0:  # if first row do nothing
                 return
 
             select_items = []
@@ -336,39 +311,6 @@ class BundleDialog(QtGui.QDialog):
                 self.table_view.selectionModel().select(idx, select)
             self.table_view.selectionModel().setCurrentIndex(idx, noupdate)
 
-#            mi = QtCore.QModelIndex()  # dummy model index
-#            rselect = self.table_view.selectionModel().isRowSelected(irow, mi)
-#            if rselect:  # entire row is selected
-#                ncols = self.table_view.model().columnCount()
-#                for c in range(ncols):
-#                    val1 = self.table_view.model().item(irow, c).text()
-#                    val2 = self.table_view.model().item(irow + 1, c).text()
-#                    item1 = QtGui.QStandardItem(val1)
-#                    item2 = QtGui.QStandardItem(val2)
-#                    self.table_view.model().setItem(irow, c, item2)
-#                    self.table_view.model().setItem(irow + 1, c, item1)
-#                    flag1 = QtGui.QItemSelectionModel.Select
-#                    flag2 = QtGui.QItemSelectionModel.Rows
-#                    idx = self.table_view.model().item(irow + 1, 2).index()
-#                    
-#                    self.table_view.selectionModel().select(idx, flag1 | flag2)
-#            else:
-#                val1 = self.table_view.model().item(irow, icol).text()
-#                val2 = self.table_view.model().item(irow + 1, icol).text()
-#                item1 = QtGui.QStandardItem(val1)
-#                item2 = QtGui.QStandardItem(val2)
-#                self.table_view.model().setItem(irow, icol, item2)
-#                self.table_view.model().setItem(irow + 1, icol, item1)
-#                flag1 = QtGui.QItemSelectionModel.Select
-#                idx = self.table_view.model().item(irow + 1, icol).index()
-#                self.table_view.selectionModel().select(idx, flag1)
-#
-#            #sel_flag2 = QtGui.QItemSelectionModel.Rows
-#            #cmi = self.table_view.model().item(irow + 1, 2).index()
-#            #select = QtGui.QItemSelectionModel.Select
-#            self.table_view.selectionModel().setCurrentIndex(idx, flag1)
-#            #self.table_view.selectionModel().select(cmi, sel_flag | sel_flag2)
-
     def clear_all(self):
         """Remove all rows"""
         nrows = self.table_view.model().rowCount()
@@ -377,19 +319,12 @@ class BundleDialog(QtGui.QDialog):
     def load_bundle_action(self):
         """Reading project setup file"""
 
-        # Import default path from config file
-        self.settings.beginGroup("PATH")
-        path_default = self.settings.value("path_default",
-                                           QtCore.QString("")).toString()
-        self.settings.endGroup()
-        file_choices = "*.pro (*.pro)"
-        filename = unicode(QtGui.QFileDialog.getOpenFileName(self, 'Open file',
-                                                             path_default,
-                                                             file_choices))
-        if filename:
-            # Read project data and create bundle instance
-            self.parent.read_pro(filename)
-            self.set_table_data()
+        filename = self.select_read_file()
+        if not filename:
+            return
+
+        self.parent.read_pro(filename)
+        self.set_table_data()
 
     def save_bundle_action(self):
         """Save data to project file"""
@@ -421,7 +356,29 @@ class BundleDialog(QtGui.QDialog):
         with open(filename, "wb") as configfile:
             config.write(configfile)
 
+    def select_read_file(self, file_choices=None):
+        """Select file for reading"""
+        # Import default path from config file
+        self.settings.beginGroup("PATH")
+        path_default = self.settings.value("path_default",
+                                           QtCore.QString("")).toString()
+        self.settings.endGroup()
+        if file_choices is None:
+            file_choices = "*.pro (*.pro)"
+        filename = unicode(QtGui.QFileDialog.getOpenFileName(self, 'Open file',
+                                                             path_default,
+                                                             file_choices))
+        if filename:
+            # Save default path to config file
+            # Save default path to config file
+            path = os.path.split(filename)[0]
+            self.settings.beginGroup("PATH")
+            self.settings.setValue("path_default", QtCore.QString(path))
+            self.settings.endGroup()
+        return filename
+
     def select_write_file(self):
+        """Select file for writing"""
         # Import default path from config file
         self.settings.beginGroup("PATH")
         path_default = self.settings.value("path_default",
@@ -436,7 +393,6 @@ class BundleDialog(QtGui.QDialog):
             path = os.path.split(filename)[0]
             self.settings.beginGroup("PATH")
             self.settings.setValue("path_default", QtCore.QString(path))
-            self.settings.endGroup()
-            
+            self.settings.endGroup()    
         return filename
     
