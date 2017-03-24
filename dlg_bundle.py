@@ -16,7 +16,7 @@ class BundleDialog(QtGui.QDialog):
         self.setup()
 
     def setup(self):
-        self.setWindowTitle("Bundle")
+        self.setWindowTitle("New bundle")
         xpos = self.parent.pos().x() + self.parent.size().width() / 2
         ypos = self.parent.pos().y() + self.parent.size().height() / 2
         self.setGeometry(QtCore.QRect(0.8*xpos, 0.9*ypos, 800, 300))

@@ -305,26 +305,26 @@ class MainWin(QtGui.QMainWindow):
                         self.fig_update()
                     self.setCursor(QtCore.Qt.ArrowCursor)
 
-    def newProject(self):
-        """Open project setup file"""
-
-        # Import default path from config file
-        self.settings.beginGroup("PATH")
-        path_default = self.settings.value("path_default",
-                                           QtCore.QString("")).toString()
-        self.settings.endGroup()
-        file_choices = "*.pro (*.pro)"
-        filename = unicode(QtGui.QFileDialog.getOpenFileName(self, 'Open file',
-                                                             path_default,
-                                                             file_choices))
-        if filename:
-            # Save default path to config file
-            path = os.path.split(filename)[0]
-            self.settings.beginGroup("PATH")
-            self.settings.setValue("path_default", QtCore.QString(path))
-            self.settings.endGroup()
-            self.ibundle = 0
-            self.read_pro(filename)
+#    def newProject(self):
+#        """Open project setup file"""
+#        
+#        # Import default path from config file
+#        self.settings.beginGroup("PATH")
+#        path_default = self.settings.value("path_default",
+#                                           QtCore.QString("")).toString()
+#        self.settings.endGroup()
+#        file_choices = "*.pro (*.pro)"
+#        filename = unicode(QtGui.QFileDialog.getOpenFileName(self, 'Open file',
+#                                                             path_default,
+#                                                             file_choices))
+#        if filename:
+#            # Save default path to config file
+#            path = os.path.split(filename)[0]
+#            self.settings.beginGroup("PATH")
+#            self.settings.setValue("path_default", QtCore.QString(path))
+#            self.settings.endGroup()
+#            self.ibundle = 0
+#            self.read_pro(filename)
                     
     def load_pickle(self, filename):
         """Load bundle object from pickle file"""
@@ -1952,7 +1952,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                                          tip="Close the application")
 
         new_project_action = self.create_action("&New...",
-                                                slot=self.newProject,
+                                                slot=self.open_bundle_dlg,
+                                                #slot=self.newProject,
                                                 shortcut="Ctrl+N",
                                                 tip="Create new bundle")
         
@@ -2048,7 +2049,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         newAction = QtGui.QAction(QtGui.QIcon(new_icon),
                                    'Create new bundle', self)
         newAction.setStatusTip('Create a new bundle')
-        newAction.triggered.connect(self.newProject)
+        newAction.triggered.connect(self.open_bundle_dlg)
+        #newAction.triggered.connect(self.newProject)
         
         file_icon = "icons/open-file-icon_32x32.png"
         fileAction = QtGui.QAction(QtGui.QIcon(file_icon), 'Open file', self)
