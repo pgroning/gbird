@@ -345,27 +345,29 @@ class BundleDialog(QtGui.QDialog):
             return
         
         self.get_table_data()
+        pfile = ProFileParser(self.data)
+        pfile.write(filename)
 
-        config = ConfigParser.SafeConfigParser()
-        config.add_section("Bundle")
-        config.set("Bundle", "fuel", self.data.fuetype)
+        #config = ConfigParser.SafeConfigParser()
+        #config.add_section("Bundle")
+        #config.set("Bundle", "fuel", self.data.fuetype)
 
-        file_str = "\n".join(self.data.caxfiles[::-1])  # save reverse order
-        config.set("Bundle", "files", file_str)
+        #file_str = "\n".join(self.data.caxfiles[::-1])  # save reverse order
+        #config.set("Bundle", "files", file_str)
 
-        nodes = map(str, self.data.nodes[::-1])
-        node_str = "\n".join(nodes)
-        config.set("Bundle", "nodes", node_str)
+        #nodes = map(str, self.data.nodes[::-1])
+        #node_str = "\n".join(nodes)
+        #config.set("Bundle", "nodes", node_str)
 
-        config.set("Bundle", "content", self.data.content)
+        #config.set("Bundle", "content", self.data.content)
 
-        config.add_section("BTF")
-        btf_nodes = map(str, self.data.btf_nodes[::-1])
-        btf_str = "\n".join(btf_nodes)
-        config.set("BTF", "nodes", btf_str)
+        #config.add_section("BTF")
+        #btf_nodes = map(str, self.data.btf_nodes[::-1])
+        #btf_str = "\n".join(btf_nodes)
+        #config.set("BTF", "nodes", btf_str)
         
-        with open(filename, "wb") as configfile:
-            config.write(configfile)
+        #with open(filename, "wb") as configfile:
+        #    config.write(configfile)
 
     def select_read_file(self, file_choices=None):
         """Select file for reading"""

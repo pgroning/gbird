@@ -59,4 +59,25 @@ class ProFileParser(object):
         return True
 
     def write(self, filename):
-        pass
+        """Save bundle data to file"""
+
+        config = ConfigParser.SafeConfigParser()
+        config.add_section("Bundle")
+        config.set("Bundle", "fuel", self.parent.fuetype)
+
+        file_str = "\n".join(self.parent.caxfiles[::-1])  # save reverse order
+        config.set("Bundle", "files", file_str)
+
+        nodes = map(str, self.parent.nodes[::-1])
+        node_str = "\n".join(nodes)
+        config.set("Bundle", "nodes", node_str)
+
+        config.set("Bundle", "content", self.parent.content)
+
+        config.add_section("BTF")
+        btf_nodes = map(str, self.parent.btf_nodes[::-1])
+        btf_str = "\n".join(btf_nodes)
+        config.set("BTF", "nodes", btf_str)
+        
+        with open(filename, "wb") as configfile:
+            config.write(configfile)
