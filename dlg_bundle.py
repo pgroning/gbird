@@ -172,9 +172,9 @@ class BundleDialog(QtGui.QDialog):
         caxfiles = caxfiles[::-1]  # make copy and reverse order
         
         #nodes = self.parent.bunlist[0].data.nodes
-        nodes = self.data.nodes
+        nodes = self.data.nodes[::-1]
         #btf_nodes = self.parent.bunlist[0].data.btf_nodes
-        btf_nodes = self.data.btf_nodes
+        btf_nodes = self.data.btf_nodes[::-1]
         #content = self.parent.bunlist[0].data.content
         content = self.data.content
         nfiles = len(caxfiles)

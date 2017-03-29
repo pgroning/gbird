@@ -408,15 +408,15 @@ class MainWin(QtGui.QMainWindow):
         # self.progressbar.close
         # self.thread.wait()
 
-    def read_pro(self, filename):
-        """Reading project setup file"""
-        self.clear_data()
-        bundle = Bundle()
-        if not bundle.readpro(filename):  # stop if error is encountered
-            return
-        self.bunlist = []
-        self.bunlist.append(bundle)
-        self.ibundle = 0
+#    def read_pro(self, filename):
+#        """Reading project setup file"""
+#        self.clear_data()
+#        bundle = Bundle()
+#        if not bundle.readpro(filename):  # stop if error is encountered
+#            return
+#        self.bunlist = []
+#        self.bunlist.append(bundle)
+#        self.ibundle = 0
 
     def init_bundle(self):
         """initialize a bundle instance"""

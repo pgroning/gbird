@@ -35,6 +35,7 @@ import copy
 from multiprocessing import Pool
 from segment import Segment, DataStruct
 from btf import Btf
+from fileio import ProFileParser
 
 
 def readcax_fun(tup):
@@ -71,57 +72,60 @@ class Bundle(object):
     def readpro(self, cfgfile):
         """Read project setup file"""
         
-        config = ConfigParser.SafeConfigParser()
-        try:
-            if not config.read(cfgfile):
-                print "Could not open file '" + cfgfile + "'"
-                return False
-        except:
-            print "An error occured trying to read the file '" + cfgfile + "'"
-            return False
+        pfile = ProFileParser(self.data)
+        pfile.read(cfgfile)
+
+        #config = ConfigParser.SafeConfigParser()
+        #try:
+        #    if not config.read(cfgfile):
+        #        print "Could not open file '" + cfgfile + "'"
+        #        return False
+        #except:
+        #    print "An error occured trying to read the file '" + cfgfile + "'"
+        #    return False
 
         # Get fuel type
-        self.data.fuetype = config.get("Bundle", "fuel")
-        if self.data.fuetype not in ('A10XM', 'A10B', 'AT11', 'OPT2', 'OPT3'):
-            print("Error: Unknown fuel type.")
-            return False
+        #self.data.fuetype = config.get("Bundle", "fuel")
+        #if self.data.fuetype not in ('A10XM', 'A10B', 'AT11', 'OPT2', 'OPT3'):
+        #    print("Error: Unknown fuel type.")
+        #    return False
         
         # cax files
-        files = config.get("Bundle", "files")
-        file_list = filter(None, re.split("\n", files))
-        file_list.reverse()
+        #files = config.get("Bundle", "files")
+        #file_list = filter(None, re.split("\n", files))
+        #file_list.reverse()
         #file_list = file_list[::-1]  # reverse order
-        self.data.caxfiles = file_list
+        #self.data.caxfiles = file_list
         
         # relative heights
-        nodes = re.split("\s+|,\s*", config.get("Bundle", "nodes"))
-        nodes = filter(None, nodes)
-        self.data.nodes = map(int, nodes)
-        if len(self.data.nodes) != len(self.data.caxfiles):
-            print "Error: Invalid node list."
-            return False
+        #nodes = re.split("\s+|,\s*", config.get("Bundle", "nodes"))
+        #nodes = filter(None, nodes)
+        #self.data.nodes = map(int, nodes)
+        #if len(self.data.nodes) != len(self.data.caxfiles):
+        #    print "Error: Invalid node list."
+        #    return False
         
         # content read option
-        self.data.content = "filtered"  # default value
-        if config.has_option("Bundle", "content"):
-            self.data.content = config.get("Bundle", "content")
-        if self.data.content not in ("filtered", "unfiltered"):
-            print "Error: Unknown content option."
-            return False
+        #self.data.content = "filtered"  # default value
+        #if config.has_option("Bundle", "content"):
+        #    self.data.content = config.get("Bundle", "content")
+        #if self.data.content not in ("filtered", "unfiltered"):
+        #    print "Error: Unknown content option."
+        #    return False
         
         # BTF options
-        if config.has_section("BTF"):
+        #if config.has_section("BTF"):
             # BTF zone vector
             #btf_zones = re.split("\s+|,\s*", config.get("BTF", "zones"))
             #btf_zones = filter(None, btf_zones)
             #self.data.btf_zones = map(int, btf_zones)
             # BTF nodes
-            btf_nodes = re.split("\s+|,\s*", config.get("BTF", "nodes"))
-            btf_nodes = filter(None, btf_nodes)
-            self.data.btf_nodes = map(int, btf_nodes)
-        else:
-            #self.data.btf_zones = [1] * len(self.data.nodes)
-            self.data.btf_nodes = self.data.nodes
+        #    btf_nodes = re.split("\s+|,\s*", config.get("BTF", "nodes"))
+        #    btf_nodes = filter(None, btf_nodes)
+        #    self.data.btf_nodes = map(int, btf_nodes)
+        #else:
+        #    #self.data.btf_zones = [1] * len(self.data.nodes)
+        #    self.data.btf_nodes = self.data.nodes
 
         # Perturbation calculation
         #self.data.dep_max = None
@@ -147,7 +151,7 @@ class Bundle(object):
         #        if model != "undef":
         #            self.data.model = model
 
-        return True
+        #return True
     
 
     '''

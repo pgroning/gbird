@@ -35,6 +35,7 @@ class ProFileParser(object):
         # segment node list
         nodes = re.split("\s+|,\s*", config.get("Bundle", "nodes"))
         nodes = filter(None, nodes)
+        nodes.reverse()
         self.parent.nodes = map(int, nodes)
         if len(self.parent.nodes) != len(self.parent.caxfiles):
             print "Error: Invalid node list."
@@ -52,6 +53,7 @@ class ProFileParser(object):
         if config.has_section("BTF"):
             btf_nodes = re.split("\s+|,\s*", config.get("BTF", "nodes"))
             btf_nodes = filter(None, btf_nodes)
+            btf_nodes.reverse()
             self.parent.btf_nodes = map(int, btf_nodes)
         else:
             self.parent.btf_nodes = self.data.nodes
