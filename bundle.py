@@ -373,11 +373,18 @@ class Bundle(object):
         # xdim = powlist[0].shape[0]
         # ydim = powlist[0].shape[1]
         # nodes = self.data.nodes
-        zdim = max(nodes)
+
+        # only non-zero elements should be considered
+        nodes = [n for n in nodes if n]
+        
+        #zdim = max(nodes)
+        zdim = 25
         POW3 = np.zeros((zdim, xdim, ydim))
         z0 = 0
         for i, P in enumerate(POW):
-            z1 = nodes[i]
+            #z1 = nodes[i]
+            z1 = nodes[i] / max(nodes) * 25
+            print z1
             for z in range(z0, z1):
                 POW3[z, :, :] = P
             z0 = z1
