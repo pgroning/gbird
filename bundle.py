@@ -376,15 +376,19 @@ class Bundle(object):
 
         # only non-zero elements should be considered
         nodes = [n for n in nodes if n]
+        nodes = np.array(nodes).astype(int)
         
         #zdim = max(nodes)
-        zdim = 25
+        zdim = 25  # max node
         POW3 = np.zeros((zdim, xdim, ydim))
+
+        nodes = nodes / nodes[-1] * zdim  # normalize nodes
+        nodes = nodes.astype(int)
+        
         z0 = 0
         for i, P in enumerate(POW):
-            #z1 = nodes[i]
-            z1 = nodes[i] / max(nodes) * 25
-            print z1
+            z1 = nodes[i]
+            #z1 = int(nodes[i] / max(nodes) * 25)
             for z in range(z0, z1):
                 POW3[z, :, :] = P
             z0 = z1
