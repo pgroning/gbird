@@ -42,7 +42,6 @@ class PertDialog(QtGui.QDialog):
         grid = QtGui.QGridLayout()
         grid.addWidget(groupbox, 0, 0)
         
-
         hbox = QtGui.QHBoxLayout()
         self.ok_button = QtGui.QPushButton("Ok")
         self.cancel_button = QtGui.QPushButton("Cancel")

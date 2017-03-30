@@ -41,13 +41,13 @@ class ProFileParser(object):
             print "Error: Invalid node list."
             return False
 
-        # read content option
-        self.parent.content = "filtered"  # default value
-        if config.has_option("Bundle", "content"):
-            self.parent.content = config.get("Bundle", "content")
-        if self.parent.content not in ("filtered", "unfiltered"):
-            print "Error: Unknown content option."
-            return False
+        ## read content option
+        #self.parent.content = "filtered"  # default value
+        #if config.has_option("Bundle", "content"):
+        #    self.parent.content = config.get("Bundle", "content")
+        #if self.parent.content not in ("filtered", "unfiltered"):
+        #    print "Error: Unknown content option."
+        #    return False
 
         # segment node list for BTF calc
         if config.has_section("BTF"):
@@ -74,7 +74,7 @@ class ProFileParser(object):
         node_str = "\n".join(nodes)
         config.set("Bundle", "nodes", node_str)
 
-        config.set("Bundle", "content", self.parent.content)
+        #config.set("Bundle", "content", self.parent.content)
 
         config.add_section("BTF")
         btf_nodes = map(str, self.parent.btf_nodes[::-1])

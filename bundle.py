@@ -202,8 +202,8 @@ class Bundle(object):
     def readcax(self, content="filtered"):
         """Read multiple caxfiles using multithreading.
         Syntax:
-        readcax() reads the first part of the file (where voi=vhi)
-        readcax('all') reads the whole file."""
+        readcax() reads the first part of the file where voi=vhi
+        readcax('unfiltered') reads the whole file."""
 
         inlist = []  # Bundle input args
         for caxfile in self.data.caxfiles:

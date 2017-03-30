@@ -176,7 +176,7 @@ class BundleDialog(QtGui.QDialog):
         #btf_nodes = self.parent.bunlist[0].data.btf_nodes
         btf_nodes = self.data.btf_nodes[::-1]
         #content = self.parent.bunlist[0].data.content
-        content = self.data.content
+        #content = self.data.content
         nfiles = len(caxfiles)
         
         for i, caxfile in enumerate(caxfiles):
@@ -202,10 +202,10 @@ class BundleDialog(QtGui.QDialog):
         ifue = self.fue_list.index(fuetype)
         self.fuetype_cbox.setCurrentIndex(ifue)
 
-        if content == "filtered":
-            self.content_cbox.setCurrentIndex(0)
-        else:
-            self.content_cbox.setCurrentIndex(1)
+        #if content == "filtered":
+        self.content_cbox.setCurrentIndex(0)
+        #else:
+        #    self.content_cbox.setCurrentIndex(1)
         
     def import_data_action(self):
         """Import data from cax files"""
