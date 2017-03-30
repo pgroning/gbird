@@ -382,13 +382,12 @@ class Bundle(object):
         zdim = 25  # max node
         POW3 = np.zeros((zdim, xdim, ydim))
 
-        nodes = nodes / nodes[-1] * zdim  # normalize nodes
-        nodes = nodes.astype(int)
+        nodes = nodes / nodes[-1] * zdim  # rescale nodes
+        nodes = nodes.round().astype(int)
         
         z0 = 0
         for i, P in enumerate(POW):
             z1 = nodes[i]
-            #z1 = int(nodes[i] / max(nodes) * 25)
             for z in range(z0, z1):
                 POW3[z, :, :] = P
             z0 = z1
