@@ -29,10 +29,10 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg \
 # as NavigationToolbar
 from matplotlib.figure import Figure
 import matplotlib.patches as mpatches
-try:  # patheffects not available for older versions of matplotlib
-    import matplotlib.patheffects as path_effects
-except:
-    pass
+#try:  # patheffects not available for older versions of matplotlib
+#    import matplotlib.patheffects as path_effects
+#except:
+#    pass
 
 from bundle import Bundle
 from btf import Btf
@@ -40,9 +40,10 @@ from plot import PlotWin
 from dlg_cascalc import CasDialog, CasRunDialog
 from dlg_bundle import BundleDialog
 from dlg_report import ReportDialog
+from pin import FuePin
 from progbar import ProgressBar
-# from map_s96 import s96o2
-# from map_a10 import a10xm
+from map_s96 import s96o2
+from map_a10 import a10xm
 
 
 class dataThread(QtCore.QThread):
@@ -71,77 +72,77 @@ class dataThread(QtCore.QThread):
         # self.emit(SIGNAL('progressbar_update(int)'),90)
         # self.parent.dataobj.calcbtf()
 
-"""
-class Circle(object):
-    def __init__(self,axes,x,y,c=(1,1,1),text='',r=0.028):
-        self.axes = axes
-        # radius = 0.028
-        self.circle = mpatches.Circle((x,y), r, fc=c, ec=(0.1, 0.1, 0.1))
-        self.circle.set_linestyle('solid')
-        try:
-            self.circle.set_path_effects([path_effects.withSimplePatchShadow()])
-        except: pass
-        self.circle.set_linewidth(2.0)
-        self.x = x
-        self.y = y
-        self.text = self.axes.text(x,y,text,ha='center',va='center',fontsize=8)
-        # self.axes.add_patch(self.circle)
+#"""
+#class Circle(object):
+#    def __init__(self,axes,x,y,c=(1,1,1),text='',r=0.028):
+#        self.axes = axes
+#        # radius = 0.028
+#        self.circle = mpatches.Circle((x,y), r, fc=c, ec=(0.1, 0.1, 0.1))
+#        self.circle.set_linestyle('solid')
+#        try:
+#            self.circle.set_path_effects([path_effects.withSimplePatchShadow()]#)
+#        except: pass
+#        self.circle.set_linewidth(2.0)
+#        self.x = x
+#        self.y = y
+#        self.text = self.axes.text(x,y,text,ha='center',va='center',fontsize=8)
+#        # self.axes.add_patch(self.circle)
+#
+#    def set_text(self,text):
+#        pass
+#        # self.text.remove()
+#        # self.text = self.axes.text(self.x,self.y,text,ha='center',
+#        va='center',fontsize=8)
+#
+#    def is_clicked(self,xc,yc):
+#        r2 = (xc-self.x)**2 + (yc-self.y)**2
+#        if r2 < self.circle.get_radius()**2: #Mouse click is within pin radius
+#            return True
+#        else:
+#            return False
+#"""
 
-    def set_text(self,text):
-        pass
-        # self.text.remove()
-        # self.text = self.axes.text(self.x,self.y,text,ha='center',
-        va='center',fontsize=8)
 
-    def is_clicked(self,xc,yc):
-        r2 = (xc-self.x)**2 + (yc-self.y)**2
-        if r2 < self.circle.get_radius()**2: #Mouse click is within pin radius
-            return True
-        else:
-            return False
-"""
-
-
-class cpin(object):
-    def __init__(self, axes):
-        self.axes = axes
-
-    def set_circle(self, x, y, r, c=None):
-        self.x = x
-        self.y = y
-        if c is None:
-            c = self.facecolor
-        self.circle = mpatches.Circle((x, y), r, fc=c, ec=(0.1, 0.1, 0.1))
-        self.circle.set_linestyle('solid')
-        self.circle.set_linewidth(2.0)
-        try:
-            self.circle.set_path_effects([path_effects.
-                                          withSimplePatchShadow()])
-        except:
-            pass
-
-        # Set background rectangle
-        d = 2*r + 0.019
-        self.rectangle = mpatches.Rectangle((x - d/2, y - d/2), d, d,
-                                            fc=(1, 1, 0), alpha=1.0,
-                                            ec=(1, 1, 1))
-        self.rectangle.set_fill(True)
-        self.rectangle.set_linewidth(0.0)
-        
-    def set_text(self, string='', fsize=8):
-        # if hasattr(self,'text'):
-        #    self.text.remove()
-        self.text = self.axes.text(self.x, self.y, string, ha='center',
-                                   va='center', fontsize=fsize)
-
-    def is_clicked(self, xc, yc):
-        r2 = (xc - self.x)**2 + (yc - self.y)**2
-        # Mouse click is within pin radius ?
-        if r2 < self.circle.get_radius()**2:
-            return True
-        else:
-            return False
-
+#class cpin(object):
+#    def __init__(self, axes):
+#        self.axes = axes
+#
+#    def set_circle(self, x, y, r, c=None):
+#        self.x = x
+#        self.y = y
+#        if c is None:
+#            c = self.facecolor
+#        self.circle = mpatches.Circle((x, y), r, fc=c, ec=(0.1, 0.1, 0.1))
+#        self.circle.set_linestyle('solid')
+#        self.circle.set_linewidth(2.0)
+#        try:
+#            self.circle.set_path_effects([path_effects.
+#                                          withSimplePatchShadow()])
+#        except:
+#            pass
+#
+#        # Set background rectangle
+#        d = 2*r + 0.019
+#        self.rectangle = mpatches.Rectangle((x - d/2, y - d/2), d, d,
+#                                            fc=(1, 1, 0), alpha=1.0,
+#                                            ec=(1, 1, 1))
+#        self.rectangle.set_fill(True)
+#        self.rectangle.set_linewidth(0.0)
+#        
+#    def set_text(self, string='', fsize=8):
+#        # if hasattr(self,'text'):
+#        #    self.text.remove()
+#        self.text = self.axes.text(self.x, self.y, string, ha='center',
+#                                   va='center', fontsize=fsize)
+#
+#    def is_clicked(self, xc, yc):
+#        r2 = (xc - self.x)**2 + (yc - self.y)**2
+#        # Mouse click is within pin radius ?
+#        if r2 < self.circle.get_radius()**2:
+#            return True
+#        else:
+#            return False
+#"""
 
 class EnrDialog(QtGui.QDialog):
     def __init__(self, parent, mode="edit"):
@@ -630,7 +631,7 @@ class MainWin(QtGui.QMainWindow):
             for i in range(LFU.shape[0]):
                 for j in range(LFU.shape[1]):
                     if LFU[i, j] > 0:
-                        pinobj = cpin(self.axes)
+                        pinobj = FuePin(self.axes)
                         pinobj.pos = [i, j]
                         pinobj.ENR = ENR[i, j]
                         pinobj.BA = BA[i, j]
@@ -646,7 +647,7 @@ class MainWin(QtGui.QMainWindow):
             enr_ba = FUE[:, 4]
             cmap = self.get_colormap(enr_levels.size)
             for i in range(enr_levels.size):
-                enrobj = cpin(self.axes)
+                enrobj = FuePin(self.axes)
                 enrobj.facecolor = cmap[i]
                 enrobj.ENR = enr_levels[i]
                 enrobj.BA = enr_ba[i]
@@ -666,7 +667,7 @@ class MainWin(QtGui.QMainWindow):
         case_num = int(self.case_cbox.currentIndex())
         ipin = self.pinselection_index  # copy attributes from selected pin
 
-        enrobj = cpin(self.axes)
+        enrobj = FuePin(self.axes)
         enrobj.facecolor = self.enrpinlist[case_num][ipin].facecolor
         enrobj.DENS = self.enrpinlist[case_num][ipin].DENS
         #enrobj.DENS = self.enr_dlg.dens
@@ -1488,8 +1489,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
     def draw_fuelmap(self):
         """Draw fuel map"""
 
-        from map_s96 import s96o2
-        from map_a10 import a10xm
+        #from map_s96 import s96o2
+        #from map_a10 import a10xm
 
         self.fig.set_facecolor((1, 1, 0.8784))
         # Draw outer rectangle

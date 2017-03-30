@@ -1,8 +1,7 @@
 import matplotlib.patches as mpatches
 import numpy as np
 
-from gbird import cpin
-
+#from gbird import cpin
 
 def a10xm(self):
     
