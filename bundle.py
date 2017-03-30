@@ -5,12 +5,12 @@ from IPython.core.debugger import Tracer  # Debugging
 from pyqt_trace import pyqt_trace as qtrace  # Break point that works with Qt
 ''' ipy example:
 import bundle
-: obj = bundle.bundle()
-: obj.readinp("file.inp")
-: obj.readcax()
+: b = bundle.Bundle()
+: b.readinp("file.pro")
+: b.readcax()
 After some code modification:
 : reload(bundle)
-: obj.readcax()
+: b.readcax()
 Usage:
 b0 = Bundle('file.pro')
 b0.readcax()
