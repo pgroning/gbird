@@ -15,10 +15,10 @@ class CasDialog(QtGui.QDialog):
         self.setGeometry(QtCore.QRect(0.8*xpos, 0.9*ypos, 150, 120))
 
         self.grid = QtGui.QGridLayout()
-        pert_gbox = self.pert_group()
+        #pert_gbox = self.pert_group()
         cas_gbox = self.cas_group()
-        self.grid.addWidget(pert_gbox, 0, 0)
-        self.grid.addWidget(cas_gbox, 0, 1)
+        #self.grid.addWidget(pert_gbox, 0, 0)
+        self.grid.addWidget(cas_gbox, 0, 0)
         
         hbox = QtGui.QHBoxLayout()
         self.ok_button = QtGui.QPushButton("Ok")
@@ -28,7 +28,8 @@ class CasDialog(QtGui.QDialog):
         hbox.addWidget(self.cancel_button)
         self.connect(self.cancel_button, QtCore.SIGNAL('clicked()'),
                      self.close)
-        self.connect(self.ok_button, QtCore.SIGNAL('clicked()'), self.action)
+        self.connect(self.ok_button, QtCore.SIGNAL('clicked()'), 
+                     self.ok_action)
 
         vbox = QtGui.QVBoxLayout()
         #vbox.addLayout(flo)
@@ -37,23 +38,28 @@ class CasDialog(QtGui.QDialog):
         vbox.addLayout(hbox)
         self.setLayout(vbox)
 
-    def action(self):
+    def ok_action(self):
         self.close()
-        self.parent.pert_model = str(self.model_cbox.currentText())
-        if self.depmax_cbox.currentText() == "undef":
-            self.parent.pert_depmax = None
-        else:
-            self.parent.pert_depmax = float(self.depmax_cbox.currentText())
-        if self.depthres_cbox.currentText() == "undef":
-            self.parent.pert_depthres = None
-        else:
-            self.parent.pert_depthres = float(self.depthres_cbox.currentText())
-        if self.void_cbox.currentText() == "undef":
-            self.parent.pert_voi = None
-        else:
-            self.parent.pert_voi = float(self.void_cbox.currentText())
-        if hasattr(self.parent, "biascalc"):
-            del self.parent.biascalc  # bias calc must be updated
+        self.parent.params.cas_version = str(self.version_cbox.currentText())
+        self.parent.params.cas_neulib = str(self.neulib_cbox.currentText()) 
+        self.parent.params.cas_gamlib = str(self.gamlib_cbox.currentText())
+        self.parent.params.cas_cpu = str(self.cpu_cbox.currentText())
+        
+        #self.parent.pert_model = str(self.model_cbox.currentText())
+        #if self.depmax_cbox.currentText() == "undef":
+        #    self.parent.pert_depmax = None
+        #else:
+        #    self.parent.pert_depmax = float(self.depmax_cbox.currentText())
+        #if self.depthres_cbox.currentText() == "undef":
+        #    self.parent.pert_depthres = None
+        #else:
+        #    self.parent.pert_depthres = float(self.depthres_cbox.currentText())
+        #if self.void_cbox.currentText() == "undef":
+        #    self.parent.pert_voi = None
+        #else:
+        #    self.parent.pert_voi = float(self.void_cbox.currentText())
+        #if hasattr(self.parent, "biascalc"):
+        #    del self.parent.biascalc  # bias calc must be updated
 
     def cas_group(self):
         flo = QtGui.QFormLayout()

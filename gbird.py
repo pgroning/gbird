@@ -38,6 +38,7 @@ from bundle import Bundle
 from btf import Btf
 from plot import PlotWin
 from dlg_cascalc import CasDialog, CasRunDialog
+from dlg_pertcalc import PertDialog
 from dlg_bundle import BundleDialog
 from dlg_report import ReportDialog
 from pin import FuePin, EnrDialog
@@ -209,6 +210,11 @@ class dataThread(QtCore.QThread):
 #            self.parent.enrpin_add_callback()
 #"""
 
+class Data(object):
+    """Empty class with the purpose to organize data"""
+    pass
+
+
 class MainWin(QtGui.QMainWindow):
     def __init__(self, parent=None):
         super(MainWin, self).__init__(parent)
@@ -217,6 +223,9 @@ class MainWin(QtGui.QMainWindow):
 
         # self.resize(1100,620)
         # self.move(200,200)
+
+        # Init empty class to hold parameters
+        self.params = Data()
 
         # Initial window size/pos last saved
         self.settings = QtCore.QSettings("greenbird")
@@ -782,6 +791,10 @@ class MainWin(QtGui.QMainWindow):
         self.bundle_dlg = BundleDialog(self)
         self.bundle_dlg.exec_()  # Make dialog modal
 
+    def open_pert_dlg(self):
+        self.pert_dlg = PertDialog(self)
+        self.pert_dlg.exec_()
+
     def open_cas_dlg(self):
         """open cas settings dialog"""
         self.cas_dlg = CasDialog(self)
@@ -1319,20 +1332,20 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             self.ibundle = len(self.bunlist) - 1
         
         # Set pert. calc parameters
-        if hasattr(self, "pert_model"):
-            pert_model = self.pert_model
+        if hasattr(self.params, "pert_model"):
+            pert_model = self.params.pert_model
         else:
             pert_model = "C3"
-        if hasattr(self, "pert_depmax"):
-            pert_depmax = self.pert_depmax
+        if hasattr(self.params, "pert_depmax"):
+            pert_depmax = self.params.pert_depmax
         else:
             pert_depmax = None
-        if hasattr(self, "pert_depthres"):
-            pert_depthres = self.pert_depthres
+        if hasattr(self.params, "pert_depthres"):
+            pert_depthres = self.params.pert_depthres
         else:
             pert_depthres = None
-        if hasattr(self, "pert_voi"):
-            pert_voi = self.pert_voi
+        if hasattr(self.params, "pert_voi"):
+            pert_voi = self.params.pert_voi
         else:
             pert_voi = None
         
@@ -2001,8 +2014,9 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.tools_menu = self.menuBar().addMenu("&Tools")
         plot_action = self.create_action("Plot...", tip="Plot...",
                                          slot=self.open_plotwin)
-        bundle_action = self.create_action("Bundle...", tip="Bundle...",
-                                           slot=self.open_bundle_dlg)
+        pert_action = self.create_action("Perturbation...",
+                                           tip="Perturbation model...",
+                                           slot=self.open_pert_dlg)
         casmo_action = self.create_action("CASMO...", tip="CASMO...",
                                           slot=self.open_cas_dlg)
         data_action = self.create_action("Report...", tip="Fuel report...",
@@ -2013,7 +2027,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                                           tip="BTF optimization...")
         egv_action = self.create_action("EGV...", tip="EGV...")
         self.add_actions(self.tools_menu,
-                         (plot_action, bundle_action, casmo_action, data_action,
+                         (plot_action, pert_action, casmo_action, data_action,
                           table_action, optim_action, egv_action))
 
         self.run_menu = self.menuBar().addMenu("&Run")
