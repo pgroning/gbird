@@ -1359,7 +1359,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             #dep_thres = self.biascalc.data.dep_thres
             #model = self.biascalc.data.model
             self.biascalc.new_calc(model=pert_model, dep_max=pert_depmax,
-                                   dep_thres=pert_depthres)
+                                   dep_thres=pert_depthres, voi=pert_voi)
             #self.biascalc.new_btf()
         
         # New perturbation calc
@@ -1378,12 +1378,13 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         #dep_thres = bundle.data.dep_thres
         #model = bundle.data.model
         bundle.new_calc(model=pert_model, dep_max=pert_depmax, 
-                        dep_thres=pert_depthres)
+                        dep_thres=pert_depthres, voi=pert_voi)
         
         # remove bias from perturbation calc
         for iseg in xrange(len(bundle.segments)):
             pts = bundle.segments[iseg].statepoints
             burnlist = [p.burnup for p in pts]
+            
             pts0 = [p for p in self.bunlist[0].segments[iseg].statepoints 
                     if p.burnup in burnlist]
             pts1 = [p for p in self.biascalc.segments[iseg].statepoints 
@@ -1397,8 +1398,6 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                 POW[:, :, i] = pts0[i].POW + dPOW
                 dkinf = pts[i].kinf - pts1[i].kinf
                 kinf[i] = pts0[i].kinf + dkinf
-                #if dPOW.any():
-                #    qtrace()
           
             fint = bundle.segments[iseg].fintcalc(POW)
             burnup = np.array(burnlist)
