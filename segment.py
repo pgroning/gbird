@@ -645,7 +645,7 @@ class Segment(object):
         
         if voi:
             voilist = [int(voi)]
-            self.data.voilist = voilist
+            #self.data.voilist = voilist
         else:
             voilist = self.data.voilist
         
@@ -699,11 +699,23 @@ class Segment(object):
         
         if not hasattr(self, "burnlist"):
             self.burnlist = [self.burnpoints(voi=v) for v in self.data.voilist]
-        
+
         if dep_max or dep_thres:
             burnlist = self.reduce_burnpoints(dep_max, dep_thres)
         else:
             burnlist = self.burnlist
+            
+        if voi is not None:
+            #if voi not in self.data.voilist:
+            # set burnlist to union of all lists
+            ulist = []
+            for blist in burnlist:
+                ulist = list(set().union(ulist, blist))
+            ulist.sort()
+            burnlist = [ulist]
+            #else:
+            #    i = self.data.voilist.index(voi)
+            #    burnlist = [burnlist[i]]
         
         if hasattr(self.data, "LFU"):
             LFU = self.data.LFU
