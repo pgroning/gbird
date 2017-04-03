@@ -19,6 +19,7 @@ except:
 import sys
 import os
 import time
+import copy
 import numpy as np
 from PyQt4 import QtGui, QtCore
 
@@ -1379,8 +1380,49 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         #model = bundle.data.model
         bundle.new_calc(model=pert_model, dep_max=pert_depmax, 
                         dep_thres=pert_depthres, voi=pert_voi)
+
+        if pert_voi is None:
+            bundle = self.bias_subtract(bundle)
+        else:
+            bundle = self.bias_subtract_svoi(bundle)
+
+        ## remove bias from perturbation calc
+        #for iseg in xrange(len(bundle.segments)):
+        #    pts = bundle.segments[iseg].statepoints
+        #    burnlist = [p.burnup for p in pts]
+        #    
+        #    pts0 = [p for p in self.bunlist[0].segments[iseg].statepoints 
+        #            if p.burnup in burnlist]
+        #    pts1 = [p for p in self.biascalc.segments[iseg].statepoints 
+        #            if p.burnup in burnlist]
+        #    npst = bundle.segments[iseg].data.npst
+        #    Nburnpts = len(pts)
+        #    POW = np.zeros((npst, npst, Nburnpts))
+        #    kinf = np.zeros(Nburnpts)
+        #    for i in xrange(len(pts)):  # bias subtraction
+        #        dPOW = pts[i].POW - pts1[i].POW
+        #        POW[:, :, i] = pts0[i].POW + dPOW
+        #        dkinf = pts[i].kinf - pts1[i].kinf
+        #        kinf[i] = pts0[i].kinf + dkinf
+        #  
+        #    fint = bundle.segments[iseg].fintcalc(POW)
+        #    burnup = np.array(burnlist)
+        #    EXP = bundle.segments[iseg].expcalc(POW, burnup)
+        #    for i in xrange(Nburnpts):
+        #        bundle.segments[iseg].statepoints[i].POW = POW[:, :, i]
+        #        bundle.segments[iseg].statepoints[i].EXP = EXP[:, :, i]
+        #        bundle.segments[iseg].statepoints[i].fint = fint[i]
+        #        bundle.segments[iseg].statepoints[i].kinf = kinf[i]
         
-        # remove bias from perturbation calc
+        bundle.new_btf()
+        self.bunlist.append(bundle)
+        self.ibundle = len(self.bunlist) - 1
+        self.fig_update()
+        self.setCursor(QtCore.Qt.ArrowCursor)
+
+    def bias_subtract(self, bundle):
+        """remove bias from perturbation calc"""
+
         for iseg in xrange(len(bundle.segments)):
             pts = bundle.segments[iseg].statepoints
             burnlist = [p.burnup for p in pts]
@@ -1407,12 +1449,47 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                 bundle.segments[iseg].statepoints[i].EXP = EXP[:, :, i]
                 bundle.segments[iseg].statepoints[i].fint = fint[i]
                 bundle.segments[iseg].statepoints[i].kinf = kinf[i]
+
+        return bundle
+
+    def bias_subtract_svoi(self, bundle):
+        """remove bias from single voi perturbation calc"""
+        print "single voi calculation"
+        #pbundle = copy.copy(self.bunlist[0])
+        pbundle = copy.copy(bundle)
+
+        for iseg in xrange(len(bundle.segments)):
+            pts0 = self.bunlist[0].segments[iseg].statepoints
+            burnlist = [p.burnup for p in pts0]
+            pts1 = self.biascalc.segments[iseg].statepoints
+            pts = bundle.segments[iseg].statepoints
+            voi = bundle.segments[iseg].data.voilist[0]
+            npst = bundle.segments[iseg].data.npst
+            Nburnpts = len(pts0)
+            POW = np.zeros((npst, npst, Nburnpts))
+            kinf = np.zeros(Nburnpts)
+            for i, p in enumerate(pts0):
+                j = bundle.segments[iseg].findpoint(burnup=p.burnup,
+                                                    voi=voi, vhi=voi)
+                dPOW = pts[j].POW - pts1[j].POW
+                POW[:, :, i] = p.POW + dPOW
+                dkinf = pts[j].kinf - pts1[j].kinf
+                kinf[i] = p.kinf + dkinf
+
+            fint = pbundle.segments[iseg].fintcalc(POW)
+            burnup = np.array(burnlist)
+            EXP = pbundle.segments[iseg].expcalc(POW, burnup)
+            pbundle.segments[iseg].statepoints = copy.copy(pts0)
+            # update pbundle.segments[0].data.voilist
+            qtrace()
+            for i in xrange(Nburnpts):
+                pbundle.segments[iseg].statepoints[i].POW = POW[:, :, i]
+                pbundle.segments[iseg].statepoints[i].EXP = EXP[:, :, i]
+                pbundle.segments[iseg].statepoints[i].fint = fint[i]
+                pbundle.segments[iseg].statepoints[i].kinf = kinf[i]
+                
+        return pbundle
         
-        bundle.new_btf()
-        self.bunlist.append(bundle)
-        self.ibundle = len(self.bunlist) - 1
-        self.fig_update()
-        self.setCursor(QtCore.Qt.ArrowCursor)
         
     def fig_update(self):
         """ Redraw figure and update values"""
