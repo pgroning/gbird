@@ -643,11 +643,11 @@ class Segment(object):
         # Creating dep strings
         info = self.data
         
-        if voi:
-            voilist = [int(voi)]
-            #self.data.voilist = voilist
-        else:
-            voilist = self.data.voilist
+        #if voi:
+        #    voilist = [int(voi)]
+        #    #self.data.voilist = voilist
+        #else:
+        #    voilist = self.data.voilist
         
         #if voi is not None:
         #    if int(voi) in voivec:
@@ -713,10 +713,11 @@ class Segment(object):
                 ulist = list(set().union(ulist, blist))
             ulist.sort()
             burnlist = [ulist]
-            #else:
-            #    i = self.data.voilist.index(voi)
-            #    burnlist = [burnlist[i]]
-        
+            voilist = [int(voi)]
+            self.data.voilist = voilist
+        else:
+            voilist = self.data.voilist
+                
         if hasattr(self.data, "LFU"):
             LFU = self.data.LFU
         else:

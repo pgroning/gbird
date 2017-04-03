@@ -59,7 +59,7 @@ class Bundle(object):
 
         #self.parent = parent
         if profile:
-            self.readpro(profile)
+            self.readinp(profile)
         elif parent:
             self.setup(parent)
 
@@ -69,10 +69,10 @@ class Bundle(object):
         # self.loadcasobj(inpfile)
         # self.interp2(P1,P2,x1,x2,x)
 
-    def readpro(self, cfgfile):
+    def readinp(self, cfgfile):
         """Read project setup file"""
         
-        pfile = ProFileParser(self.data)
+        pfile = InpFileParser(self.data)
         pfile.read(cfgfile)
 
         #config = ConfigParser.SafeConfigParser()
