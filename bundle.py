@@ -35,7 +35,7 @@ import copy
 from multiprocessing import Pool
 from segment import Segment, DataStruct
 from btf import Btf
-from fileio import ProFileParser
+from fileio import InpFileParser
 
 
 def readcax_fun(tup):

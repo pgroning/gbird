@@ -3,7 +3,7 @@ import os
 import ConfigParser
 from PyQt4 import QtGui, QtCore
 
-from fileio import ProFileParser
+from fileio import InpFileParser
 
 class Data(object):
     """A class that can be used to organize data in its attributes"""
@@ -163,7 +163,7 @@ class BundleDialog(QtGui.QDialog):
         #self.table_view.removeRow(row)
 
     def set_table_data(self):
-        """Load settings from project setup file"""
+        """Set table cell data"""
         
         self.clear_all()
         
@@ -287,6 +287,7 @@ class BundleDialog(QtGui.QDialog):
             
     def move_down_action(self):
         """Swap rows in order to move selected data down one step"""
+
         if self.table_view.selectionModel().hasSelection():
             # get current index
             icur = self.table_view.selectionModel().currentIndex()
@@ -320,33 +321,34 @@ class BundleDialog(QtGui.QDialog):
 
     def clear_all(self):
         """Remove all rows"""
+ 
         nrows = self.table_view.model().rowCount()
         self.table_view.model().removeRows(0, nrows)
 
     def load_bundle_action(self):
-        """Reading project setup file"""
+        """Reading bundle setup file"""
 
         filename = self.select_read_file()
         if not filename:
             return
 
         self.data = Data()
-        pfile = ProFileParser(self.data)
-        pfile.read(filename)
+        inpfile = InpFileParser(self.data)
+        inpfile.read(filename)
         
         #self.parent.read_pro(filename)
         self.set_table_data()
 
     def save_bundle_action(self):
-        """Save data to project file"""
+        """Save data to bundle setup file"""
         
         filename = self.select_write_file()
         if not filename:
             return
         
         self.get_table_data()
-        pfile = ProFileParser(self.data)
-        pfile.write(filename)
+        inpfile = InpFileParser(self.data)
+        inpfile.write(filename)
 
         #config = ConfigParser.SafeConfigParser()
         #config.add_section("Bundle")
@@ -371,13 +373,14 @@ class BundleDialog(QtGui.QDialog):
 
     def select_read_file(self, file_choices=None):
         """Select file for reading"""
+
         # Import default path from config file
         self.settings.beginGroup("PATH")
         path_default = self.settings.value("path_default",
                                            QtCore.QString("")).toString()
         self.settings.endGroup()
         if file_choices is None:
-            file_choices = "*.pro (*.pro)"
+            file_choices = "*.inp (*.inp)"
         filename = unicode(QtGui.QFileDialog.getOpenFileName(self, 'Open file',
                                                              path_default,
                                                              file_choices))
@@ -392,12 +395,13 @@ class BundleDialog(QtGui.QDialog):
 
     def select_write_file(self):
         """Select file for writing"""
+
         # Import default path from config file
         self.settings.beginGroup("PATH")
         path_default = self.settings.value("path_default",
                                            QtCore.QString("")).toString()
         self.settings.endGroup()
-        file_choices = "*.pro (*.pro)"
+        file_choices = "*.inp (*.inp)"
         filename = unicode(QtGui.QFileDialog.getSaveFileName(self, 'Save file',
                                                              path_default,
                                                              file_choices))

@@ -1,13 +1,13 @@
 import ConfigParser
 import re
 
-class ProFileParser(object):
+class InpFileParser(object):
     def __init__(self, parent):
 
         self.parent = parent
 
     def read(self, filename):
-        """Read project file"""
+        """Read bundle input file"""
         
         config = ConfigParser.SafeConfigParser()
         try:
