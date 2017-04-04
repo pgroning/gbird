@@ -28,6 +28,8 @@ class PertDialog(QtGui.QDialog):
         self.void_cbox.addItems(QtCore.QStringList(["undef", "0", "40",
                                                       "50", "60", "80"]))
 
+        self.void_cbox.setCurrentIndex(4)
+
         flo.addRow("Model:", self.model_cbox)
         flo.addRow("Maximum depletion:", self.depmax_cbox)
         flo.addRow("Depletion threshold:", self.depthres_cbox)

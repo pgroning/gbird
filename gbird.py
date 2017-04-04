@@ -1454,39 +1454,49 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
     def bias_subtract_svoi(self, bundle):
         """remove bias from single voi perturbation calc"""
-        print "single voi calculation"
-        #pbundle = copy.copy(self.bunlist[0])
-        pbundle = copy.copy(bundle)
+        
+        pbundle = Bundle(parent=bundle)
 
         for iseg in xrange(len(bundle.segments)):
-            pts0 = self.bunlist[0].segments[iseg].statepoints
-            burnlist = [p.burnup for p in pts0]
-            pts1 = self.biascalc.segments[iseg].statepoints
-            pts = bundle.segments[iseg].statepoints
+
             voi = bundle.segments[iseg].data.voilist[0]
             npst = bundle.segments[iseg].data.npst
+
+            pts = bundle.segments[iseg].statepoints
+            burnlist = [p.burnup for p in pts]
+            
+            pts0 = [p for p in self.bunlist[0].segments[iseg].statepoints
+                    if p.burnup in burnlist]
+
+            pts1 = [p for p in self.biascalc.segments[iseg].statepoints
+                    if p.burnup in burnlist]
+            
             Nburnpts = len(pts0)
             POW = np.zeros((npst, npst, Nburnpts))
             kinf = np.zeros(Nburnpts)
-            for i, p in enumerate(pts0):
-                j = bundle.segments[iseg].findpoint(burnup=p.burnup,
+            
+            for i in xrange(len(pts0)):
+                j = bundle.segments[iseg].findpoint(burnup=pts0[i].burnup,
                                                     voi=voi, vhi=voi)
                 dPOW = pts[j].POW - pts1[j].POW
-                POW[:, :, i] = p.POW + dPOW
+                POW[:, :, i] = pts0[i].POW + dPOW
                 dkinf = pts[j].kinf - pts1[j].kinf
-                kinf[i] = p.kinf + dkinf
-
+                kinf[i] = pts0[i].kinf + dkinf
+            
             fint = pbundle.segments[iseg].fintcalc(POW)
-            burnup = np.array(burnlist)
+            burnup = np.array([p.burnup for p in pts0])
             EXP = pbundle.segments[iseg].expcalc(POW, burnup)
-            pbundle.segments[iseg].statepoints = copy.copy(pts0)
-            # update pbundle.segments[0].data.voilist
-            qtrace()
-            for i in xrange(Nburnpts):
-                pbundle.segments[iseg].statepoints[i].POW = POW[:, :, i]
-                pbundle.segments[iseg].statepoints[i].EXP = EXP[:, :, i]
-                pbundle.segments[iseg].statepoints[i].fint = fint[i]
-                pbundle.segments[iseg].statepoints[i].kinf = kinf[i]
+
+            statepoints = copy.deepcopy(pts0)
+            for i, p in enumerate(statepoints):
+                p.POW = POW[:, :, i]
+                p.EXP = EXP[:, :, i]
+                p.fint = fint[i]
+                p.kinf = kinf[i]
+            
+            voilist = self.bunlist[0].segments[iseg].data.voilist
+            pbundle.segments[iseg].data.voilist = voilist
+            pbundle.segments[iseg].statepoints = statepoints
                 
         return pbundle
         
