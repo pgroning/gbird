@@ -1464,10 +1464,15 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
             pts = bundle.segments[iseg].statepoints
             burnlist = [p.burnup for p in pts]
-            
-            pts0 = [p for p in self.bunlist[0].segments[iseg].statepoints
-                    if p.burnup in burnlist]
 
+            # Only use state points (stp) where voi = vhi
+            idx = next(i for i, p in 
+                       enumerate(self.bunlist[0].segments[iseg].statepoints)
+                       if p.voi != p.vhi)
+            
+            pts0 = [p for p in self.bunlist[0].segments[iseg].statepoints[:idx]
+                    if p.burnup in burnlist]
+            
             pts1 = [p for p in self.biascalc.segments[iseg].statepoints
                     if p.burnup in burnlist]
             
