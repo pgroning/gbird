@@ -64,25 +64,43 @@ class CasDialog(QtGui.QDialog):
     def cas_group(self):
         flo = QtGui.QFormLayout()
 
+        version_list = self.get_versions()
         self.version_cbox = QtGui.QComboBox()
-        ver_list = self.get_versions()
-        self.version_cbox.addItems(QtCore.QStringList(ver_list))
-        self.version_cbox.setCurrentIndex(3)  # set default version
+        self.version_cbox.addItems(QtCore.QStringList(version_list))
+        if hasattr(self.parent.params, "cas_version"):
+            i = version_list.index(self.parent.params.cas_version)
+            self.version_cbox.setCurrentIndex(i)
+        else:
+            self.version_cbox.setCurrentIndex(3)  # set default version
 
-        self.neulib_cbox = QtGui.QComboBox()
         neulib_list = self.get_neulibs()
+        self.neulib_cbox = QtGui.QComboBox()
         self.neulib_cbox.addItems(QtCore.QStringList(neulib_list))
-        self.neulib_cbox.setCurrentIndex(3)
+        if hasattr(self.parent.params, "cas_neulib"):
+            i = neulib_list.index(self.parent.params.cas_neulib)
+            self.neulib_cbox.setCurrentIndex(i)
+        else:
+            self.neulib_cbox.setCurrentIndex(3)
 
-        self.gamlib_cbox = QtGui.QComboBox()
         gamlib_list = self.get_gamlibs()
+        self.gamlib_cbox = QtGui.QComboBox()
         self.gamlib_cbox.addItems(QtCore.QStringList(gamlib_list))
-        self.gamlib_cbox.setCurrentIndex(0)
+        if hasattr(self.parent.params, "cas_gamlib"):
+            i = gamlib_list.index(self.parent.params.cas_gamlib)
+            self.gamlib_cbox.setCurrentIndex(i)
+        else:
+            self.gamlib_cbox.setCurrentIndex(0)
 
+        cpu_list = ["local", "grid"]
         self.cpu_cbox = QtGui.QComboBox()
-        self.cpu_cbox.addItems(QtCore.QStringList(["local", "grid"]))
+        self.cpu_cbox.addItems(QtCore.QStringList(cpu_list))
+        if hasattr(self.parent.params, "cas_cpu"):
+            i = cpu_list.index(self.parent.params.cas_cpu)
+            self.cpu_cbox.setCurrentIndex(i)
+        else:
+            self.cpu_cbox.setCurrentIndex(0)
 
-        self.owrite_chbox = QtGui.QCheckBox()
+        #self.owrite_chbox = QtGui.QCheckBox()
         
         flo.addRow("Version:", self.version_cbox)
         flo.addRow("Neutron library:", self.neulib_cbox)
