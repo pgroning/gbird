@@ -272,6 +272,7 @@ class MainWin(QtGui.QMainWindow):
         self.axes.set_ylim(0, 1)
 
     def openFile(self):
+        """Open bundle object from pickle file"""
 
         # Import default path from config file
         self.settings.beginGroup("PATH")
@@ -346,6 +347,7 @@ class MainWin(QtGui.QMainWindow):
         print "Loading data from file " + filename
         self.clear_data()
         with open(filename, 'rb') as fp:
+            self.params = pickle.load(fp)
             self.bunlist = pickle.load(fp)
             try:
                 self.biascalc = pickle.load(fp)
@@ -559,6 +561,7 @@ class MainWin(QtGui.QMainWindow):
             if fname_split[1] != ".gbi":
                 filename = filename + ".gbi"  # add file extension
             with open(filename, 'wb') as fp:
+                pickle.dump(self.params, fp, 1)
                 pickle.dump(self.bunlist, fp, 1)
                 if hasattr(self, "biascalc"):
                     pickle.dump(self.biascalc, fp, 1)
