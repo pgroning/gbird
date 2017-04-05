@@ -3,8 +3,7 @@ from pyqt_trace import pyqt_trace as qtrace
 import matplotlib.patches as mpatches
 import numpy as np
 
-from gbird import cpin
-
+#from gbird import cpin
 
 def s96o2(self):
     

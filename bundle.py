@@ -5,12 +5,12 @@ from IPython.core.debugger import Tracer  # Debugging
 from pyqt_trace import pyqt_trace as qtrace  # Break point that works with Qt
 ''' ipy example:
 import bundle
-: obj = bundle.bundle()
-: obj.readinp("file.inp")
-: obj.readcax()
+: b = bundle.Bundle()
+: b.readinp("file.pro")
+: b.readcax()
 After some code modification:
 : reload(bundle)
-: obj.readcax()
+: b.readcax()
 Usage:
 b0 = Bundle('file.pro')
 b0.readcax()
@@ -35,13 +35,12 @@ import copy
 from multiprocessing import Pool
 from segment import Segment, DataStruct
 from btf import Btf
+from fileio import InpFileParser
 
 
 def readcax_fun(tup):
-    """Unpack input arguments for use with the casdata class"""
+    """Unpack input arguments for use with the Segment class"""
     return Segment(*tup)
-    # caxfile, opt = tup
-    # return casdata(caxfile, opt)
 
 
 def quickcalc_fun(tup):
@@ -49,9 +48,6 @@ def quickcalc_fun(tup):
     segment = tup[0]  # First arg should always be an instance of the class
     segment.quickcalc(*tup[1:])
     return segment
-    # case, voi, maxdep, opt = tup
-    # case.quickcalc(voi, maxdep, opt)
-    # return case
 
 
 class Bundle(object):
@@ -60,14 +56,10 @@ class Bundle(object):
     #def __init__(self, parent=None):
     def __init__(self, profile=None, parent=None):
         self.data = DataStruct()
-        #self.cases = []
-        # self.btf = Btf(self)
-        #self.states = []
-        #self.states.append(DataStruct())
 
         #self.parent = parent
         if profile:
-            self.readpro(profile)
+            self.readinp(profile)
         elif parent:
             self.setup(parent)
 
@@ -77,48 +69,90 @@ class Bundle(object):
         # self.loadcasobj(inpfile)
         # self.interp2(P1,P2,x1,x2,x)
 
-    def readpro(self, cfgfile):
+    def readinp(self, cfgfile):
         """Read project setup file"""
         
-        config = ConfigParser.ConfigParser()
-        try:
-            if not config.read(cfgfile):
-                print "Could not open file '" + cfgfile + "'"
-                return
-        except:
-            print "An error occured trying to read the file '" + cfgfile + "'"
-            return
+        pfile = InpFileParser(self.data)
+        pfile.read(cfgfile)
+
+        #config = ConfigParser.SafeConfigParser()
+        #try:
+        #    if not config.read(cfgfile):
+        #        print "Could not open file '" + cfgfile + "'"
+        #        return False
+        #except:
+        #    print "An error occured trying to read the file '" + cfgfile + "'"
+        #    return False
 
         # Get fuel type
-        self.data.fuetype = config.get("Bundle", "fuetype")
-        if self.data.fuetype not in ('A10XM', 'A10B', 'AT11', 'OPT2', 'OPT3'):
-            print("Error: Unknown fuel type.")
-            return
-
+        #self.data.fuetype = config.get("Bundle", "fuel")
+        #if self.data.fuetype not in ('A10XM', 'A10B', 'AT11', 'OPT2', 'OPT3'):
+        #    print("Error: Unknown fuel type.")
+        #    return False
+        
         # cax files
-        files = config.get("Bundle", "files")
-        self.data.caxfiles = filter(None, re.split("\n", files))
-
-        # node list
-        nodes = re.split("\s+|,\s*", config.get("Bundle", "nodes"))
-        nodes = filter(None, nodes)
-        self.data.nodes = map(int, nodes)
-        if len(self.data.nodes) != len(self.data.caxfiles):
-            print "Error: Invalid node list."
-            return
-
-        if config.has_section("BTF"):
+        #files = config.get("Bundle", "files")
+        #file_list = filter(None, re.split("\n", files))
+        #file_list.reverse()
+        #file_list = file_list[::-1]  # reverse order
+        #self.data.caxfiles = file_list
+        
+        # relative heights
+        #nodes = re.split("\s+|,\s*", config.get("Bundle", "nodes"))
+        #nodes = filter(None, nodes)
+        #self.data.nodes = map(int, nodes)
+        #if len(self.data.nodes) != len(self.data.caxfiles):
+        #    print "Error: Invalid node list."
+        #    return False
+        
+        # content read option
+        #self.data.content = "filtered"  # default value
+        #if config.has_option("Bundle", "content"):
+        #    self.data.content = config.get("Bundle", "content")
+        #if self.data.content not in ("filtered", "unfiltered"):
+        #    print "Error: Unknown content option."
+        #    return False
+        
+        # BTF options
+        #if config.has_section("BTF"):
             # BTF zone vector
-            btf_zones = re.split("\s+|,\s*", config.get("BTF", "zones"))
-            btf_zones = filter(None, btf_zones)
-            self.data.btf_zones = map(int, btf_zones)
+            #btf_zones = re.split("\s+|,\s*", config.get("BTF", "zones"))
+            #btf_zones = filter(None, btf_zones)
+            #self.data.btf_zones = map(int, btf_zones)
             # BTF nodes
-            btf_nodes = re.split("\s+|,\s*", config.get("BTF", "nodes"))
-            btf_nodes = filter(None, btf_nodes)
-            self.data.btf_nodes = map(int, btf_nodes)
-        else:
-            self.data.btf_zones = [1] * len(self.data.nodes)
-            self.data.btf_nodes = self.data.nodes
+        #    btf_nodes = re.split("\s+|,\s*", config.get("BTF", "nodes"))
+        #    btf_nodes = filter(None, btf_nodes)
+        #    self.data.btf_nodes = map(int, btf_nodes)
+        #else:
+        #    #self.data.btf_zones = [1] * len(self.data.nodes)
+        #    self.data.btf_nodes = self.data.nodes
+
+        # Perturbation calculation
+        #self.data.dep_max = None
+        #self.data.dep_thres = None
+        #self.data.voi = None
+        #self.data.model = "c3"
+        #
+        #if config.has_section("Pertcalc"):
+        #    if config.has_option("Pertcalc", "dep_max"):
+        #        dep_max = config.get("Pertcalc", "dep_max")
+        #        if dep_max != "undef":
+        #            self.data.dep_max = float(dep_max)
+        #    if config.has_option("Pertcalc", "dep_thres"):
+        #        dep_thres = config.get("Pertcalc", "dep_thres")
+        #        if dep_thres != "undef":
+        #            self.data.dep_thres = float(dep_thres)
+        #    if config.has_option("Pertcalc", "voi"):
+        #        voi = config.get("Pertcalc", "voi")
+        #        if voi != "undef":
+        #            self.data.voi = int(voi)
+        #    if config.has_option("Pertcalc", "model"):
+        #        model = config.get("Pertcalc", "model")
+        #        if model != "undef":
+        #            self.data.model = model
+
+        #return True
+    
 
     '''
     def readinp(self, inpfile):
@@ -165,15 +199,15 @@ class Bundle(object):
         self.data.nodes = nodes
         self.data.btf_cases = btf_cases
     '''
-    def readcax(self, read_all=False):
+    def readcax(self, content="filtered"):
         """Read multiple caxfiles using multithreading.
         Syntax:
-        readcax() reads the first part of the file (where voi=vhi)
-        readcax('all') reads the whole file."""
+        readcax() reads the first part of the file where voi=vhi
+        readcax('unfiltered') reads the whole file."""
 
         inlist = []  # Bundle input args
         for caxfile in self.data.caxfiles:
-            inlist.append((caxfile, read_all))
+            inlist.append((caxfile, content))
 
         n = len(self.data.caxfiles)  # Number of threads
         p = Pool(n)  # Make the Pool of workers
@@ -209,9 +243,9 @@ class Bundle(object):
         elif fuetype == "A10":
             self.data.fuetype = "A10B"
 
-    def new_calc(self, voi=None, maxdep=60, depthres=None, refcalc=False,
-                 grid=False, model='c3', box_offset=0, neulib=False):
-
+    def new_calc(self, voi=None, dep_max=None, dep_thres=None, grid=False,
+                 model="c3", box_offset=0, neulib=False):
+        
         # For storage of new calculation
         #self.new_state()
 
@@ -240,11 +274,11 @@ class Bundle(object):
         
         segments = self.segments
         for s in segments:
-            inlist.append((s, voi, maxdep, depthres, refcalc, grid,
-                           model, box_offset, neulib))
+            inlist.append((s, voi, dep_max, dep_thres, grid, model,
+                           box_offset, neulib))
         
         #quickcalc_fun(inlist[0])
-        #Tracer()()
+        
         n = len(segments)  # Number of threads
         p = Pool(n)  # Make the Pool of workers
         
@@ -255,7 +289,7 @@ class Bundle(object):
         p.join()
 
     def setup(self, parent):
-        """Setup new Bundle instance and copy data from parent"""
+        """Setup new Bundle instance and copy/link data from parent"""
 
         self.data = parent.data
         self.segments = []
@@ -263,6 +297,9 @@ class Bundle(object):
             self.segments.append(Segment())
             self.segments[-1].data = copy.copy(s.data)
             self.segments[-1].topnode = s.topnode
+            #self.segments[-1].statepoints = s.statepoints
+            self.segments[-1].burnlist = [s.burnpoints(voi=v) 
+                                          for v in s.data.voilist]
 
 #    def append_state(self):
 #        """Append a list element to store new segment instancies"""
@@ -297,7 +334,7 @@ class Bundle(object):
 
     def new_btf(self):
         """Administrates btf calculation by composition of the Btf class"""
-
+        
         #nstates = len(self.states)
         #nstates = len(self.cases[0].states)
         #while len(self.states) < nstates:
@@ -336,8 +373,18 @@ class Bundle(object):
         # xdim = powlist[0].shape[0]
         # ydim = powlist[0].shape[1]
         # nodes = self.data.nodes
-        zdim = max(nodes)
+
+        # only non-zero elements should be considered
+        nodes = [n for n in nodes if n]
+        nodes = np.array(nodes).astype(int)
+        
+        #zdim = max(nodes)
+        zdim = 25  # max node
         POW3 = np.zeros((zdim, xdim, ydim))
+
+        nodes = nodes / nodes[-1] * zdim  # rescale nodes
+        nodes = nodes.round().astype(int)
+        
         z0 = 0
         for i, P in enumerate(POW):
             z1 = nodes[i]

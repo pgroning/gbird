@@ -40,16 +40,10 @@ class PlotWin(QtGui.QMainWindow):
         self.resize(self.settings.value("size", QtCore.QVariant(QtCore.QSize(800, 650))).toSize())
         self.move(self.settings.value("pos", QtCore.QVariant(QtCore.QPoint(600, 300))).toPoint())
         self.settings.endGroup()
-        
-        # Retrieve initial data
-        # self.parent = parent
-        # self.data_init()
-        
-        self.case_id_current = int(self.parent.case_cbox.currentIndex())
-        
+                
         self.create_menu()
         self.create_main_frame()
-        self.create_status_bar()
+        #self.create_status_bar()
         
         # self.textbox.setText('1 2 3 4')
         # self.data_init()
@@ -58,79 +52,59 @@ class PlotWin(QtGui.QMainWindow):
         # self.case_id_current = 0
         self.on_plot()  # Init plot
 
-        # self.on_draw()
+    def get_xy(self, segment, parameter):
+        ipoint = self.parent.point_sbox.value()
+        voi = segment.statepoints[ipoint].voi
+        vhi = segment.statepoints[ipoint].vhi
+        tfu = segment.statepoints[ipoint].tfu
+        print voi, vhi, tfu
+        print " "
+        statepoints = segment.get_statepoints(voi, vhi, tfu)
+        x = [s.burnup for s in statepoints]
+        if parameter == "KINF":
+            y = [s.kinf for s in statepoints]
+        if parameter == "FINT":
+            y = [s.fint for s in statepoints]
+        return x, y
 
-    # def data_init(self):
-    #    self.bundle = self.parent.bundle
-    #    #self.cas = casio()
-    #    #self.cas.loadpic('caxfiles.p')
-
-    def plot_kinf(self, case_id, istate=-1, linestyle="-"):
+    def plot_kinf(self, segment, voi, vhi, tfu, linestyle="-"):
+        """Plot kinf as a function of burnup"""
         
-        segment = self.parent.bunlist[istate].segments[case_id]
-        #case = self.parent.bundle.cases[case_id]
-        idx0 = self.startpoint(case_id, istate)
-        statepoints = segment.statepoints[idx0:]
-        
-        burnup_old = 0.0
-        for idx, p in enumerate(statepoints):
-            if p.burnup < burnup_old:
-                break
-            burnup_old = p.burnup
-        
-        x = [statepoints[i].burnup for i in range(idx)]
-        y = [statepoints[i].kinf for i in range(idx)]
+        statepoints = segment.get_statepoints(voi, vhi, tfu)
+        x = [s.burnup for s in statepoints]
+        y = [s.kinf for s in statepoints]
         
         labstr = segment.data.sim
         labstr = labstr.replace("SIM", "").replace("'", "").strip()
-        # labstr = case.states[0].caxfile
-        # labstr = os.path.split(labstr)[1]
-        # labstr = os.path.splitext(labstr)[0]
         
         self.axes.plot(x, y, label=labstr, linestyle=linestyle)
         self.axes.set_xlabel('Burnup (MWd/kgU)')
         self.axes.set_ylabel('K-inf')
         self.axes.legend(loc='best', prop={'size': 8})
-        self.canvas.draw()
         self.on_draw()
 
-    def plot_fint(self, case_id, istate=-1, linestyle="-"):
+    def plot_fint(self, segment, voi, vhi, tfu, linestyle="-"):
 
-        segment = self.parent.bunlist[istate].segments[case_id]
-        idx0 = self.startpoint(case_id, istate)
-        statepoints = segment.statepoints[idx0:]
-
-        burnup_old = 0.0
-        for idx, p in enumerate(statepoints):
-            if p.burnup < burnup_old:
-                break
-            burnup_old = p.burnup
-
-        x = [statepoints[i].burnup for i in range(idx)]
-        y = [statepoints[i].fint for i in range(idx)]
+        statepoints = segment.get_statepoints(voi, vhi, tfu)
+        x = [s.burnup for s in statepoints]
+        y = [s.fint for s in statepoints]
 
         labstr = segment.data.sim
         labstr = labstr.replace("SIM", "").replace("'", "").strip()
-        # labstr = case.states[-1].caxfile
-        # labstr = os.path.split(labstr)[1]
-        # labstr = os.path.splitext(labstr)[0]
         
         self.axes.plot(x, y, label=labstr, linestyle=linestyle)
         self.axes.set_xlabel('Burnup (MWd/kgU)')
         self.axes.set_ylabel('Fint')
         self.axes.legend(loc='best', prop={'size': 8})
-        self.canvas.draw()
         self.on_draw()
 
-    def plot_btf(self, case_id, istate=-1, linestyle="-"):
-        
-        # x = self.cas.btf.burnpoints
-        x = self.parent.bunlist[istate].btf.burnpoints
-        # DOX = self.cas.btf.DOX
-        DOX = self.parent.bunlist[istate].btf.DOX
-        y = [elem.max() for elem in DOX]
-        self.axes.plot(x, y, linestyle=linestyle)
+    def plot_btf(self, bundle, linestyle="-"):
 
+        x = bundle.btf.burnpoints
+        DOX = bundle.btf.DOX
+        y = [e.max() for e in DOX]
+                
+        self.axes.plot(x, y, linestyle=linestyle)
         self.axes.set_xlabel('Burnup (MWd/kgU)')
         self.axes.set_ylabel('BTF')
         self.on_draw()
@@ -185,13 +159,12 @@ class PlotWin(QtGui.QMainWindow):
         
         self.canvas.draw()
 
-    def startpoint(self, case_id, istate):
+    def startpoint(self, iseg, istate):
         voi_val = int(self.voi_cbox.currentText())
         vhi_val = int(self.vhi_cbox.currentText())
         type_val = str(self.type_cbox.currentText())
         
-        segment = self.parent.bunlist[istate].segments[case_id]
-        #case = self.parent.bundle.cases[case_id]
+        segment = self.parent.bunlist[istate].segments[iseg]
         
         if type_val == 'CCl':
             idx0 = segment.findpoint(tfu=293)
@@ -208,62 +181,58 @@ class PlotWin(QtGui.QMainWindow):
         return idx0
 
     def on_plot(self):
-        
-        case_id = self.case_id_current
+
+        case_id = int(self.parent.case_cbox.currentIndex())
         case_id_max = len(self.parent.bunlist[-1].segments)
-        #case_id_max = len(self.parent.bundle.cases)
+        
         param = self.param_cbox.currentText()
+        ibundle = self.parent.ibundle
+
+        ipoint = self.parent.point_sbox.value()
+        statepoint = (self.parent.bunlist[ibundle]
+                      .segments[case_id].statepoints[ipoint])
+        voi = statepoint.voi
+        vhi = statepoint.vhi
+        tfu = statepoint.tfu
+        tmo = statepoint.tmo
+        fmtstr = ("VOI={0:.0f} : VHI={1:.0f} : TFU={2:.0f} : TMO={3:.0f}"
+                  .format(voi, vhi, tfu, tmo))
+        self.statusBar().showMessage(fmtstr)
         
         self.axes.clear()
-        if param == 'Kinf':
+        if param == "KINF":
             if self.case_cb.isChecked():
-                for i in range(case_id_max):
-                    # idx0 = self.startpoint(i)
-                    self.plot_kinf(i)
+                for iseg in range(case_id_max):
+                    segment = self.parent.bunlist[ibundle].segments[iseg]
+                    self.plot_kinf(segment, voi=voi, vhi=vhi, tfu=tfu)
             else:
-                # idx0 = self.startpoint(case_id)
-                self.plot_kinf(case_id)
+                segment = self.parent.bunlist[ibundle].segments[case_id]
+                self.plot_kinf(segment, voi=voi, vhi=vhi, tfu=tfu)
                 if self.original_cb.isChecked():
-                    self.plot_kinf(case_id, istate=0, linestyle="--")
+                    segment = self.parent.bunlist[0].segments[case_id]
+                    self.plot_kinf(segment, voi=voi, vhi=vhi, tfu=tfu,
+                                   linestyle="--")
 
-        elif param == 'Fint':
+        elif param == "FINT":
             if self.case_cb.isChecked():
-                for i in range(case_id_max):
-                    self.plot_fint(i)
+                for iseg in range(case_id_max):
+                    segment = self.parent.bunlist[ibundle].segments[iseg]
+                    self.plot_fint(segment, voi=voi, vhi=vhi, tfu=tfu)
             else:
-                self.plot_fint(case_id)
+                segment = self.parent.bunlist[ibundle].segments[case_id]
+                self.plot_fint(segment, voi=voi, vhi=vhi, tfu=tfu)
                 if self.original_cb.isChecked():
-                    self.plot_fint(case_id, istate=0, linestyle="--")
+                    segment = self.parent.bunlist[0].segments[case_id]
+                    self.plot_fint(segment, voi=voi, vhi=vhi, tfu=tfu,
+                                   linestyle="--")
 
         elif param == 'BTF':
-            if self.case_cb.isChecked():
-                for i in range(case_id_max):
-                    self.plot_btf(i)
-            else:
-                self.plot_btf(case_id)
-                if self.original_cb.isChecked():
-                    self.plot_btf(case_id, istate=0, linestyle="--")
+            bundle = self.parent.bunlist[ibundle]
+            self.plot_btf(bundle)
+            if self.original_cb.isChecked():
+                bundle = self.parent.bunlist[0]
+                self.plot_btf(bundle, linestyle="--")
  
-
-#    def on_index(self):
-#        print "Find index"
-#        case_id = self.case_id_current
-#        case = self.cas.cases[case_id]
-#        burnup = None
-#        voi_val = int(self.voi_cbox.currentText())
-#        vhi_val = int(self.vhi_cbox.currentText())
-#        type_val = str(self.type_cbox.currentText())
-#        print type_val,voi_val,vhi_val
-#        
-#       index = self.cas.findpoint(case,burnup,vhi,voi)
-#       index = self.cas.findpoint(case,vhi=vhi_val,voi=voi_val)
-#        index = self.cas.findpoint(case,voi=voi_val,vhi=vhi_val)
-#        idx0 = case.findpoint(voi=voi_val,vhi=vhi_val)
-#
-#        if type_val == 'CCl':
-#            idx0 = case.findpoint(tfu=293)
-#            print idx0
-
     def create_main_frame(self):
         self.main_frame = QtGui.QWidget()
         
@@ -300,7 +269,7 @@ class PlotWin(QtGui.QMainWindow):
         # self.connect(self.textbox, SIGNAL('editingFinished ()'),
         # self.on_draw)
         
-        self.draw_button = QtGui.QPushButton("Redraw")
+        self.draw_button = QtGui.QPushButton("Update")
         self.connect(self.draw_button, QtCore.SIGNAL('clicked()'), 
                      self.on_plot)
         
@@ -320,71 +289,76 @@ class PlotWin(QtGui.QMainWindow):
         
         param_label = QtGui.QLabel('Param:')
         self.param_cbox = QtGui.QComboBox()
-        paramlist = ['Kinf', 'Fint', 'BTF']
+        paramlist = ["KINF", "FINT", "BTF"]
         for i in paramlist:
             self.param_cbox.addItem(i)
-        # self.connect(self.param_cbox, SIGNAL('currentIndexChanged(int)'),
-        # self.on_plot)
+
+        parent_param = str(self.parent.param_cbox.currentText())
+        if parent_param in paramlist:
+            i = paramlist.index(parent_param)
+            self.param_cbox.setCurrentIndex(i)
+        else:
+            self.param_cbox.setCurrentIndex(0)
+        
+        self.connect(self.param_cbox,
+                     QtCore.SIGNAL('currentIndexChanged(int)'), self.on_plot)
         
         # case_label = QLabel('All cases:')
         self.case_cb = QtGui.QCheckBox("All seg.")
         self.case_cb.setChecked(False)
         self.connect(self.case_cb, QtCore.SIGNAL('stateChanged(int)'), 
                      self.on_plot)
-#       self.case_cbox = QComboBox()
-#       caselist = ['1','2','3','All']
-#       for i in caselist:
-#            self.case_cbox.addItem(i)
         
         self.original_cb = QtGui.QCheckBox("Plot orig.")
         self.original_cb.setChecked(False)
         self.connect(self.original_cb, QtCore.SIGNAL('stateChanged(int)'),
                      self.on_plot)
 
-        type_label = QtGui.QLabel('Type:')
-        self.type_cbox = QtGui.QComboBox()
-        typelist = ['Hot', 'HCr', 'CCl', 'CCr']
-        for i in typelist:
-            self.type_cbox.addItem(i)
+        #type_label = QtGui.QLabel('Type:')
+        #self.type_cbox = QtGui.QComboBox()
+        #typelist = ['Hot', 'HCr', 'CCl', 'CCr']
+        #for i in typelist:
+        #    self.type_cbox.addItem(i)
         # self.connect(self.type_cbox, SIGNAL('currentIndexChanged(int)'),
         # self.on_index)
 
-        voi_label = QtGui.QLabel('VOI:')
-        self.voi_cbox = QtGui.QComboBox()
-        # self.voilist = ['0', '40', '80']
-        iseg = self.case_id_current
-        self.voilist = (self.parent.bunlist[-1].segments[iseg].data.voilist)
+        #voi_label = QtGui.QLabel('VOI:')
+        #self.voi_cbox = QtGui.QComboBox()
+        ## self.voilist = ['0', '40', '80']
+        #iseg = int(self.parent.case_cbox.currentIndex())
+        ##iseg = self.case_id_current
+        #self.voilist = (self.parent.bunlist[-1].segments[iseg].data.voilist)
 
         #self.voilist = (self.parent.bundle.cases[self.case_id_current]
         #                .states[-1].voivec)
         # self.voilist = map(str, self.voilist)
         
-        for v in self.voilist:
-            self.voi_cbox.addItem(str(v))
+        #for v in self.voilist:
+        #    self.voi_cbox.addItem(str(v))
         # Determine voi index
-        voi = self.parent.bunlist[-1].segments[iseg].statepoints[0].voi
+        #voi = self.parent.bunlist[-1].segments[iseg].statepoints[0].voi
         #voi = (self.parent.bundle.cases[self.case_id_current].states[-1]
         #       .statepoints[0].voi)
         # voi = self.cas.cases[self.case_id_current].statepts[0].voi
-        voi_index = [i for i, v in enumerate(self.voilist) if int(v) == voi]
-        voi_index = voi_index[0]
-        self.voi_cbox.setCurrentIndex(voi_index)
+        #voi_index = [i for i, v in enumerate(self.voilist) if int(v) == voi]
+        #voi_index = voi_index[0]
+        #self.voi_cbox.setCurrentIndex(voi_index)
         # self.connect(self.voi_cbox, SIGNAL('currentIndexChanged(int)'),
         # self.on_plot)
-        vhi_label = QtGui.QLabel('VHI:')
-        self.vhi_cbox = QtGui.QComboBox()
+        #vhi_label = QtGui.QLabel('VHI:')
+        #self.vhi_cbox = QtGui.QComboBox()
         # self.vhilist = ['0', '40', '80']
-        self.vhilist = self.voilist
-        for v in self.vhilist:
-            self.vhi_cbox.addItem(str(v))
+        #self.vhilist = self.voilist
+        #for v in self.vhilist:
+        #    self.vhi_cbox.addItem(str(v))
         
-        # Determine vhi index
-        vhi = self.parent.bunlist[-1].segments[iseg].statepoints[0].vhi
+        ## Determine vhi index
+        #vhi = self.parent.bunlist[-1].segments[iseg].statepoints[0].vhi
         #vhi = (self.parent.bundle.cases[self.case_id_current].states[-1]
         #       .statepoints[0].vhi)
-        vhi_index = [i for i, v in enumerate(self.vhilist) if int(v) == vhi]
-        vhi_index = vhi_index[0]
-        self.vhi_cbox.setCurrentIndex(vhi_index)
+        #vhi_index = [i for i, v in enumerate(self.vhilist) if int(v) == vhi]
+        #vhi_index = vhi_index[0]
+        #self.vhi_cbox.setCurrentIndex(vhi_index)
         # self.connect(self.vhi_cbox, SIGNAL('currentIndexChanged(int)'),
         # self.on_plot)
         
@@ -410,9 +384,8 @@ class PlotWin(QtGui.QMainWindow):
         #            slider_label, self.slider]:
         
         for w in [self.draw_button, self.grid_cb, slider_label, self.slider,
-                  self.case_cb, self.original_cb, param_label, self.param_cbox,
-                  type_label, self.type_cbox, voi_label, self.voi_cbox,
-                  vhi_label, self.vhi_cbox]:
+                  self.case_cb, self.original_cb, param_label,
+                  self.param_cbox]:
 
             hbox.addWidget(w)
             hbox.setAlignment(w, QtCore.Qt.AlignVCenter)
@@ -427,9 +400,9 @@ class PlotWin(QtGui.QMainWindow):
         self.main_frame.setLayout(vbox)
         self.setCentralWidget(self.main_frame)
     
-    def create_status_bar(self):
-        self.status_text = QtGui.QLabel("Plot window")
-        self.statusBar().addWidget(self.status_text, 1)
+    #def create_status_bar(self):
+    #    self.status_text = QtGui.QLabel("Plot window")
+    #    self.statusBar().addWidget(self.status_text, 1)
         
     def create_menu(self):        
         self.file_menu = self.menuBar().addMenu("&File")
@@ -495,6 +468,7 @@ class PlotWin(QtGui.QMainWindow):
         self.settings.setValue("pos", QtCore.QVariant(self.pos()))
         self.settings.endGroup()
 
+        del self.parent.plotwin  # delete parent attr that holds the object
 
 def main():
     app = QApplication(sys.argv)

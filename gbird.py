@@ -19,6 +19,7 @@ except:
 import sys
 import os
 import time
+import copy
 import numpy as np
 from PyQt4 import QtGui, QtCore
 
@@ -29,17 +30,22 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg \
 # as NavigationToolbar
 from matplotlib.figure import Figure
 import matplotlib.patches as mpatches
-try:  # patheffects not available for older versions of matplotlib
-    import matplotlib.patheffects as path_effects
-except:
-    pass
+#try:  # patheffects not available for older versions of matplotlib
+#    import matplotlib.patheffects as path_effects
+#except:
+#    pass
 
 from bundle import Bundle
 from btf import Btf
 from plot import PlotWin
+from dlg_cascalc import CasDialog, CasRunDialog
+from dlg_pertcalc import PertDialog
+from dlg_bundle import BundleDialog
+from dlg_report import ReportDialog
+from pin import FuePin, EnrDialog
 from progbar import ProgressBar
-# from map_s96 import s96o2
-# from map_a10 import a10xm
+from map_s96 import s96o2
+from map_a10 import a10xm
 
 
 class dataThread(QtCore.QThread):
@@ -68,141 +74,146 @@ class dataThread(QtCore.QThread):
         # self.emit(SIGNAL('progressbar_update(int)'),90)
         # self.parent.dataobj.calcbtf()
 
-"""
-class Circle(object):
-    def __init__(self,axes,x,y,c=(1,1,1),text='',r=0.028):
-        self.axes = axes
-        # radius = 0.028
-        self.circle = mpatches.Circle((x,y), r, fc=c, ec=(0.1, 0.1, 0.1))
-        self.circle.set_linestyle('solid')
-        try:
-            self.circle.set_path_effects([path_effects.withSimplePatchShadow()])
-        except: pass
-        self.circle.set_linewidth(2.0)
-        self.x = x
-        self.y = y
-        self.text = self.axes.text(x,y,text,ha='center',va='center',fontsize=8)
-        # self.axes.add_patch(self.circle)
-
-    def set_text(self,text):
-        pass
-        # self.text.remove()
-        # self.text = self.axes.text(self.x,self.y,text,ha='center',
-        va='center',fontsize=8)
-
-    def is_clicked(self,xc,yc):
-        r2 = (xc-self.x)**2 + (yc-self.y)**2
-        if r2 < self.circle.get_radius()**2: #Mouse click is within pin radius
-            return True
-        else:
-            return False
-"""
-
-
-class cpin(object):
-    def __init__(self, axes):
-        self.axes = axes
-
-    def set_circle(self, x, y, r, c=None):
-        self.x = x
-        self.y = y
-        if c is None:
-            c = self.facecolor
-        self.circle = mpatches.Circle((x, y), r, fc=c, ec=(0.1, 0.1, 0.1))
-        self.circle.set_linestyle('solid')
-        self.circle.set_linewidth(2.0)
-        try:
-            self.circle.set_path_effects([path_effects.
-                                          withSimplePatchShadow()])
-        except:
-            pass
-
-        # Set background rectangle
-        d = 2*r + 0.019
-        self.rectangle = mpatches.Rectangle((x - d/2, y - d/2), d, d,
-                                            fc=(1, 1, 0), alpha=1.0,
-                                            ec=(1, 1, 1))
-        self.rectangle.set_fill(True)
-        self.rectangle.set_linewidth(0.0)
-        
-    def set_text(self, string='', fsize=8):
-        # if hasattr(self,'text'):
-        #    self.text.remove()
-        self.text = self.axes.text(self.x, self.y, string, ha='center',
-                                   va='center', fontsize=fsize)
-
-    def is_clicked(self, xc, yc):
-        r2 = (xc - self.x)**2 + (yc - self.y)**2
-        # Mouse click is within pin radius ?
-        if r2 < self.circle.get_radius()**2:
-            return True
-        else:
-            return False
+#"""
+#class Circle(object):
+#    def __init__(self,axes,x,y,c=(1,1,1),text='',r=0.028):
+#        self.axes = axes
+#        # radius = 0.028
+#        self.circle = mpatches.Circle((x,y), r, fc=c, ec=(0.1, 0.1, 0.1))
+#        self.circle.set_linestyle('solid')
+#        try:
+#            self.circle.set_path_effects([path_effects.withSimplePatchShadow()]#)
+#        except: pass
+#        self.circle.set_linewidth(2.0)
+#        self.x = x
+#        self.y = y
+#        self.text = self.axes.text(x,y,text,ha='center',va='center',fontsize=8)
+#        # self.axes.add_patch(self.circle)
+#
+#    def set_text(self,text):
+#        pass
+#        # self.text.remove()
+#        # self.text = self.axes.text(self.x,self.y,text,ha='center',
+#        va='center',fontsize=8)
+#
+#    def is_clicked(self,xc,yc):
+#        r2 = (xc-self.x)**2 + (yc-self.y)**2
+#        if r2 < self.circle.get_radius()**2: #Mouse click is within pin radius
+#            return True
+#        else:
+#            return False
+#"""
 
 
-class EnrDialog(QtGui.QDialog):
-    def __init__(self, parent, mode="edit"):
-        # QDialog.__init__(self, parent)
-        QtGui.QDialog.__init__(self)
-        self.parent = parent
-        self.mode = mode
+#class cpin(object):
+#    def __init__(self, axes):
+#        self.axes = axes
+#
+#    def set_circle(self, x, y, r, c=None):
+#        self.x = x
+#        self.y = y
+#        if c is None:
+#            c = self.facecolor
+#        self.circle = mpatches.Circle((x, y), r, fc=c, ec=(0.1, 0.1, 0.1))
+#        self.circle.set_linestyle('solid')
+#        self.circle.set_linewidth(2.0)
+#        try:
+#            self.circle.set_path_effects([path_effects.
+#                                          withSimplePatchShadow()])
+#        except:
+#            pass
+#
+#        # Set background rectangle
+#        d = 2*r + 0.019
+#        self.rectangle = mpatches.Rectangle((x - d/2, y - d/2), d, d,
+#                                            fc=(1, 1, 0), alpha=1.0,
+#                                            ec=(1, 1, 1))
+#        self.rectangle.set_fill(True)
+#        self.rectangle.set_linewidth(0.0)
+#        
+#    def set_text(self, string='', fsize=8):
+#        # if hasattr(self,'text'):
+#        #    self.text.remove()
+#        self.text = self.axes.text(self.x, self.y, string, ha='center',
+#                                   va='center', fontsize=fsize)
+#
+#    def is_clicked(self, xc, yc):
+#        r2 = (xc - self.x)**2 + (yc - self.y)**2
+#        # Mouse click is within pin radius ?
+#        if r2 < self.circle.get_radius()**2:
+#            return True
+#        else:
+#            return False
+#"""
 
-        # self.setWindowTitle("Window title")
-        # set x-pos relative to cursor position
-        # xpos = QCursor.pos().x() - 250
-        # set dialog pos relative to main window
-        xpos = parent.pos().x() + parent.size().width() / 2
-        ypos = parent.pos().y() + parent.size().height() / 2
-        self.setGeometry(QtCore.QRect(xpos, ypos, 150, 120))
+#class EnrDialog(QtGui.QDialog):
+#    def __init__(self, parent, mode="edit"):
+#        # QDialog.__init__(self, parent)
+#        QtGui.QDialog.__init__(self)
+#        self.parent = parent
+#        self.mode = mode
+#
+#        # self.setWindowTitle("Window title")
+#        # set x-pos relative to cursor position
+#        # xpos = QCursor.pos().x() - 250
+#        # set dialog pos relative to main window
+#        xpos = parent.pos().x() + parent.size().width() / 2
+#        ypos = parent.pos().y() + parent.size().height() / 2
+#        self.setGeometry(QtCore.QRect(xpos, ypos, 150, 120))
+#
+#        case_num = int(parent.case_cbox.currentIndex())
+#        ipin = parent.pinselection_index
+#        enr = parent.enrpinlist[case_num][ipin].ENR
+#        ba = parent.enrpinlist[case_num][ipin].BA
+#        ba = 0 if np.isnan(ba) else ba
+#        if mode == "edit":
+#            self.setWindowTitle("Edit enrichment")
+#        elif mode == "add":
+#            self.setWindowTitle("Add enrichment")
+#        self.enr_text = QtGui.QLineEdit("%.2f" % enr)
+#        # dens = parent.enrpinlist[case_num][ipin].DENS
+#        # self.dens_text = QtGui.QLineEdit("%.3f" % dens)
+#        self.ba_text = QtGui.QLineEdit("%.2f" % ba)
+#        validator = QtGui.QDoubleValidator(0, 9.99, 2, self)
+#        self.enr_text.setValidator(validator)
+#        self.ba_text.setValidator(validator)
+#        # validator = QtGui.QDoubleValidator(0, 9.99, 3, self)
+#        # self.dens_text.setValidator(validator)
+#
+#        flo = QtGui.QFormLayout()
+#        flo.addRow("%U-235:", self.enr_text)
+#        #flo.addRow("Density (g/cm-3):", self.dens_text)
+#        flo.addRow("%Gd:", self.ba_text)
+#
+#        hbox = QtGui.QHBoxLayout()
+#        self.ok_button = QtGui.QPushButton("Ok")
+#        self.cancel_button = QtGui.QPushButton("Cancel")
+#        hbox.addWidget(self.cancel_button)
+#        hbox.addWidget(self.ok_button)
+#        self.connect(self.cancel_button, QtCore.SIGNAL('clicked()'),
+#                     self.close)
+#        self.connect(self.ok_button, QtCore.SIGNAL('clicked()'), self.action)
+#
+#        vbox = QtGui.QVBoxLayout()
+#        vbox.addLayout(flo)
+#        vbox.addStretch()
+#        vbox.addLayout(hbox)
+#        self.setLayout(vbox)
+#
+#    def action(self):
+#        self.close()
+#        self.enr = self.enr_text.text().toDouble()[0]
+#        #self.dens = self.dens_text.text().toDouble()[0]
+#        self.ba = self.ba_text.text().toDouble()[0]
+#        if self.mode == "edit":
+#            self.parent.enrpin_edit_callback()
+#        elif self.mode == "add":
+#            self.parent.enrpin_add_callback()
+#"""
 
-        case_num = int(parent.case_cbox.currentIndex())
-        ipin = parent.pinselection_index
-        enr = parent.enrpinlist[case_num][ipin].ENR
-        ba = parent.enrpinlist[case_num][ipin].BA
-        ba = 0 if np.isnan(ba) else ba
-        if mode == "edit":
-            self.setWindowTitle("Edit enrichment")
-        elif mode == "add":
-            self.setWindowTitle("Add enrichment")
-        self.enr_text = QtGui.QLineEdit("%.2f" % enr)
-        # dens = parent.enrpinlist[case_num][ipin].DENS
-        # self.dens_text = QtGui.QLineEdit("%.3f" % dens)
-        self.ba_text = QtGui.QLineEdit("%.2f" % ba)
-        validator = QtGui.QDoubleValidator(0, 9.99, 2, self)
-        self.enr_text.setValidator(validator)
-        self.ba_text.setValidator(validator)
-        # validator = QtGui.QDoubleValidator(0, 9.99, 3, self)
-        # self.dens_text.setValidator(validator)
-
-        flo = QtGui.QFormLayout()
-        flo.addRow("%U-235:", self.enr_text)
-        #flo.addRow("Density (g/cm-3):", self.dens_text)
-        flo.addRow("%Gd:", self.ba_text)
-
-        hbox = QtGui.QHBoxLayout()
-        self.ok_button = QtGui.QPushButton("Ok")
-        self.cancel_button = QtGui.QPushButton("Cancel")
-        hbox.addWidget(self.cancel_button)
-        hbox.addWidget(self.ok_button)
-        self.connect(self.cancel_button, QtCore.SIGNAL('clicked()'),
-                     self.close)
-        self.connect(self.ok_button, QtCore.SIGNAL('clicked()'), self.action)
-
-        vbox = QtGui.QVBoxLayout()
-        vbox.addLayout(flo)
-        vbox.addStretch()
-        vbox.addLayout(hbox)
-        self.setLayout(vbox)
-
-    def action(self):
-        self.close()
-        self.enr = self.enr_text.text().toDouble()[0]
-        #self.dens = self.dens_text.text().toDouble()[0]
-        self.ba = self.ba_text.text().toDouble()[0]
-        if self.mode == "edit":
-            self.parent.enrpin_edit_callback()
-        elif self.mode == "add":
-            self.parent.enrpin_add_callback()
+class Data(object):
+    """Empty class with the purpose to organize data"""
+    pass
 
 
 class MainWin(QtGui.QMainWindow):
@@ -213,6 +224,9 @@ class MainWin(QtGui.QMainWindow):
 
         # self.resize(1100,620)
         # self.move(200,200)
+
+        # Init empty class to hold parameters
+        self.params = Data()
 
         # Initial window size/pos last saved
         self.settings = QtCore.QSettings("greenbird")
@@ -278,7 +292,7 @@ class MainWin(QtGui.QMainWindow):
 
             filext = os.path.splitext(filename)[1]
             if filext == ".gbi":  # pickle file
-                self.ibundle = -1
+                #self.ibundle = -1
                 self.load_pickle(filename)
                 self.fig_update()
                 self.chanbow_sbox_update()
@@ -302,26 +316,26 @@ class MainWin(QtGui.QMainWindow):
                         self.fig_update()
                     self.setCursor(QtCore.Qt.ArrowCursor)
 
-    def newProject(self):
-        """Open project setup file"""
-
-        # Import default path from config file
-        self.settings.beginGroup("PATH")
-        path_default = self.settings.value("path_default",
-                                           QtCore.QString("")).toString()
-        self.settings.endGroup()
-        file_choices = "*.pro (*.pro)"
-        filename = unicode(QtGui.QFileDialog.getOpenFileName(self, 'Open file',
-                                                             path_default,
-                                                             file_choices))
-        if filename:
-            # Save default path to config file
-            path = os.path.split(filename)[0]
-            self.settings.beginGroup("PATH")
-            self.settings.setValue("path_default", QtCore.QString(path))
-            self.settings.endGroup()
-            self.ibundle = 0
-            self.read_pro(filename)
+#    def newProject(self):
+#        """Open project setup file"""
+#        
+#        # Import default path from config file
+#        self.settings.beginGroup("PATH")
+#        path_default = self.settings.value("path_default",
+#                                           QtCore.QString("")).toString()
+#        self.settings.endGroup()
+#        file_choices = "*.pro (*.pro)"
+#        filename = unicode(QtGui.QFileDialog.getOpenFileName(self, 'Open file',
+#                                                             path_default,
+#                                                             file_choices))
+#        if filename:
+#            # Save default path to config file
+#            path = os.path.split(filename)[0]
+#            self.settings.beginGroup("PATH")
+#            self.settings.setValue("path_default", QtCore.QString(path))
+#            self.settings.endGroup()
+#            self.ibundle = 0
+#            self.read_pro(filename)
                     
     def load_pickle(self, filename):
         """Load bundle object from pickle file"""
@@ -333,19 +347,15 @@ class MainWin(QtGui.QMainWindow):
         self.clear_data()
         with open(filename, 'rb') as fp:
             self.bunlist = pickle.load(fp)
+            try:
+                self.biascalc = pickle.load(fp)
+            except EOFError:  # biascalc exists?
+                pass
 
+        self.ibundle = len(self.bunlist) - 1
         self.init_pinobjects()
-
-        # Update case number list box
-        nsegments = len(self.bunlist[-1].segments)
-        seglist = map(str, range(1, nsegments + 1))
-        self.case_cbox.addItems(QtCore.QStringList(seglist))
-        #for i in range(1, ncases + 1):
-        #    self.case_cbox.addItem(str(i))
-        self.connect(self.case_cbox, QtCore.SIGNAL('currentIndexChanged(int)'),
-                     self.fig_update)
-        #self.fig_update()
-
+        self.init_cboxes()
+ 
     def read_cax(self, filename):
         """Importing data from a single cax file"""
         
@@ -409,7 +419,21 @@ class MainWin(QtGui.QMainWindow):
         # self.progressbar.close
         # self.thread.wait()
 
-    def read_pro(self, filename):
+#    def read_pro(self, filename):
+#        """Reading project setup file"""
+#        self.clear_data()
+#        bundle = Bundle()
+#        if not bundle.readpro(filename):  # stop if error is encountered
+#            return
+#        self.bunlist = []
+#        self.bunlist.append(bundle)
+#        self.ibundle = 0
+
+    def init_bundle(self):
+        """initialize a bundle instance"""
+        self.bunlist = [Bundle()]
+        
+    def import_data(self):
         """Reading project setup file"""
         
         msgBox = QtGui.QMessageBox()
@@ -420,31 +444,31 @@ class MainWin(QtGui.QMainWindow):
         #self._filename = filename
         if status == QtGui.QMessageBox.Yes:
             self.setCursor(QtCore.Qt.WaitCursor)
-            self.clear_data()
-            bundle = Bundle()
-            bundle.readpro(filename)
-            bundle.readcax()  # inargs "all" reads the whole file content
+            #self.clear_data()
+            #bundle = Bundle()
+            #if not bundle.readpro(filename):  # stop if error is encountered
+            #    self.setCursor(QtCore.Qt.ArrowCursor)
+            #    return
+            # inarg content="unfiltered" reads the whole file content
+            self.ibundle = 0
+            bundle = self.bunlist[0]
+            bundle.readcax(content=bundle.data.content)
             bundle.new_btf()
-            self.bunlist = []
-            self.bunlist.append(bundle)
+            #self.bunlist = []
+            #self.bunlist.append(bundle)
             
             self.init_pinobjects()
-        
-            # Update segment number list box
-            #state_num = self.ibundle
-            nsegments = len(bundle.segments)
-            #nsegments = len(self.bundle.states[state_num].segments)
-            seglist = map(str, range(1, nsegments + 1))
-            self.case_cbox.addItems(QtCore.QStringList(seglist))
-            
-            self.connect(self.case_cbox,
-                         QtCore.SIGNAL('currentIndexChanged(int)'),
-                         self.fig_update)
+            self.init_cboxes()
+
             self.setCursor(QtCore.Qt.ArrowCursor)
             self.fig_update()
         else:
             return
             
+
+
+
+
         #self.fig_update()
             #self.setCursor(QtCore.Qt.ArrowCursor)
             # self.canvas.draw()
@@ -498,6 +522,24 @@ class MainWin(QtGui.QMainWindow):
         #else:
         #    return
 
+    def init_cboxes(self):
+        """Initiate combo boxes"""
+        
+        # init segment combo box
+        nsegments = len(self.bunlist[-1].segments)
+        seglist = map(str, range(1, nsegments + 1))
+        self.case_cbox.addItems(QtCore.QStringList(seglist))
+        self.connect(self.case_cbox, QtCore.SIGNAL('currentIndexChanged(int)'),
+                     self.fig_update)
+        # init voi combo box
+        voilist = map(str, self.bunlist[-1].segments[0].data.voilist)
+        self.voi_cbox.addItems(QtCore.QStringList(voilist))
+        self.vhi_cbox.addItems(QtCore.QStringList(voilist))
+        self.connect(self.voi_cbox, QtCore.SIGNAL('currentIndexChanged(int)'),
+                     self.set_point_number)
+        self.connect(self.vhi_cbox, QtCore.SIGNAL('currentIndexChanged(int)'),
+                     self.set_point_number) 
+
     def saveData(self):
         """Save bundle object to pickle file"""
 
@@ -512,26 +554,35 @@ class MainWin(QtGui.QMainWindow):
                                                              "Save project",
                                                              path_default,
                                                              file_choices))
-        # self.bundle.savepic(filename)
-        fname_split =  os.path.splitext(filename)
-        if fname_split[1] != ".gbi":
-            filename = filename + ".gbi"  # add file extension
-        with open(filename, 'wb') as fp:
-            pickle.dump(self.bunlist, fp, 1)
-        print "Saved data to file " + filename
+        if filename:  # ok button clicked
+            fname_split =  os.path.splitext(filename)
+            if fname_split[1] != ".gbi":
+                filename = filename + ".gbi"  # add file extension
+            with open(filename, 'wb') as fp:
+                pickle.dump(self.bunlist, fp, 1)
+                if hasattr(self, "biascalc"):
+                    pickle.dump(self.biascalc, fp, 1)
+            print "Project saved to file " + filename
 
-    def plotWin(self):
+    def open_plotwin(self):
         """Open plot window"""
 
-        if hasattr(self, "bunlist"):
-            plotwin = PlotWin(self)
-            plotwin.show()
+        if hasattr(self, "bunlist"):  # data is imported
+            if not hasattr(self, "plotwin"):  # plot win is not already open
+                self.plotwin = PlotWin(self)
+                self.plotwin.show()
         else:
             msg = "There is no data to plot."
             msgBox = QtGui.QMessageBox()
-            # msgBox.information(self,"No data", msg.strip(),
-            #                   QtGui.QMessageBox.Close)
             msgBox.information(self, "No data", msg.strip(), msgBox.Close)
+
+    def plot_update(self):
+        if hasattr(self, "plotwin"):  # plot win is open
+            self.plotwin.on_plot()
+
+    def report_update(self):
+        if hasattr(self, "report_dlg"):
+            self.report_dlg.update()
 
     def get_colormap(self, num_enr_levels, colormap="rainbow"):
 
@@ -590,7 +641,7 @@ class MainWin(QtGui.QMainWindow):
             for i in range(LFU.shape[0]):
                 for j in range(LFU.shape[1]):
                     if LFU[i, j] > 0:
-                        pinobj = cpin(self.axes)
+                        pinobj = FuePin(self.axes)
                         pinobj.pos = [i, j]
                         pinobj.ENR = ENR[i, j]
                         pinobj.BA = BA[i, j]
@@ -606,7 +657,7 @@ class MainWin(QtGui.QMainWindow):
             enr_ba = FUE[:, 4]
             cmap = self.get_colormap(enr_levels.size)
             for i in range(enr_levels.size):
-                enrobj = cpin(self.axes)
+                enrobj = FuePin(self.axes)
                 enrobj.facecolor = cmap[i]
                 enrobj.ENR = enr_levels[i]
                 enrobj.BA = enr_ba[i]
@@ -614,7 +665,7 @@ class MainWin(QtGui.QMainWindow):
                 enrobj.DENS = enr_dens[i]
                 enrlist.append(enrobj)
             self.enrpinlist.append(enrlist)
-            
+
     def enrpin_add(self):
         """add enr pin"""
         self.enr_dlg = EnrDialog(self, "add")
@@ -626,7 +677,7 @@ class MainWin(QtGui.QMainWindow):
         case_num = int(self.case_cbox.currentIndex())
         ipin = self.pinselection_index  # copy attributes from selected pin
 
-        enrobj = cpin(self.axes)
+        enrobj = FuePin(self.axes)
         enrobj.facecolor = self.enrpinlist[case_num][ipin].facecolor
         enrobj.DENS = self.enrpinlist[case_num][ipin].DENS
         #enrobj.DENS = self.enr_dlg.dens
@@ -660,7 +711,7 @@ class MainWin(QtGui.QMainWindow):
         ipin = self.pinselection_index  # index of enr level pin to be edited
         enrpin = self.enrpinlist[case_num][ipin]
 
-        # first update fue pins
+        # update fue pins
         for pin in self.pinobjects[case_num]:
             if pin.LFU == ipin + 1:
                 pin.ENR = self.enr_dlg.enr
@@ -668,7 +719,7 @@ class MainWin(QtGui.QMainWindow):
                 #pin.DENS = self.enr_dlg.dens
                 pin.BA = self.enr_dlg.ba
 
-        # second update enr level pin
+        # update enr level pin
         self.enrpinlist[case_num][ipin].ENR = self.enr_dlg.enr
         if self.enr_dlg.ba < 0.00001:
             self.enrpinlist[case_num][ipin].BA = np.nan
@@ -687,14 +738,15 @@ class MainWin(QtGui.QMainWindow):
 
         case_num = int(self.case_cbox.currentIndex())
         ipin = self.pinselection_index  # index of enr level pin to be removed
-
+        
         del self.enrpinlist[case_num][ipin]  # remove the selected pin
-
-        if ipin >= len(self.enrpinlist[case_num]):
-            j = len(self.enrpinlist[case_num]) - 1
+        
+        enrpin_num = len(self.enrpinlist[case_num])
+        if ipin >= enrpin_num:
+            j = enrpin_num - 1
         else:
             j = ipin
-
+        
         for pin in self.pinobjects[case_num]:
             if pin.LFU == ipin + 1:
                 pin.ENR = self.enrpinlist[case_num][j].ENR
@@ -702,6 +754,8 @@ class MainWin(QtGui.QMainWindow):
                     pin.BA = 0.0
                 else:
                     pin.BA = self.enrpinlist[case_num][j].BA
+            if pin.LFU > enrpin_num:
+                pin.LFU = enrpin_num
         self.fig_update()
 
     def enrpin_sort(self):
@@ -717,27 +771,87 @@ class MainWin(QtGui.QMainWindow):
         case_num = int(self.case_cbox.currentIndex())
         enrlist = [pin.ENR for pin in self.enrpinlist[case_num]]
         isort = [i for i, e in sorted(enumerate(enrlist), key=lambda x:x[1])]
-
+        
         cmap = self.get_colormap(len(isort))
         pinlist_sorted = []
         for i, j in enumerate(isort):
             pinlist_sorted.append(self.enrpinlist[case_num][j])
             pinlist_sorted[-1].facecolor = cmap[i]
         self.enrpinlist[case_num] = pinlist_sorted
+
+        # Update pin LFU
+        invsort = [i for i, e in sorted(enumerate(isort), key=lambda x:x[1])]
+        for pin in self.pinobjects[case_num]:
+            i = pin.LFU - 1
+            pin.LFU = invsort[i] + 1
+        
         self.fig_update()
+
+    def open_bundle_dlg(self):
+        """open bundle settings dialog"""
+        self.bundle_dlg = BundleDialog(self)
+        self.bundle_dlg.exec_()  # Make dialog modal
+
+    def open_pert_dlg(self):
+        self.pert_dlg = PertDialog(self)
+        self.pert_dlg.exec_()
+
+    def open_cas_dlg(self):
+        """open cas settings dialog"""
+        self.cas_dlg = CasDialog(self)
+        self.cas_dlg.exec_()
+        
+    def open_fullcalc_dlg(self):
+        """open run fullcalc dialog"""
+        self.fullcalc_dlg = CasRunDialog(self)
+        self.fullcalc_dlg.exec_()
+
+    def open_report_dlg(self):
+        """open fuel report dialog"""
+        if hasattr(self, "bunlist"):  # check that data has been imported
+            if not hasattr(self, "report_dlg"):  # not already open?
+                self.report_dlg = ReportDialog(self)
+                #self.report_dlg.setModal(False)
+                self.report_dlg.show()  # Make dialog non-modal
+                #self.report_dlg.exec_()
+
+    def set_point_number(self):
+        ipoint = int(self.point_sbox.value())
+        iseg = int(self.case_cbox.currentIndex())
+        bundle = self.bunlist[self.ibundle]
+        segment = bundle.segments[iseg]
+        statepoint = segment.statepoints[ipoint]
+        
+        voi = int(self.voi_cbox.currentText())
+        vhi = int(self.vhi_cbox.currentText())
+
+        if statepoint.voi != voi or statepoint.vhi != vhi:
+            ipoint = segment.findpoint(voi=voi, vhi=vhi)
+            if ipoint is not None:
+                self.point_sbox.setValue(ipoint)
 
     def set_pinvalues(self):
         """Update values"""
-
+        
         param_str = str(self.param_cbox.currentText())
         iseg = int(self.case_cbox.currentIndex())
-        point_num = int(self.point_sbox.value())
-        state_num = self.ibundle
 
+        state_num = self.ibundle
         bundle = self.bunlist[state_num]
         segment = bundle.segments[iseg]
-        #state = self.bundle.cases[case_num].states[state_num]
         
+        self.point_sbox.setMaximum(len(segment.statepoints) - 1)
+        point_num = int(self.point_sbox.value())
+        
+        #voi = segment.statepoints[point_num].voi
+        #ivoi = segment.data.voilist.index(voi)
+        #if ivoi != self.voi_cbox.currentIndex():
+        #    self.voi_cbox.setCurrentIndex(ivoi)
+        #vhi = segment.statepoints[point_num].vhi
+        #ivhi = segment.data.voilist.index(vhi)
+        #if ivhi != self.vhi_cbox.currentIndex():
+        #    self.vhi_cbox.setCurrentIndex(ivhi)
+
         ENR = segment.data.ENR
         
         EXP = segment.statepoints[point_num].EXP
@@ -755,10 +869,9 @@ class MainWin(QtGui.QMainWindow):
             BTF.fill(np.nan)
 
         npst = segment.data.npst
-        #npst = self.bundle.cases[case_num].states[0].npst
         LFU = segment.data.LFU
         BA = segment.data.BA
-
+        
         # Sorting table column 0 in ascending order
         self.table.sortItems(0, QtCore.Qt.AscendingOrder)
         self.setpincoords()
@@ -813,22 +926,23 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         elif param_str == "BTF":
             v = np.array([pin.BTF for pin in self.pinobjects[iseg]])
             uni_btf = np.unique(v)
-            cmap = self.get_colormap(uni_btf.size, "byr")
+            cmap = self.get_colormap(uni_btf.size, "bmr")
         elif param_str == "EXP":
             v = np.array([pin.EXP for pin in self.pinobjects[iseg]])
             uni_exp = np.unique(v)
-            cmap = self.get_colormap(uni_exp.size)
+            cmap = self.get_colormap(uni_exp.size, "bmr")
             
         for i in xrange(npins):
             
-            if self.pinobjects[iseg][i].BA < 0.00001:
-                j = next(j for j, epin in enumerate(self.enrpinlist[iseg])
-                         if epin.ENR == self.pinobjects[iseg][i].ENR)
-            else:
-                j = next(j for j, epin in enumerate(self.enrpinlist[iseg])
-                         if epin.BA == self.pinobjects[iseg][i].BA
-                         and epin.ENR == self.pinobjects[iseg][i].ENR)
-            self.pinobjects[iseg][i].LFU = j + 1
+            #if self.pinobjects[iseg][i].BA < 0.00001:
+            #    j = next(j for j, epin in enumerate(self.enrpinlist[iseg])
+            #             if epin.ENR == self.pinobjects[iseg][i].ENR)
+            #else:
+            #    j = next(j for j, epin in enumerate(self.enrpinlist[iseg])
+            #             if epin.BA == self.pinobjects[iseg][i].BA
+            #             and epin.ENR == self.pinobjects[iseg][i].ENR)
+            #self.pinobjects[iseg][i].LFU = j + 1
+            j = self.pinobjects[iseg][i].LFU - 1
             fc = self.enrpinlist[iseg][j].circle.get_facecolor()
             self.pinobjects[iseg][i].circle.set_facecolor(fc)
 
@@ -872,6 +986,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             self.pinobjects[iseg][i].set_text(text)
 
         self.canvas.draw()
+        self.plot_update()
+        self.report_update()
 
     def setpincoords(self):
         """Update table with pin coordinates"""
@@ -1087,6 +1203,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         formstr = '{0:.4f} ({1:+.4f})'.format(bundle_enr, diff_bundle_enr)
         self.bundle_enr_text.setText(formstr)
         #self.bundle_denr_text.setText("%.5f" % diff_bundle_enr)
+        self.report_update()
 
     def enr_modify(self, mod, case_num=None, ipin=None):
         halfsym = True
@@ -1108,25 +1225,30 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             # print "Increase enrichment for pin " + str(i)
             pinEnr = self.pinobjects[case_num][i].ENR
             pinBA = self.pinobjects[case_num][i].BA
+            pinLFU = self.pinobjects[case_num][i].LFU
             
-            for j, x in enumerate(self.enrpinlist[case_num]):
-                if np.isnan(x.BA):
-                    x.BA = 0.0
-                if x.ENR == pinEnr and x.BA == pinBA:
-                    break
+            #for j, x in enumerate(self.enrpinlist[case_num]):
+            #    if np.isnan(x.BA):
+            #        x.BA = 0.0
+            #    if x.ENR == pinEnr and x.BA == pinBA:
+            #        break
             if mod == "add":
-                if j < len(self.enrpinlist[case_num]) - 1:
-                    self.__pinenr_update(i, j + 1, case_num)
+                if pinLFU < len(self.enrpinlist[case_num]):
+                    self.__pinenr_update(i, pinLFU + 1, case_num) 
+                #if j < len(self.enrpinlist[case_num]) - 1:
+                #    self.__pinenr_update(i, j + 1, case_num)
             elif mod == "sub":
-                if j > 0:
-                    self.__pinenr_update(i, j - 1, case_num)
+                if pinLFU > 1:
+                    self.__pinenr_update(i, pinLFU - 1, case_num)
+                #if j > 0:
+                #    self.__pinenr_update(i, j - 1, case_num)
 
-    def __pinenr_update(self, i, j, case_num=None):
+    def __pinenr_update(self, i, pinLFU, case_num=None):
         # i = self.pinselection_index
         if case_num is None:
             case_num = int(self.case_cbox.currentIndex())
-        
-        self.pinobjects[case_num][i].LFU = j + 1
+        j = pinLFU - 1
+        self.pinobjects[case_num][i].LFU = pinLFU
         self.pinobjects[case_num][i].ENR = self.enrpinlist[case_num][j].ENR
         
         if np.isnan(self.enrpinlist[case_num][j].BA):
@@ -1197,52 +1319,196 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                     k += 1
         return BA
 
-    # def quick_calc(self,case_num):
-    def quick_calc(self, state_num=-1):
-        """Performing quick calculation"""
-
+    def quick_calc(self):
+        """Performing perturbation calculation"""
+        
         self.setCursor(QtCore.Qt.WaitCursor)
         
-        chanbow = self.chanbow_sbox.value() / 10  # mm -> cm
-
-        bundle = Bundle(parent=self.bunlist[state_num])
+        # remove irrelevant bundle calcs
+        while len(self.bunlist) > self.ibundle + 1:
+            del self.bunlist[-1]
+        
+        while len(self.bunlist) > 2:  # limit num of bundles stored in memory
+            del self.bunlist[1]
+            self.ibundle = len(self.bunlist) - 1
+        
+        # Set pert. calc parameters
+        if hasattr(self.params, "pert_model"):
+            pert_model = self.params.pert_model
+        else:
+            pert_model = "C3"
+        if hasattr(self.params, "pert_depmax"):
+            pert_depmax = self.params.pert_depmax
+        else:
+            pert_depmax = None
+        if hasattr(self.params, "pert_depthres"):
+            pert_depthres = self.params.pert_depthres
+        else:
+            pert_depthres = None
+        if hasattr(self.params, "pert_voi"):
+            pert_voi = self.params.pert_voi
+        else:
+            pert_voi = None
+        
+        if not hasattr(self, "biascalc"):  # make bias calc?
+            print "Bias calibration calculation..."
+            self.biascalc = Bundle(parent=self.bunlist[0])
+            #if self.biascalc.data.voi is not None:
+            #    for s in self.biascalc.segments:
+            #        s.set_data(voi=self.biascalc.data.voi)
+            #dep_max = self.biascalc.data.dep_max
+            #dep_thres = self.biascalc.data.dep_thres
+            #model = self.biascalc.data.model
+            self.biascalc.new_calc(model=pert_model, dep_max=pert_depmax,
+                                   dep_thres=pert_depthres, voi=pert_voi)
+            #self.biascalc.new_btf()
+        
+        # New perturbation calc
+        bundle = Bundle(parent=self.bunlist[0])  # parent is set to orig bundle
         nsegments = len(bundle.segments)
-        #nsegments = len(self.bunlist[state_num].segments)
-        #self.bundle.append_state()
 
+        #voi = bundle.data.voi
+        voi = None
+        chanbow = self.chanbow_sbox.value() / 10  # mm -> cm
         for iseg in xrange(nsegments):
             LFU = self.__lfumap(iseg)
             FUE = self.__fuemap(iseg)
             BA = self.__bamap(iseg)
-            voi = None
             bundle.segments[iseg].set_data(LFU, FUE, BA, voi, chanbow)
-            #self.bunlist[-1].segments[iseg].set_data(LFU, FUE, BA,
-            #                                               voi, chanbow)
-            #self.bundle.cases[case_num].add_state(LFU, FUE, BA, voi, chanbow)
+        #dep_max = bundle.data.dep_max
+        #dep_thres = bundle.data.dep_thres
+        #model = bundle.data.model
+        bundle.new_calc(model=pert_model, dep_max=pert_depmax, 
+                        dep_thres=pert_depthres, voi=pert_voi)
 
-        bundle.new_calc(model='c3', depthres=20)
+        if pert_voi is None:
+            bundle = self.bias_subtract(bundle)
+        else:
+            bundle = self.bias_subtract_svoi(bundle)
+
+        ## remove bias from perturbation calc
+        #for iseg in xrange(len(bundle.segments)):
+        #    pts = bundle.segments[iseg].statepoints
+        #    burnlist = [p.burnup for p in pts]
+        #    
+        #    pts0 = [p for p in self.bunlist[0].segments[iseg].statepoints 
+        #            if p.burnup in burnlist]
+        #    pts1 = [p for p in self.biascalc.segments[iseg].statepoints 
+        #            if p.burnup in burnlist]
+        #    npst = bundle.segments[iseg].data.npst
+        #    Nburnpts = len(pts)
+        #    POW = np.zeros((npst, npst, Nburnpts))
+        #    kinf = np.zeros(Nburnpts)
+        #    for i in xrange(len(pts)):  # bias subtraction
+        #        dPOW = pts[i].POW - pts1[i].POW
+        #        POW[:, :, i] = pts0[i].POW + dPOW
+        #        dkinf = pts[i].kinf - pts1[i].kinf
+        #        kinf[i] = pts0[i].kinf + dkinf
+        #  
+        #    fint = bundle.segments[iseg].fintcalc(POW)
+        #    burnup = np.array(burnlist)
+        #    EXP = bundle.segments[iseg].expcalc(POW, burnup)
+        #    for i in xrange(Nburnpts):
+        #        bundle.segments[iseg].statepoints[i].POW = POW[:, :, i]
+        #        bundle.segments[iseg].statepoints[i].EXP = EXP[:, :, i]
+        #        bundle.segments[iseg].statepoints[i].fint = fint[i]
+        #        bundle.segments[iseg].statepoints[i].kinf = kinf[i]
+        
         bundle.new_btf()
         self.bunlist.append(bundle)
-        #self.bundle.new_calc(model='c3', depthres=20)
-        #self.bundle.new_btf()
-        #if state_num:
-        self.ibundle = state_num
-        #else:
-        #    self.ibundle = len(self.bundle.cases[0].states) - 1
-        #print self.ibundle
+        self.ibundle = len(self.bunlist) - 1
         self.fig_update()
         self.setCursor(QtCore.Qt.ArrowCursor)
-        
-        #
-        # self.dataobj.cases[case_num].qcalc[0].LFU = LFU
-        # self.dataobj.cases[case_num].quickcalc()
-        
-        # case_num = int(self.case_cbox.currentIndex())
-        # self.dataobj.cases[case_num].pertcalc()
 
+    def bias_subtract(self, bundle):
+        """remove bias from perturbation calc"""
+
+        for iseg in xrange(len(bundle.segments)):
+            pts = bundle.segments[iseg].statepoints
+            burnlist = [p.burnup for p in pts]
+            
+            pts0 = [p for p in self.bunlist[0].segments[iseg].statepoints 
+                    if p.burnup in burnlist]
+            pts1 = [p for p in self.biascalc.segments[iseg].statepoints 
+                    if p.burnup in burnlist]
+            npst = bundle.segments[iseg].data.npst
+            Nburnpts = len(pts)
+            POW = np.zeros((npst, npst, Nburnpts))
+            kinf = np.zeros(Nburnpts)
+            for i in xrange(len(pts)):  # bias subtraction
+                dPOW = pts[i].POW - pts1[i].POW
+                POW[:, :, i] = pts0[i].POW + dPOW
+                dkinf = pts[i].kinf - pts1[i].kinf
+                kinf[i] = pts0[i].kinf + dkinf
+          
+            fint = bundle.segments[iseg].fintcalc(POW)
+            burnup = np.array(burnlist)
+            EXP = bundle.segments[iseg].expcalc(POW, burnup)
+            for i in xrange(Nburnpts):
+                bundle.segments[iseg].statepoints[i].POW = POW[:, :, i]
+                bundle.segments[iseg].statepoints[i].EXP = EXP[:, :, i]
+                bundle.segments[iseg].statepoints[i].fint = fint[i]
+                bundle.segments[iseg].statepoints[i].kinf = kinf[i]
+
+        return bundle
+
+    def bias_subtract_svoi(self, bundle):
+        """remove bias from single voi perturbation calc"""
+        
+        pbundle = Bundle(parent=bundle)
+
+        for iseg in xrange(len(bundle.segments)):
+
+            voi = bundle.segments[iseg].data.voilist[0]
+            npst = bundle.segments[iseg].data.npst
+
+            pts = bundle.segments[iseg].statepoints
+            burnlist = [p.burnup for p in pts]
+
+            # Only use state points (stp) where voi = vhi
+            idx = next((i for i, p in 
+                       enumerate(self.bunlist[0].segments[iseg].statepoints)
+                       if p.voi != p.vhi), None)
+            
+            pts0 = [p for p in self.bunlist[0].segments[iseg].statepoints[:idx]
+                    if p.burnup in burnlist]
+            
+            pts1 = [p for p in self.biascalc.segments[iseg].statepoints
+                    if p.burnup in burnlist]
+            
+            Nburnpts = len(pts0)
+            POW = np.zeros((npst, npst, Nburnpts))
+            kinf = np.zeros(Nburnpts)
+            
+            for i in xrange(len(pts0)):
+                j = bundle.segments[iseg].findpoint(burnup=pts0[i].burnup,
+                                                    voi=voi, vhi=voi)
+                dPOW = pts[j].POW - pts1[j].POW
+                POW[:, :, i] = pts0[i].POW + dPOW
+                dkinf = pts[j].kinf - pts1[j].kinf
+                kinf[i] = pts0[i].kinf + dkinf
+            
+            fint = pbundle.segments[iseg].fintcalc(POW)
+            burnup = np.array([p.burnup for p in pts0])
+            EXP = pbundle.segments[iseg].expcalc(POW, burnup)
+
+            statepoints = copy.deepcopy(pts0)
+            for i, p in enumerate(statepoints):
+                p.POW = POW[:, :, i]
+                p.EXP = EXP[:, :, i]
+                p.fint = fint[i]
+                p.kinf = kinf[i]
+            
+            voilist = self.bunlist[0].segments[iseg].data.voilist
+            pbundle.segments[iseg].data.voilist = voilist
+            pbundle.segments[iseg].statepoints = statepoints
+                
+        return pbundle
+        
+        
     def fig_update(self):
         """ Redraw figure and update values"""
-
+        
         # self.on_draw()
         self.axes.clear()
         self.draw_fuelmap()
@@ -1327,8 +1593,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
     def draw_fuelmap(self):
         """Draw fuel map"""
 
-        from map_s96 import s96o2
-        from map_a10 import a10xm
+        #from map_s96 import s96o2
+        #from map_a10 import a10xm
 
         self.fig.set_facecolor((1, 1, 0.8784))
         # Draw outer rectangle
@@ -1494,14 +1760,9 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
         case_label = QtGui.QLabel('Segment:')
         self.case_cbox = QtGui.QComboBox()
-        # caselist = ['1', '2', '3']
-        # for i in caselist:
-        #     self.case_cbox.addItem(i)
         case_hbox = QtGui.QHBoxLayout()
         case_hbox.addWidget(case_label)
         case_hbox.addWidget(self.case_cbox)
-        # self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'),
-        # self.set_pinvalues)
         # self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'),
         # self.fig_update)
 
@@ -1552,20 +1813,27 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.connect(self.bgcolors_cb, QtCore.SIGNAL('clicked()'),
                      self.toggle_pin_bgcolors)
         
+        voi_hbox = QtGui.QHBoxLayout()
         type_label = QtGui.QLabel('Type:')
         self.type_cbox = QtGui.QComboBox()
         typelist = ['Hot', 'HCr', 'CCl', 'CCr']
         for i in typelist:
             self.type_cbox.addItem(i)
+        voi_hbox.addWidget(type_label)
+        voi_hbox.addWidget(self.type_cbox)
+
         # self.connect(self.type_cbox, SIGNAL('currentIndexChanged(int)'),
         # self.on_index)
 
+        voi_hbox = QtGui.QHBoxLayout()
         voi_label = QtGui.QLabel('VOI:')
         self.voi_cbox = QtGui.QComboBox()
-        
-        self.voilist = ['0', '40', '80']
-        for i in self.voilist:
-            self.voi_cbox.addItem(i)
+        voi_hbox.addWidget(voi_label)
+        voi_hbox.addWidget(self.voi_cbox)
+        #self.connect(self.voi_cbox, QtCore.SIGNAL('currentIndexChanged(int)'),
+        #             self.fig_update)
+        #self.connect(self.voi_cbox, QtCore.SIGNAL('currentIndexChanged(int)'),
+        #             self.set_pinvalues)
 
         # Determine voi index
         # voi = self.cas.cases[self.case_id_current].statepts[0].voi
@@ -1575,11 +1843,34 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         # self.connect(self.voi_cbox, SIGNAL('currentIndexChanged(int)'),
         # self.on_plot)
 
+        vhi_hbox = QtGui.QHBoxLayout()
         vhi_label = QtGui.QLabel('VHI:')
         self.vhi_cbox = QtGui.QComboBox()
-        self.vhilist = ['0', '40', '80']
-        for i in self.vhilist:
-            self.vhi_cbox.addItem(i)
+        #self.vhilist = ['0', '40', '80']
+        #for v in self.vhilist:
+        #    self.vhi_cbox.addItem(str(v))
+        vhi_hbox.addWidget(vhi_label)
+        vhi_hbox.addWidget(self.vhi_cbox)
+
+        type_hbox = QtGui.QHBoxLayout()
+        type_label = QtGui.QLabel('Type:')
+        self.type_cbox = QtGui.QComboBox()
+        typelist = ['Hot', 'HCr', 'CCl', 'CCr']
+        for i in typelist:
+            self.type_cbox.addItem(i)
+        type_hbox.addWidget(type_label)
+        type_hbox.addWidget(self.type_cbox)
+
+        exp_hbox = QtGui.QHBoxLayout()
+        exp_label = QtGui.QLabel('EXP:')
+        self.exp_cbox = QtGui.QComboBox()
+        #self.explist = [0, 0.001, 0.1, 0.5, 1.5, 2, 2.5]
+        #for e in self.explist:
+        #    self.exp_cbox.addItem(str(e))
+        exp_hbox.addWidget(exp_label)
+        exp_hbox.addWidget(self.exp_cbox)
+
+
         # Determine vhi index
         # vhi = self.cas.cases[self.case_id_current].statepts[0].vhi
         # vhi_index = [i for i,v in enumerate(self.vhilist) if int(v) == vhi]
@@ -1667,7 +1958,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.table.cellActivated.connect(self.pinSelect)
         self.table.cellClicked.connect(self.pinSelect)
         # self.table.selectionModel().selectionChanged.connect(self.pinSelect)
-
+        
         tvbox = QtGui.QVBoxLayout()
         tvbox.addWidget(self.table)
         tableGbox = QtGui.QGroupBox()
@@ -1688,10 +1979,14 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
         # Layout with box sizers
         vbox = QtGui.QVBoxLayout()
-        #vbox.addLayout(sim_hbox)
+        vbox.addLayout(sim_hbox)
         vbox.addLayout(case_hbox)
         vbox.addLayout(param_hbox)
         vbox.addLayout(point_hbox)
+        vbox.addLayout(voi_hbox)
+        vbox.addLayout(vhi_hbox)
+        vbox.addLayout(exp_hbox)
+        vbox.addLayout(type_hbox)
         vbox.addLayout(enr_hbox)
         vbox.addLayout(enr_case_hbox)
         vbox.addLayout(calc_hbox)
@@ -1703,7 +1998,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         # vbox.addItem(spacerItem)
         vbox.addStretch(1)
         vbox.addLayout(info_flo)
-        vbox.addLayout(sim_hbox)
+        #vbox.addLayout(sim_hbox)
         
         groupbox = QtGui.QGroupBox()
         groupbox.setStyleSheet("QGroupBox { background-color: rgb(200, 200,\
@@ -1761,10 +2056,11 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                                          shortcut="Ctrl+Q",
                                          tip="Close the application")
 
-        new_project_action = self.create_action("&New project...",
-                                                slot=self.newProject,
+        new_project_action = self.create_action("&New...",
+                                                slot=self.open_bundle_dlg,
+                                                #slot=self.newProject,
                                                 shortcut="Ctrl+N",
-                                                tip="Create new project")
+                                                tip="Create new bundle")
         
         open_file_action = self.create_action("&Open...",
                                               slot=self.openFile,
@@ -1782,26 +2078,63 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                                           quit_action))
 
         self.edit_menu = self.menuBar().addMenu("&Edit")
+
+        back = self.create_action("Back", slot=self.back_state,
+                                  tip="Back to previous")
+
+        forward = self.create_action("Forward", slot=self.forward_state,
+                                         tip="Forward to next")
+
+        reset = self.create_action("Undo changes...",
+                                         tip="Undo all changes...")
+
+        enr_plus = self.create_action("Increase enr", slot=self.enr_add,
+                                      tip="Increase enrichment",
+                                      shortcut="F6")
+
+        enr_minus = self.create_action("Decrease enr", slot=self.enr_sub,
+                                       tip="Decrease enrichment",
+                                       shortcut="F5")
+        
         preferences = self.create_action("Preferences...",
                                          tip="Preferences...")
-        project = self.create_action("Project...",
-                                     tip="Edit project...")
-        self.add_actions(self.edit_menu, (project, None, preferences))
-
+        
+        self.add_actions(self.edit_menu, (back, forward, None, enr_plus,
+                                          enr_minus, None, reset, preferences))
+        
         self.tools_menu = self.menuBar().addMenu("&Tools")
         plot_action = self.create_action("Plot...", tip="Plot...",
-                                         slot=self.plotWin)
-        btf_action = self.create_action("BTF...", tip="BTF...")
-        casmo_action = self.create_action("CASMO...", tip="CASMO...")
-        data_action = self.create_action("Fuel data...", tip="Fuel data...")
+                                         slot=self.open_plotwin)
+        pert_action = self.create_action("Perturbation...",
+                                           tip="Perturbation model...",
+                                           slot=self.open_pert_dlg)
+        casmo_action = self.create_action("CASMO...", tip="CASMO...",
+                                          slot=self.open_cas_dlg)
+        data_action = self.create_action("Report...", tip="Fuel report...",
+                                         slot=self.open_report_dlg)
         table_action = self.create_action("Point table...",
                                           tip="Point table...")
         optim_action = self.create_action("Optimization...",
                                           tip="BTF optimization...")
         egv_action = self.create_action("EGV...", tip="EGV...")
         self.add_actions(self.tools_menu,
-                         (plot_action, btf_action, casmo_action, data_action,
+                         (plot_action, pert_action, casmo_action, data_action,
                           table_action, optim_action, egv_action))
+
+        self.run_menu = self.menuBar().addMenu("&Run")
+        pert_action = self.create_action("&Perturbation", shortcut="F9",
+                                          slot=self.quick_calc,
+                                          tip="Run perturbation")
+
+        smallcalc_action = self.create_action("&Small calc",
+                                          slot=self.quick_calc,
+                                          tip="Run small calculation")
+        
+        fullcalc_action = self.create_action("&Complete calc...",
+                                             slot=self.open_fullcalc_dlg,
+                                             tip="Run complete calculation")
+        self.add_actions(self.run_menu, (pert_action, smallcalc_action,
+                                         fullcalc_action))
         
         self.help_menu = self.menuBar().addMenu("&Help")
         about_action = self.create_action("&About", shortcut='F1',
@@ -1818,10 +2151,28 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         exitAction.setStatusTip('Exit application')
         exitAction.triggered.connect(self.close)
 
+        new_icon = "icons/new-icon_32x32.png"
+        newAction = QtGui.QAction(QtGui.QIcon(new_icon),
+                                   'Create new bundle', self)
+        newAction.setStatusTip('Create a new bundle')
+        newAction.triggered.connect(self.open_bundle_dlg)
+        #newAction.triggered.connect(self.newProject)
+        
         file_icon = "icons/open-file-icon_32x32.png"
         fileAction = QtGui.QAction(QtGui.QIcon(file_icon), 'Open file', self)
         fileAction.setStatusTip('Open file')
         fileAction.triggered.connect(self.openFile)
+
+        save_icon = "icons/save-icon_32x32.png"
+        saveAction = QtGui.QAction(QtGui.QIcon(save_icon), 'Save to file', self)
+        saveAction.setStatusTip('Save to file')
+        saveAction.triggered.connect(self.saveData)
+        
+        calc_icon = "icons/flame-red-icon_32x32.png"
+        calcAction = QtGui.QAction(QtGui.QIcon(calc_icon),
+                                   'Run perturbation', self)
+        calcAction.setStatusTip('Run simulation')
+        calcAction.triggered.connect(self.quick_calc)
 
         pre_icon = "icons/preferences-icon_32x32.png"
         settingsAction = QtGui.QAction(QtGui.QIcon(pre_icon), 'Settings', self)
@@ -1830,22 +2181,27 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         diagram_icon = "icons/diagram-icon_32x32.png"
         plotAction = QtGui.QAction(QtGui.QIcon(diagram_icon), 'Plot', self)
         plotAction.setStatusTip('Open plot window')
-        plotAction.triggered.connect(self.plotWin)
+        plotAction.triggered.connect(self.open_plotwin)
 
-        arrow_left_icon = "icons/arrow-left-icon_32x32.png"
-        backAction = QtGui.QAction(QtGui.QIcon(arrow_left_icon),
-                                   'Back to previous state', self)
-        backAction.setStatusTip('Back to previous state')
+        #arrow_left_icon = "icons/arrow-left-icon_32x32.png"
+        arrow_undo_icon =  "icons/arrow-undo-icon_32x32.png"
+        backAction = QtGui.QAction(QtGui.QIcon(arrow_undo_icon),
+                                   'Back to previous design', self)
+        backAction.setStatusTip('Back to previous design')
         backAction.triggered.connect(self.back_state)
 
-        arrow_forward_icon = "icons/arrow-right-icon_32x32.png"
-        forwardAction = QtGui.QAction(QtGui.QIcon(arrow_forward_icon),
-                                      'Forward to next state', self)
-        forwardAction.setStatusTip('Forward to next state')
+        #arrow_forward_icon = "icons/arrow-right-icon_32x32.png"
+        arrow_redo_icon =  "icons/arrow-redo-icon_32x32.png"
+        forwardAction = QtGui.QAction(QtGui.QIcon(arrow_redo_icon),
+                                      'Forward to next design', self)
+        forwardAction.setStatusTip('Forward to next design')
         forwardAction.triggered.connect(self.forward_state)
         
         toolbar = self.addToolBar('Toolbar')
+        toolbar.addAction(newAction)
         toolbar.addAction(fileAction)
+        toolbar.addAction(saveAction)
+        toolbar.addAction(calcAction)
         toolbar.addAction(settingsAction)
         toolbar.addAction(plotAction)
         toolbar.addAction(backAction)
@@ -1939,6 +2295,11 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.settings.setValue("size", QtCore.QVariant(self.size()))
         self.settings.setValue("pos", QtCore.QVariant(self.pos()))
         self.settings.endGroup()
+
+        # Close windows before exit
+        if hasattr(self, "report_dlg"):
+            self.report_dlg.close()
+
         print "Good bye!"
 
 

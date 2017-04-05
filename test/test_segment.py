@@ -53,7 +53,7 @@ class UnitTest(unittest.TestCase):
     #@unittest.skip("test_readcax_topol_atxm_all")
     def test_readcax_topol_atxm_all(self):
         testfile = "test/topol/ATXM/10g40dom/e28ATXM-385-10g40dom-cas.cax"
-        s = Segment(testfile, read_all=True)
+        s = Segment(testfile, content='Unfiltered')
         Nstatepoints = len(s.statepoints)
         self.assertEqual(19482, Nstatepoints,
                         "Number of state points is incorrect")
@@ -103,11 +103,11 @@ class UnitTest(unittest.TestCase):
     #    self.assertTrue((s.states[1].LFU == LFU).all())
     
     #@unittest.skip("test_writec3cai_at11")
-    def test_writec3cai_at11(self):
+    def test_writecai_c3_at11(self):
         testfile = "test/tosim/AT11/14g35top/exxAT11-384-14g35top-cas.cax"
         #testfile = "test/tosim/OPT2/12g30mid/e32OPT2-390-12g30mid-cas.cax"
         s = Segment(testfile)
-        s.writec3cai(self.file_base_name)
+        s.writecai(self.file_base_name)
         caifile = self.file_base_name + ".inp"
         
         # check file content
@@ -139,13 +139,14 @@ class UnitTest(unittest.TestCase):
     def test_runc4(self):
         testfile = "test/topol/ATXM/10g40dom/e28ATXM-385-10g40dom-cas.cax"
         s = Segment(testfile)
-        s.writec3cai(self.file_base_name, voi=60, depthres=20, box_offset=-0.1)
+        s.writecai(self.file_base_name, voi=60, dep_thres=20, box_offset=-0.1,
+                   model="c4e")
         s.runc4(self.file_base_name, grid=True)
         caxfile = self.file_base_name + ".cax"
         with open(caxfile) as f:
             flines = f.read().splitlines()
-        self.assertTrue(len(flines) > 99,
-                        "file content is less than 100 lines")
+        self.assertTrue(len(flines) > 200,
+                        "file content is less than 200 lines")
     
     #@unittest.skip("skip this test")
     def test_readc3cax(self):
@@ -161,7 +162,7 @@ class UnitTest(unittest.TestCase):
         s = Segment(testfile)
         s.quickcalc(grid=False)
         Nstatepoints = len(s.statepoints)
-        self.assertEqual(127, Nstatepoints, 
+        self.assertEqual(147, Nstatepoints, 
                         "Number of state points is incorrect")
 
 
