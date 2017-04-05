@@ -1466,9 +1466,9 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             burnlist = [p.burnup for p in pts]
 
             # Only use state points (stp) where voi = vhi
-            idx = next(i for i, p in 
+            idx = next((i for i, p in 
                        enumerate(self.bunlist[0].segments[iseg].statepoints)
-                       if p.voi != p.vhi)
+                       if p.voi != p.vhi), None)
             
             pts0 = [p for p in self.bunlist[0].segments[iseg].statepoints[:idx]
                     if p.burnup in burnlist]
