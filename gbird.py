@@ -42,6 +42,7 @@ from dlg_cascalc import CasDialog, CasRunDialog
 from dlg_pertcalc import PertDialog
 from dlg_bundle import BundleDialog
 from dlg_report import ReportDialog
+from dlg_egv import EgvDialog
 from pin import FuePin, EnrDialog
 from progbar import ProgressBar
 from map_s96 import s96o2
@@ -817,6 +818,11 @@ class MainWin(QtGui.QMainWindow):
                 #self.report_dlg.setModal(False)
                 self.report_dlg.show()  # Make dialog non-modal
                 #self.report_dlg.exec_()
+
+    def open_egv_dlg(self):
+        """Open egv settings dialog"""
+        self.egv_dlg = EgvDialog(self)
+        self.egv_dlg.exec_()
 
     def set_point_number(self):
         ipoint = int(self.point_sbox.value())
@@ -2119,7 +2125,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                                           tip="Point table...")
         optim_action = self.create_action("Optimization...",
                                           tip="BTF optimization...")
-        egv_action = self.create_action("EGV...", tip="EGV...")
+        egv_action = self.create_action("EGV...", tip="EGV...",
+                                        slot=self.open_egv_dlg)
         self.add_actions(self.tools_menu,
                          (plot_action, pert_action, casmo_action, data_action,
                           table_action, optim_action, egv_action))
