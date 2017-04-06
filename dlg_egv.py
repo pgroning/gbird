@@ -98,28 +98,25 @@ class EgvDialog(QtGui.QDialog):
         if hasattr(self.parent, "bunlist"):
             bundle = self.parent.bunlist[0]
             caxfiles = bundle.data.caxfiles[::-1]
+            zone_list = ["None", "Lower End", "Lower Active", "Upper Active", "Upper End"]
+            if hasattr(self.parent.params, "egv_zones"):
+                zones = self.parent.params.egv_zones[::-1]
+            else:
+                zones = None
+                
             nrows = len(caxfiles)
             for i in range(nrows):
                 self.table.insertRow(i)
                 vheader = QtGui.QTableWidgetItem(str(nrows - i))
                 self.table.setVerticalHeaderItem(i, vheader)
                 zone_cbox = QtGui.QComboBox()
-                zone_cbox.addItem("None")
-                zone_cbox.addItem("Lower end")
-                zone_cbox.addItem("Lower active")
-                zone_cbox.addItem("Upper active")
-                zone_cbox.addItem("Upper end")
+                zone_cbox.addItems(QtCore.QStringList(zone_list))
 
-                if hasattr(self.parent.params, "egv_zones"):
-                    zone_list = [str(zone_cbox.itemText(j))
-                                 for j in range(zone_cbox.count())]
-                    if self.parent.params.egv_zones[i]:
-                        zone = self.parent.params.egv_zones[i]
+                if zones is not None:
+                    if zones[i]:
+                        j = zone_list.index(zones[i])
                     else:
-                        zone = "None"
-                    j = zone_list.index(zone)
-                    print j
-                    #j = 1
+                        j = zone_list.index("None")
                     zone_cbox.setCurrentIndex(j)
 
                 self.table.setCellWidget(i, 0, zone_cbox)
