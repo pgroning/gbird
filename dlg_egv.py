@@ -98,11 +98,18 @@ class EgvDialog(QtGui.QDialog):
         if hasattr(self.parent, "bunlist"):
             bundle = self.parent.bunlist[0]
             caxfiles = bundle.data.caxfiles[::-1]
-            zone_list = ["None", "Lower End", "Lower Active", "Upper Active", "Upper End"]
+            zone_list = ["None", "Upper End", "Upper Active", "Lower Active",
+                         "Lower End"]
+            
             if hasattr(self.parent.params, "egv_zones"):
                 zones = self.parent.params.egv_zones[::-1]
             else:
                 zones = None
+
+            if hasattr(self.parent.params, "egv_files"):
+                files = self.parent.params.egv_files[::-1]
+            else:
+                files = None
                 
             nrows = len(caxfiles)
             for i in range(nrows):
@@ -119,7 +126,11 @@ class EgvDialog(QtGui.QDialog):
                         j = zone_list.index("None")
                     zone_cbox.setCurrentIndex(j)
 
+                if files is not None:
+                    fname = files[i]
+                else:
+                    fname = caxfiles[i].split(os.sep)[-1]
+
                 self.table.setCellWidget(i, 0, zone_cbox)
-                fname = caxfiles[i].split(os.sep)[-1]
                 item = QtGui.QTableWidgetItem(fname)
                 self.table.setItem(i, 1, item)
