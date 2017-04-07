@@ -12,7 +12,7 @@ class EgvDialog(QtGui.QDialog):
         self.setWindowTitle("EGV settings")
         xpos = self.parent.pos().x() + self.parent.size().width() / 2
         ypos = self.parent.pos().y() + self.parent.size().height() / 2
-        self.setGeometry(QtCore.QRect(0.8*xpos, 0.9*ypos, 500, 210))
+        self.setGeometry(QtCore.QRect(0.6*xpos, 0.9*ypos, 550, 210))
 
         # Table
         self.table = QtGui.QTableWidget(0, 2)
@@ -29,7 +29,7 @@ class EgvDialog(QtGui.QDialog):
 
         # Group box
         self.version_cbox = QtGui.QComboBox()
-        self.version_list = ["2.3.0", "3.2.1"]
+        self.version_list = self.get_versions()
         self.version_cbox.addItems(QtCore.QStringList(self.version_list))
 
         self.reactor_cbox = QtGui.QComboBox()
@@ -144,3 +144,13 @@ class EgvDialog(QtGui.QDialog):
                 self.table.setCellWidget(i, 0, zone_cbox)
                 item = QtGui.QTableWidgetItem(fname)
                 self.table.setItem(i, 1, item)
+
+    def get_versions(self):
+        """Get list of available EGV versions"""
+
+        path = "/home/prog/prod/tools/egv"
+        if os.path.isdir(path):
+            ver_list = os.listdir(path)
+        else:
+            ver_list = []
+        return ver_list

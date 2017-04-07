@@ -147,7 +147,7 @@ class CasDialog(QtGui.QDialog):
         return groupbox
         
     def get_versions(self):
-        """List available C4E versions"""
+        """Get list of available C4E versions"""
 
         path = "/home/prog/prod/CMSCODES/C4E"
         if os.path.isdir(path):
@@ -169,7 +169,7 @@ class CasDialog(QtGui.QDialog):
         return neulib_list
 
     def get_gamlibs(self):
-        """List available gamlibs"""
+        """Get list of available gamlibs"""
 
         path = "/home/prog/prod/CMSCODES/CasLib/library"
         if os.path.isdir(path):
