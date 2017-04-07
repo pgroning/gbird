@@ -20,12 +20,12 @@ class EgvDialog(QtGui.QDialog):
         self.table.setHorizontalHeaderItem(0, QtGui.QTableWidgetItem("Zone"))
         self.table.setHorizontalHeaderItem(1, QtGui.QTableWidgetItem("File"))
 
+        horizontalheader = self.table.horizontalHeader()
+        horizontalheader.setResizeMode(1, QtGui.QHeaderView.Stretch)
+
         verticalheader = self.table.verticalHeader()
         verticalheader.setResizeMode(QtGui.QHeaderView.Fixed)
         verticalheader.setDefaultSectionSize(25)
-
-        horizontalheader = self.table.horizontalHeader()
-        horizontalheader.setResizeMode(1, QtGui.QHeaderView.Stretch)
 
         # Group box
         self.version_cbox = QtGui.QComboBox()

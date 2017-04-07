@@ -21,7 +21,7 @@ class BundleDialog(QtGui.QDialog):
         self.setWindowTitle("New bundle")
         xpos = self.parent.pos().x() + self.parent.size().width() / 2
         ypos = self.parent.pos().y() + self.parent.size().height() / 2
-        self.setGeometry(QtCore.QRect(0.8*xpos, 0.9*ypos, 800, 300))
+        self.setGeometry(QtCore.QRect(0.5*xpos, 0.8*ypos, 800, 300))
 
         self.table_view = QtGui.QTableView()
         #self.table_view.setShowGrid(False)
@@ -41,6 +41,9 @@ class BundleDialog(QtGui.QDialog):
         model.setHorizontalHeaderItem(1, QtGui.QStandardItem("BTF"))
         model.setHorizontalHeaderItem(2, QtGui.QStandardItem("Files"))
 
+        horizontalheader = self.table_view.horizontalHeader()
+        horizontalheader.setResizeMode(2, QtGui.QHeaderView.Stretch)
+
         verticalheader = self.table_view.verticalHeader()
         verticalheader.setResizeMode(QtGui.QHeaderView.Fixed)
         verticalheader.setDefaultSectionSize(25)
@@ -53,8 +56,8 @@ class BundleDialog(QtGui.QDialog):
         self.content_list = ["filt.", "unfilt."]
         self.content_cbox.addItems(QtCore.QStringList(self.content_list))
 
-        self.save_button = QtGui.QPushButton("Save...")
-        self.load_button = QtGui.QPushButton("Load...")
+        #self.save_button = QtGui.QPushButton("Save...")
+        #self.load_button = QtGui.QPushButton("Load...")
 
         flo = QtGui.QFormLayout()
         flo.addRow("Fuel:", self.fuetype_cbox)
@@ -63,9 +66,9 @@ class BundleDialog(QtGui.QDialog):
         vbox = QtGui.QVBoxLayout()
         vbox.addLayout(flo)
         #vbox.addWidget(self.fuetype_cbox)
-        vbox.addStretch()
-        vbox.addWidget(self.load_button)
-        vbox.addWidget(self.save_button)
+        #vbox.addStretch()
+        #vbox.addWidget(self.load_button)
+        #vbox.addWidget(self.save_button)
 
         groupbox = QtGui.QGroupBox()
         #groupbox.setTitle("Bundle")
@@ -78,12 +81,12 @@ class BundleDialog(QtGui.QDialog):
         grid.addWidget(self.table_view, 0, 1)
         
         hbox = QtGui.QHBoxLayout()
-        #self.save_button = QtGui.QPushButton("Save As...")
-        #self.load_button = QtGui.QPushButton("Load...")
+        self.save_button = QtGui.QPushButton("Save As...")
+        self.load_button = QtGui.QPushButton("Load...")
         self.import_button = QtGui.QPushButton("Import")
         self.cancel_button = QtGui.QPushButton("Cancel")
-        #hbox.addWidget(self.save_button)
-        #hbox.addWidget(self.load_button)
+        hbox.addWidget(self.save_button)
+        hbox.addWidget(self.load_button)
         hbox.addStretch()
         hbox.addWidget(self.import_button)
         hbox.addWidget(self.cancel_button)
