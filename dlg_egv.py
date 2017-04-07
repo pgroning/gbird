@@ -101,6 +101,16 @@ class EgvDialog(QtGui.QDialog):
             zone_list = ["None", "Upper End", "Upper Active", "Lower Active",
                          "Lower End"]
             
+            if hasattr(self.parent.params, "egv_version"):
+                version = self.parent.params.egv_version
+                j = self.version_list.index(version)
+                self.version_cbox.setCurrentIndex(j)
+
+            if hasattr(self.parent.params, "egv_reactor"):
+                reactor = self.parent.params.egv_reactor
+                j = self.reactor_list.index(reactor)
+                self.reactor_cbox.setCurrentIndex(j)
+
             if hasattr(self.parent.params, "egv_zones"):
                 zones = self.parent.params.egv_zones[::-1]
             else:
