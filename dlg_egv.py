@@ -1,6 +1,11 @@
+# -*- coding: utf-8 -*-
+
 from pyqt_trace import pyqt_trace as qtrace  # Break point that works with Qt
 import os
 from PyQt4 import QtGui, QtCore
+
+from egv import do_egv
+
 
 class EgvDialog(QtGui.QDialog):
     def __init__(self, parent):
@@ -12,7 +17,7 @@ class EgvDialog(QtGui.QDialog):
         self.setWindowTitle("EGV settings")
         xpos = self.parent.pos().x() + self.parent.size().width() / 2
         ypos = self.parent.pos().y() + self.parent.size().height() / 2
-        self.setGeometry(QtCore.QRect(0.6*xpos, 0.9*ypos, 550, 210))
+        self.setGeometry(QtCore.QRect(0.6*xpos, 0.9*ypos, 650, 210))
 
         # Table
         self.table = QtGui.QTableWidget(0, 2)
@@ -57,15 +62,15 @@ class EgvDialog(QtGui.QDialog):
         #self.table.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 
         hbox = QtGui.QHBoxLayout()
-        self.ok_button = QtGui.QPushButton("Ok")
+        self.run_button = QtGui.QPushButton("Run")
         self.cancel_button = QtGui.QPushButton("Cancel")
         hbox.addStretch()
-        hbox.addWidget(self.ok_button)
+        hbox.addWidget(self.run_button)
         hbox.addWidget(self.cancel_button)
         self.connect(self.cancel_button, QtCore.SIGNAL('clicked()'),
                      self.close)
-        self.connect(self.ok_button, QtCore.SIGNAL('clicked()'), 
-                     self.ok_action)
+        self.connect(self.run_button, QtCore.SIGNAL('clicked()'), 
+                     self.run_action)
 
         vbox = QtGui.QVBoxLayout()
         vbox.addLayout(grid)
@@ -73,7 +78,7 @@ class EgvDialog(QtGui.QDialog):
         vbox.addLayout(hbox)
         self.setLayout(vbox)
 
-    def ok_action(self):
+    def run_action(self):
         self.close()
         params  = self.parent.params
         params.egv_version = str(self.version_cbox.currentText())
@@ -91,6 +96,7 @@ class EgvDialog(QtGui.QDialog):
             params.egv_files.append(str(item.text()))
         params.egv_zones.reverse()
         params.egv_files.reverse()
+        self.run_egv()
 
     def insert_table_rows(self):
         """Fill table rows in reverse order"""
@@ -139,7 +145,8 @@ class EgvDialog(QtGui.QDialog):
                 if files is not None:
                     fname = files[i]
                 else:
-                    fname = caxfiles[i].split(os.sep)[-1]
+                    fname = caxfiles[i]
+                    #fname = caxfiles[i].split(os.sep)[-1]
 
                 self.table.setCellWidget(i, 0, zone_cbox)
                 item = QtGui.QTableWidgetItem(fname)
@@ -154,3 +161,46 @@ class EgvDialog(QtGui.QDialog):
         else:
             ver_list = []
         return ver_list
+
+    def run_egv(self):
+        """Running EGV..."""
+        
+        if hasattr(self.parent, "bunlist"):
+            reactor = self.parent.params.egv_reactor
+            bundle = self.parent.bunlist[0]
+            fuetype = bundle.data.fuetype
+            if fuetype == "A10XM":
+                fuel = "ATRIUM10XM"
+            elif fuetype == "A10B":
+                fuel = "ATRIUM10B"
+            elif fuetype == "OPT2":
+                fuel = "SVEA96OPT2"
+            elif fuetype == "OPT3":
+                fuel = "SVEA96OPT3"
+            elif fuetype == "AT11":
+                fuel = "ATRIUM11"
+            else:
+                print "Unknown fuel type"
+                return
+
+            zones = []
+            for zone in self.parent.params.egv_zones:
+                if zone == "Lower End":
+                    zones.append("NEDRE ÄNDZON")
+                elif zone == "Lower Active":
+                    zones.append("NEDRE AKTIVZON")
+                elif zone == "Upper Active":
+                    zones.append("ÖVRE AKTIVZON")
+                elif zone == "Upper End":
+                    zones.append("ÖVRE ÄNDZON")
+
+            files = self.parent.params.egv_files
+            caxfiles = []
+            for i in range(len(files)):
+                zone = zones[i]
+                fname = files[i]
+                fdict = {"ZON" : zone, "FIL" : fname}
+                caxfiles.append(fdict)
+
+            version = self.parent.params.egv_version
+            do_egv(reactor, fuel, caxfiles, egv_version=version, verbose=True)
