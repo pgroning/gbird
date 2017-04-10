@@ -92,10 +92,11 @@ def do_egv(reactor, fuel, caxfiles, runname=None, egvinpfile="egv-indata.txt", e
   # kontrollera körning
   flag = check_egv_run(listfil,verbose=verbose)
 
-  if flag:
-    if verbose: print "Run OK"
-  else:
-    print "ERROR: EGV-Run NOT OK"
+  if verbose:
+    if flag:
+      print "Run OK"
+    else:
+      print "ERROR: EGV-Run NOT OK"
 
   return flag
 

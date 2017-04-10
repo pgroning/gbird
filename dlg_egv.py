@@ -3,6 +3,7 @@
 from pyqt_trace import pyqt_trace as qtrace  # Break point that works with Qt
 import os
 from PyQt4 import QtGui, QtCore
+from multiprocessing import Pool
 
 from egv import do_egv
 
@@ -203,4 +204,17 @@ class EgvDialog(QtGui.QDialog):
                 caxfiles.append(fdict)
 
             version = self.parent.params.egv_version
-            do_egv(reactor, fuel, caxfiles, egv_version=version, verbose=True)
+            egv_status = do_egv(reactor, fuel, caxfiles, egv_version=version, 
+                                verbose=False)
+            
+            msgBox = QtGui.QMessageBox()
+            msgBox.setWindowTitle("EGV status")
+            msgBox.setStandardButtons(QtGui.QMessageBox.Ok)
+            if egv_status:
+                msgBox.setText("EGV-run passed!")
+                msgBox.setIcon(QtGui.QMessageBox.Information)
+            else:
+                msgBox.setText("EGV-run did not pass!")
+                msgBox.setDetailedText("Bla bla bla")
+                msgBox.setIcon(QtGui.QMessageBox.Critical)
+            status = msgBox.exec_()
