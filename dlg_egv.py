@@ -194,14 +194,17 @@ class EgvDialog(QtGui.QDialog):
                     zones.append("ÖVRE AKTIVZON")
                 elif zone == "Upper End":
                     zones.append("ÖVRE ÄNDZON")
+                else:
+                    zones.append(None)
 
             files = self.parent.params.egv_files
             caxfiles = []
-            for i in range(len(files)):
-                zone = zones[i]
-                fname = files[i]
-                fdict = {"ZON" : zone, "FIL" : fname}
-                caxfiles.append(fdict)
+            for i in range(len(zones)):
+                if zones[i]:
+                    zone = zones[i]
+                    fname = files[i]
+                    fdict = {"ZON" : zone, "FIL" : fname}
+                    caxfiles.append(fdict)
 
             version = self.parent.params.egv_version
             egv_status, infolines = do_egv(reactor, fuel, caxfiles,
