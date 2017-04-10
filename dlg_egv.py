@@ -214,7 +214,7 @@ class EgvDialog(QtGui.QDialog):
                 parts = line.split(":")[1:]
                 s = ":".join(parts).strip()
                 sublines.append(s)
-            sublines.insert(0, "The following conditions were not met:")
+            sublines.insert(0, "The following criteria are not met:")
             infotext = "\n".join(sublines)
             
             msgBox = QtGui.QMessageBox()
