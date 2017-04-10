@@ -204,17 +204,36 @@ class EgvDialog(QtGui.QDialog):
                 caxfiles.append(fdict)
 
             version = self.parent.params.egv_version
-            egv_status = do_egv(reactor, fuel, caxfiles, egv_version=version, 
-                                verbose=False)
+            egv_status, infolines = do_egv(reactor, fuel, caxfiles,
+                                           egv_version=version, verbose=False)
+            sublines = []
+            for line in infolines:
+                parts = line.split(":")[1:]
+                s = ":".join(parts).strip()
+                sublines.append(s)
+            sublines.insert(0, "The following conditions were not met:")
+            infotext = "\n".join(sublines)
             
             msgBox = QtGui.QMessageBox()
+            xpos = self.parent.pos().x() + self.parent.size().width() / 2
+            ypos = self.parent.pos().y() + self.parent.size().height() / 2
+            msgBox.move(0.8*xpos, ypos)
+
+            # adjust size
+            hspacer = QtGui.QSpacerItem(350, 0, QtGui.QSizePolicy.Minimum, 
+                                        QtGui.QSizePolicy.Expanding)
+            layout = msgBox.layout()
+            layout.addItem(hspacer, layout.rowCount(), 0, 1, 
+                           layout.columnCount())
+
             msgBox.setWindowTitle("EGV status")
             msgBox.setStandardButtons(QtGui.QMessageBox.Ok)
+            
             if egv_status:
                 msgBox.setText("EGV-run passed!")
                 msgBox.setIcon(QtGui.QMessageBox.Information)
             else:
-                msgBox.setText("EGV-run did not pass!")
-                msgBox.setDetailedText("Bla bla bla")
+                msgBox.setText("EGV-run failed!")
+                msgBox.setDetailedText(QtCore.QString.fromUtf8(infotext))
                 msgBox.setIcon(QtGui.QMessageBox.Critical)
             status = msgBox.exec_()

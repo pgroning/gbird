@@ -30,13 +30,15 @@ def check_egv_run(listfil,verbose=False):
   with open(listfil) as f:
     flines = f.read().splitlines()
   pattern = '^\s*Nej'
+  mlines = []
   flag = True
   for line in flines:
     match = re.search(pattern, line)
     if match:
       flag = False
+      mlines.append(line)
       if verbose: print line
-  return flag
+  return flag, mlines
 
 def create_egv_inp(reactor,fuel,name,cax,filename="egv-indata.txt",verbose=False):
   """Create egv-input"""
@@ -90,15 +92,15 @@ def do_egv(reactor, fuel, caxfiles, runname=None, egvinpfile="egv-indata.txt", e
   run_egv(egvinput,egv_version,verbose=verbose)
 
   # kontrollera körning
-  flag = check_egv_run(listfil,verbose=verbose)
-
+  flag, infolines = check_egv_run(listfil,verbose=verbose)
+  
   if verbose:
     if flag:
       print "Run OK"
     else:
       print "ERROR: EGV-Run NOT OK"
 
-  return flag
+  return flag, infolines
 
 if __name__=='__main__':
   reactor     = sys.argv[1]
