@@ -1,6 +1,7 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 from IPython.core.debugger import Tracer  # Debugging använd Tracer()()
+from pyqt_trace import pyqt_trace as qtrace  # Break point that works with Qt
 import sys
 import os
 import re
@@ -21,12 +22,16 @@ def run_egv(inpfil, egv_version,verbose=False):
 
 def check_egv_run(listfil,verbose=False):
   """Check if egv-run OK"""
+  
   if verbose: 
     print "check_egv_run:"
     print "  {0:<20} {1:<}".format("kontrollerar fil:",listfil)
   if not os.path.isfile(listfil):
-    print "ERROR: no listfile ({0}), egv-run not ok".format(listfil)
-    return False
+    if verbose:
+      print "ERROR: no listfile ({0}), egv-run not ok".format(listfil)
+    msg = ["ERROR: no listfile, egv-run not ok"]
+    return False, msg
+  
   with open(listfil) as f:
     flines = f.read().splitlines()
   pattern = '^\s*Nej'
@@ -71,7 +76,8 @@ def create_egv_inp(reactor,fuel,name,cax,filename="egv-indata.txt",verbose=False
   f.close()
   return [filename,listfil]
 
-def do_egv(reactor, fuel, caxfiles, runname=None, egvinpfile="egv-indata.txt", egv_version="2.3.0", verbose=False ):
+def do_egv(reactor, fuel, caxfiles, runname=None, egvinpfile="egv-indata.txt", egv_version="2.3.0", verbose=False, 
+           remove=False):
   """Create input and run egv. Check if run ok"""
 
   if runname is None:
@@ -90,7 +96,7 @@ def do_egv(reactor, fuel, caxfiles, runname=None, egvinpfile="egv-indata.txt", e
   # kör egv
   egvinput = egvfiler[0]
   run_egv(egvinput,egv_version,verbose=verbose)
-
+  
   # kontrollera körning
   flag, infolines = check_egv_run(listfil,verbose=verbose)
   
@@ -100,7 +106,36 @@ def do_egv(reactor, fuel, caxfiles, runname=None, egvinpfile="egv-indata.txt", e
     else:
       print "ERROR: EGV-Run NOT OK"
 
+  if remove:  # ta bort resultat-filer
+    clean_up(runname)
+
   return flag, infolines
+
+def clean_up(name):
+  """remove output files"""
+
+  fname = name + "-allmaennakrav-egv.txt"
+  if os.path.isfile(fname):
+    os.remove(fname)
+  fname = name + "-plrkrav-egv.txt"
+  if os.path.isfile(fname):
+    os.remove(fname)
+  fname = name + "-bakrav-egv.txt"
+  if os.path.isfile(fname):
+    os.remove(fname)
+  fname = name + "-a1a2krav-egv.txt"
+  if os.path.isfile(fname):
+    os.remove(fname)
+  fname = name + "-kriticitetskrav-egv.txt"
+  if os.path.isfile(fname):
+    os.remove(fname)
+  fname = name + "-lista-egv.txt"
+  if os.path.isfile(fname):
+    os.remove(fname)
+  fname = "egv-indata.txt"
+  if os.path.isfile(fname):
+    os.remove(fname)
+
 
 if __name__=='__main__':
   reactor     = sys.argv[1]

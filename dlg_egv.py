@@ -2,6 +2,7 @@
 
 from pyqt_trace import pyqt_trace as qtrace  # Break point that works with Qt
 import os
+import re
 from PyQt4 import QtGui, QtCore
 from multiprocessing import Pool
 
@@ -42,11 +43,12 @@ class EgvDialog(QtGui.QDialog):
         self.reactor_list = ["F1", "F2", "F3", "R1"]
         self.reactor_cbox.addItems(QtCore.QStringList(self.reactor_list))
 
-        # EGV fue: ATRIUM10B, ATRIUM10XM, SVEA96OPTIMA3
-
+        self.file_chbox = QtGui.QCheckBox()
+        
         flo = QtGui.QFormLayout()
         flo.addRow("Version:", self.version_cbox)
         flo.addRow("Reactor:", self.reactor_cbox)
+        flo.addRow("Keep files:", self.file_chbox)
 
         gbox = QtGui.QGroupBox()
         gbox.setStyleSheet("QGroupBox {border: 1px solid silver;\
@@ -64,14 +66,18 @@ class EgvDialog(QtGui.QDialog):
 
         hbox = QtGui.QHBoxLayout()
         self.run_button = QtGui.QPushButton("Run")
-        self.cancel_button = QtGui.QPushButton("Cancel")
-        hbox.addStretch()
+        self.cancel_button = QtGui.QPushButton("Close")
+        self.apply_button = QtGui.QPushButton("Apply")
         hbox.addWidget(self.run_button)
+        hbox.addStretch()
+        hbox.addWidget(self.apply_button)
         hbox.addWidget(self.cancel_button)
         self.connect(self.cancel_button, QtCore.SIGNAL('clicked()'),
                      self.close)
         self.connect(self.run_button, QtCore.SIGNAL('clicked()'), 
                      self.run_action)
+        self.connect(self.apply_button, QtCore.SIGNAL('clicked()'), 
+                     self.apply_action)
 
         vbox = QtGui.QVBoxLayout()
         vbox.addLayout(grid)
@@ -79,11 +85,11 @@ class EgvDialog(QtGui.QDialog):
         vbox.addLayout(hbox)
         self.setLayout(vbox)
 
-    def run_action(self):
-        self.close()
+    def apply_action(self):
         params  = self.parent.params
         params.egv_version = str(self.version_cbox.currentText())
         params.egv_reactor = str(self.reactor_cbox.currentText())
+        params.egv_keepfiles = self.file_chbox.isChecked()
         nrows = self.table.rowCount()
         params.egv_zones = []
         params.egv_files = []
@@ -97,6 +103,10 @@ class EgvDialog(QtGui.QDialog):
             params.egv_files.append(str(item.text()))
         params.egv_zones.reverse()
         params.egv_files.reverse()
+
+    def run_action(self):
+        self.close()
+        self.apply_action()
         self.run_egv()
 
     def insert_table_rows(self):
@@ -117,6 +127,10 @@ class EgvDialog(QtGui.QDialog):
                 reactor = self.parent.params.egv_reactor
                 j = self.reactor_list.index(reactor)
                 self.reactor_cbox.setCurrentIndex(j)
+
+            if hasattr(self.parent.params, "egv_keepfiles"):
+                if self.parent.params.egv_keepfiles:
+                    self.file_chbox.setChecked(True)
 
             if hasattr(self.parent.params, "egv_zones"):
                 zones = self.parent.params.egv_zones[::-1]
@@ -207,15 +221,10 @@ class EgvDialog(QtGui.QDialog):
                     caxfiles.append(fdict)
 
             version = self.parent.params.egv_version
+            remove = not self.file_chbox.isChecked()
             egv_status, infolines = do_egv(reactor, fuel, caxfiles,
-                                           egv_version=version, verbose=False)
-            sublines = []
-            for line in infolines:
-                parts = line.split(":")[1:]
-                s = ":".join(parts).strip()
-                sublines.append(s)
-            sublines.insert(0, "The following criteria are not met:")
-            infotext = "\n".join(sublines)
+                                           egv_version=version, 
+                                           verbose=False, remove=remove)
             
             msgBox = QtGui.QMessageBox()
             xpos = self.parent.pos().x() + self.parent.size().width() / 2
@@ -233,10 +242,24 @@ class EgvDialog(QtGui.QDialog):
             msgBox.setStandardButtons(QtGui.QMessageBox.Ok)
             
             if egv_status:
-                msgBox.setText("EGV-run passed!")
+                msgBox.setText("EGV-run passed")
                 msgBox.setIcon(QtGui.QMessageBox.Information)
             else:
-                msgBox.setText("EGV-run failed!")
-                msgBox.setDetailedText(QtCore.QString.fromUtf8(infotext))
-                msgBox.setIcon(QtGui.QMessageBox.Critical)
+                if re.search("^\s*ERROR", infolines[0]):
+                    msgBox.setText("EGV-run failed")
+                    infotext = "Make sure EGV settings are valid."
+                    msgBox.setDetailedText(QtCore.QString.fromUtf8(infotext))
+                    msgBox.setIcon(QtGui.QMessageBox.Critical)
+                else:
+                    sublines = []
+                    for line in infolines:
+                        parts = line.split(":")[1:]
+                        s = ":".join(parts).strip()
+                        sublines.append(s)
+                    sublines.insert(0, "The following criteria were not met:")
+                    infotext = "\n".join(sublines) 
+                    msgBox.setText("EGV-run did not pass")
+                    msgBox.setDetailedText(QtCore.QString.fromUtf8(infotext))
+                    msgBox.setIcon(QtGui.QMessageBox.Warning)
+                #msgBox.setIcon(QtGui.QMessageBox.Critical)
             status = msgBox.exec_()
