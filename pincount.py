@@ -13,8 +13,8 @@ class PinCount(object):
     """ init """
     self.LFU = LFU
     self.FUE = _fixafue(FUE)
-    self.fuetype = fuetype
-    if verbose: print "PinCount initiated, fuetype = " + fuetype + ", number of segments = " + str(len(self.LFU))
+    self.fuetype = _fixafuetype(fuetype)
+    if verbose: print "PinCount initiated, fuetype = " + self.fuetype + ", number of segments = " + str(len(self.LFU))
     if not self.__totrod():
       print "False"
       return
@@ -72,11 +72,11 @@ class PinCount(object):
 
 def specialpos(pos,fuetype):
   [i,j] = pos
-  if fuetype == "OPT3":
+  if fuetype == "OPT2" or fuetype == "OPT3":
     if (pos == (1,3) or pos == (1,7) or pos == (3,1) or pos == (3,9) or 
         pos == (7,1) or pos == (7,9) or pos == (9,3) or pos == (9,7)): 
       return True
-  elif fuetype == "AT10XM":
+  elif fuetype == "A10B" or fuetype == "A10XM":
     if ( ((i == 0 or i == 9) and (j != 0 and j != 9)) or
          ((j == 0 or j == 9) and (i != 0 and i != 9)) ):
       return True
@@ -87,7 +87,7 @@ def iswaterpos(pos,fuetype):
   if fuetype == "OPT2" or fuetype == "OPT3":
     if ( (i == 5) or (j == 5) or ( ((i>=4) and (i<=6)) and ((j>=4) and (j<=6)) ) ):
       return True
-  elif fuetype == "AT10XM" or fuetype == "A10B":
+  elif fuetype == "A10XM" or fuetype == "A10B":
     if ((i>=4) and (i<=6)) and ((j>=4) and (j<=6)):
       return True
   return False
@@ -100,6 +100,17 @@ def _fixafue(FUE):
       for k in range(len(FUE[i][j])):
         if np.isnan(FUE[i][j][k]): FUE[i][j][k]=0
   return FUE
+def _fixafuetype(fuetype):
+  fuetype = fuetype.upper()
+  if fuetype == "ATRIUM10XM":
+    fuetype = "A10XM"
+  elif fuetype == "ATRIUM10B":
+    fuetype = "A10B"
+  elif fuetype == "SVEA96OPT2":
+    fuetype = "OPT2"
+  elif fuetype == "SVEA96OPT3":
+    fuetype = "OPT3"
+  return fuetype
 
 def _isequal(pin1,pin2):
   """ Check if pin1 == pin2 """
