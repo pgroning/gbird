@@ -247,7 +247,8 @@ class EgvDialog(QtGui.QDialog):
             else:
                 if re.search("^\s*ERROR", infolines[0]):
                     msgBox.setText("EGV-run failed")
-                    infotext = "Make sure EGV settings are valid."
+                    infolines.append("Check EGV input options!")
+                    infotext = "\n".join(infolines)
                     msgBox.setDetailedText(QtCore.QString.fromUtf8(infotext))
                     msgBox.setIcon(QtGui.QMessageBox.Critical)
                 else:
