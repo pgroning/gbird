@@ -61,7 +61,7 @@ class UnitTest(unittest.TestCase):
 
     #@unittest.skip("skip this test")
     def test_bundle_ave_enr(self):
-        testfile = "test/topol/bundle_a10xm.pro"
+        testfile = "test/topol/bundle_a10xm.inp"
         b = Bundle(testfile)
         b.readcax()
         for s in b.segments:
