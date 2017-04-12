@@ -44,6 +44,7 @@ from dlg_bundle import BundleDialog
 from dlg_report import ReportDialog
 from dlg_egv import EgvDialog
 from pin import FuePin, EnrDialog
+from pincount import PinCount
 from progbar import ProgressBar
 from map_s96 import s96o2
 from map_a10 import a10xm
@@ -1186,12 +1187,16 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         bundle = self.bunlist[istate]
 
         # Update enr for all segments
+        LFU_list = []
+        FUE_list = []
         for i, segment in enumerate(bundle.segments):
             LFU = self.__lfumap(i)
             FUE = self.__fuemap(i)
             segment.ave_enr_calc(LFU, FUE)
             if not hasattr(segment.data, "ave_enr"):  # save orig. calc
                 segment.data.ave_enr = segment.ave_enr
+            LFU_list.append(LFU)
+            FUE_list.append(FUE)
         
         segment = bundle.segments[iseg]
         #self.ave_enr_text.setText("%.5f" % segment.ave_enr)
@@ -1212,6 +1217,13 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         formstr = '{0:.4f} ({1:+.4f})'.format(bundle_enr, diff_bundle_enr)
         self.bundle_enr_text.setText(formstr)
         #self.bundle_denr_text.setText("%.5f" % diff_bundle_enr)
+
+        # Update number of pin types
+        fuetype = self.bunlist[0].data.fuetype
+        pins = PinCount(LFU_list, FUE_list, fuetype)
+        formstr = '{0:d}'.format(pins.noofpintypes)
+        self.rod_types_text.setText(formstr)
+
         self.report_update()
 
     def enr_modify(self, mod, case_num=None, ipin=None):
