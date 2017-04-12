@@ -56,12 +56,17 @@ class BundleDialog(QtGui.QDialog):
         self.content_list = ["filt.", "unfilt."]
         self.content_cbox.addItems(QtCore.QStringList(self.content_list))
 
+        self.height_cbox = QtGui.QComboBox()
+        self.height_list = ["bundle", "zone"]
+        self.height_cbox.addItems(QtCore.QStringList(self.height_list))
+
         #self.save_button = QtGui.QPushButton("Save...")
         #self.load_button = QtGui.QPushButton("Load...")
 
         flo = QtGui.QFormLayout()
         flo.addRow("Fuel:", self.fuetype_cbox)
         flo.addRow("Content:", self.content_cbox)
+        flo.addRow("Height:", self.height_cbox)
 
         vbox = QtGui.QVBoxLayout()
         vbox.addLayout(flo)
@@ -222,8 +227,10 @@ class BundleDialog(QtGui.QDialog):
         bundle = self.parent.bunlist[0]
         bundle.data.fuetype = self.data.fuetype
         bundle.data.caxfiles = self.data.caxfiles
+
         bundle.data.nodes = self.data.nodes
         bundle.data.btf_nodes = self.data.btf_nodes
+ 
         bundle.data.content = self.data.content
         self.close()
         self.parent.import_data()
