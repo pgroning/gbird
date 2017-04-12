@@ -183,8 +183,12 @@ class BundleDialog(QtGui.QDialog):
         nfiles = len(caxfiles)
         
         for i, caxfile in enumerate(caxfiles):
-            item0 = QtGui.QStandardItem(str(nodes[i]))
-            item1 = QtGui.QStandardItem(str(btf_nodes[i]))
+            #item0 = QtGui.QStandardItem(str(nodes[i]))
+            node = '{0:g}'.format(nodes[i])
+            item0 = QtGui.QStandardItem(node)
+            #item1 = QtGui.QStandardItem(str(btf_nodes[i]))
+            btf_node = '{0:g}'.format(btf_nodes[i])
+            item1 = QtGui.QStandardItem(btf_node)
             item2 = QtGui.QStandardItem(caxfile)
             self.table_view.model().setItem(i, 0, item0)
             self.table_view.model().setItem(i, 1, item1)
@@ -239,9 +243,11 @@ class BundleDialog(QtGui.QDialog):
         nrows = self.table_view.model().rowCount()
         for i in range(nrows):
             node_item = self.table_view.model().item(i, 0)
-            node_list.append(int(node_item.text()))
+            #node_list.append(int(node_item.text()))
+            node_list.append(float(node_item.text()))
             btf_item = self.table_view.model().item(i, 1)
-            btf_list.append(int(btf_item.text()))
+            #btf_list.append(int(btf_item.text()))
+            btf_list.append(float(btf_item.text()))
             file_item = self.table_view.model().item(i, 2)
             file_list.append(str(file_item.text()))
         node_list.reverse()
