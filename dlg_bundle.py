@@ -37,8 +37,8 @@ class BundleDialog(QtGui.QDialog):
         self.table_view.setModel(model)
         self.table_view.setSelectionModel(selection_model)
 
-        model.setHorizontalHeaderItem(0, QtGui.QStandardItem("Nodes"))
-        model.setHorizontalHeaderItem(1, QtGui.QStandardItem("BTF"))
+        model.setHorizontalHeaderItem(0, QtGui.QStandardItem("Height"))
+        model.setHorizontalHeaderItem(1, QtGui.QStandardItem("Height (BTF)"))
         model.setHorizontalHeaderItem(2, QtGui.QStandardItem("Files"))
 
         horizontalheader = self.table_view.horizontalHeader()
