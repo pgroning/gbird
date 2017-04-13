@@ -57,9 +57,9 @@ class BundleDialog(QtGui.QDialog):
         self.content_list = ["filt.", "unfilt."]
         self.content_cbox.addItems(QtCore.QStringList(self.content_list))
 
-        self.height_cbox = QtGui.QComboBox()
-        self.height_list = ["zone", "total"]
-        self.height_cbox.addItems(QtCore.QStringList(self.height_list))
+        #self.height_cbox = QtGui.QComboBox()
+        #self.height_list = ["zone", "total"]
+        #self.height_cbox.addItems(QtCore.QStringList(self.height_list))
 
         #self.save_button = QtGui.QPushButton("Save...")
         #self.load_button = QtGui.QPushButton("Load...")
@@ -67,7 +67,7 @@ class BundleDialog(QtGui.QDialog):
         flo = QtGui.QFormLayout()
         flo.addRow("Fuel:", self.fuetype_cbox)
         flo.addRow("Content:", self.content_cbox)
-        flo.addRow("Height:", self.height_cbox)
+        #flo.addRow("Height:", self.height_cbox)
 
         vbox = QtGui.QVBoxLayout()
         vbox.addLayout(flo)
@@ -220,10 +220,10 @@ class BundleDialog(QtGui.QDialog):
         #else:
         #    self.content_cbox.setCurrentIndex(1)
 
-        if self.data.height == "zone":
-            self.height_cbox.setCurrentIndex(0)
-        else:
-            self.height_cbox.setCurrentIndex(1)
+        #if self.data.height == "zone":
+        #    self.height_cbox.setCurrentIndex(0)
+        #else:
+        #    self.height_cbox.setCurrentIndex(1)
 
     def import_data_action(self):
         """Import data from cax files"""
@@ -234,12 +234,12 @@ class BundleDialog(QtGui.QDialog):
         bundle.data.fuetype = self.data.fuetype
         bundle.data.caxfiles = self.data.caxfiles
 
-        if self.height_cbox.currentIndex() == 0:
-            bundle.data.nodes = self.data.nodes
-            bundle.data.btf_nodes = self.data.btf_nodes
-        elif self.height_cbox.currentIndex() == 1:  # convert to zone height
-            bundle.data.nodes = self.zone_height(self.data.nodes)
-            bundle.data.btf_nodes = self.zone_height(self.data.btf_nodes)
+        #if self.height_cbox.currentIndex() == 0:
+        bundle.data.nodes = self.data.nodes
+        bundle.data.btf_nodes = self.data.btf_nodes
+        #elif self.height_cbox.currentIndex() == 1:  # convert to zone height
+        #    bundle.data.nodes = self.zone_height(self.data.nodes)
+        #    bundle.data.btf_nodes = self.zone_height(self.data.btf_nodes)
         
         bundle.data.content = self.data.content
         self.close()
@@ -267,10 +267,10 @@ class BundleDialog(QtGui.QDialog):
         else:
             content = "unfiltered"
 
-        if self.height_cbox.currentIndex() == 0:
-            height = "zone"
-        else:
-            height = "total"
+        #if self.height_cbox.currentIndex() == 0:
+        #    height = "zone"
+        #else:
+        #    height = "total"
 
         node_list = []
         btf_list = []
@@ -293,7 +293,7 @@ class BundleDialog(QtGui.QDialog):
         self.data.fuetype = fuetype
         self.data.content = content
         self.data.nodes = node_list
-        self.data.height = height
+        #self.data.height = height
         self.data.btf_nodes = btf_list
         self.data.caxfiles = file_list
                 
