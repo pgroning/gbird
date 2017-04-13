@@ -42,6 +42,12 @@ class InpFileParser(object):
             print "Error: Invalid node list."
             return False
 
+        # height option
+        if config.has_option("Bundle", "height"):
+            self.parent.height = config.get("Bundle", "height")
+        else:
+            self.parent.height = "zone"
+
         ## read content option
         #self.parent.content = "filtered"  # default value
         #if config.has_option("Bundle", "content"):
@@ -78,7 +84,7 @@ class InpFileParser(object):
         node_str = "\n".join(nodes)
         config.set("Bundle", "nodes", node_str)
 
-        #config.set("Bundle", "content", self.parent.content)
+        config.set("Bundle", "height", self.parent.height)
 
         config.add_section("BTF")
         # btf_nodes = map(str, self.parent.btf_nodes[::-1])

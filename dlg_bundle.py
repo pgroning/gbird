@@ -1,6 +1,7 @@
 from pyqt_trace import pyqt_trace as qtrace  # Break point that works with Qt
 import os
 import ConfigParser
+import numpy as np
 from PyQt4 import QtGui, QtCore
 
 from fileio import InpFileParser
@@ -57,7 +58,7 @@ class BundleDialog(QtGui.QDialog):
         self.content_cbox.addItems(QtCore.QStringList(self.content_list))
 
         self.height_cbox = QtGui.QComboBox()
-        self.height_list = ["bundle", "zone"]
+        self.height_list = ["zone", "total"]
         self.height_cbox.addItems(QtCore.QStringList(self.height_list))
 
         #self.save_button = QtGui.QPushButton("Save...")
@@ -218,7 +219,12 @@ class BundleDialog(QtGui.QDialog):
         self.content_cbox.setCurrentIndex(0)
         #else:
         #    self.content_cbox.setCurrentIndex(1)
-        
+
+        if self.data.height == "zone":
+            self.height_cbox.setCurrentIndex(0)
+        else:
+            self.height_cbox.setCurrentIndex(1)
+
     def import_data_action(self):
         """Import data from cax files"""
 
@@ -228,12 +234,29 @@ class BundleDialog(QtGui.QDialog):
         bundle.data.fuetype = self.data.fuetype
         bundle.data.caxfiles = self.data.caxfiles
 
-        bundle.data.nodes = self.data.nodes
-        bundle.data.btf_nodes = self.data.btf_nodes
- 
+        if self.height_cbox.currentIndex() == 0:
+            bundle.data.nodes = self.data.nodes
+            bundle.data.btf_nodes = self.data.btf_nodes
+        elif self.height_cbox.currentIndex() == 1:  # convert to zone height
+            bundle.data.nodes = self.zone_height(self.data.nodes)
+            bundle.data.btf_nodes = self.zone_height(self.data.btf_nodes)
+        
         bundle.data.content = self.data.content
         self.close()
         self.parent.import_data()
+
+    def zone_height(self, heights):
+        """convert to zone height"""
+        h_list = [h for h in heights if h]
+        h_array = np.array([0] + h_list)  # prepend 0
+        dh = np.diff(h_array)
+        z_array = np.zeros(len(heights))
+        j = 0
+        for i, node in enumerate(heights):
+            if node:
+                z_array[i] = dh[j]
+                j += 1
+        return z_array
 
     def get_table_data(self):
         """Get data from dialog widgets"""
@@ -243,6 +266,11 @@ class BundleDialog(QtGui.QDialog):
             content = "filtered"
         else:
             content = "unfiltered"
+
+        if self.height_cbox.currentIndex() == 0:
+            height = "zone"
+        else:
+            height = "total"
 
         node_list = []
         btf_list = []
@@ -265,6 +293,7 @@ class BundleDialog(QtGui.QDialog):
         self.data.fuetype = fuetype
         self.data.content = content
         self.data.nodes = node_list
+        self.data.height = height
         self.data.btf_nodes = btf_list
         self.data.caxfiles = file_list
                 

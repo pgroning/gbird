@@ -343,15 +343,13 @@ class Bundle(object):
         self.btf.calc_btf()
         
     def ave_enr_calc(self):
-        """The method calculates the average enrichment of the bundle.
-        This algorithm is likely naive and may need to be updated in the 
-        future"""
+        """The method calculates the average enrichment of the bundle."""
 
         nodelist = self.data.nodes
-        # nodelist.insert(0, 0)  # prepend 0
-        # nodes = np.array(nodelist)
-        nodes = np.array([0] + nodelist)  # prepend 0
-        dn = np.diff(nodes)
+        dn = np.array(nodelist)
+        #nodes = np.array([0] + nodelist)  # prepend 0
+        #dn = np.diff(nodes)
+        
         segments = self.segments
         #qtrace()
         enrlist = [seg.ave_enr for seg in segments]
@@ -363,9 +361,7 @@ class Bundle(object):
         return ave_enr
 
     def pow3(self, POW, nodes):
-        """Expanding a number of 2D pin power distributions into a 3D
-        distribution.
-        Syntax: POW3D = pow3(POW1,POW2,POW3,...)"""
+        """Expanding a list of 2D pin power distributions into a 3D array."""
 
         xdim = POW.shape[1]
         ydim = POW.shape[2]
@@ -376,22 +372,40 @@ class Bundle(object):
 
         # only non-zero elements should be considered
         nodes = [n for n in nodes if n]
-        nodes = np.array(nodes).astype(int)
+        #nodes = np.array(nodes).astype(int)
+        nodes = np.array(nodes).astype(float)
         
         #zdim = max(nodes)
         zdim = 25  # max node
         POW3 = np.zeros((zdim, xdim, ydim))
 
-        nodes = nodes / nodes[-1] * zdim  # rescale nodes
-        nodes = nodes.round().astype(int)
+        #nodes = map(float, nodes) / sum(nodes) * zdim  # rescaling
+        nodes = nodes / sum(nodes) * zdim  # rescaling
+        #nodes = nodes / nodes[-1] * zdim  # rescale nodes
         
-        z0 = 0
-        for i, P in enumerate(POW):
-            z1 = nodes[i]
-            for z in range(z0, z1):
-                POW3[z, :, :] = P
-            z0 = z1
+        # convert to int and make sure sum of nodes equals zdim
+        #i = np.argmax(nodes-nodes.astype(int))
+        nodes_int = nodes.round().astype(int)
+        if zdim > sum(nodes_int):
+            i = np.argmax(nodes-nodes_int) 
+            nodes_int[i] += zdim - sum(nodes_int)
+        elif zdim < sum(nodes_int):
+            i = np.argmin(nodes-nodes_int) 
+            nodes_int[i] += zdim - sum(nodes_int)
 
+        z = 0
+        for i, n in enumerate(nodes_int):
+            for j in range(n):
+                POW3[z, :, :] = POW[i]
+                z += 1
+
+        #z0 = 0
+        #for i, P in enumerate(POW):
+        #    z1 = nodes[i]
+        #    for z in range(z0, z1):
+        #        POW3[z, :, :] = P
+        #    z0 = z1
+        
         return POW3
 
     def interp2(self, P1, P2, x1, x2, x):
