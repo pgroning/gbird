@@ -42,6 +42,7 @@ from dlg_cascalc import CasDialog, CasRunDialog
 from dlg_pertcalc import PertDialog
 from dlg_bundle import BundleDialog
 from dlg_report import ReportDialog
+from dlg_findpoint import FindDialog
 from dlg_egv import EgvDialog
 from pin import FuePin, EnrDialog
 from pincount import PinCount
@@ -842,6 +843,13 @@ class MainWin(QtGui.QMainWindow):
                 self.report_dlg.show()  # Make dialog non-modal
                 #self.report_dlg.exec_()
 
+    def open_findpoint_dlg(self):
+        print "open find point dialog"
+        if hasattr(self, "bunlist"):  # check that data has been imported
+            if not hasattr(self, "findpoint_dlg"):  # not already open?
+                self.findpoint_dlg = FindDialog(self)
+                self.findpoint_dlg.show()  # Make dialog non-modal
+                
     def open_egv_dlg(self):
         """Open egv settings dialog"""
         self.egv_dlg = EgvDialog(self)
@@ -2117,7 +2125,6 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
 
         save_figure_action = self.create_action("&Save Figure As...",
                                               slot=self.saveFigure,
-                                              shortcut="Ctrl+F",
                                               tip="Save data to file")
         
         self.add_actions(self.file_menu, (new_project_action, open_file_action,
@@ -2161,6 +2168,10 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                                           slot=self.open_cas_dlg)
         data_action = self.create_action("Report...", tip="Fuel report...",
                                          slot=self.open_report_dlg)
+        find_action = self.create_action("Find point...",
+                                         tip="Find state point...",
+                                         shortcut="Ctrl+F",
+                                         slot=self.open_findpoint_dlg)
         table_action = self.create_action("Point table...",
                                           tip="Point table...")
         optim_action = self.create_action("Optimization...",
@@ -2169,7 +2180,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                                         slot=self.open_egv_dlg)
         self.add_actions(self.tools_menu,
                          (plot_action, pert_action, casmo_action, data_action,
-                          table_action, optim_action, egv_action))
+                          find_action, table_action, optim_action, egv_action))
 
         self.run_menu = self.menuBar().addMenu("&Run")
         pert_action = self.create_action("&Perturbation", shortcut="F9",
