@@ -1827,27 +1827,27 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.connect(self.point_sbox, QtCore.SIGNAL('valueChanged(int)'),
                      self.set_pinvalues)
 
-        self.enr_plus_button = QtGui.QPushButton("+ enr")
-        self.enr_minus_button = QtGui.QPushButton("- enr")
-        enr_hbox = QtGui.QHBoxLayout()
-        enr_hbox.addWidget(self.enr_minus_button)
-        enr_hbox.addWidget(self.enr_plus_button)
-        self.connect(self.enr_plus_button, QtCore.SIGNAL('clicked()'),
-                     self.enr_add)
-        self.connect(self.enr_minus_button, QtCore.SIGNAL('clicked()'),
-                     self.enr_sub)
+        #self.enr_plus_button = QtGui.QPushButton("+ enr")
+        #self.enr_minus_button = QtGui.QPushButton("- enr")
+        #enr_hbox = QtGui.QHBoxLayout()
+        #enr_hbox.addWidget(self.enr_minus_button)
+        #enr_hbox.addWidget(self.enr_plus_button)
+        #self.connect(self.enr_plus_button, QtCore.SIGNAL('clicked()'),
+        #             self.enr_add)
+        #self.connect(self.enr_minus_button, QtCore.SIGNAL('clicked()'),
+        #             self.enr_sub)
         self.enr_case_cb = QtGui.QCheckBox("All segments")
         self.enr_case_cb.setChecked(False)
         enr_case_hbox = QtGui.QHBoxLayout()
         enr_case_hbox.addWidget(self.enr_case_cb)
 
-        self.calc_quick_button = QtGui.QPushButton("Pert. calc")
-        self.calc_full_button = QtGui.QPushButton("Full calc")
-        calc_hbox = QtGui.QHBoxLayout()
-        calc_hbox.addWidget(self.calc_quick_button)
-        calc_hbox.addWidget(self.calc_full_button)
-        self.connect(self.calc_quick_button, QtCore.SIGNAL('clicked()'),
-                     self.quick_calc)
+        #self.calc_quick_button = QtGui.QPushButton("Pert. calc")
+        #self.calc_full_button = QtGui.QPushButton("Full calc")
+        #calc_hbox = QtGui.QHBoxLayout()
+        #calc_hbox.addWidget(self.calc_quick_button)
+        #calc_hbox.addWidget(self.calc_full_button)
+        #self.connect(self.calc_quick_button, QtCore.SIGNAL('clicked()'),
+        #             self.quick_calc)
 
         chanbow_hbox = QtGui.QHBoxLayout()
         self.chanbow_sbox = QtGui.QDoubleSpinBox()
@@ -2038,9 +2038,9 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         vbox.addLayout(vhi_hbox)
         vbox.addLayout(exp_hbox)
         vbox.addLayout(type_hbox)
-        vbox.addLayout(enr_hbox)
+        #vbox.addLayout(enr_hbox)
         vbox.addLayout(enr_case_hbox)
-        vbox.addLayout(calc_hbox)
+        #vbox.addLayout(calc_hbox)
         vbox.addLayout(chanbow_hbox)
         vbox.addLayout(bgcolors_hbox)
 
