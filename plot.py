@@ -109,14 +109,28 @@ class PlotWin(QtGui.QMainWindow):
         self.axes.set_ylabel('BTF')
         self.on_draw()
 
-    def save_plot(self):
-        file_choices = "PNG (*.png)|*.png"
+    def save_figure(self):
+        """save figure"""
+
+        # Import default path from config file
+        self.settings.beginGroup("PATH")
+        path_default = self.settings.value("path_save_figure",
+                                           QtCore.QString("")).toString()
+        self.settings.endGroup()
         
-        path = unicode(QFileDialog.getSaveFileName(self, 'Save file', '',
-                                                   file_choices))
-        if path:
-            self.canvas.print_figure(path, dpi=self.dpi)
-            self.statusBar().showMessage('Saved to %s' % path, 2000)
+        file_choices = "PNG (*.png)|*.png"
+        filename = unicode(QtGui.QFileDialog.getSaveFileName(self, 'Save As',
+                                                             path_default,
+                                                             file_choices))
+        if filename:
+            # Save default path to config file
+            path = os.path.split(filename)[0]
+            self.settings.beginGroup("PATH")
+            self.settings.setValue("path_save_figure", QtCore.QString(path))
+            self.settings.endGroup()
+            
+            self.canvas.print_figure(filename, dpi=self.dpi)
+            self.statusBar().showMessage('Saved to %s' % filename, 2000)
     
     def on_about(self):
         msg = """Greenbird plot window"""
@@ -407,9 +421,10 @@ class PlotWin(QtGui.QMainWindow):
     def create_menu(self):        
         self.file_menu = self.menuBar().addMenu("&File")
         
-        save_file_action = self.create_action("&Save plot", shortcut="Ctrl+S",
-                                              slot=self.save_plot,
-                                              tip="Save the plot")
+        save_file_action = self.create_action("&Save Figure As...",
+                                              shortcut="Ctrl+S",
+                                              slot=self.save_figure,
+                                              tip="Save figure...")
         quit_action = self.create_action("&Close", slot=self.close,
                                          shortcut="Ctrl+W",
                                          tip="Close the application")

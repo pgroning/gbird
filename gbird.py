@@ -569,6 +569,28 @@ class MainWin(QtGui.QMainWindow):
                     pickle.dump(self.biascalc, fp, 1)
             print "Project saved to file " + filename
 
+    def saveFigure(self):
+
+        # Import default path from config file
+        self.settings.beginGroup("PATH")
+        path_default = self.settings.value("path_save_figure",
+                                           QtCore.QString("")).toString()
+        self.settings.endGroup()
+        
+        file_choices = "PNG (*.png)|*.png"
+        filename = unicode(QtGui.QFileDialog.getSaveFileName(self, 'Save As',
+                                                             path_default,
+                                                             file_choices))
+        if filename:
+            # Save default path to config file
+            path = os.path.split(filename)[0]
+            self.settings.beginGroup("PATH")
+            self.settings.setValue("path_save_figure", QtCore.QString(path))
+            self.settings.endGroup()
+            
+            self.canvas.print_figure(filename, dpi=self.dpi)
+            self.statusBar().showMessage('Saved to %s' % filename, 2000)
+            
     def open_plotwin(self):
         """Open plot window"""
 
@@ -2093,9 +2115,15 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                                               shortcut="Ctrl+S",
                                               tip="Save data to file")
 
+        save_figure_action = self.create_action("&Save Figure As...",
+                                              slot=self.saveFigure,
+                                              shortcut="Ctrl+F",
+                                              tip="Save data to file")
+        
         self.add_actions(self.file_menu, (new_project_action, open_file_action,
                                           save_data_action,
-                                          save_settings_action, None,
+                                          save_settings_action,
+                                          save_figure_action, None,
                                           quit_action))
 
         self.edit_menu = self.menuBar().addMenu("&Edit")
