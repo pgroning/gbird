@@ -43,6 +43,7 @@ from dlg_pertcalc import PertDialog
 from dlg_bundle import BundleDialog
 from dlg_report import ReportDialog
 from dlg_findpoint import FindDialog
+from dlg_enrichment import EnrichmentDialog
 from dlg_egv import EgvDialog
 from pin import FuePin, EnrDialog
 from pincount import PinCount
@@ -815,6 +816,11 @@ class MainWin(QtGui.QMainWindow):
         
         self.fig_update()
 
+    def open_enrichment_dlg(self):
+        """open enrichment dialog"""
+        self.enrichment_dlg = EnrichmentDialog(self)
+        self.enrichment_dlg.exec_()
+        
     def open_bundle_dlg(self):
         """open bundle settings dialog"""
         self.bundle_dlg = BundleDialog(self)
@@ -2141,9 +2147,13 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         forward = self.create_action("Forward", slot=self.forward_state,
                                          tip="Forward to next")
 
-        reset = self.create_action("Undo changes...",
-                                         tip="Undo all changes...")
+        reset = self.create_action("Reset...",
+                                   tip="Undo all changes...")
 
+        enrichment = self.create_action("Enrichments...",
+                                        slot=self.open_enrichment_dlg,
+                                        tip="Edit enrichment levels...")
+        
         enr_plus = self.create_action("Increase enr", slot=self.enr_add,
                                       tip="Increase enrichment",
                                       shortcut="F6")
@@ -2156,7 +2166,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                                          tip="Preferences...")
         
         self.add_actions(self.edit_menu, (back, forward, None, enr_plus,
-                                          enr_minus, None, reset, preferences))
+                                          enr_minus, None, enrichment,
+                                          reset, preferences))
         
         self.tools_menu = self.menuBar().addMenu("&Tools")
         plot_action = self.create_action("Plot...", tip="Plot...",
