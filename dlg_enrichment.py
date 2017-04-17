@@ -27,8 +27,8 @@ class EnrichmentDialog(QtGui.QDialog):
         self.table_view = QtGui.QTableView()
         self.table_view.setSortingEnabled(True)
         #self.table_view.setShowGrid(False)
-        #self.table_view.setSelectionBehavior(
-        #    QtGui.QAbstractItemView.SelectRows)
+        self.table_view.setSelectionBehavior(
+            QtGui.QAbstractItemView.SelectRows)
         #self.table_view.setSelectionMode(
         #    QtGui.QAbstractItemView.SingleSelection)
         #self.table_view.setDragDropMode(
