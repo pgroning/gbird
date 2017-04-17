@@ -1,14 +1,13 @@
 from pyqt_trace import pyqt_trace as qtrace  # Break point that works with Qt
 import os
-import ConfigParser
 import numpy as np
 from PyQt4 import QtGui, QtCore
 
-from fileio import InpFileParser
 
 class Data(object):
     """A class that can be used to organize data in its attributes"""
     pass
+
 
 class EnrichmentDialog(QtGui.QDialog):
     def __init__(self, parent):
@@ -17,6 +16,7 @@ class EnrichmentDialog(QtGui.QDialog):
         self.settings = QtCore.QSettings("greenbird")
         self.parent = parent
         self.setup()
+        self.set_table_data()
 
     def setup(self):
         self.setWindowTitle("Edit enrichments")
@@ -107,14 +107,14 @@ class EnrichmentDialog(QtGui.QDialog):
                      self.ok_action)
 
         add_icon = "icons/add-icon_32x32.png"
-        addFileAction = QtGui.QAction(QtGui.QIcon(add_icon),
-                                      'Add file...', self)
-        addFileAction.triggered.connect(self.add_file_action)
+        addRowAction = QtGui.QAction(QtGui.QIcon(add_icon),
+                                      'Add row...', self)
+        addRowAction.triggered.connect(self.add_row_action)
         
         delete_icon = "icons/delete3-icon_32x32.png"
-        deleteFileAction = QtGui.QAction(QtGui.QIcon(delete_icon),
+        deleteRowAction = QtGui.QAction(QtGui.QIcon(delete_icon),
                                          'Delete row', self)
-        deleteFileAction.triggered.connect(self.delete_row_action)
+        deleteRowAction.triggered.connect(self.delete_row_action)
 
         arrow_up_icon = "icons/arrow-up-icon_32x32.png"
         moveUpAction = QtGui.QAction(QtGui.QIcon(arrow_up_icon),
@@ -127,8 +127,8 @@ class EnrichmentDialog(QtGui.QDialog):
         moveDownAction.triggered.connect(self.move_down_action)
 
         toolbar = QtGui.QToolBar()
-        toolbar.addAction(addFileAction)
-        toolbar.addAction(deleteFileAction)
+        toolbar.addAction(addRowAction)
+        toolbar.addAction(deleteRowAction)
         toolbar.addAction(moveUpAction)
         toolbar.addAction(moveDownAction)
 
@@ -143,29 +143,31 @@ class EnrichmentDialog(QtGui.QDialog):
     #def action(self):
     #    self.close()
 
-    def add_file_action(self):
+    def add_row_action(self):
         """Add single cax file to table cell"""
 
-        caxfile = self.select_read_file(file_choices="*.cax (*.cax)")
-        if not caxfile:
-            return
+        #caxfile = self.select_read_file(file_choices="*.cax (*.cax)")
+        #if not caxfile:
+        #    return
 
-        i = 0
+        #i = self.table_view.model().rowCount()
+        icur = self.table_view.selectionModel().currentIndex()
+        i = icur.row() + 1
         empty_item = QtGui.QStandardItem("")
         self.table_view.model().insertRow(i, empty_item)
         
         item0 = QtGui.QStandardItem("")
         item1 = QtGui.QStandardItem("")
-        item2 = QtGui.QStandardItem(caxfile)
+        item2 = QtGui.QStandardItem("")
         self.table_view.model().setItem(i, 0, item0)
         self.table_view.model().setItem(i, 1, item1)
         self.table_view.model().setItem(i, 2, item2)
-        self.table_view.resizeColumnToContents(2)
+        #self.table_view.resizeColumnToContents(2)
         
-        nrows = self.table_view.model().rowCount()
-        for i in range(nrows):
-            vheader = QtGui.QStandardItem(str(nrows - i))
-            self.table_view.model().setVerticalHeaderItem(i, vheader)
+        #nrows = self.table_view.model().rowCount()
+        #for i in range(nrows):
+        #    vheader = QtGui.QStandardItem(str(nrows - i))
+        #    self.table_view.model().setVerticalHeaderItem(i, vheader)
 
     def delete_row_action(self):
         row = self.table_view.selectionModel().currentIndex().row()
@@ -176,32 +178,31 @@ class EnrichmentDialog(QtGui.QDialog):
         """Set table cell data"""
         
         self.clear_all()
+
+        FUE = np.array([[1, 10.549, 0.71, 0.00],[2, 10.549, 2.20, 0.00]])
+        nrows = FUE.shape[0]
         
-        #caxfiles = self.parent.bunlist[0].data.caxfiles
-        caxfiles = self.data.caxfiles
-        caxfiles = caxfiles[::-1]  # make copy and reverse order
-        
-        #nodes = self.parent.bunlist[0].data.nodes
-        nodes = self.data.nodes[::-1]
-        #btf_nodes = self.parent.bunlist[0].data.btf_nodes
-        btf_nodes = self.data.btf_nodes[::-1]
-        #content = self.parent.bunlist[0].data.content
-        #content = self.data.content
-        nfiles = len(caxfiles)
-        
-        for i, caxfile in enumerate(caxfiles):
-            #item0 = QtGui.QStandardItem(str(nodes[i]))
-            node = '{0:g}'.format(nodes[i])
-            item0 = QtGui.QStandardItem(node)
-            #item1 = QtGui.QStandardItem(str(btf_nodes[i]))
-            btf_node = '{0:g}'.format(btf_nodes[i])
-            item1 = QtGui.QStandardItem(btf_node)
-            item2 = QtGui.QStandardItem(caxfile)
-            self.table_view.model().setItem(i, 0, item0)
-            self.table_view.model().setItem(i, 1, item1)
-            self.table_view.model().setItem(i, 2, item2)
-            vheader = QtGui.QStandardItem(str(nfiles - i))
-            self.table_view.model().setVerticalHeaderItem(i, vheader)
+        for i in range(nrows):
+            #index = '{0:d}'.format(int(FUE[i, 0]))
+            #index_item = QtGui.QStandardItem(index)
+            
+            dens = '{0:.3f}'.format(FUE[i, 1])
+            dens_item = QtGui.QStandardItem(dens)
+
+            enr = '{0:.2f}'.format(FUE[i, 2])
+            enr_item = QtGui.QStandardItem(enr)
+
+            ba = '{0:.2f}'.format(FUE[i, 3])
+            ba_item = QtGui.QStandardItem(ba)
+            
+            #self.table_view.model().setItem(i, 0, index_item)
+            self.table_view.model().setItem(i, 0, dens_item)
+            self.table_view.model().setItem(i, 1, enr_item)
+            self.table_view.model().setItem(i, 2, ba_item)
+
+            #vheader = QtGui.QStandardItem(str(nfiles - i))
+            #self.table_view.model().setVerticalHeaderItem(i, vheader)
+
             #self.table_view.setRowHeight(i, 25)
             #self.table_view.model().setRowHeight(i, 25)
             #item.setCheckable(True)
@@ -209,15 +210,15 @@ class EnrichmentDialog(QtGui.QDialog):
             #item.setCheckState(QtCore.Qt.Checked)
         #self.table_view.setColumnWidth(0, 80)
         #self.table_view.setColumnWidth(1, 80)
-        self.table_view.resizeColumnToContents(2)
+        #self.table_view.resizeColumnToContents(2)
         
         #fuetype = self.parent.bunlist[0].data.fuetype
-        fuetype = self.data.fuetype
-        ifue = self.fue_list.index(fuetype)
-        self.fuetype_cbox.setCurrentIndex(ifue)
+        #fuetype = self.data.fuetype
+        #ifue = self.fue_list.index(fuetype)
+        #self.fuetype_cbox.setCurrentIndex(ifue)
 
         #if content == "filtered":
-        self.content_cbox.setCurrentIndex(0)
+        #self.content_cbox.setCurrentIndex(0)
         #else:
         #    self.content_cbox.setCurrentIndex(1)
 
@@ -229,35 +230,22 @@ class EnrichmentDialog(QtGui.QDialog):
     def ok_action(self):
         """Import data from cax files"""
 
-        self.get_table_data()
-        self.parent.init_bundle()
-        bundle = self.parent.bunlist[0]
-        bundle.data.fuetype = self.data.fuetype
-        bundle.data.caxfiles = self.data.caxfiles
+        #self.get_table_data()
+        #self.parent.init_bundle()
+        #bundle = self.parent.bunlist[0]
+        #bundle.data.fuetype = self.data.fuetype
+        #bundle.data.caxfiles = self.data.caxfiles
 
         #if self.height_cbox.currentIndex() == 0:
-        bundle.data.nodes = self.data.nodes
-        bundle.data.btf_nodes = self.data.btf_nodes
+        #bundle.data.nodes = self.data.nodes
+        #bundle.data.btf_nodes = self.data.btf_nodes
         #elif self.height_cbox.currentIndex() == 1:  # convert to zone height
         #    bundle.data.nodes = self.zone_height(self.data.nodes)
         #    bundle.data.btf_nodes = self.zone_height(self.data.btf_nodes)
         
-        bundle.data.content = self.data.content
+        #bundle.data.content = self.data.content
         self.close()
-        self.parent.import_data()
-
-    def zone_height(self, heights):
-        """convert to zone height"""
-        h_list = [h for h in heights if h]
-        h_array = np.array([0] + h_list)  # prepend 0
-        dh = np.diff(h_array)
-        z_array = np.zeros(len(heights))
-        j = 0
-        for i, node in enumerate(heights):
-            if node:
-                z_array[i] = dh[j]
-                j += 1
-        return z_array
+        #self.parent.import_data()
 
     def get_table_data(self):
         """Get data from dialog widgets"""
@@ -371,91 +359,3 @@ class EnrichmentDialog(QtGui.QDialog):
         nrows = self.table_view.model().rowCount()
         self.table_view.model().removeRows(0, nrows)
 
-    def load_bundle_action(self):
-        """Reading bundle setup file"""
-
-        filename = self.select_read_file()
-        if not filename:
-            return
-
-        self.data = Data()
-        inpfile = InpFileParser(self.data)
-        inpfile.read(filename)
-        
-        #self.parent.read_pro(filename)
-        self.set_table_data()
-
-    def save_bundle_action(self):
-        """Save data to bundle setup file"""
-        
-        filename = self.select_write_file()
-        if not filename:
-            return
-        
-        self.get_table_data()
-        inpfile = InpFileParser(self.data)
-        inpfile.write(filename)
-
-        #config = ConfigParser.SafeConfigParser()
-        #config.add_section("Bundle")
-        #config.set("Bundle", "fuel", self.data.fuetype)
-
-        #file_str = "\n".join(self.data.caxfiles[::-1])  # save reverse order
-        #config.set("Bundle", "files", file_str)
-
-        #nodes = map(str, self.data.nodes[::-1])
-        #node_str = "\n".join(nodes)
-        #config.set("Bundle", "nodes", node_str)
-
-        #config.set("Bundle", "content", self.data.content)
-
-        #config.add_section("BTF")
-        #btf_nodes = map(str, self.data.btf_nodes[::-1])
-        #btf_str = "\n".join(btf_nodes)
-        #config.set("BTF", "nodes", btf_str)
-        
-        #with open(filename, "wb") as configfile:
-        #    config.write(configfile)
-
-    def select_read_file(self, file_choices=None):
-        """Select file for reading"""
-
-        # Import default path from config file
-        self.settings.beginGroup("PATH")
-        path_default = self.settings.value("path_default",
-                                           QtCore.QString("")).toString()
-        self.settings.endGroup()
-        if file_choices is None:
-            file_choices = "*.inp (*.inp)"
-        filename = unicode(QtGui.QFileDialog.getOpenFileName(self, 'Open file',
-                                                             path_default,
-                                                             file_choices))
-        if filename:
-            # Save default path to config file
-            # Save default path to config file
-            path = os.path.split(filename)[0]
-            self.settings.beginGroup("PATH")
-            self.settings.setValue("path_default", QtCore.QString(path))
-            self.settings.endGroup()
-        return filename
-
-    def select_write_file(self):
-        """Select file for writing"""
-
-        # Import default path from config file
-        self.settings.beginGroup("PATH")
-        path_default = self.settings.value("path_default",
-                                           QtCore.QString("")).toString()
-        self.settings.endGroup()
-        file_choices = "*.inp (*.inp)"
-        filename = unicode(QtGui.QFileDialog.getSaveFileName(self, 'Save file',
-                                                             path_default,
-                                                             file_choices))
-        if filename:
-            # Save default path to config file
-            path = os.path.split(filename)[0]
-            self.settings.beginGroup("PATH")
-            self.settings.setValue("path_default", QtCore.QString(path))
-            self.settings.endGroup()    
-        return filename
-    
