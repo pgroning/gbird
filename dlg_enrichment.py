@@ -22,7 +22,7 @@ class EnrichmentDialog(QtGui.QDialog):
         self.setWindowTitle("Edit enrichments")
         xpos = self.parent.pos().x() + self.parent.size().width() / 2
         ypos = self.parent.pos().y() + self.parent.size().height() / 2
-        self.setGeometry(QtCore.QRect(0.5*xpos, 0.8*ypos, 350, 300))
+        self.setGeometry(QtCore.QRect(0.5*xpos, 0.8*ypos, 350, 400))
 
         self.table_view = QtGui.QTableView()
         self.table_view.setSortingEnabled(True)
@@ -180,20 +180,28 @@ class EnrichmentDialog(QtGui.QDialog):
         
         self.clear_all()
 
-        FUE = np.array([[1, 10.549, 0.71, 0.00],[2, 10.349, 2.20, 3.00]])
-        nrows = FUE.shape[0]
+        iseg = int(self.parent.case_cbox.currentIndex())
+        enrpinlist = self.parent.enrpinlist[iseg]
         
-        for i in range(nrows):
+        #FUE = np.array([[1, 10.549, 0.71, 0.00],[2, 10.349, 2.20, 3.00]])
+        #nrows = FUE.shape[0]
+
+        for i, pin in enumerate(enrpinlist):
+        #for i in range(nrows):
             #index = '{0:d}'.format(int(FUE[i, 0]))
             #index_item = QtGui.QStandardItem(index)
             
-            dens = '{0:.3f}'.format(FUE[i, 1])
+            dens = '{0:.3f}'.format(pin.DENS)
             dens_item = QtGui.QStandardItem(dens)
 
-            enr = '{0:.2f}'.format(FUE[i, 2])
+            enr = '{0:.2f}'.format(pin.ENR)
             enr_item = QtGui.QStandardItem(enr)
 
-            ba = '{0:.2f}'.format(FUE[i, 3])
+            if np.isnan(pin.BA):
+                ba = 0
+            else:
+                ba = pin.BA
+            ba = '{0:.2f}'.format(ba)
             ba_item = QtGui.QStandardItem(ba)
             
             #self.table_view.model().setItem(i, 0, index_item)
