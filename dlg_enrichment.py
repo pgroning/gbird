@@ -22,9 +22,10 @@ class EnrichmentDialog(QtGui.QDialog):
         self.setWindowTitle("Edit enrichments")
         xpos = self.parent.pos().x() + self.parent.size().width() / 2
         ypos = self.parent.pos().y() + self.parent.size().height() / 2
-        self.setGeometry(QtCore.QRect(0.5*xpos, 0.8*ypos, 300, 300))
+        self.setGeometry(QtCore.QRect(0.5*xpos, 0.8*ypos, 350, 300))
 
         self.table_view = QtGui.QTableView()
+        self.table_view.setSortingEnabled(True)
         #self.table_view.setShowGrid(False)
         #self.table_view.setSelectionBehavior(
         #    QtGui.QAbstractItemView.SelectRows)
@@ -179,7 +180,7 @@ class EnrichmentDialog(QtGui.QDialog):
         
         self.clear_all()
 
-        FUE = np.array([[1, 10.549, 0.71, 0.00],[2, 10.549, 2.20, 0.00]])
+        FUE = np.array([[1, 10.549, 0.71, 0.00],[2, 10.349, 2.20, 3.00]])
         nrows = FUE.shape[0]
         
         for i in range(nrows):
