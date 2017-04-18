@@ -9,6 +9,39 @@ class Data(object):
     pass
 
 
+class ItemDelegate(QtGui.QStyledItemDelegate):
+    """Class that is used to validate user input"""
+    
+    def createEditor(self, parent, option, index):
+        line_edit = QtGui.QLineEdit(parent)
+        line_edit.setMaxLength(6)
+        validator = QtGui.QDoubleValidator(0, 99.999, 3, self)
+        line_edit.setValidator(validator)
+        return line_edit
+
+    
+class DensItemDelegate(QtGui.QStyledItemDelegate):
+    """Class that is used to validate user input"""
+    
+    def createEditor(self, parent, option, index):
+        line_edit = QtGui.QLineEdit(parent)
+        line_edit.setMaxLength(6)
+        validator = QtGui.QDoubleValidator(0, 99.999, 3, self)
+        line_edit.setValidator(validator)
+        return line_edit
+
+    
+class EnrItemDelegate(QtGui.QStyledItemDelegate):
+    """Class that is used to validate user input"""
+    
+    def createEditor(self, parent, option, index):
+        line_edit = QtGui.QLineEdit(parent)
+        line_edit.setMaxLength(4)
+        validator = QtGui.QDoubleValidator(0, 9.99, 2, self)
+        line_edit.setValidator(validator)
+        return line_edit
+    
+
 class EnrichmentDialog(QtGui.QDialog):
     def __init__(self, parent):
         QtGui.QDialog.__init__(self)
@@ -33,6 +66,13 @@ class EnrichmentDialog(QtGui.QDialog):
         #    QtGui.QAbstractItemView.SingleSelection)
         #self.table_view.setDragDropMode(
         #    QtGui.QAbstractItemView.DragDrop)
+
+        # Put constraints on user input
+        self.dens_delegate = DensItemDelegate()
+        self.table_view.setItemDelegateForColumn(0, self.dens_delegate)
+        self.enr_delegate = EnrItemDelegate()
+        self.table_view.setItemDelegateForColumn(1, self.enr_delegate)
+        self.table_view.setItemDelegateForColumn(2, self.enr_delegate)
         
         model = QtGui.QStandardItemModel(0, 3, self.table_view)
         selection_model = QtGui.QItemSelectionModel(model)
