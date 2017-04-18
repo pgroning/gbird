@@ -10,6 +10,18 @@ class Data(object):
     """A class that can be used to organize data in its attributes"""
     pass
 
+
+class ItemDelegate(QtGui.QStyledItemDelegate):
+    """Class that is used to validate user input"""
+    
+    def createEditor(self, parent, option, index):
+        line_edit = QtGui.QLineEdit(parent)
+        line_edit.setMaxLength(6)
+        validator = QtGui.QDoubleValidator(0, 999.99, 2, self)
+        line_edit.setValidator(validator)
+        return line_edit
+
+
 class BundleDialog(QtGui.QDialog):
     def __init__(self, parent):
         QtGui.QDialog.__init__(self)
@@ -32,6 +44,10 @@ class BundleDialog(QtGui.QDialog):
         #    QtGui.QAbstractItemView.SingleSelection)
         #self.table_view.setDragDropMode(
         #    QtGui.QAbstractItemView.DragDrop)
+
+        self.delegate = ItemDelegate()
+        self.table_view.setItemDelegateForColumn(0, self.delegate)
+        self.table_view.setItemDelegateForColumn(1, self.delegate)
         
         model = QtGui.QStandardItemModel(0, 3, self.table_view)
         selection_model = QtGui.QItemSelectionModel(model)
