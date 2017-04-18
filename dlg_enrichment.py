@@ -9,16 +9,6 @@ class Data(object):
     pass
 
 
-class ItemDelegate(QtGui.QStyledItemDelegate):
-    """Class that is used to validate user input"""
-    
-    def createEditor(self, parent, option, index):
-        line_edit = QtGui.QLineEdit(parent)
-        line_edit.setMaxLength(6)
-        validator = QtGui.QDoubleValidator(0, 99.999, 3, self)
-        line_edit.setValidator(validator)
-        return line_edit
-
     
 class DensItemDelegate(QtGui.QStyledItemDelegate):
     """Class that is used to validate user input"""
@@ -69,20 +59,23 @@ class EnrichmentDialog(QtGui.QDialog):
 
         # Put constraints on user input
         self.dens_delegate = DensItemDelegate()
-        self.table_view.setItemDelegateForColumn(0, self.dens_delegate)
+        self.table_view.setItemDelegateForColumn(1, self.dens_delegate)
         self.enr_delegate = EnrItemDelegate()
-        self.table_view.setItemDelegateForColumn(1, self.enr_delegate)
         self.table_view.setItemDelegateForColumn(2, self.enr_delegate)
-        
-        model = QtGui.QStandardItemModel(0, 3, self.table_view)
+        self.table_view.setItemDelegateForColumn(3, self.enr_delegate)
+
+        model = QtGui.QStandardItemModel(0, 4, self.table_view)
         selection_model = QtGui.QItemSelectionModel(model)
         self.table_view.setModel(model)
         self.table_view.setSelectionModel(selection_model)
 
-        model.setHorizontalHeaderItem(0, QtGui.QStandardItem("Density"))
-        model.setHorizontalHeaderItem(1, QtGui.QStandardItem("U-235 (w/o)"))
-        model.setHorizontalHeaderItem(2, QtGui.QStandardItem("Gd"))
+        model.setHorizontalHeaderItem(0, QtGui.QStandardItem("Index"))
+        model.setHorizontalHeaderItem(1, QtGui.QStandardItem("Density"))
+        model.setHorizontalHeaderItem(2, QtGui.QStandardItem("U-235 (w/o)"))
+        model.setHorizontalHeaderItem(3, QtGui.QStandardItem("Gd"))
 
+        self.table_view.setColumnHidden(0, True)  # do not display indicies
+        
         horizontalheader = self.table_view.horizontalHeader()
         horizontalheader.setResizeMode(QtGui.QHeaderView.Stretch)
         #horizontalheader.setResizeMode(2, QtGui.QHeaderView.Stretch)
@@ -188,18 +181,31 @@ class EnrichmentDialog(QtGui.QDialog):
         #if not caxfile:
         #    return
 
-        #i = self.table_view.model().rowCount()
-        icur = self.table_view.selectionModel().currentIndex()
-        i = icur.row() + 1
+        i = self.table_view.model().rowCount()
+        #icur = self.table_view.selectionModel().currentIndex()
+        #i = icur.row() + 1
         empty_item = QtGui.QStandardItem("")
         self.table_view.model().insertRow(i, empty_item)
-        
-        item0 = QtGui.QStandardItem("0.000")
-        item1 = QtGui.QStandardItem("0.00")
+
+        item0 = QtGui.QStandardItem(str(i))
+        item1 = QtGui.QStandardItem("0.000")
         item2 = QtGui.QStandardItem("0.00")
+        item3 = QtGui.QStandardItem("0.00")
         self.table_view.model().setItem(i, 0, item0)
         self.table_view.model().setItem(i, 1, item1)
         self.table_view.model().setItem(i, 2, item2)
+        self.table_view.model().setItem(i, 3, item3)
+
+        #self.table_view.clearSelection()
+        self.table_view.selectionModel().clearSelection()
+        select = QtGui.QItemSelectionModel.Select
+        noupdate = QtGui.QItemSelectionModel.NoUpdate
+        ncols = self.table_view.model().columnCount()
+        for j in range(ncols):
+            index = self.table_view.model().item(i, j).index()
+            self.table_view.selectionModel().select(index, select)
+        self.table_view.selectionModel().setCurrentIndex(index, noupdate)
+        
         #self.table_view.resizeColumnToContents(2)
         
         #nrows = self.table_view.model().rowCount()
@@ -208,10 +214,21 @@ class EnrichmentDialog(QtGui.QDialog):
         #    self.table_view.model().setVerticalHeaderItem(i, vheader)
 
     def delete_row_action(self):
-        row = self.table_view.selectionModel().currentIndex().row()
-        self.table_view.model().takeRow(row)
+        i = self.table_view.selectionModel().currentIndex().row()
+        self.table_view.model().takeRow(i)
         #self.table_view.removeRow(row)
 
+        if i >= self.table_view.model().rowCount():
+            i = self.table_view.model().rowCount() - 1
+            
+        select = QtGui.QItemSelectionModel.Select
+        noupdate = QtGui.QItemSelectionModel.NoUpdate
+        ncols = self.table_view.model().columnCount()
+        for j in range(ncols):
+            index = self.table_view.model().item(i, j).index()
+            self.table_view.selectionModel().select(index, select)
+        self.table_view.selectionModel().setCurrentIndex(index, noupdate)
+            
     def set_table_data(self):
         """Set table cell data"""
         
@@ -221,8 +238,8 @@ class EnrichmentDialog(QtGui.QDialog):
         enrpinlist = self.parent.enrpinlist[iseg]
         
         for i, pin in enumerate(enrpinlist):
-            #index = '{0:d}'.format(int(FUE[i, 0]))
-            #index_item = QtGui.QStandardItem(index)
+            index = '{0:d}'.format(i)
+            index_item = QtGui.QStandardItem(index)
             
             dens = '{0:.3f}'.format(pin.DENS)
             dens_item = QtGui.QStandardItem(dens)
@@ -234,10 +251,10 @@ class EnrichmentDialog(QtGui.QDialog):
             ba = '{0:.2f}'.format(ba)
             ba_item = QtGui.QStandardItem(ba)
             
-            #self.table_view.model().setItem(i, 0, index_item)
-            self.table_view.model().setItem(i, 0, dens_item)
-            self.table_view.model().setItem(i, 1, enr_item)
-            self.table_view.model().setItem(i, 2, ba_item)
+            self.table_view.model().setItem(i, 0, index_item)
+            self.table_view.model().setItem(i, 1, dens_item)
+            self.table_view.model().setItem(i, 2, enr_item)
+            self.table_view.model().setItem(i, 3, ba_item)
 
             #vheader = QtGui.QStandardItem(str(nfiles - i))
             #self.table_view.model().setVerticalHeaderItem(i, vheader)
