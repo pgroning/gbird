@@ -181,9 +181,6 @@ class EnrichmentDialog(QtGui.QDialog):
         vbox.addLayout(hbox)
         self.setLayout(vbox)
 
-    #def action(self):
-    #    self.close()
-
     def add_row_action(self):
         """Add single cax file to table cell"""
 
@@ -197,9 +194,9 @@ class EnrichmentDialog(QtGui.QDialog):
         empty_item = QtGui.QStandardItem("")
         self.table_view.model().insertRow(i, empty_item)
         
-        item0 = QtGui.QStandardItem("")
-        item1 = QtGui.QStandardItem("")
-        item2 = QtGui.QStandardItem("")
+        item0 = QtGui.QStandardItem("0.000")
+        item1 = QtGui.QStandardItem("0.00")
+        item2 = QtGui.QStandardItem("0.00")
         self.table_view.model().setItem(i, 0, item0)
         self.table_view.model().setItem(i, 1, item1)
         self.table_view.model().setItem(i, 2, item2)
@@ -223,11 +220,7 @@ class EnrichmentDialog(QtGui.QDialog):
         iseg = int(self.parent.case_cbox.currentIndex())
         enrpinlist = self.parent.enrpinlist[iseg]
         
-        #FUE = np.array([[1, 10.549, 0.71, 0.00],[2, 10.349, 2.20, 3.00]])
-        #nrows = FUE.shape[0]
-
         for i, pin in enumerate(enrpinlist):
-        #for i in range(nrows):
             #index = '{0:d}'.format(int(FUE[i, 0]))
             #index_item = QtGui.QStandardItem(index)
             
@@ -237,10 +230,7 @@ class EnrichmentDialog(QtGui.QDialog):
             enr = '{0:.2f}'.format(pin.ENR)
             enr_item = QtGui.QStandardItem(enr)
 
-            if np.isnan(pin.BA):
-                ba = 0
-            else:
-                ba = pin.BA
+            ba = 0 if np.isnan(pin.BA) else pin.BA
             ba = '{0:.2f}'.format(ba)
             ba_item = QtGui.QStandardItem(ba)
             
@@ -277,9 +267,18 @@ class EnrichmentDialog(QtGui.QDialog):
         #    self.height_cbox.setCurrentIndex(1)
 
     def ok_action(self):
-        """Import data from cax files"""
+        """Update enrpinlist"""
 
-        #self.get_table_data()
+        self.get_table_data()
+
+        iseg = int(self.parent.case_cbox.currentIndex())
+        enrpinlist = self.parent.enrpinlist[iseg]
+
+        nrows = len(self.data.enr)
+        #for i in range(nrows):
+            
+        
+        qtrace()
         #self.parent.init_bundle()
         #bundle = self.parent.bunlist[0]
         #bundle.data.fuetype = self.data.fuetype
@@ -298,42 +297,23 @@ class EnrichmentDialog(QtGui.QDialog):
 
     def get_table_data(self):
         """Get data from dialog widgets"""
-                
-        fuetype = str(self.fuetype_cbox.currentText())
-        if self.content_cbox.currentIndex() == 0:
-            content = "filtered"
-        else:
-            content = "unfiltered"
 
-        #if self.height_cbox.currentIndex() == 0:
-        #    height = "zone"
-        #else:
-        #    height = "total"
-
-        node_list = []
-        btf_list = []
-        file_list = []
+        dens_list = []
+        enr_list = []
+        ba_list = []
         nrows = self.table_view.model().rowCount()
         for i in range(nrows):
-            node_item = self.table_view.model().item(i, 0)
-            #node_list.append(int(node_item.text()))
-            node_list.append(float(node_item.text()))
-            btf_item = self.table_view.model().item(i, 1)
-            #btf_list.append(int(btf_item.text()))
-            btf_list.append(float(btf_item.text()))
-            file_item = self.table_view.model().item(i, 2)
-            file_list.append(str(file_item.text()))
-        node_list.reverse()
-        btf_list.reverse()
-        file_list.reverse()
-        
+            dens_item = self.table_view.model().item(i, 0)
+            dens_list.append(float(dens_item.text()))
+            enr_item = self.table_view.model().item(i, 1)
+            enr_list.append(float(enr_item.text()))
+            ba_item = self.table_view.model().item(i, 2)
+            ba_list.append(float(ba_item.text()))
+
         self.data = Data()
-        self.data.fuetype = fuetype
-        self.data.content = content
-        self.data.nodes = node_list
-        #self.data.height = height
-        self.data.btf_nodes = btf_list
-        self.data.caxfiles = file_list
+        self.data.dens = dens_list
+        self.data.enr = enr_list
+        self.data.ba = ba_list
                 
     def move_up_action(self):
         """Swap rows in order to move selected item up one step"""
