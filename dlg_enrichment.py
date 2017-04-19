@@ -8,7 +8,6 @@ class Data(object):
     """A class that can be used to organize data in its attributes"""
     pass
 
-
     
 class DensItemDelegate(QtGui.QStyledItemDelegate):
     """Class that is used to validate user input"""
@@ -74,7 +73,7 @@ class EnrichmentDialog(QtGui.QDialog):
         model.setHorizontalHeaderItem(2, QtGui.QStandardItem("U-235 (w/o)"))
         model.setHorizontalHeaderItem(3, QtGui.QStandardItem("Gd"))
 
-        self.table_view.setColumnHidden(0, True)  # do not display indicies
+        #self.table_view.setColumnHidden(0, True)  # do not display indicies
         
         horizontalheader = self.table_view.horizontalHeader()
         horizontalheader.setResizeMode(QtGui.QHeaderView.Stretch)
@@ -122,23 +121,19 @@ class EnrichmentDialog(QtGui.QDialog):
         grid.addWidget(self.table_view, 0, 0)
         
         hbox = QtGui.QHBoxLayout()
-        #self.save_button = QtGui.QPushButton("Save As...")
-        #self.load_button = QtGui.QPushButton("Load...")
         self.ok_button = QtGui.QPushButton("Ok")
         self.cancel_button = QtGui.QPushButton("Cancel")
-        #hbox.addWidget(self.save_button)
-        #hbox.addWidget(self.load_button)
+        self.reset_button = QtGui.QPushButton("Reset...")
+        hbox.addWidget(self.reset_button)
         hbox.addStretch()
-        hbox.addWidget(self.ok_button)
         hbox.addWidget(self.cancel_button)
+        hbox.addWidget(self.ok_button)
         self.connect(self.cancel_button, QtCore.SIGNAL('clicked()'),
                      self.close)
-        #self.connect(self.save_button, QtCore.SIGNAL('clicked()'), 
-        #             self.save_bundle_action)
-        #self.connect(self.load_button, QtCore.SIGNAL('clicked()'), 
-        #             self.load_bundle_action)
         self.connect(self.ok_button, QtCore.SIGNAL('clicked()'), 
                      self.ok_action)
+        self.connect(self.reset_button, QtCore.SIGNAL('clicked()'), 
+                     self.reset_action)
 
         add_icon = "icons/add-icon_32x32.png"
         addRowAction = QtGui.QAction(QtGui.QIcon(add_icon),
@@ -187,7 +182,8 @@ class EnrichmentDialog(QtGui.QDialog):
         empty_item = QtGui.QStandardItem("")
         self.table_view.model().insertRow(i, empty_item)
 
-        item0 = QtGui.QStandardItem(str(i))
+        index = '{0:d}'.format(i)
+        item0 = QtGui.QStandardItem(index)
         item1 = QtGui.QStandardItem("0.000")
         item2 = QtGui.QStandardItem("0.00")
         item3 = QtGui.QStandardItem("0.00")
@@ -220,7 +216,15 @@ class EnrichmentDialog(QtGui.QDialog):
 
         if i >= self.table_view.model().rowCount():
             i = self.table_view.model().rowCount() - 1
-            
+        
+        # Update indicies
+        nrows = self.table_view.model().rowCount()
+        for row in range(i, nrows):
+            index = '{0:d}'.format(row)
+            index_item = QtGui.QStandardItem(index)
+            self.table_view.model().setItem(row, 0, index_item)
+
+        # Update row selection
         select = QtGui.QItemSelectionModel.Select
         noupdate = QtGui.QItemSelectionModel.NoUpdate
         ncols = self.table_view.model().columnCount()
@@ -228,7 +232,17 @@ class EnrichmentDialog(QtGui.QDialog):
             index = self.table_view.model().item(i, j).index()
             self.table_view.selectionModel().select(index, select)
         self.table_view.selectionModel().setCurrentIndex(index, noupdate)
-            
+
+    def reset_action(self):
+        """reset all cells"""
+        msgBox = QtGui.QMessageBox()
+        status = msgBox.information(self, "Reset",
+                                    "Continue?",
+                                    QtGui.QMessageBox.Yes |
+                                    QtGui.QMessageBox.Cancel)
+        if status == QtGui.QMessageBox.Yes:
+            self.set_table_data()
+        
     def set_table_data(self):
         """Set table cell data"""
         
