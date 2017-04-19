@@ -3,6 +3,8 @@ import os
 import numpy as np
 from PyQt4 import QtGui, QtCore
 
+from pin import FuePin
+
 
 class Data(object):
     """A class that can be used to organize data in its attributes"""
@@ -39,6 +41,7 @@ class EnrichmentDialog(QtGui.QDialog):
         self.parent = parent
         self.setup()
         self.set_table_data()
+        self.ok = False  # True if Ok button is clicked
 
     def setup(self):
         self.setWindowTitle("Edit enrichments")
@@ -73,7 +76,7 @@ class EnrichmentDialog(QtGui.QDialog):
         model.setHorizontalHeaderItem(2, QtGui.QStandardItem("U-235 (w/o)"))
         model.setHorizontalHeaderItem(3, QtGui.QStandardItem("Gd"))
 
-        #self.table_view.setColumnHidden(0, True)  # do not display indicies
+        self.table_view.setColumnHidden(0, True)  # do not display indicies
         
         horizontalheader = self.table_view.horizontalHeader()
         horizontalheader.setResizeMode(QtGui.QHeaderView.Stretch)
@@ -303,45 +306,61 @@ class EnrichmentDialog(QtGui.QDialog):
         self.get_table_data()
 
         iseg = int(self.parent.case_cbox.currentIndex())
-        enrpinlist = self.parent.enrpinlist[iseg]
 
+        # Create new enrpin list
+        enrpinlist = []
         nrows = len(self.data.enr)
-        #for i in range(nrows):
-            
-        
-        qtrace()
-        #self.parent.init_bundle()
-        #bundle = self.parent.bunlist[0]
-        #bundle.data.fuetype = self.data.fuetype
-        #bundle.data.caxfiles = self.data.caxfiles
+        cmap = self.parent.get_colormap(nrows)
+        for i in range(nrows):
+            enrpin = FuePin(self.parent.axes)
+            enrpin.facecolor = cmap[i]
+            enrpin.DENS = self.data.dens[i]
+            enrpin.ENR = self.data.enr[i]
+            if self.data.ba[i] < 0.00001:
+                enrpin.BA = np.nan
+                enrpin.BAindex = np.nan
+            else:
+                enrpin.BA = self.data.ba[i]
+                enrpin.BAindex = 7300  # Gd
+            enrpinlist.append(enrpin)
 
-        #if self.height_cbox.currentIndex() == 0:
-        #bundle.data.nodes = self.data.nodes
-        #bundle.data.btf_nodes = self.data.btf_nodes
-        #elif self.height_cbox.currentIndex() == 1:  # convert to zone height
-        #    bundle.data.nodes = self.zone_height(self.data.nodes)
-        #    bundle.data.btf_nodes = self.zone_height(self.data.btf_nodes)
-        
-        #bundle.data.content = self.data.content
+        self.parent.enrpinlist[iseg] = enrpinlist
+
+        # Update fue pins
+        index = self.data.index
+        isort = [i for i, e in sorted(enumerate(index), key=lambda x:x[1])]
+        for pin in self.parent.pinobjects[iseg]:
+            i = pin.LFU - 1
+            if i > max(index):
+                i = max(index)
+            j = isort[i]
+            pin.LFU = j + 1
+            pin.ENR = enrpinlist[j].ENR
+            pin.BA = enrpinlist[j].BA
+
         self.close()
-        #self.parent.import_data()
+        self.ok = True
 
     def get_table_data(self):
         """Get data from dialog widgets"""
 
+        index_list = []
         dens_list = []
         enr_list = []
         ba_list = []
         nrows = self.table_view.model().rowCount()
         for i in range(nrows):
-            dens_item = self.table_view.model().item(i, 0)
+            index_item = self.table_view.model().item(i, 0)
+            index_list.append(int(index_item.text()))
+            dens_item = self.table_view.model().item(i, 1)
             dens_list.append(float(dens_item.text()))
-            enr_item = self.table_view.model().item(i, 1)
+            enr_item = self.table_view.model().item(i, 2)
             enr_list.append(float(enr_item.text()))
-            ba_item = self.table_view.model().item(i, 2)
+            ba_item = self.table_view.model().item(i, 3)
             ba_list.append(float(ba_item.text()))
 
         self.data = Data()
+        self.data.index = index_list
         self.data.dens = dens_list
         self.data.enr = enr_list
         self.data.ba = ba_list

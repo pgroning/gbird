@@ -820,7 +820,9 @@ class MainWin(QtGui.QMainWindow):
         """open enrichment dialog"""
         self.enrichment_dlg = EnrichmentDialog(self)
         self.enrichment_dlg.exec_()
-        
+        if self.enrichment_dlg.ok:
+            self.fig_update()
+
     def open_bundle_dlg(self):
         """open bundle settings dialog"""
         self.bundle_dlg = BundleDialog(self)
