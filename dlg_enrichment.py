@@ -76,7 +76,7 @@ class EnrichmentDialog(QtGui.QDialog):
         model.setHorizontalHeaderItem(2, QtGui.QStandardItem("U-235 (w/o)"))
         model.setHorizontalHeaderItem(3, QtGui.QStandardItem("Gd"))
 
-        self.table_view.setColumnHidden(0, True)  # do not display indicies
+        self.table_view.setColumnHidden(0, True)  # do not display index column
         
         horizontalheader = self.table_view.horizontalHeader()
         horizontalheader.setResizeMode(QtGui.QHeaderView.Stretch)
@@ -86,47 +86,13 @@ class EnrichmentDialog(QtGui.QDialog):
         verticalheader.setResizeMode(QtGui.QHeaderView.Fixed)
         verticalheader.setDefaultSectionSize(25)
 
-        self.fuetype_cbox = QtGui.QComboBox()
-        self.fue_list = ["OPT2", "OPT3", "A10B", "A10XM", "AT11"]
-        self.fuetype_cbox.addItems(QtCore.QStringList(self.fue_list))
-
-        self.content_cbox = QtGui.QComboBox()
-        self.content_list = ["filt.", "unfilt."]
-        self.content_cbox.addItems(QtCore.QStringList(self.content_list))
-
-        #self.height_cbox = QtGui.QComboBox()
-        #self.height_list = ["zone", "total"]
-        #self.height_cbox.addItems(QtCore.QStringList(self.height_list))
-
-        #self.save_button = QtGui.QPushButton("Save...")
-        #self.load_button = QtGui.QPushButton("Load...")
-
-        #flo = QtGui.QFormLayout()
-        #flo.addRow("Fuel:", self.fuetype_cbox)
-        #flo.addRow("Content:", self.content_cbox)
-        #flo.addRow("Height:", self.height_cbox)
-
-        vbox = QtGui.QVBoxLayout()
-        #vbox.addLayout(flo)
-        #vbox.addWidget(self.fuetype_cbox)
-        #vbox.addStretch()
-        #vbox.addWidget(self.load_button)
-        #vbox.addWidget(self.save_button)
-
-        groupbox = QtGui.QGroupBox()
-        #groupbox.setTitle("Bundle")
-        groupbox.setStyleSheet("QGroupBox {border: 1px solid silver;\
-        border-radius:5px; font: bold; subcontrol-origin: margin;\
-        padding: 10px 0px 0px 0px}")
-        groupbox.setLayout(vbox)
         grid = QtGui.QGridLayout()
-        #grid.addWidget(groupbox, 0, 0)
         grid.addWidget(self.table_view, 0, 0)
         
         hbox = QtGui.QHBoxLayout()
         self.ok_button = QtGui.QPushButton("Ok")
         self.cancel_button = QtGui.QPushButton("Cancel")
-        self.reset_button = QtGui.QPushButton("Reset...")
+        self.reset_button = QtGui.QPushButton("Reset")
         hbox.addWidget(self.reset_button)
         hbox.addStretch()
         hbox.addWidget(self.cancel_button)
@@ -175,10 +141,6 @@ class EnrichmentDialog(QtGui.QDialog):
     def add_row_action(self):
         """Add single cax file to table cell"""
 
-        #caxfile = self.select_read_file(file_choices="*.cax (*.cax)")
-        #if not caxfile:
-        #    return
-
         i = self.table_view.model().rowCount()
         #icur = self.table_view.selectionModel().currentIndex()
         #i = icur.row() + 1
@@ -204,13 +166,6 @@ class EnrichmentDialog(QtGui.QDialog):
             index = self.table_view.model().item(i, j).index()
             self.table_view.selectionModel().select(index, select)
         self.table_view.selectionModel().setCurrentIndex(index, noupdate)
-        
-        #self.table_view.resizeColumnToContents(2)
-        
-        #nrows = self.table_view.model().rowCount()
-        #for i in range(nrows):
-        #    vheader = QtGui.QStandardItem(str(nrows - i))
-        #    self.table_view.model().setVerticalHeaderItem(i, vheader)
 
     def delete_row_action(self):
         i = self.table_view.selectionModel().currentIndex().row()
@@ -238,13 +193,14 @@ class EnrichmentDialog(QtGui.QDialog):
 
     def reset_action(self):
         """reset all cells"""
-        msgBox = QtGui.QMessageBox()
-        status = msgBox.information(self, "Reset",
-                                    "Continue?",
-                                    QtGui.QMessageBox.Yes |
-                                    QtGui.QMessageBox.Cancel)
-        if status == QtGui.QMessageBox.Yes:
-            self.set_table_data()
+        self.set_table_data()
+        #msgBox = QtGui.QMessageBox()
+        #status = msgBox.information(self, "Reset",
+        #                            "Continue?",
+        #                            QtGui.QMessageBox.Yes |
+        #                            QtGui.QMessageBox.Cancel)
+        #if status == QtGui.QMessageBox.Yes:
+        #    self.set_table_data()
         
     def set_table_data(self):
         """Set table cell data"""
@@ -302,6 +258,14 @@ class EnrichmentDialog(QtGui.QDialog):
 
     def ok_action(self):
         """Update enrpinlist"""
+
+        msgBox = QtGui.QMessageBox()
+        status = msgBox.information(self, "Update",
+                                    "Continue?",
+                                    QtGui.QMessageBox.Yes |
+                                    QtGui.QMessageBox.Cancel)
+        if status == QtGui.QMessageBox.Cancel:
+            return
 
         self.get_table_data()
 

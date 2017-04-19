@@ -2149,8 +2149,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         forward = self.create_action("Forward", slot=self.forward_state,
                                          tip="Forward to next")
 
-        reset = self.create_action("Reset...",
-                                   tip="Undo all changes...")
+        reset = self.create_action("Reset...", slot=self.reset_state,
+                                   tip="Reset all changes...")
 
         enrichment = self.create_action("Enrichments...",
                                         slot=self.open_enrichment_dlg,
@@ -2286,6 +2286,21 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         toolbar.setFloatable(True)
         toolbar.setAutoFillBackground(False)
 
+    def reset(self):
+        self.init_pinobjects()
+        self.fig_update()
+        self.chanbow_sbox_update() 
+
+    def reset_state(self):
+        """Reset current state"""
+        msgBox = QtGui.QMessageBox()
+        status = msgBox.information(self, "Reset",
+                                    "Continue?",
+                                    QtGui.QMessageBox.Yes |
+                                    QtGui.QMessageBox.Cancel)
+        if status == QtGui.QMessageBox.Yes:
+            self.reset()
+
     def back_state(self):
         """Back to previous state"""
 
@@ -2296,9 +2311,10 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         if self.ibundle < 0:
             self.ibundle = 0
         else:
-            self.init_pinobjects()
-            self.fig_update()
-            self.chanbow_sbox_update()
+            self.reset()
+            #self.init_pinobjects()
+            #self.fig_update()
+            #self.chanbow_sbox_update()
         
     def forward_state(self):
         """Forward to next state"""
@@ -2310,9 +2326,10 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         if self.ibundle >= nbundles:
             self.ibundle = nbundles - 1
         else:
-            self.init_pinobjects()
-            self.fig_update()
-            self.chanbow_sbox_update()
+            self.reset()
+            #self.init_pinobjects()
+            #self.fig_update()
+            #self.chanbow_sbox_update()
 
     def chanbow_sbox_update(self):
         """Update chanbow spinbox value"""
