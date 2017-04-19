@@ -41,6 +41,7 @@ from plot import PlotWin
 from dlg_cascalc import CasDialog, CasRunDialog
 from dlg_pertcalc import PertDialog
 from dlg_bundle import BundleDialog
+from dlg_bundle import BundleEditDialog
 from dlg_report import ReportDialog
 from dlg_findpoint import FindDialog
 from dlg_enrichment import EnrichmentDialog
@@ -823,6 +824,11 @@ class MainWin(QtGui.QMainWindow):
         self.enrichment_dlg.exec_()
         if self.enrichment_dlg.ok:
             self.fig_update()
+
+    def open_bunedit_dlg(self):
+        """open bundle edit dialog"""
+        self.bunedit_dlg = BundleEditDialog(self)
+        self.bunedit_dlg.exec_()
 
     def open_bundle_dlg(self):
         """open bundle settings dialog"""
@@ -2157,6 +2163,10 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                                         slot=self.open_enrichment_dlg,
                                         tip="Edit enrichment levels...")
         
+        bundle = self.create_action("Bundle...",
+                                    slot=self.open_bunedit_dlg,
+                                    tip="Edit bundle heights...")
+
         enr_plus = self.create_action("Increase enr", slot=self.enr_add,
                                       tip="Increase enrichment",
                                       shortcut="F6")
@@ -2169,8 +2179,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                                          tip="Preferences...")
         
         self.add_actions(self.edit_menu, (back, forward, None, enr_minus,
-                                          enr_plus, None, enrichment,
-                                          reset, preferences))
+                                          enr_plus, None, bundle, enrichment,
+                                          None, reset, preferences))
         
         self.tools_menu = self.menuBar().addMenu("&Tools")
         plot_action = self.create_action("Plot...", tip="Plot...",
@@ -2313,9 +2323,6 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             self.ibundle = 0
         else:
             self.reset()
-            #self.init_pinobjects()
-            #self.fig_update()
-            #self.chanbow_sbox_update()
         
     def forward_state(self):
         """Forward to next state"""
@@ -2328,9 +2335,6 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             self.ibundle = nbundles - 1
         else:
             self.reset()
-            #self.init_pinobjects()
-            #self.fig_update()
-            #self.chanbow_sbox_update()
 
     def chanbow_sbox_update(self):
         """Update chanbow spinbox value"""

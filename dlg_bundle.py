@@ -474,3 +474,18 @@ class BundleDialog(QtGui.QDialog):
             self.settings.endGroup()    
         return filename
     
+
+class BundleEditDialog(QtGui.QDialog):
+    def __init__(self, parent):
+        QtGui.QDialog.__init__(self)
+
+        self.settings = QtCore.QSettings("greenbird")
+        self.parent = parent
+        self.setup()
+
+    def setup(self):
+        self.setWindowTitle("Edit bundle")
+        xpos = self.parent.pos().x() + self.parent.size().width() / 2
+        ypos = self.parent.pos().y() + self.parent.size().height() / 2
+        self.setGeometry(QtCore.QRect(0.5*xpos, 0.8*ypos, 500, 300))
+
