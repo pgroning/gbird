@@ -73,8 +73,8 @@ class EnrichmentDialog(QtGui.QDialog):
 
         model.setHorizontalHeaderItem(0, QtGui.QStandardItem("Index"))
         model.setHorizontalHeaderItem(1, QtGui.QStandardItem("Density"))
-        model.setHorizontalHeaderItem(2, QtGui.QStandardItem("U-235 (w/o)"))
-        model.setHorizontalHeaderItem(3, QtGui.QStandardItem("Gd"))
+        model.setHorizontalHeaderItem(2, QtGui.QStandardItem("% U-235"))
+        model.setHorizontalHeaderItem(3, QtGui.QStandardItem("% Gd"))
 
         self.table_view.setColumnHidden(0, True)  # do not display index column
         

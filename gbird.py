@@ -708,8 +708,8 @@ class MainWin(QtGui.QMainWindow):
 
         enrobj = FuePin(self.axes)
         enrobj.facecolor = self.enrpinlist[case_num][ipin].facecolor
-        enrobj.DENS = self.enrpinlist[case_num][ipin].DENS
-        #enrobj.DENS = self.enr_dlg.dens
+        #enrobj.DENS = self.enrpinlist[case_num][ipin].DENS
+        enrobj.DENS = self.enr_dlg.dens
         enrobj.ENR = self.enr_dlg.enr
         if self.enr_dlg.ba < 0.00001:
             enrobj.BA = np.nan
@@ -744,12 +744,13 @@ class MainWin(QtGui.QMainWindow):
         for pin in self.pinobjects[case_num]:
             if pin.LFU == ipin + 1:
                 pin.ENR = self.enr_dlg.enr
-                pin.DENS = enrpin.DENS
-                #pin.DENS = self.enr_dlg.dens
+                #pin.DENS = enrpin.DENS
+                pin.DENS = self.enr_dlg.dens
                 pin.BA = self.enr_dlg.ba
 
         # update enr level pin
         self.enrpinlist[case_num][ipin].ENR = self.enr_dlg.enr
+        self.enrpinlist[case_num][ipin].DENS = self.enr_dlg.dens
         if self.enr_dlg.ba < 0.00001:
             self.enrpinlist[case_num][ipin].BA = np.nan
         else:
@@ -2167,8 +2168,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         preferences = self.create_action("Preferences...",
                                          tip="Preferences...")
         
-        self.add_actions(self.edit_menu, (back, forward, None, enr_plus,
-                                          enr_minus, None, enrichment,
+        self.add_actions(self.edit_menu, (back, forward, None, enr_minus,
+                                          enr_plus, None, enrichment,
                                           reset, preferences))
         
         self.tools_menu = self.menuBar().addMenu("&Tools")

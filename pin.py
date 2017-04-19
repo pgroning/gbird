@@ -77,18 +77,18 @@ class EnrDialog(QtGui.QDialog):
         elif mode == "add":
             self.setWindowTitle("Add enrichment")
         self.enr_text = QtGui.QLineEdit("%.2f" % enr)
-        # dens = parent.enrpinlist[case_num][ipin].DENS
-        # self.dens_text = QtGui.QLineEdit("%.3f" % dens)
+        dens = parent.enrpinlist[case_num][ipin].DENS
+        self.dens_text = QtGui.QLineEdit("%.3f" % dens)
         self.ba_text = QtGui.QLineEdit("%.2f" % ba)
         validator = QtGui.QDoubleValidator(0, 9.99, 2, self)
         self.enr_text.setValidator(validator)
         self.ba_text.setValidator(validator)
-        # validator = QtGui.QDoubleValidator(0, 9.99, 3, self)
-        # self.dens_text.setValidator(validator)
+        validator = QtGui.QDoubleValidator(0, 9.99, 3, self)
+        self.dens_text.setValidator(validator)
 
         flo = QtGui.QFormLayout()
         flo.addRow("%U-235:", self.enr_text)
-        #flo.addRow("Density (g/cm-3):", self.dens_text)
+        flo.addRow("Density (g/cm-3):", self.dens_text)
         flo.addRow("%Gd:", self.ba_text)
 
         hbox = QtGui.QHBoxLayout()
@@ -109,7 +109,7 @@ class EnrDialog(QtGui.QDialog):
     def action(self):
         self.close()
         self.enr = self.enr_text.text().toDouble()[0]
-        #self.dens = self.dens_text.text().toDouble()[0]
+        self.dens = self.dens_text.text().toDouble()[0]
         self.ba = self.ba_text.text().toDouble()[0]
         if self.mode == "edit":
             self.parent.enrpin_edit_callback()
