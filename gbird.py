@@ -51,6 +51,7 @@ from pincount import PinCount
 from progbar import ProgressBar
 from map_s96 import s96o2
 from map_a10 import a10xm
+from map_a11 import at11
 
 
 class dataThread(QtCore.QThread):
@@ -460,9 +461,7 @@ class MainWin(QtGui.QMainWindow):
             self.ibundle = 0
             bundle = self.bunlist[0]
             bundle.readcax(content=bundle.data.content)
-            bundle.new_btf()
-            #self.bunlist = []
-            #self.bunlist.append(bundle)
+            bundle.new_btf()  # commented out only for testing purpose
             
             self.init_pinobjects()
             self.init_cboxes()
@@ -1715,7 +1714,9 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             a10xm(self)
         elif self.bunlist[0].data.fuetype == 'A10B':
             a10xm(self)
-        
+        elif self.bunlist[0].data.fuetype == 'AT11':
+            at11(self)
+
         # Draw symmetry line
         # pp = [[0.035, 0.965], [0.965, 0.035]]
         # poly = mpatches.Polygon(pp)

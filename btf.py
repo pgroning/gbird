@@ -15,6 +15,7 @@ from btf_opt2 import btf_opt2
 # from lib.btf_opt2 import btf_opt2
 from btf_a10xm import btf_a10xm
 from btf_a10b import btf_a10b
+from btf_at11 import btf_at11
 
 # sys.path.append('lib/')
 # import libADDC
@@ -113,14 +114,19 @@ class Btf(object):
         elif fuetype == "A10B":
             voi = 60
             rfact_fun = btf_a10b
+        elif fuetype == "AT11":
+            voi = 60
+            rfact_fun = btf_at11
         else:
             print "Error: BTF is not implemented for this fuel type"
+            return
 
         for i, burnup in enumerate(x):
             POW3 = self.pow3d(voi, burnup)
             self.DOX[i, :, :] = rfact_fun(POW3)
             # self.DOX[i, :, :] = self.rfact(POW3)
         self.burnpoints = np.array(x).astype(float)
+        
         #print "Done in "+str(time.time()-tic)+" seconds."
 
     #def rfact(self, POW3):
