@@ -54,7 +54,7 @@ class BundleDialog(QtGui.QDialog):
         self.table_view.setModel(model)
         self.table_view.setSelectionModel(selection_model)
 
-        model.setHorizontalHeaderItem(0, QtGui.QStandardItem("Height"))
+        model.setHorizontalHeaderItem(0, QtGui.QStandardItem("Height (ENR)"))
         model.setHorizontalHeaderItem(1, QtGui.QStandardItem("Height (BTF)"))
         model.setHorizontalHeaderItem(2, QtGui.QStandardItem("Files"))
 
@@ -447,7 +447,6 @@ class BundleDialog(QtGui.QDialog):
                                                              file_choices))
         if filename:
             # Save default path to config file
-            # Save default path to config file
             path = os.path.split(filename)[0]
             self.settings.beginGroup("PATH")
             self.settings.setValue("path_default", QtCore.QString(path))
@@ -482,10 +481,115 @@ class BundleEditDialog(QtGui.QDialog):
         self.settings = QtCore.QSettings("greenbird")
         self.parent = parent
         self.setup()
+        self.set_table_data()
+        self.ok = False
 
     def setup(self):
         self.setWindowTitle("Edit bundle")
         xpos = self.parent.pos().x() + self.parent.size().width() / 2
         ypos = self.parent.pos().y() + self.parent.size().height() / 2
-        self.setGeometry(QtCore.QRect(0.5*xpos, 0.8*ypos, 500, 300))
+        self.setGeometry(QtCore.QRect(0.5*xpos, 0.8*ypos, 500, 210))
 
+        self.table_view = QtGui.QTableView()
+
+        self.delegate = ItemDelegate()
+        self.table_view.setItemDelegateForColumn(0, self.delegate)
+        self.table_view.setItemDelegateForColumn(1, self.delegate)
+
+        model = QtGui.QStandardItemModel(0, 3, self.table_view)
+        self.table_view.setModel(model)
+        selection_model = QtGui.QItemSelectionModel(model)
+        self.table_view.setSelectionModel(selection_model)
+
+        model.setHorizontalHeaderItem(0, QtGui.QStandardItem("Height (ENR)"))
+        model.setHorizontalHeaderItem(1, QtGui.QStandardItem("Height (BTF)"))
+        model.setHorizontalHeaderItem(2, QtGui.QStandardItem("Name"))
+
+        horizontalheader = self.table_view.horizontalHeader()
+        horizontalheader.setResizeMode(2, QtGui.QHeaderView.Stretch)
+
+        verticalheader = self.table_view.verticalHeader()
+        verticalheader.setResizeMode(QtGui.QHeaderView.Fixed)
+        verticalheader.setDefaultSectionSize(25)
+
+        vbox = QtGui.QVBoxLayout()
+        vbox.addWidget(self.table_view)
+
+        hbox = QtGui.QHBoxLayout()
+        self.ok_button = QtGui.QPushButton("Ok")
+        self.cancel_button = QtGui.QPushButton("Cancel")
+        hbox.addStretch()
+        hbox.addWidget(self.cancel_button)
+        hbox.addWidget(self.ok_button)
+
+        self.connect(self.cancel_button, QtCore.SIGNAL('clicked()'), 
+                     self.close)
+        self.connect(self.ok_button, QtCore.SIGNAL('clicked()'), 
+                     self.ok_action)
+
+        vbox.addLayout(hbox)
+        self.setLayout(vbox)
+
+    def set_table_data(self):
+        """Add rows to table and populate with data"""
+
+        bundle = self.parent.bunlist[0]
+        simlist = [seg.data.sim for seg in bundle.segments]
+        simlist.reverse()
+        
+        ibundle = self.parent.ibundle
+        bundle = self.parent.bunlist[ibundle]
+        heights = bundle.data.nodes[::-1]
+        btf_heights = bundle.data.btf_nodes[::-1]
+
+        nrows = len(simlist)
+        for i in range(nrows):
+            height = '{0:g}'.format(heights[i])
+            height_item = QtGui.QStandardItem(height)
+            self.table_view.model().setItem(i, 0, height_item)
+
+            btf_height = '{0:g}'.format(btf_heights[i])
+            btf_height_item = QtGui.QStandardItem(btf_height)
+            self.table_view.model().setItem(i, 1, btf_height_item)
+
+            sim = simlist[i].replace("SIM", "").replace("'", "").strip()
+            sim_item = QtGui.QStandardItem(sim)
+            sim_item.setEditable(False)
+            #brush = QtGui.QBrush()
+            #brush.setColor(QtGui.QColor().blue())
+            #sim_item.setBackground(brush)
+            self.table_view.model().setItem(i, 2, sim_item)
+            vheader = QtGui.QStandardItem(str(nrows - i))
+            self.table_view.model().setVerticalHeaderItem(i, vheader)
+
+        self.table_view.resizeColumnToContents(2)
+
+    def get_table_data(self):
+        """retreive data from table cells"""
+        heights = []
+        btf_heights = []
+
+        nrows = self.table_view.model().rowCount()
+        for i in range(nrows):
+            height_item = self.table_view.model().item(i, 0)
+            heights.append(float(height_item.text()))
+            btf_height_item = self.table_view.model().item(i, 1)
+            btf_heights.append(float(btf_height_item.text()))
+        heights.reverse()
+        btf_heights.reverse()
+
+        self.data = Data()
+        self.data.heights = heights
+        self.data.btf_heights = btf_heights
+        
+    def ok_action(self):
+        
+        self.get_table_data()
+
+        ibundle = self.parent.ibundle
+        bundle = self.parent.bunlist[ibundle]
+        bundle.data.nodes = self.data.heights
+        bundle.data.btf_nodes = self.data.btf_heights
+        self.ok = True
+        self.close()
+        

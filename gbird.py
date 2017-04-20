@@ -829,6 +829,9 @@ class MainWin(QtGui.QMainWindow):
         """open bundle edit dialog"""
         self.bunedit_dlg = BundleEditDialog(self)
         self.bunedit_dlg.exec_()
+        if self.bunedit_dlg.ok:
+            self.bunlist[self.ibundle].new_btf()
+            self.fig_update()
 
     def open_bundle_dlg(self):
         """open bundle settings dialog"""
