@@ -217,6 +217,19 @@ class dataThread(QtCore.QThread):
 #            self.parent.enrpin_add_callback()
 #"""
 
+class InfoLabel(QtGui.QLabel):
+    def __init__(self, parent=None):
+        QtGui.QDialog.__init__(self)
+        self.setStyleSheet("""QLabel {background-color : rgb(245, 245, 245); 
+                              color : black;}""")
+        self.setFrameStyle(QtGui.QFrame.Panel | 
+                           QtGui.QFrame.Sunken)
+        self.setAlignment(QtCore.Qt.AlignBottom | 
+                          QtCore.Qt.AlignLeft)
+        self.setFixedHeight(20)
+        self.setFixedWidth(100)
+
+
 class Data(object):
     """Empty class with the purpose to organize data"""
     pass
@@ -1972,14 +1985,22 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         # self.sim_text.setText(text)
         #info_flo.addRow("SIM", self.sim_text)
 
-        self.rod_types_text = QtGui.QLineEdit()
+        self.voi_vhi_text = InfoLabel()
+        self.voi_vhi_text.setSizePolicy(sizePolicy)
+        #self.voi_vhi_text.setText("voi / vhi")
+        #self.voi_vhi_text.setNum(40)
+        info_flo.addRow("VOI / VHI", self.voi_vhi_text)
+
+        #self.rod_types_text = QtGui.QLineEdit()
+        self.rod_types_text = InfoLabel()
         self.rod_types_text.setSizePolicy(sizePolicy)
-        self.rod_types_text.setReadOnly(True)
+        #self.rod_types_text.setReadOnly(True)
         info_flo.addRow("Rod types", self.rod_types_text)
         
-        self.ave_enr_text = QtGui.QLineEdit()
+        #self.ave_enr_text = QtGui.QLineEdit()
+        self.ave_enr_text = InfoLabel()
         self.ave_enr_text.setSizePolicy(sizePolicy)
-        self.ave_enr_text.setReadOnly(True)
+        #self.ave_enr_text.setReadOnly(True)
         info_flo.addRow("Segment w/o U-235", self.ave_enr_text)
 
         #self.ave_denr_text = QtGui.QLineEdit()
@@ -1988,9 +2009,10 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         #info_flo.addRow(QtCore.QString("Segment %1 w/o")
         #                .arg(QtCore.QChar(0x0394)), self.ave_denr_text)
         
-        self.bundle_enr_text = QtGui.QLineEdit()
+        #self.bundle_enr_text = QtGui.QLineEdit()
+        self.bundle_enr_text = InfoLabel()
         self.bundle_enr_text.setSizePolicy(sizePolicy)
-        self.bundle_enr_text.setReadOnly(True)
+        #self.bundle_enr_text.setReadOnly(True)
         info_flo.addRow("Bundle w/o U-235", self.bundle_enr_text)
 
         #self.bundle_denr_text = QtGui.QLineEdit()
