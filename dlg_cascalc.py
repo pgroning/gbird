@@ -1,6 +1,13 @@
+from IPython.core.debugger import Tracer  # Set tracepoint with Tracer()()
+# Set a tracepoint that works with Qt
+from pyqt_trace import pyqt_trace as qtrace # Set tracepoint with qtrace()
+
 import os
 import re
 from PyQt4 import QtGui, QtCore
+
+from casinp import Casinp
+
 
 class CasDialog(QtGui.QDialog):
     def __init__(self, parent):
@@ -188,7 +195,7 @@ class CasRunDialog(QtGui.QDialog):
         self.setup()
 
     def setup(self):
-        self.setWindowTitle("Run CASMO")
+        self.setWindowTitle("Run CASMO-4E")
         xpos = self.parent.pos().x() + self.parent.size().width() / 2
         ypos = self.parent.pos().y() + self.parent.size().height() / 2
         self.setGeometry(QtCore.QRect(0.8*xpos, 0.9*ypos, 150, 120))
@@ -211,7 +218,8 @@ class CasRunDialog(QtGui.QDialog):
         hbox.addWidget(self.cancel_button)
         self.connect(self.cancel_button, QtCore.SIGNAL('clicked()'),
                      self.close)
-        self.connect(self.run_button, QtCore.SIGNAL('clicked()'), self.action)
+        self.connect(self.run_button, QtCore.SIGNAL('clicked()'), 
+                     self.run_action)
 
         vbox = QtGui.QVBoxLayout()
         vbox.addLayout(flo)
@@ -220,7 +228,34 @@ class CasRunDialog(QtGui.QDialog):
         vbox.addLayout(hbox)
         self.setLayout(vbox)
 
-    def action(self):
+    def run_action(self):
+        """Create .inp files and""" 
         self.close()
-        self.parent.quick_calc()
+        #self.create_inp()
+        self.complete_calc()
+
+
+        ##self.parent.quick_calc()
     
+    def complete_calc(self):
+        """run complete cas calcs"""
+        print "running complete Cas calcs"
+        
+        ibundle = self.parent.ibundle
+        bundle = self.parent.bunlist[ibundle]
+        segment = bundle.segments[0]
+        inpfile = "test/topol/AT-B/00g00nb/e26AT-B-071-00g00nb-cas.T.inp"
+        #segment.runc4(file_base_name)
+        segment.complete_calc(inpfile, neulib="j20200")
+
+    def create_inp(self):
+        """Create Cas inp files"""
+        print "Creating inp files..."
+        
+        ibundle = self.parent.ibundle
+        bundle = self.parent.bunlist[ibundle]
+        cinp = Casinp(bundle.segments, verbose=True)
+        
+        cinp.existfiles(verbose=True)
+        cinp.createinp(verbose=True)
+

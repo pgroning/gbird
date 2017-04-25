@@ -535,15 +535,16 @@ class Segment(object):
         # neulib
         if not neulib:
             neulib = "e4lbl70"
+        
+        #os.environ["CMSKILL"] = "YES"  # overwrite existing file
 
-        cmd = ' -V ' + c4ver + ' -N ' + libdir + neulib + ' ' + c4inp
+        cmd = ' -k ' + ' -V ' + c4ver + ' -N ' + libdir + neulib + ' ' + c4inp
         arglist = shlex.split(c4exe + cmd)
         arglist = shlex.split('linrsh ' + c4exe + cmd)
         # specify grid que
         arglist.insert(1, '-q')
         arglist.insert(2, 'all.q@wrath,all.q@envy,all.q@pride')
         # arglist[0] = 'linrsh -q all.q@wrath'
-        # Tracer()()
         # fout = open('c4.stdout', 'wb')
         fout = open('/dev/null', 'wb')
         print "Running c4e model"
@@ -1027,6 +1028,13 @@ class Segment(object):
     #    # burnup =
     #    # EXP = self.__expcalc(POW, burnup)
     #    # Tracer()()
+
+    def complete_calc(self, inpfile, neulib=None, gamlib=None, grid=False):
+        print "Performing a complete calculation"
+        
+        basename = os.path.splitext(inpfile)[0]   # remove suffix
+        self.runc4(basename, neulib, grid)
+
 
     def quickcalc(self, voi=None, dep_max=None, dep_thres=None, grid=False,
                   model="c3", box_offset=0.0, neulib=False):
