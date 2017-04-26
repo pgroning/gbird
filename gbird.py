@@ -2244,37 +2244,48 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         enr_minus = self.create_action("Decrease enr", slot=self.enr_sub,
                                        tip="Decrease enrichment",
                                        shortcut="F5")
+
+        perturbation = self.create_action("Perturbation...",
+                                          tip="Perturbation model...",
+                                          slot=self.open_pert_dlg)
         
         preferences = self.create_action("Preferences...",
                                          tip="Preferences...")
         
-        self.add_actions(self.edit_menu, (back, forward, None, enr_minus,
-                                          enr_plus, None, bundle, enrichment,
-                                          None, reset, preferences))
+        self.add_actions(self.edit_menu,
+                         (back, forward, None, enr_minus, enr_plus, None,
+                          bundle, enrichment, perturbation, None, reset,
+                          preferences))
         
         self.tools_menu = self.menuBar().addMenu("&Tools")
         plot_action = self.create_action("Plot...", tip="Plot...",
                                          slot=self.open_plotwin)
-        pert_action = self.create_action("Perturbation...",
-                                           tip="Perturbation model...",
-                                           slot=self.open_pert_dlg)
+        
         casmo_action = self.create_action("CASMO...", tip="CASMO...",
                                           slot=self.open_cas_dlg)
+
+        casinp_action = self.create_action("Generate inp files...",
+                                           tip="Input files...")
+        
         data_action = self.create_action("Report...", tip="Fuel report...",
                                          slot=self.open_report_dlg)
+        
         find_action = self.create_action("Find point...",
                                          tip="Find state point...",
                                          shortcut="Ctrl+F",
                                          slot=self.open_findpoint_dlg)
+        
         table_action = self.create_action("Point table...",
                                           tip="Point table...")
+        
         optim_action = self.create_action("Optimization...",
                                           tip="BTF optimization...")
+        
         egv_action = self.create_action("EGV...", tip="EGV...",
                                         slot=self.open_egv_dlg)
         self.add_actions(self.tools_menu,
-                         (plot_action, pert_action, casmo_action, data_action,
-                          find_action, table_action, optim_action, egv_action))
+                         (plot_action, casmo_action, casinp_action,
+                          data_action, find_action, egv_action))
 
         self.run_menu = self.menuBar().addMenu("&Run")
         pert_action = self.create_action("&Perturbation", shortcut="F9",
@@ -2288,8 +2299,7 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         fullcalc_action = self.create_action("&Complete calc...",
                                              slot=self.open_fullcalc_dlg,
                                              tip="Run complete calculation")
-        self.add_actions(self.run_menu, (pert_action, smallcalc_action,
-                                         fullcalc_action))
+        self.add_actions(self.run_menu, (None, pert_action))
         
         self.help_menu = self.menuBar().addMenu("&Help")
         about_action = self.create_action("&About", shortcut='F1',

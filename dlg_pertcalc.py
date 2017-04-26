@@ -7,14 +7,14 @@ class PertDialog(QtGui.QDialog):
         self.setup()
 
     def setup(self):
-        self.setWindowTitle("Perturbation model")
+        self.setWindowTitle("Perturbation")
         xpos = self.parent.pos().x() + self.parent.size().width() / 2
         ypos = self.parent.pos().y() + self.parent.size().height() / 2
-        self.setGeometry(QtCore.QRect(xpos, ypos, 150, 120))
+        self.setGeometry(QtCore.QRect(xpos-100, ypos-50, 150, 120))
 
         flo = QtGui.QFormLayout()
         
-        model_list = ["C3", "C4E"]
+        model_list = ["C3"]
         self.model_cbox = QtGui.QComboBox()
         self.model_cbox.addItems(QtCore.QStringList(model_list))
         if hasattr(self.parent.params, "pert_model"):

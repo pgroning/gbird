@@ -16,7 +16,7 @@ class CasDialog(QtGui.QDialog):
         self.setup()
 
     def setup(self):
-        self.setWindowTitle("CASMO settings")
+        self.setWindowTitle("CASMO")
         xpos = self.parent.pos().x() + self.parent.size().width() / 2
         ypos = self.parent.pos().y() + self.parent.size().height() / 2
         self.setGeometry(QtCore.QRect(0.8*xpos, 0.9*ypos, 150, 120))
@@ -28,15 +28,15 @@ class CasDialog(QtGui.QDialog):
         self.grid.addWidget(cas_gbox, 0, 0)
         
         hbox = QtGui.QHBoxLayout()
-        self.ok_button = QtGui.QPushButton("Ok")
+        self.run_button = QtGui.QPushButton("Run")
         self.cancel_button = QtGui.QPushButton("Cancel")
         hbox.addStretch()
-        hbox.addWidget(self.ok_button)
+        hbox.addWidget(self.run_button)
         hbox.addWidget(self.cancel_button)
         self.connect(self.cancel_button, QtCore.SIGNAL('clicked()'),
                      self.close)
-        self.connect(self.ok_button, QtCore.SIGNAL('clicked()'), 
-                     self.ok_action)
+        self.connect(self.run_button, QtCore.SIGNAL('clicked()'), 
+                     self.run_action)
 
         vbox = QtGui.QVBoxLayout()
         #vbox.addLayout(flo)
@@ -45,7 +45,7 @@ class CasDialog(QtGui.QDialog):
         vbox.addLayout(hbox)
         self.setLayout(vbox)
 
-    def ok_action(self):
+    def run_action(self):
         self.close()
         self.parent.params.cas_version = str(self.version_cbox.currentText())
         self.parent.params.cas_neulib = str(self.neulib_cbox.currentText()) 
