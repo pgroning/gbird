@@ -16,18 +16,27 @@ import numpy as np
 class Casinp(object):
   """ create casmo input with updated TIT, FUE and LFU cards"""
 
-  def __init__(self, seglist,verbose=False):
+  def __init__(self, caxfiles, LFU, FUE, TIT, verbose=False):
     """ init """
-    self.caxfiles = []
-    self.LFU      = []
-    self.FUE      = []
-    self.TIT      = []
-    #
-    for i in range(len(seglist)):
-      self.caxfiles.append(seglist[i].data.caxfile)
-      self.LFU.append(seglist[i].data.LFU)
-      self.FUE.append(seglist[i].data.FUE)
-      self.TIT.append(seglist[i].data.title)
+    self.caxfiles = caxfiles
+    self.LFU = LFU
+    self.FUE = FUE
+    self.TIT = TIT
+
+    self.existfiles()
+
+ # def __init__(self, seglist,verbose=False):
+ #   """ init """
+ #   self.caxfiles = []
+ #   self.LFU      = []
+ #   self.FUE      = []
+ #   self.TIT      = []
+ #   #
+ #   for i in range(len(seglist)):
+ #     self.caxfiles.append(seglist[i].data.caxfile)
+ #     self.LFU.append(seglist[i].data.LFU)
+ #     self.FUE.append(seglist[i].data.FUE)
+ #     self.TIT.append(seglist[i].data.title)
 
   def existfiles(self,verbose=False):
     """

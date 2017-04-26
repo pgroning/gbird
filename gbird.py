@@ -48,6 +48,7 @@ from dlg_enrichment import EnrichmentDialog
 from dlg_egv import EgvDialog
 from pin import FuePin, EnrDialog
 from pincount import PinCount
+from casinp import Casinp
 from progbar import ProgressBar
 from map_s96 import s96o2
 from map_a10 import a10xm
@@ -1399,6 +1400,33 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                     BA[i, j] = self.pinobjects[iseg][k].BA
                     k += 1
         return BA
+
+    def create_inpfiles(self):
+        """Create new .inp files"""
+        
+        istate = self.ibundle
+        bundle = self.bunlist[istate]
+
+        LFU = []
+        FUE = []
+        TIT = []
+        caxfiles = []
+        for i, segment in enumerate(bundle.segments):
+            LFU.append(self.__lfumap(i))
+            FUE.append(self.__fuemap(i))
+            TIT.append(segment.data.title)
+            caxfiles.append(segment.data.caxfile)
+
+        cinp = Casinp(caxfiles, LFU, FUE, TIT, verbose=False)
+        cinp.createinp(verbose=False)
+        print ".inp files created."
+    
+    def complete_calc(self):
+        """Performing complete calculation using input templates"""
+        print "Performing complete calculation..."
+        istate = self.ibundle
+        bundle = Bundle(parent=self.bunlist[0])  # set parent to bundle
+        
 
     def quick_calc(self):
         """Performing perturbation calculation"""

@@ -6,7 +6,7 @@ import os
 import re
 from PyQt4 import QtGui, QtCore
 
-from casinp import Casinp
+#from casinp import Casinp
 
 
 class CasDialog(QtGui.QDialog):
@@ -231,31 +231,30 @@ class CasRunDialog(QtGui.QDialog):
     def run_action(self):
         """Create .inp files and""" 
         self.close()
-        #self.create_inp()
-        self.complete_calc()
-
+        self.parent.create_inpfiles()
+        #self.parent.complete_calc()
 
         ##self.parent.quick_calc()
     
-    def complete_calc(self):
-        """run complete cas calcs"""
-        print "running complete Cas calcs"
-        
-        ibundle = self.parent.ibundle
-        bundle = self.parent.bunlist[ibundle]
-        segment = bundle.segments[0]
-        inpfile = "test/topol/AT-B/00g00nb/e26AT-B-071-00g00nb-cas.T.inp"
-        #segment.runc4(file_base_name)
-        segment.complete_calc(inpfile, neulib="j20200")
+#    def complete_calc(self):
+#        """run complete cas calcs"""
+#        print "running complete Cas calcs"
+#        
+#        ibundle = self.parent.ibundle
+#        bundle = self.parent.bunlist[ibundle]
+#        segment = bundle.segments[0]
+#        inpfile = "test/topol/AT-B/00g00nb/e26AT-B-071-00g00nb-cas.T.inp"
+#        #segment.runc4(file_base_name)
+#        segment.complete_calc(inpfile, neulib="j20200")
 
-    def create_inp(self):
-        """Create Cas inp files"""
-        print "Creating inp files..."
-        
-        ibundle = self.parent.ibundle
-        bundle = self.parent.bunlist[ibundle]
-        cinp = Casinp(bundle.segments, verbose=True)
-        
-        cinp.existfiles(verbose=True)
-        cinp.createinp(verbose=True)
-
+#    def create_inp(self):
+#        """Create Cas inp files"""
+#        print "Creating inp files..."
+#        
+#        ibundle = self.parent.ibundle
+#        bundle = self.parent.bunlist[ibundle]
+#        cinp = Casinp(bundle.segments, verbose=True)
+#        
+#        cinp.existfiles(verbose=True)
+#        cinp.createinp(verbose=True)
+#
