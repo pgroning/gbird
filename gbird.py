@@ -1427,6 +1427,22 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         istate = self.ibundle
         bundle = Bundle(parent=self.bunlist[0])  # set parent to bundle
         
+        iseg = int(self.case_cbox.currentIndex())
+        if hasattr(self.params, 'cas_version'):
+            c4ver = self.params.cas_version
+        else:
+            c4ver = "2.10.21P_VAT_1.3"
+        if hasattr(self.params, 'cas_neulib'):
+            neulib = self.params.cas_neulib
+        else:
+            neulib = "j20200"
+        if hasattr(self.params, 'cas_gamlib'):
+            gamlib = self.params.cas_gamlib
+        else:
+            gamlib = "galb410"
+
+        bundle.segments[iseg].complete_calc(c4ver=c4ver, neulib=neulib, 
+                                            gamlib=gamlib)
 
     def quick_calc(self):
         """Performing perturbation calculation"""

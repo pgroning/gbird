@@ -87,7 +87,7 @@ class CasDialog(QtGui.QDialog):
             i = neulib_list.index(self.parent.params.cas_neulib)
             self.neulib_cbox.setCurrentIndex(i)
         else:
-            self.neulib_cbox.setCurrentIndex(3)
+            self.neulib_cbox.setCurrentIndex(8)
 
         gamlib_list = self.get_gamlibs()
         self.gamlib_cbox = QtGui.QComboBox()
@@ -232,7 +232,7 @@ class CasRunDialog(QtGui.QDialog):
         """Create .inp files and""" 
         self.close()
         self.parent.create_inpfiles()
-        #self.parent.complete_calc()
+        self.parent.complete_calc()
 
         ##self.parent.quick_calc()
     

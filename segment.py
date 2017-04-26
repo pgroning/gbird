@@ -522,23 +522,34 @@ class Segment(object):
     #    f.write(' END\n')
     #    f.close()
 
-    def runc4(self, file_base_name, neulib=False, grid=False):
+    def runc4(self, file_base_name, c4ver=None, neulib=None, gamlib=None, 
+              grid=False):
         """Running C4E model"""
+
         c4inp = file_base_name + ".inp"
         # C4 executable
         c4exe = "cas4 -e"
         # c4exe = "/home/prog/prod/CMSCODES/bin/cas4 -e"
-        # C4 version
-        c4ver = "2.10.21P_VAT_1.3"
-        # lib directory
+
         libdir = "/home/prog/prod/CMSCODES/CasLib/library/"
-        # neulib
+        
+        if not c4ver:
+            c4ver = "2.10.21P_VAT_1.3"
         if not neulib:
             neulib = "e4lbl70"
-        
-        #os.environ["CMSKILL"] = "YES"  # overwrite existing file
+        if not gamlib:
+            gamlib = "galb410"
 
-        cmd = ' -k ' + ' -V ' + c4ver + ' -N ' + libdir + neulib + ' ' + c4inp
+        outdir = os.path.split(file_base_name)[0]
+        print c4ver
+        print neulib
+        print gamlib
+
+        cmd = ' -o ' + outdir
+        cmd += ' -k '
+        cmd += ' -G ' + libdir + gamlib
+        cmd += ' -V ' + c4ver + ' -N ' + libdir + neulib + ' ' + c4inp
+        
         arglist = shlex.split(c4exe + cmd)
         arglist = shlex.split('linrsh ' + c4exe + cmd)
         # specify grid que
@@ -559,7 +570,6 @@ class Segment(object):
                 call(arglist[3:], stdout=fout, stderr=STDOUT, shell=False)
         else:  # use local machine
             call(arglist[3:], stdout=fout, stderr=STDOUT, shell=False)
-            #call(arglist[3:])
     
     def set_data(self, LFU=None, FUE=None, BA=None, voi=None, box_offset=0.0):
         """Append a list element to store result of new calculation"""
@@ -1029,11 +1039,15 @@ class Segment(object):
     #    # EXP = self.__expcalc(POW, burnup)
     #    # Tracer()()
 
-    def complete_calc(self, inpfile, neulib=None, gamlib=None, grid=False):
-        print "Performing a complete calculation"
+    def complete_calc(self, c4ver=None, neulib=None, gamlib=None, grid=False):
+        """Performing a complete calculation"""
         
-        basename = os.path.splitext(inpfile)[0]   # remove suffix
-        self.runc4(basename, neulib, grid)
+        caxfile = self.data.caxfile
+        basename = os.path.splitext(caxfile)[0]   # remove suffix
+        basename += ".T"
+        if os.path.exists(basename + '.inp'):
+            self.runc4(basename, c4ver=c4ver, neulib=neulib, gamlib=gamlib, 
+                       grid=grid)
 
 
     def quickcalc(self, voi=None, dep_max=None, dep_thres=None, grid=False,
