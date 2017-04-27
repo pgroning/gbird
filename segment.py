@@ -525,7 +525,7 @@ class Segment(object):
     def runc4(self, file_base_name, c4ver=None, neulib=None, gamlib=None, 
               grid=False):
         """Running C4E model"""
-
+        
         c4inp = file_base_name + ".inp"
         # C4 executable
         c4exe = "cas4 -e"
@@ -536,14 +536,12 @@ class Segment(object):
         if not c4ver:
             c4ver = "2.10.21P_VAT_1.3"
         if not neulib:
-            neulib = "e4lbl70"
+            #neulib = "e4lbl70"
+            neulib = "j20200"
         if not gamlib:
-            gamlib = "galb410"
+            gamlib = "galb418"
 
         outdir = os.path.split(file_base_name)[0]
-        print c4ver
-        print neulib
-        print gamlib
 
         cmd = ' -o ' + outdir
         cmd += ' -k '
@@ -1051,7 +1049,8 @@ class Segment(object):
 
 
     def quickcalc(self, voi=None, dep_max=None, dep_thres=None, grid=False,
-                  model="c3", box_offset=0.0, neulib=False):
+                  model="c3", box_offset=0.0, c4ver=None, neulib=None, 
+                  gamlib=None):
 
         tic = time.time()
         
@@ -1062,7 +1061,8 @@ class Segment(object):
         if model.lower() == "c3":
             self.runc3(file_base_name, grid)
         elif model.lower() == "c4e":
-            self.runc4(file_base_name, neulib, grid)
+            self.runc4(file_base_name, c4ver=c4ver, neulib=neulib, 
+                       gamlib=gamlib, grid=grid)
         else:
             print "Perturbation model is unknown"
             return

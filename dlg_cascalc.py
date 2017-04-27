@@ -52,6 +52,8 @@ class CasDialog(QtGui.QDialog):
         self.parent.params.cas_gamlib = str(self.gamlib_cbox.currentText())
         self.parent.params.cas_cpu = str(self.cpu_cbox.currentText())
         
+        self.parent.cas_calc()
+
         #self.parent.pert_model = str(self.model_cbox.currentText())
         #if self.depmax_cbox.currentText() == "undef":
         #    self.parent.pert_depmax = None
@@ -159,6 +161,7 @@ class CasDialog(QtGui.QDialog):
         path = "/home/prog/prod/CMSCODES/C4E"
         if os.path.isdir(path):
             ver_list = os.listdir(path)
+            ver_list = [v.lstrip("v") for v in ver_list]
         else:
             ver_list = []
         return ver_list

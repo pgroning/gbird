@@ -1441,28 +1441,64 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         status = msgBox.information(self, "CASMO input files",
                                     msg, QtGui.QMessageBox.Ok)
     
-    def complete_calc(self):
-        """Performing complete calculation using input templates"""
-        print "Performing complete calculation..."
-        istate = self.ibundle
-        bundle = Bundle(parent=self.bunlist[0])  # set parent to bundle
-        
-        iseg = int(self.case_cbox.currentIndex())
-        if hasattr(self.params, 'cas_version'):
-            c4ver = self.params.cas_version
-        else:
-            c4ver = "2.10.21P_VAT_1.3"
-        if hasattr(self.params, 'cas_neulib'):
-            neulib = self.params.cas_neulib
-        else:
-            neulib = "j20200"
-        if hasattr(self.params, 'cas_gamlib'):
-            gamlib = self.params.cas_gamlib
-        else:
-            gamlib = "galb410"
+    #def complete_calc(self):
+    #    """Performing complete calculation using input templates"""
+    #    print "Performing complete calculation..."
+    #    istate = self.ibundle
+    #    bundle = Bundle(parent=self.bunlist[0])  # set parent to bundle
+    #    
+    #    iseg = int(self.case_cbox.currentIndex())
+    #    if hasattr(self.params, 'cas_version'):
+    #        c4ver = self.params.cas_version
+    #    else:
+    #        c4ver = "2.10.21P_VAT_1.3"
+    #    if hasattr(self.params, 'cas_neulib'):
+    #        neulib = self.params.cas_neulib
+    #    else:
+    #        neulib = "j20200"
+    #    if hasattr(self.params, 'cas_gamlib'):
+    #        gamlib = self.params.cas_gamlib
+    #    else:
+    #        gamlib = "galb410"
+    #
+    #    bundle.segments[iseg].complete_calc(c4ver=c4ver, neulib=neulib, 
+    #                                        gamlib=gamlib)
 
-        bundle.segments[iseg].complete_calc(c4ver=c4ver, neulib=neulib, 
-                                            gamlib=gamlib)
+    def cas_calc(self):
+        """Performing plain CASMO calculations..."""
+
+        self.setCursor(QtCore.Qt.WaitCursor)
+
+        #istate = self.ibundle
+
+        # create new bundle
+        bundle = Bundle(parent=self.bunlist[0])
+
+        # update bundle attributes
+        voi = None
+        chanbow = self.chanbow_sbox.value() / 10  # mm -> cm
+        nsegs = len(bundle.segments)
+        for iseg in xrange(nsegs):
+            LFU = self.__lfumap(iseg)
+            FUE = self.__fuemap(iseg)
+            BA = self.__bamap(iseg)
+            bundle.segments[iseg].set_data(LFU, FUE, BA, voi, chanbow)
+        
+        # set calc. parameters
+        model = "C4E"
+        c4ver = self.params.cas_version
+        neulib = self.params.cas_neulib
+        gamlib = self.params.cas_gamlib
+        grid = True if self.params.cas_cpu == "grid" else False
+
+        bundle.new_calc(model=model, c4ver=c4ver, neulib=neulib, 
+                        gamlib=gamlib, grid=grid)
+        bundle.new_btf()
+        self.bunlist.append(bundle)
+        self.ibundle = len(self.bunlist) - 1
+        self.fig_update()
+
+        self.setCursor(QtCore.Qt.ArrowCursor)
 
     def quick_calc(self):
         """Performing perturbation calculation"""
