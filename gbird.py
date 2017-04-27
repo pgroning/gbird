@@ -1403,6 +1403,14 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                     k += 1
         return BA
 
+    def replace_original_design(self):
+        """replacing original with current design"""
+        ibundle = self.ibundle
+        bundle = self.bunlist[ibundle]
+        self.bunlist = []
+        self.bunlist.append(bundle)
+        self.ibundle = 0
+
     def generate_inpfiles(self):
         """Generate new .inp files"""
         
@@ -2307,11 +2315,15 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         
         preferences = self.create_action("Preferences...",
                                          tip="Preferences...")
+
+        replace = self.create_action("Replace original...",
+                                     tip="Replace original design...",
+                                     slot=self.replace_original_design)
         
         self.add_actions(self.edit_menu,
                          (back, forward, None, enr_minus, enr_plus, None,
-                          bundle, enrichment, perturbation, None, reset,
-                          preferences))
+                          bundle, enrichment, perturbation, None, replace, 
+                          reset, preferences))
         
         self.tools_menu = self.menuBar().addMenu("&Tools")
         plot_action = self.create_action("Plot...", tip="Plot...",
