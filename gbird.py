@@ -240,6 +240,8 @@ class MainWin(QtGui.QMainWindow):
     def __init__(self, parent=None):
         super(MainWin, self).__init__(parent)
         # QtGui.QMainWindow.__init__(self, parent)
+        self.verbose = True
+        
         self.setWindowTitle('Main Window')
 
         # self.resize(1100,620)
@@ -1401,8 +1403,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                     k += 1
         return BA
 
-    def create_inpfiles(self):
-        """Create new .inp files"""
+    def generate_inpfiles(self):
+        """Generate new .inp files"""
         
         istate = self.ibundle
         bundle = self.bunlist[istate]
@@ -1418,8 +1420,26 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
             caxfiles.append(segment.data.caxfile)
 
         cinp = Casinp(caxfiles, LFU, FUE, TIT, verbose=False)
+        flag = cinp.existfiles()
+        if flag > 0 and flag < 1000:  # overwrite existing files?
+            msgBox = QtGui.QMessageBox()
+            msg = "Files already exist! Overwrite?"
+            status = msgBox.information(self, "CASMO input files",
+                                        msg, QtGui.QMessageBox.Yes |
+                                        QtGui.QMessageBox.Cancel)
+            if status == QtGui.QMessageBox.Cancel:
+                return
+
         cinp.createinp(verbose=False)
-        print ".inp files created."
+        if self.verbose:
+            print "Generated files:"
+            for fname in cinp.newinpfiles:
+                print fname
+
+        msgBox = QtGui.QMessageBox()
+        msg = "Files were successfully generated!"
+        status = msgBox.information(self, "CASMO input files",
+                                    msg, QtGui.QMessageBox.Ok)
     
     def complete_calc(self):
         """Performing complete calculation using input templates"""
@@ -2264,8 +2284,9 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         casmo_action = self.create_action("CASMO...", tip="CASMO...",
                                           slot=self.open_cas_dlg)
 
-        casinp_action = self.create_action("Generate inp files...",
-                                           tip="Input files...")
+        casinp_action = self.create_action("Generate inp files",
+                                           tip="Generate CASMO input files...",
+                                           slot=self.generate_inpfiles)
         
         data_action = self.create_action("Report...", tip="Fuel report...",
                                          slot=self.open_report_dlg)
