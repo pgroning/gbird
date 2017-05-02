@@ -554,13 +554,13 @@ class MainWin(QtGui.QMainWindow):
         self.connect(self.case_cbox, QtCore.SIGNAL('currentIndexChanged(int)'),
                      self.fig_update)
         # init voi combo box
-        voilist = map(str, self.bunlist[-1].segments[0].data.voilist)
-        self.voi_cbox.addItems(QtCore.QStringList(voilist))
-        self.vhi_cbox.addItems(QtCore.QStringList(voilist))
-        self.connect(self.voi_cbox, QtCore.SIGNAL('currentIndexChanged(int)'),
-                     self.set_point_number)
-        self.connect(self.vhi_cbox, QtCore.SIGNAL('currentIndexChanged(int)'),
-                     self.set_point_number) 
+        #voilist = map(str, self.bunlist[-1].segments[0].data.voilist)
+        #self.voi_cbox.addItems(QtCore.QStringList(voilist))
+        #self.vhi_cbox.addItems(QtCore.QStringList(voilist))
+        #self.connect(self.voi_cbox, QtCore.SIGNAL('currentIndexChanged(int)'),
+        #             self.set_point_number)
+        #self.connect(self.vhi_cbox, QtCore.SIGNAL('currentIndexChanged(int)'),
+        #             self.set_point_number) 
 
     def saveData(self):
         """Save bundle object to pickle file"""
@@ -877,7 +877,7 @@ class MainWin(QtGui.QMainWindow):
                 #self.report_dlg.exec_()
 
     def open_findpoint_dlg(self):
-        print "open find point dialog"
+        """open find statepoint dialog"""
         if hasattr(self, "bunlist"):  # check that data has been imported
             if not hasattr(self, "findpoint_dlg"):  # not already open?
                 self.findpoint_dlg = FindDialog(self)
@@ -888,15 +888,15 @@ class MainWin(QtGui.QMainWindow):
         self.egv_dlg = EgvDialog(self)
         self.egv_dlg.exec_()
 
-    def set_point_number(self):
+    def set_point_number(self, voi=40, vhi=40):
         ipoint = int(self.point_sbox.value())
         iseg = int(self.case_cbox.currentIndex())
         bundle = self.bunlist[self.ibundle]
         segment = bundle.segments[iseg]
         statepoint = segment.statepoints[ipoint]
         
-        voi = int(self.voi_cbox.currentText())
-        vhi = int(self.vhi_cbox.currentText())
+        #voi = int(self.voi_cbox.currentText())
+        #vhi = int(self.vhi_cbox.currentText())
 
         if statepoint.voi != voi or statepoint.vhi != vhi:
             ipoint = segment.findpoint(voi=voi, vhi=vhi)
@@ -2080,6 +2080,18 @@ class MainWin(QtGui.QMainWindow):
         exp_hbox.addWidget(self.exp_cbox)
 
 
+        findpoint_gbox = QtGui.QGroupBox()
+        findpoint_gbox.setTitle("Find state point")
+        findpoint_gbox.setStyleSheet("QGroupBox {border: 1px solid gray;\
+        border-radius:5px; font: bold; subcontrol-origin: margin;\
+        padding: 10px -5px -5px -5px}")
+        findpoint_vbox = QtGui.QVBoxLayout()
+        findpoint_vbox.addLayout(voi_hbox)
+        findpoint_vbox.addLayout(vhi_hbox)
+        findpoint_vbox.addLayout(type_hbox)
+        findpoint_vbox.addLayout(exp_hbox)
+        findpoint_gbox.setLayout(findpoint_vbox)
+
         # Determine vhi index
         # vhi = self.cas.cases[self.case_id_current].statepts[0].vhi
         # vhi_index = [i for i,v in enumerate(self.vhilist) if int(v) == vhi]
@@ -2224,10 +2236,11 @@ class MainWin(QtGui.QMainWindow):
         vbox.addLayout(param_hbox)
         vbox.addLayout(chanbow_hbox)
         #vbox.addLayout(point_hbox)
-        vbox.addLayout(voi_hbox)
-        vbox.addLayout(vhi_hbox)
-        vbox.addLayout(exp_hbox)
-        vbox.addLayout(type_hbox)
+        #vbox.addLayout(voi_hbox)
+        #vbox.addLayout(vhi_hbox)
+        #vbox.addLayout(exp_hbox)
+        #vbox.addLayout(type_hbox)
+        #vbox.addWidget(findpoint_gbox)
         #vbox.addLayout(enr_hbox)
         #vbox.addLayout(enr_case_hbox)
         #vbox.addLayout(calc_hbox)
@@ -2282,7 +2295,7 @@ class MainWin(QtGui.QMainWindow):
         self.setCentralWidget(self.main_frame)
     
     def create_status_bar(self):
-        self.status_text = QtGui.QLabel("Main window")
+        self.status_text = QtGui.QLabel("Greenbird")
         self.statusBar().addWidget(self.status_text, 1)
         
     def create_menu(self):
@@ -2597,6 +2610,8 @@ class MainWin(QtGui.QMainWindow):
         # Close windows before exit
         if hasattr(self, "report_dlg"):
             self.report_dlg.close()
+        if hasattr(self, "findpoint_dlg"):
+            self.findpoint_dlg.close()
 
         print "Good bye!"
 

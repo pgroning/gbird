@@ -21,15 +21,15 @@ class FindDialog(QtGui.QDialog):
         self.vhi_cbox = QtGui.QComboBox()
         self.vhi_cbox.addItems(QtCore.QStringList(voi_list))
 
-        tfu_list = ["undef", "551", "771"]
+        tfu_list = [""]
         self.tfu_cbox = QtGui.QComboBox()
         self.tfu_cbox.addItems(QtCore.QStringList(tfu_list))
 
-        tmo_list = ["undef", "551", "771"]
+        tmo_list = [""]
         self.tmo_cbox = QtGui.QComboBox()
         self.tmo_cbox.addItems(QtCore.QStringList(tmo_list))
 
-        exp_list = ["undef", "0", "0.001", "0.1", "1", "10", "20"]
+        exp_list = [""]
         self.exp_cbox = QtGui.QComboBox()
         self.exp_cbox.addItems(QtCore.QStringList(exp_list))
 
@@ -65,21 +65,12 @@ class FindDialog(QtGui.QDialog):
         vbox.addLayout(hbox)
         self.setLayout(vbox)
 
+    def closeEvent(self, event):
+        """This method is called before closing the dialog"""
+        del self.parent.findpoint_dlg
+
     def find_action(self):
-        self.close()
-        params = self.parent.params
-        params.pert_model = str(self.model_cbox.currentText())
-        if self.depmax_cbox.currentText() == "undef":
-            params.pert_depmax = None
-        else:
-            params.pert_depmax = float(self.depmax_cbox.currentText())
-        if self.depthres_cbox.currentText() == "undef":
-            params.pert_depthres = None
-        else:
-            params.pert_depthres = float(self.depthres_cbox.currentText())
-        if self.voi_cbox.currentText() == "undef":
-            params.pert_voi = None
-        else:
-            params.pert_voi = float(self.voi_cbox.currentText())
-        if hasattr(self.parent, "biascalc"):
-            del self.parent.biascalc  # bias calc should be updated
+        #self.close()
+        voi = int(self.voi_cbox.currentText())
+        vhi = int(self.vhi_cbox.currentText())
+        self.parent.set_point_number(voi=voi, vhi=vhi)
