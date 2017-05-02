@@ -983,10 +983,23 @@ class MainWin(QtGui.QMainWindow):
         tfu = statepoint.tfu
         tmo = statepoint.tmo
         
-        self.statusBar().showMessage("""Burnup=%.3f : VOI=%.0f : VHI=%.0f :
-Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
-                                     % (burnup, voi, vhi, kinf, fint, btf,
-                                        tfu, tmo))
+        formstr = "{0:.0f} / {1:.0f}".format(voi, vhi)
+        self.voi_vhi_text.setText(formstr)
+        formstr = "{0:.0f} / {1:.0f}".format(tfu, tmo)
+        self.tfu_tmo_text.setText(formstr)
+        formstr = "{0:.3f}".format(burnup)
+        self.burnup_text.setText(formstr)
+        formstr = "{0:.5f}".format(kinf)
+        self.kinf_text.setText(formstr)
+        formstr = "{0:.3f}".format(fint)
+        self.fint_text.setText(formstr)
+        formstr = "{0:.4f}".format(btf)
+        self.btf_text.setText(formstr)
+
+        #self.statusBar().showMessage("""Burnup=%.3f : VOI=%.0f : VHI=%.0f :
+#Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
+#                                     % (burnup, voi, vhi, kinf, fint, btf,
+#                                        tfu, tmo))
         
         npins = len(self.pinobjects[iseg])
         cmap = self.get_colormap(npins)
@@ -1214,8 +1227,9 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.canvas.draw()
 
     def enr_add(self):
-
-        if self.enr_case_cb.isChecked():  # update all cases
+        
+        if self.allsegs_update.isChecked():
+        #if self.enr_case_cb.isChecked():  # update all cases
             ncases = len(self.pinobjects)
             for case_num in range(ncases):
                 self.enr_modify("add", case_num)
@@ -1228,7 +1242,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         
     def enr_sub(self):
 
-        if self.enr_case_cb.isChecked():
+        if self.allsegs_update.isChecked():
+        #if self.enr_case_cb.isChecked():
             ncases = len(self.pinobjects)
             for case_num in range(ncases):
                 self.enr_modify("sub", case_num)
@@ -1766,7 +1781,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.ave_enr_text.clear()
         self.bundle_enr_text.clear()
 
-        self.bgcolors_cb.setChecked(False)
+        self.show_cmap.setChecked(False)
+        #self.bgcolors_cb.setChecked(False)
         self.point_sbox.setValue(0)
         self.chanbow_sbox.setValue(0)
 
@@ -1978,10 +1994,10 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         #             self.enr_add)
         #self.connect(self.enr_minus_button, QtCore.SIGNAL('clicked()'),
         #             self.enr_sub)
-        self.enr_case_cb = QtGui.QCheckBox("All segments")
-        self.enr_case_cb.setChecked(False)
-        enr_case_hbox = QtGui.QHBoxLayout()
-        enr_case_hbox.addWidget(self.enr_case_cb)
+        #self.enr_case_cb = QtGui.QCheckBox("All segments")
+        #self.enr_case_cb.setChecked(False)
+        #enr_case_hbox = QtGui.QHBoxLayout()
+        #enr_case_hbox.addWidget(self.enr_case_cb)
 
         #self.calc_quick_button = QtGui.QPushButton("Pert. calc")
         #self.calc_full_button = QtGui.QPushButton("Full calc")
@@ -1999,12 +2015,12 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         chanbow_hbox.addWidget(QtGui.QLabel("Channel bow:"))
         chanbow_hbox.addWidget(self.chanbow_sbox)
 
-        self.bgcolors_cb = QtGui.QCheckBox("Show color map")
-        self.bgcolors_cb.setChecked(False)
-        bgcolors_hbox = QtGui.QHBoxLayout()
-        bgcolors_hbox.addWidget(self.bgcolors_cb)
-        self.connect(self.bgcolors_cb, QtCore.SIGNAL('clicked()'),
-                     self.toggle_pin_bgcolors)
+        #self.bgcolors_cb = QtGui.QCheckBox("Show color map")
+        #self.bgcolors_cb.setChecked(False)
+        #bgcolors_hbox = QtGui.QHBoxLayout()
+        #bgcolors_hbox.addWidget(self.bgcolors_cb)
+        #self.connect(self.bgcolors_cb, QtCore.SIGNAL('clicked()'),
+        #             self.toggle_pin_bgcolors)
         
         voi_hbox = QtGui.QHBoxLayout()
         type_label = QtGui.QLabel('Type:')
@@ -2095,12 +2111,31 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         # self.sim_text.setText(text)
         #info_flo.addRow("SIM", self.sim_text)
 
+        self.burnup_text = InfoLabel()
+        self.burnup_text.setSizePolicy(sizePolicy)
+        info_flo.addRow("Burnup", self.burnup_text)
+
+        self.kinf_text = InfoLabel()
+        self.kinf_text.setSizePolicy(sizePolicy)
+        info_flo.addRow("Kinf", self.kinf_text)
+
+        self.fint_text = InfoLabel()
+        self.fint_text.setSizePolicy(sizePolicy)
+        info_flo.addRow("Fint", self.fint_text)
+
+        self.btf_text = InfoLabel()
+        self.btf_text.setSizePolicy(sizePolicy)
+        info_flo.addRow("BTF", self.btf_text)
+
         self.voi_vhi_text = InfoLabel()
         self.voi_vhi_text.setSizePolicy(sizePolicy)
-        #self.voi_vhi_text.setText("voi / vhi")
         #self.voi_vhi_text.setNum(40)
         info_flo.addRow("VOI / VHI", self.voi_vhi_text)
 
+        self.tfu_tmo_text = InfoLabel()
+        self.tfu_tmo_text.setSizePolicy(sizePolicy)
+        info_flo.addRow("TFU / TMO", self.tfu_tmo_text)
+        
         #self.rod_types_text = QtGui.QLineEdit()
         self.rod_types_text = InfoLabel()
         self.rod_types_text.setSizePolicy(sizePolicy)
@@ -2187,21 +2222,22 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         vbox.addLayout(sim_hbox)
         vbox.addLayout(case_hbox)
         vbox.addLayout(param_hbox)
-        vbox.addLayout(point_hbox)
+        vbox.addLayout(chanbow_hbox)
+        #vbox.addLayout(point_hbox)
         vbox.addLayout(voi_hbox)
         vbox.addLayout(vhi_hbox)
         vbox.addLayout(exp_hbox)
         vbox.addLayout(type_hbox)
         #vbox.addLayout(enr_hbox)
-        vbox.addLayout(enr_case_hbox)
+        #vbox.addLayout(enr_case_hbox)
         #vbox.addLayout(calc_hbox)
-        vbox.addLayout(chanbow_hbox)
-        vbox.addLayout(bgcolors_hbox)
+        #vbox.addLayout(bgcolors_hbox)
 
         # spacerItem = QSpacerItem(1, 1, QSizePolicy.Minimum,
         # QSizePolicy.Minimum)
         # vbox.addItem(spacerItem)
         vbox.addStretch(1)
+        vbox.addLayout(point_hbox)
         vbox.addLayout(info_flo)
         #vbox.addLayout(sim_hbox)
         
@@ -2314,6 +2350,10 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                                        tip="Decrease enrichment",
                                        shortcut="F5")
 
+        self.allsegs_update = self.create_action("Update all segments",
+                                                 tip="Update all segments",
+                                                 checkable=True) 
+        
         perturbation = self.create_action("Perturbation...",
                                           tip="Perturbation model...",
                                           slot=self.open_pert_dlg)
@@ -2326,7 +2366,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
                                      slot=self.replace_original_design)
         
         self.add_actions(self.edit_menu,
-                         (back, forward, None, enr_minus, enr_plus, None,
+                         (back, forward, None, enr_minus, enr_plus, 
+                          self.allsegs_update, None,
                           bundle, enrichment, perturbation, None, replace, 
                           reset, preferences))
         
@@ -2357,9 +2398,15 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         
         egv_action = self.create_action("EGV...", tip="EGV...",
                                         slot=self.open_egv_dlg)
+
+        self.show_cmap = self.create_action("Show color map", checkable=True,
+                                            tip="Show background color map",
+                                            slot=self.toggle_pin_bgcolors)
+
         self.add_actions(self.tools_menu,
                          (plot_action, casmo_action, casinp_action,
-                          data_action, find_action, egv_action))
+                          data_action, find_action, egv_action, 
+                          self.show_cmap))
 
         self.run_menu = self.menuBar().addMenu("&Run")
         pert_action = self.create_action("&Perturbation", shortcut="F9",
@@ -2505,7 +2552,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         """Toggle pin background colors"""
         
         iseg = int(self.case_cbox.currentIndex())
-        if self.bgcolors_cb.isChecked():
+        if self.show_cmap.isChecked():
+        #if self.bgcolors_cb.isChecked():
             for pin in self.pinobjects[iseg]:
                 pin.rectangle.set_alpha(1.0)
         else:
