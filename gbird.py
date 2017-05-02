@@ -1410,6 +1410,8 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.bunlist = []
         self.bunlist.append(bundle)
         self.ibundle = 0
+        if hasattr(self, "biascalc"):
+            del self.biascalc  # bias calc should be updated
 
     def generate_inpfiles(self):
         """Generate new .inp files"""
@@ -2142,7 +2144,10 @@ Kinf=%.5f : Fint=%.3f : BTF=%.4f : TFU=%.0f : TMO=%.0f"""
         self.table.setHorizontalHeaderLabels(('Index', 'EXP', 'FINT', 'BTF'))
         self.table.setSortingEnabled(True)
         self.table.setColumnHidden(0, True)
-        
+        verticalheader = self.table.verticalHeader()
+        verticalheader.setResizeMode(QtGui.QHeaderView.Fixed)
+        verticalheader.setDefaultSectionSize(25)
+
         # self.connect(self.table.horizontalHeader(),
         # SIGNAL('QHeaderView.sortIndicatorChanged(int)'), self.openFile)
         self.connect(self.table.horizontalHeader(),
