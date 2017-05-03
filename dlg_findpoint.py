@@ -29,15 +29,22 @@ class FindDialog(QtGui.QDialog):
         self.tmo_cbox = QtGui.QComboBox()
         self.tmo_cbox.addItems(QtCore.QStringList(tmo_list))
 
-        exp_list = [""]
-        self.exp_cbox = QtGui.QComboBox()
-        self.exp_cbox.addItems(QtCore.QStringList(exp_list))
+        #exp_list = [""]
+        #self.exp_cbox = QtGui.QComboBox()
+        #self.exp_cbox.addItems(QtCore.QStringList(exp_list))
+
+        self.exp_slider = QtGui.QSlider(QtCore.Qt.Horizontal)
+        self.exp_slider.setRange(0, 100)
+        self.exp_slider.setValue(0)
+        self.exp_slider.setTracking(True)
+        self.exp_slider.setTickPosition(QtGui.QSlider.TicksBothSides)
 
         flo.addRow("VOI:", self.voi_cbox)
         flo.addRow("VHI:", self.vhi_cbox)
         flo.addRow("TFU:", self.tfu_cbox)
         flo.addRow("TMO:", self.tmo_cbox)
-        flo.addRow("EXP:", self.exp_cbox)
+        #flo.addRow("EXP:", self.exp_cbox)
+        flo.addRow("EXP:", self.exp_slider)
 
         groupbox = QtGui.QGroupBox()
         groupbox.setTitle("Parameters")
