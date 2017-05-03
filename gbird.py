@@ -2479,11 +2479,11 @@ class MainWin(QtGui.QMainWindow):
         saveAction.triggered.connect(self.saveData)
         
         color_icon = "icons/color-icon_32x32.png"
-        colorAction = QtGui.QAction(QtGui.QIcon(color_icon), 'Show color map', 
-                                    self)
-        colorAction.setStatusTip('Show color map')
-        colorAction.setCheckable(True)
-        colorAction.triggered.connect(self.toggle_pin_bgcolors)
+        self.colorAction = QtGui.QAction(QtGui.QIcon(color_icon), 
+                                         'Show color map', self)
+        self.colorAction.setStatusTip('Show color map')
+        self.colorAction.setCheckable(True)
+        self.colorAction.triggered.connect(self.toggle_cmap)
 
         calc_icon = "icons/flame-red-icon_32x32.png"
         calcAction = QtGui.QAction(QtGui.QIcon(calc_icon),
@@ -2527,7 +2527,7 @@ class MainWin(QtGui.QMainWindow):
         toolbar.addAction(saveAction)
         toolbar.addAction(calcAction)
         toolbar.addAction(settingsAction)
-        toolbar.addAction(colorAction)
+        toolbar.addAction(self.colorAction)
         toolbar.addAction(plotAction)
         toolbar.addAction(findAction)
         toolbar.addAction(backAction)
@@ -2587,16 +2587,26 @@ class MainWin(QtGui.QMainWindow):
         else:
             box_offset = 0
         self.chanbow_sbox.setValue(box_offset)
-            
+        
+    def toggle_cmap(self, status):
+        """slot triggered on colorAction signal"""
+
+        if self.colorAction.isChecked():
+            self.show_cmap.setChecked(True)
+        else:
+            self.show_cmap.setChecked(False)
+        self.toggle_pin_bgcolors()
+    
     def toggle_pin_bgcolors(self):
         """Toggle pin background colors"""
         
         iseg = int(self.case_cbox.currentIndex())
         if self.show_cmap.isChecked():
-        #if self.bgcolors_cb.isChecked():
+            self.colorAction.setChecked(True)
             for pin in self.pinobjects[iseg]:
                 pin.rectangle.set_alpha(1.0)
         else:
+            self.colorAction.setChecked(False)
             for pin in self.pinobjects[iseg]:
                 pin.rectangle.set_alpha(0.0)
         self.canvas.draw()
