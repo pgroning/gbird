@@ -219,7 +219,7 @@ class dataThread(QtCore.QThread):
 #"""
 
 class InfoLabel(QtGui.QLabel):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, width=100):
         QtGui.QDialog.__init__(self)
         self.setStyleSheet("""QLabel {background-color : rgb(245, 245, 245); 
                               color : black;}""")
@@ -228,7 +228,7 @@ class InfoLabel(QtGui.QLabel):
         self.setAlignment(QtCore.Qt.AlignBottom | 
                           QtCore.Qt.AlignLeft)
         self.setFixedHeight(20)
-        self.setFixedWidth(100)
+        self.setFixedWidth(width)
 
 
 class Data(object):
@@ -1924,36 +1924,18 @@ class MainWin(QtGui.QMainWindow):
 
         # Other GUI controls
         #
-        # self.textbox = QLineEdit()
-        # self.textbox.setMinimumWidth(200)
-        # self.connect(self.textbox, SIGNAL('editingFinished ()'),
-        # self.on_draw)
-
-        # self.draw_button = QPushButton("Draw")
-        # self.connect(self.draw_button, SIGNAL('clicked()'), self.on_plot)
-        
-        # self.grid_cb = QCheckBox("Show Grid")
-        # self.grid_cb.setChecked(True)
-        # self.connect(self.grid_cb, SIGNAL('stateChanged(int)'), self.on_draw)
-        
-        # slider_label = QLabel('X-max:')
-        # self.slider = QSlider(Qt.Horizontal)
-        # self.slider.setRange(1, 75)
-        # self.slider.setValue(65)
-        # self.slider.setTracking(True)
-        # self.slider.setTickPosition(QSlider.TicksBothSides)
-        # self.connect(self.slider, SIGNAL('valueChanged(int)'), self.on_draw)
  
-        self.sim_info_field = QtGui.QLineEdit()
-        self.sim_info_field.setSizePolicy(QtGui.QSizePolicy.Minimum,
-                                          QtGui.QSizePolicy.Minimum)
-        self.sim_info_field.setReadOnly(True)
+        #self.sim_info_field = QtGui.QLineEdit()
+        #self.sim_info_field.setSizePolicy(QtGui.QSizePolicy.Minimum,
+        #                                  QtGui.QSizePolicy.Minimum)
+        #self.sim_info_field.setReadOnly(True)
         sim_hbox = QtGui.QHBoxLayout()
+        self.sim_info_field = InfoLabel(width=210)
         sim_hbox.addWidget(self.sim_info_field)
 
         param_label = QtGui.QLabel('Parameter:')
         self.param_cbox = QtGui.QComboBox()
-        paramlist = ['ENR', 'FINT', 'EXP', 'BTF', 'ROD']
+        paramlist = ['ENR', 'FINT', 'EXP', 'BTF']
         #paramlist = ['ENR', 'FINT', 'EXP', 'BTF', 'BTFP', 'XFL1', 'XFL2',
         #             'ROD', 'LOCK']
         for i in paramlist:
@@ -1972,8 +1954,6 @@ class MainWin(QtGui.QMainWindow):
         case_hbox = QtGui.QHBoxLayout()
         case_hbox.addWidget(case_label)
         case_hbox.addWidget(self.case_cbox)
-        # self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'),
-        # self.fig_update)
 
         point_label = QtGui.QLabel('Point number:')
         self.point_sbox = QtGui.QSpinBox()

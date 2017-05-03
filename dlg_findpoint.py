@@ -38,6 +38,8 @@ class FindDialog(QtGui.QDialog):
         self.exp_slider.setValue(0)
         self.exp_slider.setTracking(True)
         self.exp_slider.setTickPosition(QtGui.QSlider.TicksBothSides)
+        #self.connect(self.exp_slider, QtCore.SIGNAL('valueChanged(int)'), 
+        #             self.exp_slider_action)
 
         flo.addRow("VOI:", self.voi_cbox)
         flo.addRow("VHI:", self.vhi_cbox)
@@ -80,4 +82,10 @@ class FindDialog(QtGui.QDialog):
         #self.close()
         voi = int(self.voi_cbox.currentText())
         vhi = int(self.vhi_cbox.currentText())
+        exp = self.exp_slider.value()
         self.parent.set_point_number(voi=voi, vhi=vhi)
+
+    #def exp_slider_action(self):
+    #    svalue = self.exp_slider.value()
+    #    print "slider value = " + str(svalue)
+        
