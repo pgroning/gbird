@@ -70,7 +70,8 @@ class BundleDialog(QtGui.QDialog):
         self.fuetype_cbox.addItems(QtCore.QStringList(self.fue_list))
 
         self.content_cbox = QtGui.QComboBox()
-        self.content_list = ["filt.", "unfilt."]
+        #self.content_list = ["filt.", "unfilt."]
+        self.content_list = ["voi=vhi", "complete"]
         self.content_cbox.addItems(QtCore.QStringList(self.content_list))
 
         #self.height_cbox = QtGui.QComboBox()
