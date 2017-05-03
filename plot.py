@@ -226,6 +226,10 @@ class PlotWin(QtGui.QMainWindow):
                     segment = self.parent.bunlist[0].segments[case_id]
                     self.plot_kinf(segment, voi=voi, vhi=vhi, tfu=tfu,
                                    linestyle="--")
+                if self.previous_cb.isChecked():
+                    segment = self.parent.bunlist[-2].segments[case_id]
+                    self.plot_kinf(segment, voi=voi, vhi=vhi, tfu=tfu,
+                                   linestyle=":")
 
         elif param == "FINT":
             if self.case_cb.isChecked():
@@ -318,14 +322,19 @@ class PlotWin(QtGui.QMainWindow):
                      QtCore.SIGNAL('currentIndexChanged(int)'), self.on_plot)
         
         # case_label = QLabel('All cases:')
-        self.case_cb = QtGui.QCheckBox("All seg.")
+        self.case_cb = QtGui.QCheckBox("Plot all seg.")
         self.case_cb.setChecked(False)
         self.connect(self.case_cb, QtCore.SIGNAL('stateChanged(int)'), 
                      self.on_plot)
         
-        self.original_cb = QtGui.QCheckBox("Plot orig.")
+        self.original_cb = QtGui.QCheckBox("Show original")
         self.original_cb.setChecked(False)
         self.connect(self.original_cb, QtCore.SIGNAL('stateChanged(int)'),
+                     self.on_plot)
+
+        self.previous_cb = QtGui.QCheckBox("Show previous")
+        self.previous_cb.setChecked(False)
+        self.connect(self.previous_cb, QtCore.SIGNAL('stateChanged(int)'),
                      self.on_plot)
 
         #type_label = QtGui.QLabel('Type:')
@@ -391,19 +400,27 @@ class PlotWin(QtGui.QMainWindow):
 
         #
         # Layout with box sizers
-        # 
+        #
+
+        param_flo = QtGui.QFormLayout()
+        param_flo.addRow("Param:", self.param_cbox)
+ 
         hbox = QtGui.QHBoxLayout()
         
         # for w in [  self.textbox, self.draw_button, self.grid_cb,
         #            slider_label, self.slider]:
         
-        for w in [self.draw_button, self.grid_cb, slider_label, self.slider,
-                  self.case_cb, self.original_cb, param_label,
-                  self.param_cbox]:
-
+        #for w in [self.draw_button, self.grid_cb, slider_label, self.slider,
+        #          self.case_cb, self.original_cb, param_label,
+        #          self.param_cbox]:
+        for w in [self.grid_cb, self.case_cb, self.original_cb, 
+                  self.previous_cb]:
             hbox.addWidget(w)
-            hbox.setAlignment(w, QtCore.Qt.AlignVCenter)
-        
+            #hbox.setAlignment(w, QtCore.Qt.AlignVCenter)
+            #hbox.setAlignment(w, QtCore.Qt.AlignHCenter)
+        hbox.addStretch(1)
+        hbox.addLayout(param_flo)
+
         vbox = QtGui.QVBoxLayout()
         # vbox.addLayout(hbox)
         # vbox.addWidget(self.canvas)
