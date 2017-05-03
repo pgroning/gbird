@@ -2301,10 +2301,11 @@ class MainWin(QtGui.QMainWindow):
     def create_menu(self):
         self.file_menu = self.menuBar().addMenu("&File")
         
-        save_settings_action = self.create_action("&Clear project...",
-                                                  shortcut="Ctrl+C",
-                                                  slot=self.clear_project,
-                                                  tip="Clear current project")
+        clear_action = self.create_action("&Clear project...",
+                                          shortcut="Ctrl+C",
+                                          slot=self.clear_project,
+                                          tip="Clear current project",
+                                          icon="delete-icon_32x32")
 
         quit_action = self.create_action("&Quit", slot=self.close,
                                          shortcut="Ctrl+Q",
@@ -2324,7 +2325,7 @@ class MainWin(QtGui.QMainWindow):
                                               tip="Open file",
                                               icon="open-file-icon_32x32")
 
-        save_data_action = self.create_action("&Save...",
+        save_data_action = self.create_action("&Save project...",
                                               slot=self.saveData,
                                               shortcut="Ctrl+S",
                                               tip="Save data to file",
@@ -2336,7 +2337,7 @@ class MainWin(QtGui.QMainWindow):
         
         self.add_actions(self.file_menu, (new_project_action, open_file_action,
                                           save_data_action,
-                                          save_settings_action,
+                                          clear_action,
                                           save_figure_action, None,
                                           quit_action))
 
@@ -2477,6 +2478,13 @@ class MainWin(QtGui.QMainWindow):
         saveAction.setStatusTip('Save to file')
         saveAction.triggered.connect(self.saveData)
         
+        color_icon = "icons/color-icon_32x32.png"
+        colorAction = QtGui.QAction(QtGui.QIcon(color_icon), 'Show color map', 
+                                    self)
+        colorAction.setStatusTip('Show color map')
+        colorAction.setCheckable(True)
+        colorAction.triggered.connect(self.toggle_pin_bgcolors)
+
         calc_icon = "icons/flame-red-icon_32x32.png"
         calcAction = QtGui.QAction(QtGui.QIcon(calc_icon),
                                    'Run perturbation', self)
@@ -2497,6 +2505,7 @@ class MainWin(QtGui.QMainWindow):
                                    self)
         findAction.setStatusTip('Find state point')
         findAction.triggered.connect(self.open_findpoint_dlg)
+        #findAction.setCheckable(True)
 
         #arrow_left_icon = "icons/arrow-left-icon_32x32.png"
         arrow_undo_icon =  "icons/arrow-undo-icon_32x32.png"
@@ -2518,6 +2527,7 @@ class MainWin(QtGui.QMainWindow):
         toolbar.addAction(saveAction)
         toolbar.addAction(calcAction)
         toolbar.addAction(settingsAction)
+        toolbar.addAction(colorAction)
         toolbar.addAction(plotAction)
         toolbar.addAction(findAction)
         toolbar.addAction(backAction)
