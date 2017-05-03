@@ -2308,23 +2308,27 @@ class MainWin(QtGui.QMainWindow):
 
         quit_action = self.create_action("&Quit", slot=self.close,
                                          shortcut="Ctrl+Q",
-                                         tip="Close the application")
+                                         tip="Close the application",
+                                         icon="exit-icon_32x32")
 
         new_project_action = self.create_action("&New...",
                                                 slot=self.open_bundle_dlg,
                                                 #slot=self.newProject,
                                                 shortcut="Ctrl+N",
-                                                tip="Create new bundle")
+                                                tip="Create new bundle",
+                                                icon="new-icon_32x32")
         
         open_file_action = self.create_action("&Open...",
                                               slot=self.openFile,
                                               shortcut="Ctrl+O",
-                                              tip="Open file")
+                                              tip="Open file",
+                                              icon="open-file-icon_32x32")
 
         save_data_action = self.create_action("&Save...",
                                               slot=self.saveData,
                                               shortcut="Ctrl+S",
-                                              tip="Save data to file")
+                                              tip="Save data to file",
+                                              icon="save-icon_32x32")
 
         save_figure_action = self.create_action("&Save Figure As...",
                                               slot=self.saveFigure,
@@ -2339,10 +2343,12 @@ class MainWin(QtGui.QMainWindow):
         self.edit_menu = self.menuBar().addMenu("&Edit")
 
         back = self.create_action("Back", slot=self.back_state,
-                                  tip="Back to previous")
+                                  tip="Back to previous",
+                                  icon="arrow-undo-icon_32x32")
 
         forward = self.create_action("Forward", slot=self.forward_state,
-                                         tip="Forward to next")
+                                     tip="Forward to next",
+                                     icon="arrow-redo-icon_32x32")
 
         reset = self.create_action("Reset...", slot=self.reset_state,
                                    tip="Reset all changes...")
@@ -2357,11 +2363,11 @@ class MainWin(QtGui.QMainWindow):
 
         enr_plus = self.create_action("Increase enr", slot=self.enr_add,
                                       tip="Increase enrichment",
-                                      shortcut="F6")
+                                      shortcut="F6", icon="add-icon_32x32")
 
         enr_minus = self.create_action("Decrease enr", slot=self.enr_sub,
                                        tip="Decrease enrichment",
-                                       shortcut="F5")
+                                       shortcut="F5", icon="remove-icon_32x32")
 
         self.allsegs_update = self.create_action("Update all segments",
                                                  tip="Update all segments",
@@ -2386,7 +2392,8 @@ class MainWin(QtGui.QMainWindow):
         
         self.tools_menu = self.menuBar().addMenu("&Tools")
         plot_action = self.create_action("Plot...", tip="Plot...",
-                                         slot=self.open_plotwin)
+                                         slot=self.open_plotwin,
+                                         icon="diagram-icon_32x32")
         
         casmo_action = self.create_action("CASMO...", tip="CASMO...",
                                           slot=self.open_cas_dlg)
@@ -2396,12 +2403,14 @@ class MainWin(QtGui.QMainWindow):
                                            slot=self.generate_inpfiles)
         
         data_action = self.create_action("Report...", tip="Fuel report...",
-                                         slot=self.open_report_dlg)
+                                         slot=self.open_report_dlg,
+                                         icon="document-icon_32x32")
         
         find_action = self.create_action("Find point...",
                                          tip="Find state point...",
                                          shortcut="Ctrl+F",
-                                         slot=self.open_findpoint_dlg)
+                                         slot=self.open_findpoint_dlg,
+                                         icon="binoculars-icon_32x32")
         
         table_action = self.create_action("Point table...",
                                           tip="Point table...")
@@ -2423,8 +2432,9 @@ class MainWin(QtGui.QMainWindow):
 
         self.run_menu = self.menuBar().addMenu("&Run")
         pert_action = self.create_action("&Perturbation", shortcut="F9",
-                                          slot=self.quick_calc,
-                                          tip="Run perturbation")
+                                         slot=self.quick_calc,
+                                         tip="Run perturbation",
+                                         icon="flame-red-icon_32x32")
 
         smallcalc_action = self.create_action("&Small calc",
                                           slot=self.quick_calc,
@@ -2437,8 +2447,8 @@ class MainWin(QtGui.QMainWindow):
         
         self.help_menu = self.menuBar().addMenu("&Help")
         about_action = self.create_action("&About", shortcut='F1',
-                                          slot=self.on_about,
-                                          tip='About the demo')
+                                          slot=self.on_about, tip='About',
+                                          icon="help-about-icon_32x32")
         
         self.add_actions(self.help_menu, (about_action,))
 
@@ -2482,6 +2492,12 @@ class MainWin(QtGui.QMainWindow):
         plotAction.setStatusTip('Open plot window')
         plotAction.triggered.connect(self.open_plotwin)
 
+        find_icon = "icons/binoculars-icon_32x32.png"
+        findAction = QtGui.QAction(QtGui.QIcon(find_icon), 'Find state point', 
+                                   self)
+        findAction.setStatusTip('Find state point')
+        findAction.triggered.connect(self.open_findpoint_dlg)
+
         #arrow_left_icon = "icons/arrow-left-icon_32x32.png"
         arrow_undo_icon =  "icons/arrow-undo-icon_32x32.png"
         backAction = QtGui.QAction(QtGui.QIcon(arrow_undo_icon),
@@ -2503,6 +2519,7 @@ class MainWin(QtGui.QMainWindow):
         toolbar.addAction(calcAction)
         toolbar.addAction(settingsAction)
         toolbar.addAction(plotAction)
+        toolbar.addAction(findAction)
         toolbar.addAction(backAction)
         toolbar.addAction(forwardAction)
         toolbar.addAction(exitAction)
@@ -2586,7 +2603,9 @@ class MainWin(QtGui.QMainWindow):
 
         action = QtGui.QAction(text, self)
         if icon is not None:
-            action.setIcon(QIcon(":/%s.png" % icon))
+            #action.setIcon(QtGui.QIcon(":/%s.png" % icon))
+            action.setIcon(QtGui.QIcon("icons/%s.png" % icon))
+            action.setIconVisibleInMenu(True)
         if shortcut is not None:
             action.setShortcut(shortcut)
         if tip is not None:
