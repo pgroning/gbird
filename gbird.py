@@ -1762,7 +1762,7 @@ class MainWin(QtGui.QMainWindow):
         # self.canvas.draw()
 
     def clear_project(self):
-        """Clear project"""
+        """Clear current project"""
         
         msgBox = QtGui.QMessageBox()
         status = msgBox.information(self, "Clear current project",
@@ -1775,16 +1775,26 @@ class MainWin(QtGui.QMainWindow):
     def clear_data(self):
         """Clear fuel map figure axes and delete bundle- and GUI field data"""
 
-        self.case_cbox.clear()
-        self.sim_info_field.clear()
-        self.rod_types_text.clear()
-        self.ave_enr_text.clear()
-        self.bundle_enr_text.clear()
+        self.param_cbox.setCurrentIndex(0)
+        #self.param_cbox.setEnabled(False)
+
+        self.point_sbox.setValue(0)
+        #self.point_sbox.setEnabled(False)
+
+        self.chanbow_sbox.setValue(0)
+        #self.chanbow_sbox.setEnabled(False)
+
+        widgets = [self.case_cbox, self.sim_info_field, self.rod_types_text,
+                   self.ave_enr_text, self.bundle_enr_text,
+                   self.burnup_text, self.kinf_text, self.fint_text,
+                   self.btf_text, self.voi_vhi_text, self.tfu_tmo_text]
+        for w in widgets:
+            w.clear()
 
         self.show_cmap.setChecked(False)
-        #self.bgcolors_cb.setChecked(False)
-        self.point_sbox.setValue(0)
-        self.chanbow_sbox.setValue(0)
+        
+        #self.chanbow_sbox.setValue(0)
+        #self.chanbow_sbox.setEnabled(False)
 
         self.table.clearContents()
 
@@ -1800,10 +1810,9 @@ class MainWin(QtGui.QMainWindow):
     def draw_fuelmap(self):
         """Draw fuel map"""
 
-        #from map_s96 import s96o2
-        #from map_a10 import a10xm
+        #self.fig.set_facecolor((1, 1, 0.8784))  # Light yellow
+        self.fig.set_facecolor("#CFEECF")  # Tea green
 
-        self.fig.set_facecolor((1, 1, 0.8784))
         # Draw outer rectangle
         rect = mpatches.Rectangle((0.035, 0.035), 0.935, 0.935,
                                   fc=(0.8, 0.898, 1), ec=(0.3, 0.3, 0.3))
