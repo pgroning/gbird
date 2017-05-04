@@ -214,6 +214,7 @@ class PlotWin(QtGui.QMainWindow):
         self.statusBar().showMessage(fmtstr)
         
         self.axes.clear()
+
         if param == "KINF":
             if self.case_cb.isChecked():
                 for iseg in range(case_id_max):
@@ -222,14 +223,15 @@ class PlotWin(QtGui.QMainWindow):
             else:
                 segment = self.parent.bunlist[ibundle].segments[case_id]
                 self.plot_kinf(segment, voi=voi, vhi=vhi, tfu=tfu)
-                if self.original_cb.isChecked():
-                    segment = self.parent.bunlist[0].segments[case_id]
-                    self.plot_kinf(segment, voi=voi, vhi=vhi, tfu=tfu,
-                                   linestyle="--")
-                if self.previous_cb.isChecked():
-                    segment = self.parent.bunlist[-2].segments[case_id]
-                    self.plot_kinf(segment, voi=voi, vhi=vhi, tfu=tfu,
-                                   linestyle=":")
+                if ibundle > 0:
+                    if self.original_cb.isChecked():
+                        segment = self.parent.bunlist[0].segments[case_id]
+                        self.plot_kinf(segment, voi=voi, vhi=vhi, tfu=tfu,
+                                       linestyle="--")
+                    if self.previous_cb.isChecked():
+                        segment = self.parent.bunlist[ibundle-1].segments[case_id]
+                        self.plot_kinf(segment, voi=voi, vhi=vhi, tfu=tfu,
+                                       linestyle="--")
 
         elif param == "FINT":
             if self.case_cb.isChecked():

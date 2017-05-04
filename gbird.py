@@ -2311,9 +2311,9 @@ class MainWin(QtGui.QMainWindow):
                                               tip="Save data to file",
                                               icon="save-icon_32x32")
 
-        save_figure_action = self.create_action("&Save Figure As...",
+        save_figure_action = self.create_action("&Export Figure...",
                                                 slot=self.saveFigure,
-                                                tip="Save data to file",
+                                                tip="Export fuel map to file",
                                                 icon="export-icon_32x32")
         
         self.add_actions(self.file_menu, (new_project_action, open_file_action,
