@@ -2312,8 +2312,9 @@ class MainWin(QtGui.QMainWindow):
                                               icon="save-icon_32x32")
 
         save_figure_action = self.create_action("&Save Figure As...",
-                                              slot=self.saveFigure,
-                                              tip="Save data to file")
+                                                slot=self.saveFigure,
+                                                tip="Save data to file",
+                                                icon="export-icon_32x32")
         
         self.add_actions(self.file_menu, (new_project_action, open_file_action,
                                           save_data_action,
@@ -2336,11 +2337,13 @@ class MainWin(QtGui.QMainWindow):
 
         enrichment = self.create_action("Enrichments...",
                                         slot=self.open_enrichment_dlg,
-                                        tip="Edit enrichment levels...")
+                                        tip="Edit enrichment levels...",
+                                        icon="table-icon_32x32")
         
         bundle = self.create_action("Bundle...",
                                     slot=self.open_bunedit_dlg,
-                                    tip="Edit bundle heights...")
+                                    tip="Edit bundle heights...",
+                                    icon="layers-icon_32x32")
 
         enr_plus = self.create_action("Increase enr", slot=self.enr_add,
                                       tip="Increase enrichment",
@@ -2377,7 +2380,8 @@ class MainWin(QtGui.QMainWindow):
                                          icon="diagram-icon_32x32")
         
         casmo_action = self.create_action("CASMO...", tip="CASMO...",
-                                          slot=self.open_cas_dlg)
+                                          slot=self.open_cas_dlg,
+                                          icon="grid-icon_32x32")
 
         casinp_action = self.create_action("Generate inp files",
                                            tip="Generate CASMO input files...",
@@ -2400,7 +2404,8 @@ class MainWin(QtGui.QMainWindow):
                                           tip="BTF optimization...")
         
         egv_action = self.create_action("EGV...", tip="EGV...",
-                                        slot=self.open_egv_dlg)
+                                        slot=self.open_egv_dlg,
+                                        icon="letter-e-icon_32x32")
 
         self.show_cmap = self.create_action("Show color map", checkable=True,
                                             tip="Show background color map",
