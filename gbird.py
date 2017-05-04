@@ -241,6 +241,9 @@ class MainWin(QtGui.QMainWindow):
         super(MainWin, self).__init__(parent)
         # QtGui.QMainWindow.__init__(self, parent)
         self.verbose = True
+
+        path = os.path.realpath(__file__)
+        self.appdir = os.path.split(path)[0] + os.sep
         
         self.setWindowTitle('Main Window')
 
@@ -2459,55 +2462,52 @@ class MainWin(QtGui.QMainWindow):
 
     def create_toolbar(self):
 
-        path = os.path.realpath(__file__)
-        appdir = os.path.split(path)[0] + os.sep
-        
-        exit_icon = appdir + "icons/exit-icon_32x32.png"
+        exit_icon = self.appdir + "icons/exit-icon_32x32.png"
         exitAction = QtGui.QAction(QtGui.QIcon(exit_icon), 'Exit', self)
         # exitAction.setShortcut('Ctrl+Q')
         exitAction.setStatusTip('Exit application')
         exitAction.triggered.connect(self.close)
 
-        new_icon = appdir + "icons/new-icon_32x32.png"
+        new_icon = self.appdir + "icons/new-icon_32x32.png"
         newAction = QtGui.QAction(QtGui.QIcon(new_icon),
                                    'Create new bundle', self)
         newAction.setStatusTip('Create a new bundle')
         newAction.triggered.connect(self.open_bundle_dlg)
         #newAction.triggered.connect(self.newProject)
         
-        file_icon = appdir + "icons/open-file-icon_32x32.png"
+        file_icon = self.appdir + "icons/open-file-icon_32x32.png"
         fileAction = QtGui.QAction(QtGui.QIcon(file_icon), 'Open file', self)
         fileAction.setStatusTip('Open file')
         fileAction.triggered.connect(self.openFile)
 
-        save_icon = appdir + "icons/save-icon_32x32.png"
+        save_icon = self.appdir + "icons/save-icon_32x32.png"
         saveAction = QtGui.QAction(QtGui.QIcon(save_icon), 'Save to file', self)
         saveAction.setStatusTip('Save to file')
         saveAction.triggered.connect(self.saveData)
         
-        color_icon = appdir + "icons/color-icon_32x32.png"
+        color_icon = self.appdir + "icons/color-icon_32x32.png"
         self.colorAction = QtGui.QAction(QtGui.QIcon(color_icon), 
                                          'Show color map', self)
         self.colorAction.setStatusTip('Show color map')
         self.colorAction.setCheckable(True)
         self.colorAction.triggered.connect(self.toggle_cmap)
 
-        calc_icon = appdir + "icons/flame-red-icon_32x32.png"
+        calc_icon = self.appdir + "icons/flame-red-icon_32x32.png"
         calcAction = QtGui.QAction(QtGui.QIcon(calc_icon),
                                    'Run perturbation', self)
         calcAction.setStatusTip('Run simulation')
         calcAction.triggered.connect(self.quick_calc)
 
-        pre_icon = appdir + "icons/preferences-icon_32x32.png"
+        pre_icon = self.appdir + "icons/preferences-icon_32x32.png"
         settingsAction = QtGui.QAction(QtGui.QIcon(pre_icon), 'Settings', self)
         settingsAction.setStatusTip('Settings')
 
-        diagram_icon = appdir + "icons/diagram-icon_32x32.png"
+        diagram_icon = self.appdir + "icons/diagram-icon_32x32.png"
         plotAction = QtGui.QAction(QtGui.QIcon(diagram_icon), 'Plot', self)
         plotAction.setStatusTip('Open plot window')
         plotAction.triggered.connect(self.open_plotwin)
 
-        find_icon = appdir + "icons/binoculars-icon_32x32.png"
+        find_icon = self.appdir + "icons/binoculars-icon_32x32.png"
         findAction = QtGui.QAction(QtGui.QIcon(find_icon), 'Find state point', 
                                    self)
         findAction.setStatusTip('Find state point')
@@ -2515,14 +2515,14 @@ class MainWin(QtGui.QMainWindow):
         #findAction.setCheckable(True)
 
         #arrow_left_icon = "icons/arrow-left-icon_32x32.png"
-        arrow_undo_icon =  appdir + "icons/arrow-undo-icon_32x32.png"
+        arrow_undo_icon =  self.appdir + "icons/arrow-undo-icon_32x32.png"
         backAction = QtGui.QAction(QtGui.QIcon(arrow_undo_icon),
                                    'Back to previous design', self)
         backAction.setStatusTip('Back to previous design')
         backAction.triggered.connect(self.back_state)
 
         #arrow_forward_icon = "icons/arrow-right-icon_32x32.png"
-        arrow_redo_icon =  appdir + "icons/arrow-redo-icon_32x32.png"
+        arrow_redo_icon =  self.appdir + "icons/arrow-redo-icon_32x32.png"
         forwardAction = QtGui.QAction(QtGui.QIcon(arrow_redo_icon),
                                       'Forward to next design', self)
         forwardAction.setStatusTip('Forward to next design')
@@ -2631,9 +2631,7 @@ class MainWin(QtGui.QMainWindow):
         action = QtGui.QAction(text, self)
         if icon is not None:
             #action.setIcon(QtGui.QIcon(":/%s.png" % icon))
-            path = os.path.realpath(__file__)
-            appdir = os.path.split(path)[0] + os.sep
-            action.setIcon(QtGui.QIcon(appdir + "icons/%s.png" % icon))
+            action.setIcon(QtGui.QIcon(self.appdir + "icons/%s.png" % icon))
             action.setIconVisibleInMenu(True)
         if shortcut is not None:
             action.setShortcut(shortcut)
