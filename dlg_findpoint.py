@@ -1,4 +1,5 @@
 from PyQt4 import QtGui, QtCore
+from pyqt_trace import pyqt_trace as qtrace
 
 class FindDialog(QtGui.QDialog):
     def __init__(self, parent):
@@ -79,11 +80,11 @@ class FindDialog(QtGui.QDialog):
         del self.parent.findpoint_dlg
 
     def find_action(self):
-        #self.close()
         voi = int(self.voi_cbox.currentText())
         vhi = int(self.vhi_cbox.currentText())
-        exp = self.exp_slider.value()
-        self.parent.set_point_number(voi=voi, vhi=vhi)
+        exp_percent = self.exp_slider.value()
+        
+        self.parent.set_point_number(voi=voi, vhi=vhi, exp_percent=exp_percent)
 
     #def exp_slider_action(self):
     #    svalue = self.exp_slider.value()
