@@ -43,6 +43,10 @@ class DataStruct(object):
 class Segment(object):
 
     def __init__(self, caxfile=None, content="filtered"):
+
+        path = os.path.realpath(__file__)
+        self.appdir = os.path.split(path)[0] + os.sep
+        
         self.data = DataStruct()
         #self.states = []
         #self.states.append(DataStruct())
@@ -860,11 +864,11 @@ class Segment(object):
         # cax file
         c3cax = filebasename + ".cax"
         # C3 libs
-        lib1 = "./lib/c3/e4lbj40"
-        lib2 = "./lib/c3/bal8ab4"
-        lib3 = "./lib/c3/galb410"
+        lib1 = self.appdir + "lib/c3/e4lbj40"
+        lib2 = self.appdir + "lib/c3/bal8ab4"
+        lib3 = self.appdir + "lib/c3/galb410"
         # C3 executable
-        c3exe = "./bin/casmo3"
+        c3exe = self.appdir + "bin/casmo3"
         if os.path.isfile(c3exe):
             pass  # no need to change the location of executable and libs
         elif os.path.isfile("." + c3exe):
