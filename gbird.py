@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """
 This is the main window of the program.
-This window embeds a matplotlib (mpl) plot into a PyQt4 GUI application
 """
 
 from IPython.core.debugger import Tracer  # Set tracepoint (used for debugging)
@@ -245,7 +244,7 @@ class MainWin(QtGui.QMainWindow):
         path = os.path.realpath(__file__)
         self.appdir = os.path.split(path)[0] + os.sep
         
-        self.setWindowTitle('Main Window')
+        self.setWindowTitle("Greenbird")
 
         # self.resize(1100,620)
         # self.move(200,200)
@@ -1575,7 +1574,7 @@ class MainWin(QtGui.QMainWindow):
             pert_voi = None
         
         if not hasattr(self, "biascalc"):  # make bias calc?
-            print "Bias calibration calculation..."
+            print "Performing reference calculation..."
             self.biascalc = Bundle(parent=self.bunlist[0])
             #if self.biascalc.data.voi is not None:
             #    for s in self.biascalc.segments:
@@ -2302,7 +2301,7 @@ class MainWin(QtGui.QMainWindow):
         self.setCentralWidget(self.main_frame)
     
     def create_status_bar(self):
-        self.status_text = QtGui.QLabel("Greenbird")
+        self.status_text = QtGui.QLabel("Main window")
         self.statusBar().addWidget(self.status_text, 1)
         
     def create_menu(self):

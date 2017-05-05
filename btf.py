@@ -93,7 +93,8 @@ class Btf(object):
 
     def calc_btf(self):
         """Calculating BTF"""
-        print "Calculating BTF"
+        print "Calculating BTF..."
+
         #tic = time.time()
         x = self.intersect_points()
         
@@ -132,6 +133,7 @@ class Btf(object):
             # self.DOX[i, :, :] = self.rfact(POW3)
         self.burnpoints = np.array(x).astype(float)
         
+        print "Done."
         #print "Done in "+str(time.time()-tic)+" seconds."
 
     #def rfact(self, POW3):

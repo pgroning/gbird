@@ -902,7 +902,7 @@ class Segment(object):
         # Run C3 executable
         # cmd = "linrsh " + c3exe + " " + c3cfg
         # cmd = c3exe + " " + c3cfg
-        print "Running c3 model"
+        print "Running c3 model..."
         # args = ['linrsh', c3exe, c3cfg]
         arglist = ['linrsh', c3exe, c3cfg]
         arglist.insert(1, '-q')
@@ -1056,7 +1056,7 @@ class Segment(object):
                   model="c3", box_offset=0.0, c4ver=None, neulib=None, 
                   gamlib=None):
 
-        tic = time.time()
+        #tic = time.time()
         
         file_base_name = "./tmp." + str(uuid.uuid4()).split('-')[0]
         self.writecai(file_base_name, voi, dep_max, dep_thres, box_offset, 
@@ -1082,7 +1082,8 @@ class Segment(object):
         except:
             pass
 
-        print "Done in "+str(time.time()-tic)+" seconds."
+        print "Done."
+        #print "Done in "+str(time.time()-tic)+" seconds."
 
     def __boxbow(self, box_offset=0.0):
         """Updating the BWR card to account for box bowing."""
