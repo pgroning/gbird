@@ -12,6 +12,7 @@ import time
 import numpy as np
 
 from btf_opt2 import btf_opt2
+from btf_opt3 import btf_opt3
 # from lib.btf_opt2 import btf_opt2
 from btf_a10xm import btf_a10xm
 from btf_a10b import btf_a10b
@@ -105,10 +106,11 @@ class Btf(object):
             voi = 50
             rfact_fun = btf_opt2
         elif fuetype == "OPT3":
-            print "Warning: BTF is not yet implemented for this fuel type."
-            print "Using OPT2 dryout performance calculation instead."
+            #print "Warning: BTF is not yet implemented for this fuel type."
+            #print "Using OPT2 dryout performance calculation instead."
+            zdim = 100
             voi = 50
-            rfact_fun = btf_opt2
+            rfact_fun = btf_opt3
         elif fuetype == "A10XM":
             voi = 60
             rfact_fun = btf_a10xm
