@@ -82,9 +82,9 @@ class FindDialog(QtGui.QDialog):
     def find_action(self):
         voi = int(self.voi_cbox.currentText())
         vhi = int(self.vhi_cbox.currentText())
-        exp_percent = self.exp_slider.value()
+        exp_pc = self.exp_slider.value()
         
-        self.parent.set_point_number(voi=voi, vhi=vhi, exp_percent=exp_percent)
+        self.parent.set_point_number(voi=voi, vhi=vhi, exp_pc=exp_pc)
 
     #def exp_slider_action(self):
     #    svalue = self.exp_slider.value()

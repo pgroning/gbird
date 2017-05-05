@@ -1140,7 +1140,7 @@ class Segment(object):
                            if p.vhi == vhi and p.voi == voi), None)
         return ipoint
 
-    def get_statepoints(self, voi, vhi, tfu):
+    def get_statepoints(self, voi, vhi, tfu=None):
         """get a list of all state points for given voi, vhi, tfu"""
 
         i = self.findpoint(voi=voi, vhi=vhi, tfu=tfu)  # first index

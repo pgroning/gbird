@@ -891,30 +891,35 @@ class MainWin(QtGui.QMainWindow):
         self.egv_dlg = EgvDialog(self)
         self.egv_dlg.exec_()
 
-    def set_point_number(self, voi=40.0, vhi=40.0, exp_percent=0):
+    def set_point_number(self, voi=40.0, vhi=40.0, exp_pc=0):
         ipoint = int(self.point_sbox.value())
         iseg = int(self.case_cbox.currentIndex())
         bundle = self.bunlist[self.ibundle]
         segment = bundle.segments[iseg]
         statepoint = segment.statepoints[ipoint]
         
-        tfu = 771.29999999999995
         voi = float(voi)
         vhi = float(vhi)
-        statepoints = segment.get_statepoints(voi, vhi, tfu)
+        #statepoints = segment.get_statepoints(voi, vhi, tfu)
+        statepoints = segment.get_statepoints(voi, vhi)
+        if statepoints == None:
+            return
         burnvec = [s.burnup for s in statepoints]
         burn_range = max(burnvec) - min(burnvec)
-        exp = exp_percent/100.0 * burn_range + min(burnvec)
+        exp = exp_pc / 100.0 * burn_range + min(burnvec)
         index = [i for i, e in enumerate(burnvec) if e <= exp][-1]
         exp = burnvec[index]
-        qtrace()
+        
+        ipoint = segment.findpoint(burnup=exp, voi=voi, vhi=vhi)
+        if ipoint is not None:
+            self.point_sbox.setValue(ipoint)
+
         #voi = int(self.voi_cbox.currentText())
         #vhi = int(self.vhi_cbox.currentText())
-
-        if statepoint.voi != voi or statepoint.vhi != vhi:
-            ipoint = segment.findpoint(voi=voi, vhi=vhi)
-            if ipoint is not None:
-                self.point_sbox.setValue(ipoint)
+        #if statepoint.voi != voi or statepoint.vhi != vhi:
+        #    ipoint = segment.findpoint(voi=voi, vhi=vhi)
+        #    if ipoint is not None:
+        #        self.point_sbox.setValue(ipoint)
 
     def set_pinvalues(self):
         """Update values"""
