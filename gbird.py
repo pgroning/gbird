@@ -480,6 +480,12 @@ class MainWin(QtGui.QMainWindow):
             bundle = self.bunlist[0]
             bundle.readcax(content=bundle.data.content)
             bundle.new_btf()
+
+            # Perform reference calculation
+            print "Performing reference calculation..."
+            self.biascalc = Bundle(parent=self.bunlist[0])
+            self.biascalc.new_calc(model="C3", dep_max=None,
+                                   dep_thres=None, voi=None)
             
             self.init_pinobjects()
             self.init_cboxes()
