@@ -361,7 +361,7 @@ class Bundle(object):
         #self.states[state_num].ave_enr = ave_enr
         return ave_enr
 
-    def pow3(self, POW, nodes):
+    def pow3(self, POW, nodes, zdim=25):
         """Expanding a list of 2D pin power distributions into a 3D array."""
 
         xdim = POW.shape[1]
@@ -377,7 +377,7 @@ class Bundle(object):
         nodes = np.array(nodes).astype(float)
         
         #zdim = max(nodes)
-        zdim = 25  # max node
+        #zdim = 25  # number of nodes
         POW3 = np.zeros((zdim, xdim, ydim))
 
         #nodes = map(float, nodes) / sum(nodes) * zdim  # rescaling

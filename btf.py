@@ -56,7 +56,7 @@ class Btf(object):
             x = [val for val in x if val in x2]
         return x
 
-    def pow3d(self, voi, burnup):
+    def pow3d(self, voi, burnup, zdim):
         """Construct a 3D pin power distribution for specific void and burnup.
         Use interpolation if necessary."""
         
@@ -87,7 +87,7 @@ class Btf(object):
                 P2 = segments[i].statepoints[i2].POW
                 POW[i, :, :] = self.bundle.interp2(P1, P2, voi1, voi2, voi)
                 
-        POW3 = self.bundle.pow3(POW, nodes)
+        POW3 = self.bundle.pow3(POW, nodes, zdim)
         return POW3
 
     def calc_btf(self):
@@ -100,6 +100,7 @@ class Btf(object):
         self.DOX = np.zeros((len(x), npst, npst))
 
         fuetype = self.bundle.data.fuetype
+        zdim = 25  # default number of nodes
         if fuetype == "OPT2":
             voi = 50
             rfact_fun = btf_opt2
@@ -112,6 +113,7 @@ class Btf(object):
             voi = 60
             rfact_fun = btf_a10xm
         elif fuetype == "A10B":
+            zdim = 25 
             voi = 60
             rfact_fun = btf_a10b
         elif fuetype == "AT11":
@@ -122,7 +124,8 @@ class Btf(object):
             return
 
         for i, burnup in enumerate(x):
-            POW3 = self.pow3d(voi, burnup)
+            POW3 = self.pow3d(voi, burnup, zdim)
+            #print POW3.shape
             self.DOX[i, :, :] = rfact_fun(POW3)
             # self.DOX[i, :, :] = self.rfact(POW3)
         self.burnpoints = np.array(x).astype(float)
