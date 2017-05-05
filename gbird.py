@@ -460,7 +460,7 @@ class MainWin(QtGui.QMainWindow):
         self.bunlist = [Bundle()]
         
     def import_data(self):
-        """Reading project setup file"""
+        """Importing data from card image file"""
         
         msgBox = QtGui.QMessageBox()
         status = msgBox.information(self, "Importing data", "Continue?",
@@ -479,7 +479,7 @@ class MainWin(QtGui.QMainWindow):
             self.ibundle = 0
             bundle = self.bunlist[0]
             bundle.readcax(content=bundle.data.content)
-            bundle.new_btf()  # commented out only for testing purpose
+            bundle.new_btf()
             
             self.init_pinobjects()
             self.init_cboxes()
@@ -1914,9 +1914,11 @@ class MainWin(QtGui.QMainWindow):
         # Create the mpl Figure and FigCanvas objects.
         # 5x4 inches, 100 dots-per-inch
         #
-        self.dpi = 100
+        r = 1.0  # resolution factor
+        self.dpi = 100 * r
         #self.fig = Figure((6, 5), dpi=self.dpi, facecolor=None)
-        self.fig = Figure((6, 5), dpi=self.dpi)
+        #self.fig = Figure((6, 5), dpi=self.dpi)
+        self.fig = Figure((6 / r, 5 / r), dpi=self.dpi)
         # self.fig = Figure((6, 5), dpi=self.dpi, facecolor=(1,1,1))
         self.canvas = FigureCanvas(self.fig)
         self.canvas.mpl_connect('button_press_event', self.on_click)
