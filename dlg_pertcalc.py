@@ -7,7 +7,7 @@ class PertDialog(QtGui.QDialog):
         self.setup()
 
     def setup(self):
-        self.setWindowTitle("Perturbation")
+        self.setWindowTitle("Quick calc")
         xpos = self.parent.pos().x() + self.parent.size().width() / 2
         ypos = self.parent.pos().y() + self.parent.size().height() / 2
         self.setGeometry(QtCore.QRect(xpos-100, ypos-50, 150, 120))

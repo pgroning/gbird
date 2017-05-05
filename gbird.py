@@ -2384,8 +2384,8 @@ class MainWin(QtGui.QMainWindow):
                                                  tip="Update all segments",
                                                  checkable=True) 
         
-        perturbation = self.create_action("Perturbation...",
-                                          tip="Perturbation model...",
+        quickcalc = self.create_action("Quick calc...",
+                                          tip="Quick calc model...",
                                           slot=self.open_pert_dlg)
         
         preferences = self.create_action("Preferences...",
@@ -2398,7 +2398,7 @@ class MainWin(QtGui.QMainWindow):
         self.add_actions(self.edit_menu,
                          (back, forward, None, enr_minus, enr_plus, 
                           self.allsegs_update, None,
-                          bundle, enrichment, perturbation, None, replace, 
+                          bundle, enrichment, quickcalc, None, replace, 
                           reset, preferences))
         
         self.tools_menu = self.menuBar().addMenu("&Tools")
@@ -2444,9 +2444,9 @@ class MainWin(QtGui.QMainWindow):
                           self.show_cmap))
 
         self.run_menu = self.menuBar().addMenu("&Run")
-        pert_action = self.create_action("&Perturbation", shortcut="F9",
+        quickcalc_action = self.create_action("&Quick calc", shortcut="F9",
                                          slot=self.quick_calc,
-                                         tip="Run perturbation",
+                                         tip="Run quick calc",
                                          icon="flame-red-icon_32x32")
 
         smallcalc_action = self.create_action("&Small calc",
@@ -2456,7 +2456,7 @@ class MainWin(QtGui.QMainWindow):
         fullcalc_action = self.create_action("&Complete calc...",
                                              slot=self.open_fullcalc_dlg,
                                              tip="Run complete calculation")
-        self.add_actions(self.run_menu, (None, pert_action))
+        self.add_actions(self.run_menu, (None, quickcalc_action))
         
         self.help_menu = self.menuBar().addMenu("&Help")
         about_action = self.create_action("&About", shortcut='F1',
@@ -2499,7 +2499,7 @@ class MainWin(QtGui.QMainWindow):
 
         calc_icon = self.appdir + "icons/flame-red-icon_32x32.png"
         calcAction = QtGui.QAction(QtGui.QIcon(calc_icon),
-                                   'Run perturbation', self)
+                                   'Run quick calc', self)
         calcAction.setStatusTip('Run simulation')
         calcAction.triggered.connect(self.quick_calc)
 
