@@ -546,7 +546,7 @@ class Segment(object):
             gamlib = "galb418"
 
         outdir = os.path.split(file_base_name)[0]
-
+        
         cmd = ' -o ' + outdir
         cmd += ' -k '
         cmd += ' -G ' + libdir + gamlib
