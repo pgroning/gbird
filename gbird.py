@@ -281,6 +281,7 @@ class MainWin(QtGui.QMainWindow):
 
         self.on_draw()  # Init plot
 
+        self.widgets_setenabled(False)
         # self.draw_fuelmap()
         # self.textbox.setText('1 2 3 4')
         # self.data_init()
@@ -321,6 +322,7 @@ class MainWin(QtGui.QMainWindow):
                 self.load_pickle(filename)
                 self.fig_update()
                 self.chanbow_sbox_update()
+                self.widgets_setenabled()
             else:
                 msgBox = QtGui.QMessageBox()
                 status = msgBox.information(self, "Importing data",
@@ -492,11 +494,10 @@ class MainWin(QtGui.QMainWindow):
 
             self.setCursor(QtCore.Qt.ArrowCursor)
             self.fig_update()
+            self.widgets_setenabled(True)
         else:
             return
             
-
-
 
 
         #self.fig_update()
@@ -2656,6 +2657,13 @@ class MainWin(QtGui.QMainWindow):
             action.setCheckable(True)
         return action
 
+    def widgets_setenabled(self, status=True):
+
+        widgets = [self.param_cbox, self.case_cbox, self.point_sbox,
+                   self.chanbow_sbox]
+        for w in widgets:
+            w.setEnabled(status)
+    
     def closeEvent(self, event):
         """Runs before program terminates"""
 
