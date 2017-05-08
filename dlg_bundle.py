@@ -478,7 +478,7 @@ class BundleDialog(QtGui.QDialog):
         return filename
     
 
-class BundleEditDialog(QtGui.QDialog):
+class SegmentDialog(QtGui.QDialog):
     def __init__(self, parent):
         QtGui.QDialog.__init__(self)
 
@@ -489,7 +489,7 @@ class BundleEditDialog(QtGui.QDialog):
         self.ok = False
 
     def setup(self):
-        self.setWindowTitle("Edit bundle")
+        self.setWindowTitle("Edit segments")
         xpos = self.parent.pos().x() + self.parent.size().width() / 2
         ypos = self.parent.pos().y() + self.parent.size().height() / 2
         self.setGeometry(QtCore.QRect(0.5*xpos, 0.8*ypos, 500, 210))

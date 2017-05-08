@@ -40,7 +40,7 @@ from plot import PlotWin
 from dlg_cascalc import CasDialog, CasRunDialog
 from dlg_pertcalc import PertDialog
 from dlg_bundle import BundleDialog
-from dlg_bundle import BundleEditDialog
+from dlg_bundle import SegmentDialog
 from dlg_report import ReportDialog
 from dlg_findpoint import FindDialog
 from dlg_enrichment import EnrichmentDialog
@@ -849,9 +849,9 @@ class MainWin(QtGui.QMainWindow):
         if self.enrichment_dlg.ok:
             self.fig_update()
 
-    def open_bunedit_dlg(self):
+    def open_segment_dlg(self):
         """open bundle edit dialog"""
-        self.bunedit_dlg = BundleEditDialog(self)
+        self.bunedit_dlg = SegmentDialog(self)
         self.bunedit_dlg.exec_()
         if self.bunedit_dlg.ok:
             self.bunlist[self.ibundle].new_btf()
@@ -2377,9 +2377,9 @@ class MainWin(QtGui.QMainWindow):
                                         tip="Edit enrichment levels...",
                                         icon="table-icon_32x32")
         
-        bundle = self.create_action("Bundle...",
-                                    slot=self.open_bunedit_dlg,
-                                    tip="Edit bundle heights...",
+        segment = self.create_action("Segments...",
+                                    slot=self.open_segment_dlg,
+                                    tip="Edit segment heights...",
                                     icon="layers-icon_32x32")
 
         enr_plus = self.create_action("Increase enr", slot=self.enr_add,
@@ -2411,7 +2411,7 @@ class MainWin(QtGui.QMainWindow):
         self.add_actions(self.edit_menu,
                          (back, forward, None, enr_minus, enr_plus, 
                           self.allsegs_update, None,
-                          bundle, enrichment, quickcalc, None, replace, 
+                          segment, enrichment, quickcalc, None, replace, 
                           reset, preferences))
         
         self.tools_menu = self.menuBar().addMenu("&Tools")
@@ -2481,7 +2481,7 @@ class MainWin(QtGui.QMainWindow):
 
         self.menu_actions = [save_data_action, clear_action, 
                              save_figure_action, back, forward, reset, 
-                             enrichment, bundle, enr_plus, enr_minus, 
+                             enrichment, segment, enr_plus, enr_minus, 
                              quickcalc, replace, plot_action, casmo_action,
                              casinp_action, data_action, find_action, 
                              egv_action, quickcalc_action]
