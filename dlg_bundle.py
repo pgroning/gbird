@@ -502,9 +502,9 @@ class BundleEditDialog(QtGui.QDialog):
         selection_model = QtGui.QItemSelectionModel(model)
         self.table_view.setSelectionModel(selection_model)
 
-        model.setHorizontalHeaderItem(0, QtGui.QStandardItem("Height (ENR)"))
-        model.setHorizontalHeaderItem(1, QtGui.QStandardItem("Height (BTF)"))
-        model.setHorizontalHeaderItem(2, QtGui.QStandardItem("Name"))
+        model.setHorizontalHeaderItem(0, QtGui.QStandardItem("Height (enr)"))
+        model.setHorizontalHeaderItem(1, QtGui.QStandardItem("Height (btf)"))
+        model.setHorizontalHeaderItem(2, QtGui.QStandardItem("Segment"))
 
         horizontalheader = self.table_view.horizontalHeader()
         horizontalheader.setResizeMode(2, QtGui.QHeaderView.Stretch)

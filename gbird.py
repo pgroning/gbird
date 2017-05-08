@@ -2369,7 +2369,8 @@ class MainWin(QtGui.QMainWindow):
                                      icon="arrow-redo-icon_32x32")
 
         reset = self.create_action("Reset...", slot=self.reset_state,
-                                   tip="Reset all changes...")
+                                   tip="Reset all changes...",
+                                   icon="undo-icon_32x32")
 
         enrichment = self.create_action("Enrichments...",
                                         slot=self.open_enrichment_dlg,
@@ -2394,15 +2395,18 @@ class MainWin(QtGui.QMainWindow):
                                                  checkable=True) 
         
         quickcalc = self.create_action("Quick calc...",
-                                          tip="Quick calc model...",
-                                          slot=self.open_pert_dlg)
+                                       tip="Quick calc model...",
+                                       slot=self.open_pert_dlg,
+                                       icon="flame-red-icon_32x32")
         
         preferences = self.create_action("Preferences...",
-                                         tip="Preferences...")
+                                         tip="Preferences...",
+                                         icon="preferences-icon_32x32")
 
         replace = self.create_action("Replace original...",
                                      tip="Replace original design...",
-                                     slot=self.replace_original_design)
+                                     slot=self.replace_original_design,
+                                     icon="original-icon_32x32")
         
         self.add_actions(self.edit_menu,
                          (back, forward, None, enr_minus, enr_plus, 
@@ -2421,7 +2425,8 @@ class MainWin(QtGui.QMainWindow):
 
         casinp_action = self.create_action("Generate inp files",
                                            tip="Generate CASMO input files...",
-                                           slot=self.generate_inpfiles)
+                                           slot=self.generate_inpfiles,
+                                           icon="write-icon_32x32")
         
         data_action = self.create_action("Report...", tip="Fuel report...",
                                          slot=self.open_report_dlg,
