@@ -37,6 +37,9 @@ class EnrichmentDialog(QtGui.QDialog):
     def __init__(self, parent):
         QtGui.QDialog.__init__(self)
 
+        path = os.path.realpath(__file__)
+        self.appdir = os.path.split(path)[0] + os.sep
+
         self.settings = QtCore.QSettings("greenbird")
         self.parent = parent
         self.setup()
@@ -104,22 +107,22 @@ class EnrichmentDialog(QtGui.QDialog):
         self.connect(self.reset_button, QtCore.SIGNAL('clicked()'), 
                      self.reset_action)
 
-        add_icon = "icons/add-icon_32x32.png"
+        add_icon = self.appdir + "icons/add-icon_32x32.png"
         addRowAction = QtGui.QAction(QtGui.QIcon(add_icon),
                                       'Add row...', self)
         addRowAction.triggered.connect(self.add_row_action)
         
-        delete_icon = "icons/delete3-icon_32x32.png"
+        delete_icon = self.appdir + "icons/delete3-icon_32x32.png"
         deleteRowAction = QtGui.QAction(QtGui.QIcon(delete_icon),
                                          'Delete row', self)
         deleteRowAction.triggered.connect(self.delete_row_action)
 
-        arrow_up_icon = "icons/arrow-up-icon_32x32.png"
+        arrow_up_icon = self.appdir + "icons/arrow-up-icon_32x32.png"
         moveUpAction = QtGui.QAction(QtGui.QIcon(arrow_up_icon),
                                      'Move selected cells up', self)
         moveUpAction.triggered.connect(self.move_up_action)
         
-        arrow_down_icon = "icons/arrow-down-icon_32x32.png"
+        arrow_down_icon = self.appdir + "icons/arrow-down-icon_32x32.png"
         moveDownAction = QtGui.QAction(QtGui.QIcon(arrow_down_icon),
                                        'Move selected cells down', self)
         moveDownAction.triggered.connect(self.move_down_action)
