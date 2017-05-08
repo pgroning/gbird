@@ -475,7 +475,7 @@ class PlotWin(QtGui.QMainWindow):
         self.add_actions(self.tools_menu, (options,))
         
         self.help_menu = self.menuBar().addMenu("&Help")
-        about_action = self.create_action("&About", shortcut='F1',
+        about_action = self.create_action("&About",
                                           slot=self.on_about,
                                           tip='About the demo')
         

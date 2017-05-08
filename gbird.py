@@ -2383,11 +2383,11 @@ class MainWin(QtGui.QMainWindow):
 
         enr_plus = self.create_action("Increase enr", slot=self.enr_add,
                                       tip="Increase enrichment",
-                                      shortcut="F6", icon="add-icon_32x32")
+                                      shortcut="F2", icon="add-icon_32x32")
 
         enr_minus = self.create_action("Decrease enr", slot=self.enr_sub,
                                        tip="Decrease enrichment",
-                                       shortcut="F5", icon="remove-icon_32x32")
+                                       shortcut="F1", icon="remove-icon_32x32")
 
         self.allsegs_update = self.create_action("Update all segments",
                                                  tip="Update all segments",
@@ -2468,7 +2468,7 @@ class MainWin(QtGui.QMainWindow):
         self.add_actions(self.run_menu, (None, quickcalc_action))
         
         self.help_menu = self.menuBar().addMenu("&Help")
-        about_action = self.create_action("&About", shortcut='F1',
+        about_action = self.create_action("&About", #shortcut='F1',
                                           slot=self.on_about, tip='About',
                                           icon="help-about-icon_32x32")
         
