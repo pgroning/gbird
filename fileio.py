@@ -28,18 +28,25 @@ class InpFileParser(object):
         # cax files
         files = config.get("Bundle", "files")
         file_list = filter(None, re.split("\n", files))
-        file_list.reverse()  # reverse order (no copy)
+        #file_list.reverse()  # reverse order (no copy)
         #file_list = file_list[::-1]  # copy and reverse order
         self.parent.caxfiles = file_list
 
         # segment node list
-        nodes = re.split("\s+|,\s*", config.get("Bundle", "nodes"))
+        nodes = re.split("\s+|,\s*", config.get("Bundle", "height"))
         nodes = filter(None, nodes)
-        nodes.reverse()
-        self.parent.nodes = map(int, nodes)
+        #nodes.reverse()
+        #self.parent.nodes = map(int, nodes)
+        self.parent.nodes = map(float, nodes)
         if len(self.parent.nodes) != len(self.parent.caxfiles):
             print "Error: Invalid node list."
             return False
+
+        # height option
+        #if config.has_option("Bundle", "height"):
+        #    self.parent.height = config.get("Bundle", "height")
+        #else:
+        #    self.parent.height = "zone"
 
         ## read content option
         #self.parent.content = "filtered"  # default value
@@ -51,10 +58,11 @@ class InpFileParser(object):
 
         # segment node list for BTF calc
         if config.has_section("BTF"):
-            btf_nodes = re.split("\s+|,\s*", config.get("BTF", "nodes"))
+            btf_nodes = re.split("\s+|,\s*", config.get("BTF", "height"))
             btf_nodes = filter(None, btf_nodes)
-            btf_nodes.reverse()
-            self.parent.btf_nodes = map(int, btf_nodes)
+            #btf_nodes.reverse()
+            #self.parent.btf_nodes = map(int, btf_nodes)
+            self.parent.btf_nodes = map(float, btf_nodes)
         else:
             self.parent.btf_nodes = self.data.nodes
 
@@ -67,19 +75,22 @@ class InpFileParser(object):
         config.add_section("Bundle")
         config.set("Bundle", "fuel", self.parent.fuetype)
 
-        file_str = "\n".join(self.parent.caxfiles[::-1])  # save reverse order
+        # file_str = "\n".join(self.parent.caxfiles[::-1])  # save reverse order
+        file_str = "\n".join(self.parent.caxfiles)
         config.set("Bundle", "files", file_str)
 
-        nodes = map(str, self.parent.nodes[::-1])
-        node_str = "\n".join(nodes)
-        config.set("Bundle", "nodes", node_str)
+        # nodes = map(str, self.parent.nodes[::-1])
+        height = map(str, self.parent.nodes)
+        height_str = " ".join(height)
+        config.set("Bundle", "height", height_str)
 
-        #config.set("Bundle", "content", self.parent.content)
+        #config.set("Bundle", "height", self.parent.height)
 
         config.add_section("BTF")
-        btf_nodes = map(str, self.parent.btf_nodes[::-1])
-        btf_str = "\n".join(btf_nodes)
-        config.set("BTF", "nodes", btf_str)
+        # btf_nodes = map(str, self.parent.btf_nodes[::-1])
+        btf_height = map(str, self.parent.btf_nodes)
+        btf_str = " ".join(btf_height)
+        config.set("BTF", "height", btf_str)
         
         with open(filename, "wb") as configfile:
             config.write(configfile)

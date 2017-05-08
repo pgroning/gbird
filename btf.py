@@ -12,9 +12,11 @@ import time
 import numpy as np
 
 from btf_opt2 import btf_opt2
+from btf_opt3 import btf_opt3
 # from lib.btf_opt2 import btf_opt2
 from btf_a10xm import btf_a10xm
 from btf_a10b import btf_a10b
+from btf_at11 import btf_at11
 
 # sys.path.append('lib/')
 # import libADDC
@@ -55,7 +57,7 @@ class Btf(object):
             x = [val for val in x if val in x2]
         return x
 
-    def pow3d(self, voi, burnup):
+    def pow3d(self, voi, burnup, zdim):
         """Construct a 3D pin power distribution for specific void and burnup.
         Use interpolation if necessary."""
         
@@ -86,12 +88,13 @@ class Btf(object):
                 P2 = segments[i].statepoints[i2].POW
                 POW[i, :, :] = self.bundle.interp2(P1, P2, voi1, voi2, voi)
                 
-        POW3 = self.bundle.pow3(POW, nodes)
+        POW3 = self.bundle.pow3(POW, nodes, zdim)
         return POW3
 
     def calc_btf(self):
         """Calculating BTF"""
-        print "Calculating BTF"
+        print "Calculating BTF..."
+
         #tic = time.time()
         x = self.intersect_points()
         
@@ -99,28 +102,38 @@ class Btf(object):
         self.DOX = np.zeros((len(x), npst, npst))
 
         fuetype = self.bundle.data.fuetype
+        zdim = 25  # default number of nodes
         if fuetype == "OPT2":
             voi = 50
             rfact_fun = btf_opt2
         elif fuetype == "OPT3":
-            print "Warning: BTF is not yet implemented for this fuel type."
-            print "Using OPT2 dryout performance calculation instead."
+            #print "Warning: BTF is not yet implemented for this fuel type."
+            #print "Using OPT2 dryout performance calculation instead."
+            zdim = 100
             voi = 50
-            rfact_fun = btf_opt2
+            rfact_fun = btf_opt3
         elif fuetype == "A10XM":
             voi = 60
             rfact_fun = btf_a10xm
         elif fuetype == "A10B":
+            zdim = 25 
             voi = 60
             rfact_fun = btf_a10b
+        elif fuetype == "AT11":
+            voi = 60
+            rfact_fun = btf_at11
         else:
             print "Error: BTF is not implemented for this fuel type"
+            return
 
         for i, burnup in enumerate(x):
-            POW3 = self.pow3d(voi, burnup)
+            POW3 = self.pow3d(voi, burnup, zdim)
+            #print POW3.shape
             self.DOX[i, :, :] = rfact_fun(POW3)
             # self.DOX[i, :, :] = self.rfact(POW3)
         self.burnpoints = np.array(x).astype(float)
+        
+        print "Done."
         #print "Done in "+str(time.time()-tic)+" seconds."
 
     #def rfact(self, POW3):

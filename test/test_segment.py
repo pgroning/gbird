@@ -141,7 +141,7 @@ class UnitTest(unittest.TestCase):
         s = Segment(testfile)
         s.writecai(self.file_base_name, voi=60, dep_thres=20, box_offset=-0.1,
                    model="c4e")
-        s.runc4(self.file_base_name, grid=True)
+        s.runc4("./" + self.file_base_name, grid=True)
         caxfile = self.file_base_name + ".cax"
         with open(caxfile) as f:
             flines = f.read().splitlines()

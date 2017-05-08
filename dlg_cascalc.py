@@ -1,6 +1,13 @@
+from IPython.core.debugger import Tracer  # Set tracepoint with Tracer()()
+# Set a tracepoint that works with Qt
+from pyqt_trace import pyqt_trace as qtrace # Set tracepoint with qtrace()
+
 import os
 import re
 from PyQt4 import QtGui, QtCore
+
+#from casinp import Casinp
+
 
 class CasDialog(QtGui.QDialog):
     def __init__(self, parent):
@@ -9,7 +16,7 @@ class CasDialog(QtGui.QDialog):
         self.setup()
 
     def setup(self):
-        self.setWindowTitle("CASMO settings")
+        self.setWindowTitle("CASMO")
         xpos = self.parent.pos().x() + self.parent.size().width() / 2
         ypos = self.parent.pos().y() + self.parent.size().height() / 2
         self.setGeometry(QtCore.QRect(0.8*xpos, 0.9*ypos, 150, 120))
@@ -21,15 +28,15 @@ class CasDialog(QtGui.QDialog):
         self.grid.addWidget(cas_gbox, 0, 0)
         
         hbox = QtGui.QHBoxLayout()
-        self.ok_button = QtGui.QPushButton("Ok")
+        self.run_button = QtGui.QPushButton("Run")
         self.cancel_button = QtGui.QPushButton("Cancel")
         hbox.addStretch()
-        hbox.addWidget(self.ok_button)
+        hbox.addWidget(self.run_button)
         hbox.addWidget(self.cancel_button)
         self.connect(self.cancel_button, QtCore.SIGNAL('clicked()'),
                      self.close)
-        self.connect(self.ok_button, QtCore.SIGNAL('clicked()'), 
-                     self.ok_action)
+        self.connect(self.run_button, QtCore.SIGNAL('clicked()'), 
+                     self.run_action)
 
         vbox = QtGui.QVBoxLayout()
         #vbox.addLayout(flo)
@@ -38,13 +45,15 @@ class CasDialog(QtGui.QDialog):
         vbox.addLayout(hbox)
         self.setLayout(vbox)
 
-    def ok_action(self):
+    def run_action(self):
         self.close()
         self.parent.params.cas_version = str(self.version_cbox.currentText())
         self.parent.params.cas_neulib = str(self.neulib_cbox.currentText()) 
         self.parent.params.cas_gamlib = str(self.gamlib_cbox.currentText())
         self.parent.params.cas_cpu = str(self.cpu_cbox.currentText())
         
+        self.parent.cas_calc()
+
         #self.parent.pert_model = str(self.model_cbox.currentText())
         #if self.depmax_cbox.currentText() == "undef":
         #    self.parent.pert_depmax = None
@@ -64,25 +73,43 @@ class CasDialog(QtGui.QDialog):
     def cas_group(self):
         flo = QtGui.QFormLayout()
 
+        version_list = self.get_versions()
         self.version_cbox = QtGui.QComboBox()
-        ver_list = self.get_versions()
-        self.version_cbox.addItems(QtCore.QStringList(ver_list))
-        self.version_cbox.setCurrentIndex(3)  # set default version
+        self.version_cbox.addItems(QtCore.QStringList(version_list))
+        if hasattr(self.parent.params, "cas_version"):
+            i = version_list.index(self.parent.params.cas_version)
+            self.version_cbox.setCurrentIndex(i)
+        else:
+            self.version_cbox.setCurrentIndex(3)  # set default version
 
-        self.neulib_cbox = QtGui.QComboBox()
         neulib_list = self.get_neulibs()
+        self.neulib_cbox = QtGui.QComboBox()
         self.neulib_cbox.addItems(QtCore.QStringList(neulib_list))
-        self.neulib_cbox.setCurrentIndex(3)
+        if hasattr(self.parent.params, "cas_neulib"):
+            i = neulib_list.index(self.parent.params.cas_neulib)
+            self.neulib_cbox.setCurrentIndex(i)
+        else:
+            self.neulib_cbox.setCurrentIndex(8)
 
-        self.gamlib_cbox = QtGui.QComboBox()
         gamlib_list = self.get_gamlibs()
+        self.gamlib_cbox = QtGui.QComboBox()
         self.gamlib_cbox.addItems(QtCore.QStringList(gamlib_list))
-        self.gamlib_cbox.setCurrentIndex(0)
+        if hasattr(self.parent.params, "cas_gamlib"):
+            i = gamlib_list.index(self.parent.params.cas_gamlib)
+            self.gamlib_cbox.setCurrentIndex(i)
+        else:
+            self.gamlib_cbox.setCurrentIndex(0)
 
+        cpu_list = ["local", "grid"]
         self.cpu_cbox = QtGui.QComboBox()
-        self.cpu_cbox.addItems(QtCore.QStringList(["local", "grid"]))
+        self.cpu_cbox.addItems(QtCore.QStringList(cpu_list))
+        if hasattr(self.parent.params, "cas_cpu"):
+            i = cpu_list.index(self.parent.params.cas_cpu)
+            self.cpu_cbox.setCurrentIndex(i)
+        else:
+            self.cpu_cbox.setCurrentIndex(0)
 
-        self.owrite_chbox = QtGui.QCheckBox()
+        #self.owrite_chbox = QtGui.QCheckBox()
         
         flo.addRow("Version:", self.version_cbox)
         flo.addRow("Neutron library:", self.neulib_cbox)
@@ -129,11 +156,12 @@ class CasDialog(QtGui.QDialog):
         return groupbox
         
     def get_versions(self):
-        """List available C4E versions"""
+        """Get list of available C4E versions"""
 
         path = "/home/prog/prod/CMSCODES/C4E"
         if os.path.isdir(path):
             ver_list = os.listdir(path)
+            ver_list = [v.lstrip("v") for v in ver_list]
         else:
             ver_list = []
         return ver_list
@@ -151,7 +179,7 @@ class CasDialog(QtGui.QDialog):
         return neulib_list
 
     def get_gamlibs(self):
-        """List available gamlibs"""
+        """Get list of available gamlibs"""
 
         path = "/home/prog/prod/CMSCODES/CasLib/library"
         if os.path.isdir(path):
@@ -170,7 +198,7 @@ class CasRunDialog(QtGui.QDialog):
         self.setup()
 
     def setup(self):
-        self.setWindowTitle("Run CASMO")
+        self.setWindowTitle("Run CASMO-4E")
         xpos = self.parent.pos().x() + self.parent.size().width() / 2
         ypos = self.parent.pos().y() + self.parent.size().height() / 2
         self.setGeometry(QtCore.QRect(0.8*xpos, 0.9*ypos, 150, 120))
@@ -193,7 +221,8 @@ class CasRunDialog(QtGui.QDialog):
         hbox.addWidget(self.cancel_button)
         self.connect(self.cancel_button, QtCore.SIGNAL('clicked()'),
                      self.close)
-        self.connect(self.run_button, QtCore.SIGNAL('clicked()'), self.action)
+        self.connect(self.run_button, QtCore.SIGNAL('clicked()'), 
+                     self.run_action)
 
         vbox = QtGui.QVBoxLayout()
         vbox.addLayout(flo)
@@ -202,7 +231,33 @@ class CasRunDialog(QtGui.QDialog):
         vbox.addLayout(hbox)
         self.setLayout(vbox)
 
-    def action(self):
+    def run_action(self):
+        """Create .inp files and""" 
         self.close()
-        self.parent.quick_calc()
+        self.parent.create_inpfiles()
+        self.parent.complete_calc()
+
+        ##self.parent.quick_calc()
     
+#    def complete_calc(self):
+#        """run complete cas calcs"""
+#        print "running complete Cas calcs"
+#        
+#        ibundle = self.parent.ibundle
+#        bundle = self.parent.bunlist[ibundle]
+#        segment = bundle.segments[0]
+#        inpfile = "test/topol/AT-B/00g00nb/e26AT-B-071-00g00nb-cas.T.inp"
+#        #segment.runc4(file_base_name)
+#        segment.complete_calc(inpfile, neulib="j20200")
+
+#    def create_inp(self):
+#        """Create Cas inp files"""
+#        print "Creating inp files..."
+#        
+#        ibundle = self.parent.ibundle
+#        bundle = self.parent.bunlist[ibundle]
+#        cinp = Casinp(bundle.segments, verbose=True)
+#        
+#        cinp.existfiles(verbose=True)
+#        cinp.createinp(verbose=True)
+#

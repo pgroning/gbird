@@ -67,56 +67,70 @@ class PlotWin(QtGui.QMainWindow):
             y = [s.fint for s in statepoints]
         return x, y
 
-    def plot_kinf(self, segment, voi, vhi, tfu, linestyle="-"):
+    def plot_xy(self, x, y, ylabel, legend, linestyle):
+        self.axes.plot(x, y, label=legend, linestyle=linestyle)
+        if legend:
+            self.axes.legend(loc='best', prop={'size': 8})
+        self.axes.set_xlabel('Burnup (MWd/kgU)')
+        self.axes.set_ylabel(ylabel)
+        self.on_draw()
+
+    def plot_kinf(self, segment, voi, vhi, tfu, linestyle="-", label=None):
         """Plot kinf as a function of burnup"""
         
         statepoints = segment.get_statepoints(voi, vhi, tfu)
         x = [s.burnup for s in statepoints]
         y = [s.kinf for s in statepoints]
         
-        labstr = segment.data.sim
-        labstr = labstr.replace("SIM", "").replace("'", "").strip()
-        
-        self.axes.plot(x, y, label=labstr, linestyle=linestyle)
-        self.axes.set_xlabel('Burnup (MWd/kgU)')
-        self.axes.set_ylabel('K-inf')
-        self.axes.legend(loc='best', prop={'size': 8})
-        self.on_draw()
+        if label == None:
+            labstr = segment.data.sim
+            labstr = labstr.replace("SIM", "").replace("'", "").strip()
+        else:
+            labstr = label
+        self.plot_xy(x, y, "K-inf", labstr, linestyle)
 
-    def plot_fint(self, segment, voi, vhi, tfu, linestyle="-"):
+    def plot_fint(self, segment, voi, vhi, tfu, linestyle="-", label=None):
 
         statepoints = segment.get_statepoints(voi, vhi, tfu)
         x = [s.burnup for s in statepoints]
         y = [s.fint for s in statepoints]
 
-        labstr = segment.data.sim
-        labstr = labstr.replace("SIM", "").replace("'", "").strip()
-        
-        self.axes.plot(x, y, label=labstr, linestyle=linestyle)
-        self.axes.set_xlabel('Burnup (MWd/kgU)')
-        self.axes.set_ylabel('Fint')
-        self.axes.legend(loc='best', prop={'size': 8})
-        self.on_draw()
+        if label == None:
+            labstr = segment.data.sim
+            labstr = labstr.replace("SIM", "").replace("'", "").strip()
+        else:
+            labstr = label
+        self.plot_xy(x, y, "K-inf", labstr, linestyle)
 
-    def plot_btf(self, bundle, linestyle="-"):
+    def plot_btf(self, bundle, linestyle="-", label=None):
 
         x = bundle.btf.burnpoints
         DOX = bundle.btf.DOX
         y = [e.max() for e in DOX]
-                
-        self.axes.plot(x, y, linestyle=linestyle)
-        self.axes.set_xlabel('Burnup (MWd/kgU)')
-        self.axes.set_ylabel('BTF')
-        self.on_draw()
+        self.plot_xy(x, y, "BTF", label, linestyle)
 
-    def save_plot(self):
-        file_choices = "PNG (*.png)|*.png"
+    def save_figure(self):
+        """save figure"""
+
+        # Import default path from config file
+        self.settings.beginGroup("PATH")
+        path_default = self.settings.value("path_save_figure",
+                                           QtCore.QString("")).toString()
+        self.settings.endGroup()
         
-        path = unicode(QFileDialog.getSaveFileName(self, 'Save file', '',
-                                                   file_choices))
-        if path:
-            self.canvas.print_figure(path, dpi=self.dpi)
-            self.statusBar().showMessage('Saved to %s' % path, 2000)
+        file_choices = "PNG (*.png)|*.png"
+        filename = unicode(QtGui.QFileDialog.getSaveFileName(self, 'Save As',
+                                                             path_default,
+                                                             file_choices))
+        if filename:
+            # Save default path to config file
+            path = os.path.split(filename)[0]
+            self.settings.beginGroup("PATH")
+            self.settings.setValue("path_save_figure", QtCore.QString(path))
+            self.settings.endGroup()
+            
+            self.canvas.print_figure(filename, dpi=self.dpi)
+            self.statusBar().showMessage('Saved to %s' % filename, 2000)
     
     def on_about(self):
         msg = """Greenbird plot window"""
@@ -186,9 +200,11 @@ class PlotWin(QtGui.QMainWindow):
         case_id_max = len(self.parent.bunlist[-1].segments)
         
         param = self.param_cbox.currentText()
+        
         ibundle = self.parent.ibundle
-
+        bunlist = self.parent.bunlist
         ipoint = self.parent.point_sbox.value()
+        
         statepoint = (self.parent.bunlist[ibundle]
                       .segments[case_id].statepoints[ipoint])
         voi = statepoint.voi
@@ -200,38 +216,53 @@ class PlotWin(QtGui.QMainWindow):
         self.statusBar().showMessage(fmtstr)
         
         self.axes.clear()
+        
         if param == "KINF":
             if self.case_cb.isChecked():
                 for iseg in range(case_id_max):
-                    segment = self.parent.bunlist[ibundle].segments[iseg]
+                    segment = bunlist[ibundle].segments[iseg]
                     self.plot_kinf(segment, voi=voi, vhi=vhi, tfu=tfu)
             else:
-                segment = self.parent.bunlist[ibundle].segments[case_id]
+                segment = bunlist[ibundle].segments[case_id]
                 self.plot_kinf(segment, voi=voi, vhi=vhi, tfu=tfu)
-                if self.original_cb.isChecked():
-                    segment = self.parent.bunlist[0].segments[case_id]
-                    self.plot_kinf(segment, voi=voi, vhi=vhi, tfu=tfu,
-                                   linestyle="--")
+                if ibundle > 0:
+                    if self.previous_cb.isChecked():
+                        segment = bunlist[ibundle-1].segments[case_id]
+                        self.plot_kinf(segment, voi=voi, vhi=vhi, tfu=tfu,
+                                       linestyle="--", label="previous")
+                    if self.original_cb.isChecked():
+                        segment = bunlist[0].segments[case_id]
+                        self.plot_kinf(segment, voi=voi, vhi=vhi, tfu=tfu,
+                                       linestyle="--", label="original")
 
         elif param == "FINT":
             if self.case_cb.isChecked():
                 for iseg in range(case_id_max):
-                    segment = self.parent.bunlist[ibundle].segments[iseg]
+                    segment = bunlist[ibundle].segments[iseg]
                     self.plot_fint(segment, voi=voi, vhi=vhi, tfu=tfu)
             else:
-                segment = self.parent.bunlist[ibundle].segments[case_id]
+                segment = bunlist[ibundle].segments[case_id]
                 self.plot_fint(segment, voi=voi, vhi=vhi, tfu=tfu)
-                if self.original_cb.isChecked():
-                    segment = self.parent.bunlist[0].segments[case_id]
-                    self.plot_fint(segment, voi=voi, vhi=vhi, tfu=tfu,
-                                   linestyle="--")
+                if ibundle > 0:
+                    if self.previous_cb.isChecked():
+                        segment = bunlist[ibundle-1].segments[case_id]
+                        self.plot_fint(segment, voi=voi, vhi=vhi, tfu=tfu,
+                                       linestyle="--", label="previous")
+                    if self.original_cb.isChecked():
+                        segment = bunlist[0].segments[case_id]
+                        self.plot_fint(segment, voi=voi, vhi=vhi, tfu=tfu,
+                                       linestyle="--", label="original")
 
         elif param == 'BTF':
-            bundle = self.parent.bunlist[ibundle]
+            bundle = bunlist[ibundle]
             self.plot_btf(bundle)
-            if self.original_cb.isChecked():
-                bundle = self.parent.bunlist[0]
-                self.plot_btf(bundle, linestyle="--")
+            if ibundle > 0:
+                if self.previous_cb.isChecked():
+                    bundle = bunlist[ibundle-1]
+                    self.plot_btf(bundle, linestyle="--", label="previous")
+                if self.original_cb.isChecked():
+                    bundle = bunlist[0]
+                    self.plot_btf(bundle, linestyle="--", label="original")
  
     def create_main_frame(self):
         self.main_frame = QtGui.QWidget()
@@ -304,14 +335,19 @@ class PlotWin(QtGui.QMainWindow):
                      QtCore.SIGNAL('currentIndexChanged(int)'), self.on_plot)
         
         # case_label = QLabel('All cases:')
-        self.case_cb = QtGui.QCheckBox("All seg.")
+        self.case_cb = QtGui.QCheckBox("Plot all seg.")
         self.case_cb.setChecked(False)
         self.connect(self.case_cb, QtCore.SIGNAL('stateChanged(int)'), 
                      self.on_plot)
         
-        self.original_cb = QtGui.QCheckBox("Plot orig.")
+        self.original_cb = QtGui.QCheckBox("Show original")
         self.original_cb.setChecked(False)
         self.connect(self.original_cb, QtCore.SIGNAL('stateChanged(int)'),
+                     self.on_plot)
+
+        self.previous_cb = QtGui.QCheckBox("Show previous")
+        self.previous_cb.setChecked(False)
+        self.connect(self.previous_cb, QtCore.SIGNAL('stateChanged(int)'),
                      self.on_plot)
 
         #type_label = QtGui.QLabel('Type:')
@@ -377,19 +413,27 @@ class PlotWin(QtGui.QMainWindow):
 
         #
         # Layout with box sizers
-        # 
+        #
+
+        param_flo = QtGui.QFormLayout()
+        param_flo.addRow("Param:", self.param_cbox)
+ 
         hbox = QtGui.QHBoxLayout()
         
         # for w in [  self.textbox, self.draw_button, self.grid_cb,
         #            slider_label, self.slider]:
         
-        for w in [self.draw_button, self.grid_cb, slider_label, self.slider,
-                  self.case_cb, self.original_cb, param_label,
-                  self.param_cbox]:
-
+        #for w in [self.draw_button, self.grid_cb, slider_label, self.slider,
+        #          self.case_cb, self.original_cb, param_label,
+        #          self.param_cbox]:
+        for w in [self.grid_cb, self.case_cb, self.original_cb, 
+                  self.previous_cb]:
             hbox.addWidget(w)
-            hbox.setAlignment(w, QtCore.Qt.AlignVCenter)
-        
+            #hbox.setAlignment(w, QtCore.Qt.AlignVCenter)
+            #hbox.setAlignment(w, QtCore.Qt.AlignHCenter)
+        hbox.addStretch(1)
+        hbox.addLayout(param_flo)
+
         vbox = QtGui.QVBoxLayout()
         # vbox.addLayout(hbox)
         # vbox.addWidget(self.canvas)
@@ -407,9 +451,10 @@ class PlotWin(QtGui.QMainWindow):
     def create_menu(self):        
         self.file_menu = self.menuBar().addMenu("&File")
         
-        save_file_action = self.create_action("&Save plot", shortcut="Ctrl+S",
-                                              slot=self.save_plot,
-                                              tip="Save the plot")
+        save_file_action = self.create_action("&Save Figure As...",
+                                              shortcut="Ctrl+S",
+                                              slot=self.save_figure,
+                                              tip="Save figure...")
         quit_action = self.create_action("&Close", slot=self.close,
                                          shortcut="Ctrl+W",
                                          tip="Close the application")
@@ -430,7 +475,7 @@ class PlotWin(QtGui.QMainWindow):
         self.add_actions(self.tools_menu, (options,))
         
         self.help_menu = self.menuBar().addMenu("&Help")
-        about_action = self.create_action("&About", shortcut='F1',
+        about_action = self.create_action("&About",
                                           slot=self.on_about,
                                           tip='About the demo')
         

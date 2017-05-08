@@ -43,6 +43,10 @@ class DataStruct(object):
 class Segment(object):
 
     def __init__(self, caxfile=None, content="filtered"):
+
+        path = os.path.realpath(__file__)
+        self.appdir = os.path.split(path)[0] + os.sep
+        
         self.data = DataStruct()
         #self.states = []
         #self.states.append(DataStruct())
@@ -522,28 +526,38 @@ class Segment(object):
     #    f.write(' END\n')
     #    f.close()
 
-    def runc4(self, file_base_name, neulib=False, grid=False):
+    def runc4(self, file_base_name, c4ver=None, neulib=None, gamlib=None, 
+              grid=False):
         """Running C4E model"""
+        
         c4inp = file_base_name + ".inp"
         # C4 executable
         c4exe = "cas4 -e"
         # c4exe = "/home/prog/prod/CMSCODES/bin/cas4 -e"
-        # C4 version
-        c4ver = "2.10.21P_VAT_1.3"
-        # lib directory
-        libdir = "/home/prog/prod/CMSCODES/CasLib/library/"
-        # neulib
-        if not neulib:
-            neulib = "e4lbl70"
 
-        cmd = ' -V ' + c4ver + ' -N ' + libdir + neulib + ' ' + c4inp
+        libdir = "/home/prog/prod/CMSCODES/CasLib/library/"
+        
+        if not c4ver:
+            c4ver = "2.10.21P_VAT_1.3"
+        if not neulib:
+            #neulib = "e4lbl70"
+            neulib = "j20200"
+        if not gamlib:
+            gamlib = "galb418"
+
+        outdir = os.path.split(file_base_name)[0]
+        
+        cmd = ' -o ' + outdir
+        cmd += ' -k '
+        cmd += ' -G ' + libdir + gamlib
+        cmd += ' -V ' + c4ver + ' -N ' + libdir + neulib + ' ' + c4inp
+        
         arglist = shlex.split(c4exe + cmd)
         arglist = shlex.split('linrsh ' + c4exe + cmd)
         # specify grid que
         arglist.insert(1, '-q')
         arglist.insert(2, 'all.q@wrath,all.q@envy,all.q@pride')
         # arglist[0] = 'linrsh -q all.q@wrath'
-        # Tracer()()
         # fout = open('c4.stdout', 'wb')
         fout = open('/dev/null', 'wb')
         print "Running c4e model"
@@ -558,7 +572,6 @@ class Segment(object):
                 call(arglist[3:], stdout=fout, stderr=STDOUT, shell=False)
         else:  # use local machine
             call(arglist[3:], stdout=fout, stderr=STDOUT, shell=False)
-            #call(arglist[3:])
     
     def set_data(self, LFU=None, FUE=None, BA=None, voi=None, box_offset=0.0):
         """Append a list element to store result of new calculation"""
@@ -851,11 +864,11 @@ class Segment(object):
         # cax file
         c3cax = filebasename + ".cax"
         # C3 libs
-        lib1 = "./lib/c3/e4lbj40"
-        lib2 = "./lib/c3/bal8ab4"
-        lib3 = "./lib/c3/galb410"
+        lib1 = self.appdir + "lib/c3/e4lbj40"
+        lib2 = self.appdir + "lib/c3/bal8ab4"
+        lib3 = self.appdir + "lib/c3/galb410"
         # C3 executable
-        c3exe = "./bin/casmo3"
+        c3exe = self.appdir + "bin/casmo3"
         if os.path.isfile(c3exe):
             pass  # no need to change the location of executable and libs
         elif os.path.isfile("." + c3exe):
@@ -889,7 +902,7 @@ class Segment(object):
         # Run C3 executable
         # cmd = "linrsh " + c3exe + " " + c3cfg
         # cmd = c3exe + " " + c3cfg
-        print "Running c3 model"
+        print "Running c3 model..."
         # args = ['linrsh', c3exe, c3cfg]
         arglist = ['linrsh', c3exe, c3cfg]
         arglist.insert(1, '-q')
@@ -1028,10 +1041,22 @@ class Segment(object):
     #    # EXP = self.__expcalc(POW, burnup)
     #    # Tracer()()
 
-    def quickcalc(self, voi=None, dep_max=None, dep_thres=None, grid=False,
-                  model="c3", box_offset=0.0, neulib=False):
+    def complete_calc(self, c4ver=None, neulib=None, gamlib=None, grid=False):
+        """Performing a complete calculation"""
+        
+        caxfile = self.data.caxfile
+        basename = os.path.splitext(caxfile)[0]   # remove suffix
+        basename += ".T"
+        if os.path.exists(basename + '.inp'):
+            self.runc4(basename, c4ver=c4ver, neulib=neulib, gamlib=gamlib, 
+                       grid=grid)
 
-        tic = time.time()
+
+    def quickcalc(self, voi=None, dep_max=None, dep_thres=None, grid=False,
+                  model="c3", box_offset=0.0, c4ver=None, neulib=None, 
+                  gamlib=None):
+
+        #tic = time.time()
         
         file_base_name = "./tmp." + str(uuid.uuid4()).split('-')[0]
         self.writecai(file_base_name, voi, dep_max, dep_thres, box_offset, 
@@ -1040,7 +1065,8 @@ class Segment(object):
         if model.lower() == "c3":
             self.runc3(file_base_name, grid)
         elif model.lower() == "c4e":
-            self.runc4(file_base_name, neulib, grid)
+            self.runc4(file_base_name, c4ver=c4ver, neulib=neulib, 
+                       gamlib=gamlib, grid=grid)
         else:
             print "Perturbation model is unknown"
             return
@@ -1056,7 +1082,8 @@ class Segment(object):
         except:
             pass
 
-        print "Done in "+str(time.time()-tic)+" seconds."
+        print "Done."
+        #print "Done in "+str(time.time()-tic)+" seconds."
 
     def __boxbow(self, box_offset=0.0):
         """Updating the BWR card to account for box bowing."""
@@ -1114,7 +1141,7 @@ class Segment(object):
                            if p.vhi == vhi and p.voi == voi), None)
         return ipoint
 
-    def get_statepoints(self, voi, vhi, tfu):
+    def get_statepoints(self, voi, vhi, tfu=None):
         """get a list of all state points for given voi, vhi, tfu"""
 
         i = self.findpoint(voi=voi, vhi=vhi, tfu=tfu)  # first index
