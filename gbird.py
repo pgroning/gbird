@@ -1795,6 +1795,7 @@ class MainWin(QtGui.QMainWindow):
                                     QtGui.QMessageBox.Cancel)
         if status == QtGui.QMessageBox.Yes:
             self.clear_data()
+            self.widgets_setenabled(False)
 
     def clear_data(self):
         """Clear fuel map figure axes and delete bundle- and GUI field data"""
@@ -2432,11 +2433,11 @@ class MainWin(QtGui.QMainWindow):
                                          slot=self.open_findpoint_dlg,
                                          icon="binoculars-icon_32x32")
         
-        table_action = self.create_action("Point table...",
-                                          tip="Point table...")
+        #table_action = self.create_action("Point table...",
+        #                                  tip="Point table...")
         
-        optim_action = self.create_action("Optimization...",
-                                          tip="BTF optimization...")
+        #optim_action = self.create_action("Optimization...",
+        #                                  tip="BTF optimization...")
         
         egv_action = self.create_action("EGV...", tip="EGV...",
                                         slot=self.open_egv_dlg,
@@ -2457,13 +2458,13 @@ class MainWin(QtGui.QMainWindow):
                                          tip="Run quick calc",
                                          icon="flame-red-icon_32x32")
 
-        smallcalc_action = self.create_action("&Small calc",
-                                          slot=self.quick_calc,
-                                          tip="Run small calculation")
+        #smallcalc_action = self.create_action("&Small calc",
+        #                                  slot=self.quick_calc,
+        #                                  tip="Run small calculation")
         
-        fullcalc_action = self.create_action("&Complete calc...",
-                                             slot=self.open_fullcalc_dlg,
-                                             tip="Run complete calculation")
+        #fullcalc_action = self.create_action("&Complete calc...",
+        #                                     slot=self.open_fullcalc_dlg,
+        #                                     tip="Run complete calculation")
         self.add_actions(self.run_menu, (None, quickcalc_action))
         
         self.help_menu = self.menuBar().addMenu("&Help")
@@ -2472,6 +2473,13 @@ class MainWin(QtGui.QMainWindow):
                                           icon="help-about-icon_32x32")
         
         self.add_actions(self.help_menu, (about_action,))
+
+        self.menu_actions = [save_data_action, clear_action, 
+                             save_figure_action, back, forward, reset, 
+                             enrichment, bundle, enr_plus, enr_minus, 
+                             quickcalc, replace, plot_action, casmo_action,
+                             casinp_action, data_action, find_action, 
+                             egv_action, quickcalc_action]
 
     def create_toolbar(self):
 
@@ -2558,10 +2566,14 @@ class MainWin(QtGui.QMainWindow):
         toolbar.setFloatable(True)
         toolbar.setAutoFillBackground(False)
 
+        self.toolbar_actions = [saveAction, calcAction, self.colorAction,
+                                plotAction, findAction, backAction, 
+                                forwardAction]
+
     def reset(self):
         self.init_pinobjects()
         self.fig_update()
-        self.chanbow_sbox_update() 
+        self.chanbow_sbox_update()
 
     def reset_state(self):
         """Reset current state"""
@@ -2664,6 +2676,12 @@ class MainWin(QtGui.QMainWindow):
         for w in widgets:
             w.setEnabled(status)
     
+        for a in self.toolbar_actions:
+            a.setEnabled(status)
+
+        for a in self.menu_actions:
+            a.setEnabled(status)
+
     def closeEvent(self, event):
         """Runs before program terminates"""
 
