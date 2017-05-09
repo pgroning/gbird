@@ -1,11 +1,8 @@
 *~
 *.pyc
-*.cax
-addc*
 bin
-cax
-topol
-tosim
+lib/c3
+lib/libADDC*
 test/files
-lib
-tmp
+test/topol
+test/tosim
