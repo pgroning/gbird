@@ -239,12 +239,13 @@ class MainWin(QtGui.QMainWindow):
     def __init__(self, parent=None):
         super(MainWin, self).__init__(parent)
         # QtGui.QMainWindow.__init__(self, parent)
+        self.appversion = "1.0.0T"
         self.verbose = True
 
         path = os.path.realpath(__file__)
         self.appdir = os.path.split(path)[0] + os.sep
         
-        self.setWindowTitle("Greenbird")
+        self.setWindowTitle("Greenbird v" + self.appversion)
 
         # self.resize(1100,620)
         # self.move(200,200)
@@ -1124,7 +1125,7 @@ class MainWin(QtGui.QMainWindow):
             self.statusBar().showMessage('Saved to %s' % path, 2000)
     
     def on_about(self):
-        msg = """Greenbird version X.X.X"""
+        msg = "Greenbird version " + self.appversion
         QtGui.QMessageBox.about(self, "About the software", msg.strip())
 
     def tableHeaderSort(self):
