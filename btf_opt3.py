@@ -1,5 +1,9 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
+# for debugging. Add Tracer()() inside the code at desired line to break at that line
+from IPython.core.debugger import Tracer 
+import matplotlib.pyplot as plt           # nice with plot-possibilities for debugging
+#
 import numpy as np
 import sys
 import os.path
@@ -29,10 +33,14 @@ class opt3_defaults(object):
           line = re.sub('^\s*axial:','',line)
           line = re.sub(',',' ',line)
           self.axial = line.split()
+    self.fileisread = True
 
   def get_defaults(self):
-    if not hasattr(self,'axial'):
-      self.read_defaults()
+    try:
+      if self.fileisread:
+        return
+    except AttributeError:
+      self.read_defaults(verbose=False)
 
 
 def btf_opt3(POW3):
@@ -49,10 +57,10 @@ def btf_opt3(POW3):
   MAPI=np.zeros((11,11),dtype=int)    #
   MAPJ=np.zeros((11,11),dtype=int)    #
   #
-  i1=0;  j1=0
-  i2=0;  j2=10
-  i3=10; j3=10
-  i4=10; j4=0
+  i1, j1 =  0,  0
+  i2, j2 =  0, 10
+  i3, j3 = 10, 10
+  i4, j4 = 10,  0
   #
   for i in range(5):
     for j in range(5):
@@ -119,7 +127,7 @@ def calc_sub(sub_bundle):
   """
   Subroutine calc_sub: calculates rfactors for a sub-bundle
   IN:  sub_bundle - pin power for sub-bundle (3-D)
-  OUT: Rglob      - rfactors for sub-bundle (2-D)
+  OUT: Rglob      - rfactors for sub-bundle  (2-D)
   """
   sub_norm = norm_sub(sub_bundle)
   epsilon  = 0.0001
@@ -131,10 +139,10 @@ def calc_sub(sub_bundle):
   defaults.get_defaults()
   #
   ax_def = np.array(map(float,defaults.axial))  # typiska värden:
-  rv70   = defaults.rv70                        #rv70 =  1    # relative gas density
-  hfg    = defaults.hfg                         #hfg  =  1.5  # latent heat [MJ/kg
-  G      = defaults.G                           #G    =  1.5  # Mass flow [10^3 kg/m2/s]
-  xin    = defaults.xin                         #xin  = -0.03 # typical subcooling
+  rv70   = defaults.rv70                        # rv70 =  1    # relative gas density
+  hfg    = defaults.hfg                         # hfg  =  1.5  # latent heat [MJ/kg
+  G      = defaults.G                           # G    =  1.5  # Mass flow [10^3 kg/m2/s]
+  xin    = defaults.xin                         # xin  = -0.03 # typical subcooling
   # ax power profile
   noder = sub_bundle.shape[0]
   APLHGR = get_ax_eff(noder,ax_def)
@@ -148,14 +156,9 @@ def calc_sub(sub_bundle):
   Rglob = np.zeros((5,5))
   for k in range(noder):
     LHGR[k,:,:] = sub_norm[k,:,:]*APLHGR[k]
-  # typiska 
-  #rv70 =  1    # relative gas density
-  #hfg  =  1.5  # latent heat [MJ/kg]
-  #G    =  1.5  # Mass flow [10^3 kg/m2/s], typical
-  #xin  = -0.03 # typical subcooling
   #
-  xout=0.5     # critical quality guess
-  Lheat = 3.68 # heated length
+  xout  = 0.5     # critical quality guess
+  Lheat = 3.68    # heated length
   #
   iloop = 0
   while (True):
@@ -197,6 +200,7 @@ def calc_sub(sub_bundle):
     if iloop > 100:
       # TODO: ett felmeddelande här!!!
       break  # no convergence
+  #Tracer()()
   return Rglob
 
 def get_ax_eff(noder,ax_def):
@@ -271,7 +275,7 @@ def invxcD5(xc,I2,G,rv70,hfg):
   """
   Subroutine invxcD5: calculates R-factors
   IN:  xc   - critical quality
-  IN:  I2   - I2-paramter (vector)
+  IN:  I2   - I2-parameter
   IN:  G    - mass flow [10^3 kg/m2/s]
   IN:  rv70 - relative gas density
   IN:  hfg  - latent heat [MJ/kg]
@@ -293,7 +297,7 @@ def xcD5(R,I2,G,rv70,hfg):
   OUT: xc   - critical quality
   """
   a=np.array((-2.0477, 1.6064, -2.9805, 1.5110, 0.2880, 2.9443, -0.3807, -1.8105, 0.5158, 1.0976, 0.8062))
-  I2m=np.minimum(a[8]*(I2/a[8])**((min(G/a[9],1))**a[10]),0.572)
+  I2m=np.minimum(a[8]*(I2[-1]/a[8])**((min(G/a[9],1))**a[10]),0.572)
   xc=(np.exp(1.0/(1+np.exp(a[0]+a[1]*G))+a[2]/(I2m+1)+a[3])*(rv70+a[4])*hfg**a[5]+a[6]*rv70)*np.exp(a[7]*R)
   return xc
   
