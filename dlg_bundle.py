@@ -567,16 +567,10 @@ class SegmentDialog(QtGui.QDialog):
             nrows = self.table.rowCount()
             cboxes = [self.table.cellWidget(i, 0) for i in range(nrows)]
             allchecked = all([cbox.isChecked() for cbox in cboxes])
-            print allchecked
-            #for cbox in cboxes:
-            #    if not cbox.isChecked():
-            #        allchecked = False
-            #        break
-            
-            #qtrace()
-                
-                #connect_cbox = self.table.cellWidget(i, 0)
-                #connect_cbox.setChecked(True)
+            if allchecked:
+                [cbox.setChecked(False) for cbox in cboxes]
+            else:
+                [cbox.setChecked(True) for cbox in cboxes]
 
     def set_table_data(self):
         """Add rows to table and populate with data"""
