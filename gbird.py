@@ -2393,9 +2393,9 @@ class MainWin(QtGui.QMainWindow):
                                        tip="Decrease enrichment",
                                        shortcut="F1", icon="remove-icon_32x32")
 
-        self.allsegs_update = self.create_action("Update all segments",
-                                                 tip="Update all segments",
-                                                 checkable=True)
+        #self.allsegs_update = self.create_action("Update all segments",
+        #                                         tip="Update all segments",
+        #                                         checkable=True)
         
         quickcalc = self.create_action("Quick calc...",
                                        tip="Quick calc model...",
@@ -2413,7 +2413,7 @@ class MainWin(QtGui.QMainWindow):
         
         self.add_actions(self.edit_menu,
                          (back, forward, None, enr_minus, enr_plus, 
-                          self.allsegs_update, None,
+                          None,
                           segment, enrichment, quickcalc, None, replace, 
                           reset, preferences))
         
