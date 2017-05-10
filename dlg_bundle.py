@@ -545,6 +545,10 @@ class SegmentDialog(QtGui.QDialog):
         bundle = self.parent.bunlist[ibundle]
         heights = bundle.data.nodes[::-1]
         btf_heights = bundle.data.btf_nodes[::-1]
+        if hasattr(bundle.data, "segment_connect_list"):
+            connect_list = bundle.data.segment_connect_list[::-1]
+        else:
+            connect_list = [False for i in range(len(simlist))]
 
         nrows = len(simlist)
         for i in range(nrows):
@@ -559,6 +563,9 @@ class SegmentDialog(QtGui.QDialog):
             sim = simlist[i].replace("SIM", "").replace("'", "").strip()
             sim_item = QtGui.QStandardItem(sim)
             sim_item.setCheckable(True)
+            sim_item.setSelectable(True)
+            if connect_list[i]:
+                sim_item.setCheckState(QtCore.Qt.Checked)
             sim_item.setEditable(False)
             #brush = QtGui.QBrush()
             #brush.setColor(QtGui.QColor().blue())
