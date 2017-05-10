@@ -565,9 +565,18 @@ class SegmentDialog(QtGui.QDialog):
     def header_clicked(self, column):
         if column == 0:
             nrows = self.table.rowCount()
-            for i in range(nrows):
-                connect_cbox = self.table.cellWidget(i, 0)
-                connect_cbox.setChecked(True)
+            cboxes = [self.table.cellWidget(i, 0) for i in range(nrows)]
+            allchecked = all([cbox.isChecked() for cbox in cboxes])
+            print allchecked
+            #for cbox in cboxes:
+            #    if not cbox.isChecked():
+            #        allchecked = False
+            #        break
+            
+            #qtrace()
+                
+                #connect_cbox = self.table.cellWidget(i, 0)
+                #connect_cbox.setChecked(True)
 
     def set_table_data(self):
         """Add rows to table and populate with data"""
