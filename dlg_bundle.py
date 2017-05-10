@@ -494,30 +494,58 @@ class SegmentDialog(QtGui.QDialog):
         ypos = self.parent.pos().y() + self.parent.size().height() / 2
         self.setGeometry(QtCore.QRect(0.5*xpos, 0.8*ypos, 500, 210))
 
-        self.table_view = QtGui.QTableView()
+        self.table = QtGui.QTableWidget(0, 4)
 
-        self.delegate = ItemDelegate()
-        self.table_view.setItemDelegateForColumn(0, self.delegate)
-        self.table_view.setItemDelegateForColumn(1, self.delegate)
+        headerview = QtGui.QHeaderView(QtCore.Qt.Horizontal)
+        headerview.setClickable(True)
+        self.connect(headerview, QtCore.SIGNAL('sectionDoubleClicked(int)'), 
+                     self.header_clicked)
+        self.table.setHorizontalHeader(headerview)
 
-        model = QtGui.QStandardItemModel(0, 3, self.table_view)
-        self.table_view.setModel(model)
-        selection_model = QtGui.QItemSelectionModel(model)
-        self.table_view.setSelectionModel(selection_model)
+        connect_header_item = QtGui.QTableWidgetItem()
+        #connect_header_item.setForeground(QtCore.Qt.white);
+        #connect_header_item.setBackground(QtGui.QColor("lightblue"));
+        #connect_header_item.setFont(QtGui.QFont("arial", 12));
+        self.table.setHorizontalHeaderItem(0, connect_header_item)
+        self.table.setHorizontalHeaderItem(1, QtGui.QTableWidgetItem("Height (enr)"))
+        self.table.setHorizontalHeaderItem(2, QtGui.QTableWidgetItem("Height (btf)"))
+        self.table.setHorizontalHeaderItem(3, QtGui.QTableWidgetItem("Segment"))
 
-        model.setHorizontalHeaderItem(0, QtGui.QStandardItem("Height (enr)"))
-        model.setHorizontalHeaderItem(1, QtGui.QStandardItem("Height (btf)"))
-        model.setHorizontalHeaderItem(2, QtGui.QStandardItem("Segment"))
+        horizontalheader = self.table.horizontalHeader()
+        horizontalheader.setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
+        horizontalheader.setResizeMode(3, QtGui.QHeaderView.Stretch)
 
-        horizontalheader = self.table_view.horizontalHeader()
-        horizontalheader.setResizeMode(2, QtGui.QHeaderView.Stretch)
-
-        verticalheader = self.table_view.verticalHeader()
+        verticalheader = self.table.verticalHeader()
         verticalheader.setResizeMode(QtGui.QHeaderView.Fixed)
         verticalheader.setDefaultSectionSize(25)
 
+
+        #self.table_view = QtGui.QTableView()
+        #self.delegate = ItemDelegate()
+        #self.table_view.setItemDelegateForColumn(0, self.delegate)
+        #self.table_view.setItemDelegateForColumn(1, self.delegate)
+
+        #model = QtGui.QStandardItemModel(0, 4, self.table_view)
+        #self.table_view.setModel(model)
+        #selection_model = QtGui.QItemSelectionModel(model)
+        #self.table_view.setSelectionModel(selection_model)
+
+        #model.setHorizontalHeaderItem(0, QtGui.QStandardItem("Con."))
+        #model.setHorizontalHeaderItem(1, QtGui.QStandardItem("Height (enr)"))
+        #model.setHorizontalHeaderItem(2, QtGui.QStandardItem("Height (btf)"))
+        #model.setHorizontalHeaderItem(3, QtGui.QStandardItem("Segment"))
+
+        #horizontalheader = self.table_view.horizontalHeader()
+        #horizontalheader.setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
+        #horizontalheader.setResizeMode(3, QtGui.QHeaderView.Stretch)
+
+        #verticalheader = self.table_view.verticalHeader()
+        #verticalheader.setResizeMode(QtGui.QHeaderView.Fixed)
+        #verticalheader.setDefaultSectionSize(25)
+
         vbox = QtGui.QVBoxLayout()
-        vbox.addWidget(self.table_view)
+        vbox.addWidget(self.table)
+        #vbox.addWidget(self.table_view)
 
         hbox = QtGui.QHBoxLayout()
         self.ok_button = QtGui.QPushButton("Ok")
@@ -534,6 +562,13 @@ class SegmentDialog(QtGui.QDialog):
         vbox.addLayout(hbox)
         self.setLayout(vbox)
 
+    def header_clicked(self, column):
+        if column == 0:
+            nrows = self.table.rowCount()
+            for i in range(nrows):
+                connect_cbox = self.table.cellWidget(i, 0)
+                connect_cbox.setChecked(True)
+
     def set_table_data(self):
         """Add rows to table and populate with data"""
 
@@ -548,25 +583,52 @@ class SegmentDialog(QtGui.QDialog):
 
         nrows = len(simlist)
         for i in range(nrows):
+            self.table.insertRow(i)
+            vheader = QtGui.QTableWidgetItem(str(nrows - i))
+            self.table.setVerticalHeaderItem(i, vheader)
+
+            connect_cbox = QtGui.QCheckBox()
+            self.table.setCellWidget(i, 0, connect_cbox)
+            
             height = '{0:g}'.format(heights[i])
-            height_item = QtGui.QStandardItem(height)
-            self.table_view.model().setItem(i, 0, height_item)
+            height_item = QtGui.QTableWidgetItem(height)
+            self.table.setItem(i, 1, height_item)
 
             btf_height = '{0:g}'.format(btf_heights[i])
-            btf_height_item = QtGui.QStandardItem(btf_height)
-            self.table_view.model().setItem(i, 1, btf_height_item)
+            btf_height_item = QtGui.QTableWidgetItem(btf_height)
+            self.table.setItem(i, 2, btf_height_item)
 
             sim = simlist[i].replace("SIM", "").replace("'", "").strip()
-            sim_item = QtGui.QStandardItem(sim)
-            sim_item.setEditable(False)
+            sim_item = QtGui.QTableWidgetItem(sim)
+            self.table.setItem(i, 3, sim_item)
+
+            #connect_item = QtGui.QCheckBox("")
+            #self.table_view.setIndexWidget(0, connect_item)
+
+            #connect_item = QtGui.QStandardItem("")
+            #connect_item.setCheckable(False)
+            #connect_item.setCheckState(QtCore.Qt.Checked)
+            #self.table_view.model().setItem(i, 0, connect_item)
+
+            #height = '{0:g}'.format(heights[i])
+            #height_item = QtGui.QStandardItem(height)
+            #self.table_view.model().setItem(i, 1, height_item)
+
+            #btf_height = '{0:g}'.format(btf_heights[i])
+            #btf_height_item = QtGui.QStandardItem(btf_height)
+            #self.table_view.model().setItem(i, 2, btf_height_item)
+
+            #sim = simlist[i].replace("SIM", "").replace("'", "").strip()
+            #sim_item = QtGui.QStandardItem(sim)
+            #sim_item.setEditable(False)
             #brush = QtGui.QBrush()
             #brush.setColor(QtGui.QColor().blue())
             #sim_item.setBackground(brush)
-            self.table_view.model().setItem(i, 2, sim_item)
-            vheader = QtGui.QStandardItem(str(nrows - i))
-            self.table_view.model().setVerticalHeaderItem(i, vheader)
+            #self.table_view.model().setItem(i, 3, sim_item)
+            #vheader = QtGui.QStandardItem(str(nrows - i))
+            #self.table_view.model().setVerticalHeaderItem(i, vheader)
 
-        self.table_view.resizeColumnToContents(2)
+        self.table.resizeColumnToContents(3)
 
     def get_table_data(self):
         """retreive data from table cells"""
