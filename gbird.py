@@ -1252,29 +1252,31 @@ class MainWin(QtGui.QMainWindow):
         self.canvas.draw()
 
     def enr_add(self):
+
+        case_num = int(self.case_cbox.currentIndex())
+        self.enr_modify("add", case_num)
         
-        if self.allsegs_update.isChecked():
-        #if self.enr_case_cb.isChecked():  # update all cases
+        bundle = self.bunlist[self.ibundle]
+        if hasattr(bundle.data, "segment_connect_list"):
             ncases = len(self.pinobjects)
-            for case_num in range(ncases):
-                self.enr_modify("add", case_num)
-        else:
-            case_num = int(self.case_cbox.currentIndex())
-            self.enr_modify("add", case_num)
+            for iseg in range(ncases):
+                if iseg != case_num and bundle.data.segment_connect_list[iseg]:
+                    self.enr_modify("add", iseg)
 
         self.canvas.draw()
         self.enr_update()  # Update info fields
         
     def enr_sub(self):
 
-        if self.allsegs_update.isChecked():
-        #if self.enr_case_cb.isChecked():
+        case_num = int(self.case_cbox.currentIndex())
+        self.enr_modify("sub", case_num)
+        
+        bundle = self.bunlist[self.ibundle]
+        if hasattr(bundle.data, "segment_connect_list"):
             ncases = len(self.pinobjects)
-            for case_num in range(ncases):
-                self.enr_modify("sub", case_num)
-        else:
-            case_num = int(self.case_cbox.currentIndex())
-            self.enr_modify("sub", case_num)
+            for iseg in range(ncases):
+                if iseg != case_num and bundle.data.segment_connect_list[iseg]:
+                    self.enr_modify("sub", iseg)
         
         self.canvas.draw()
         self.enr_update()  # Update info fields
@@ -2393,7 +2395,7 @@ class MainWin(QtGui.QMainWindow):
 
         self.allsegs_update = self.create_action("Update all segments",
                                                  tip="Update all segments",
-                                                 checkable=True) 
+                                                 checkable=True)
         
         quickcalc = self.create_action("Quick calc...",
                                        tip="Quick calc model...",
