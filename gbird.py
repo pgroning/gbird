@@ -238,6 +238,8 @@ class PinTableWidget(QtGui.QTableWidget):
         verticalheader.setResizeMode(QtGui.QHeaderView.Fixed)
         verticalheader.setDefaultSectionSize(25)
 
+        self.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+
         self.connect(self.horizontalHeader(),
                      QtCore.SIGNAL('sectionClicked(int)'),
                      self.parent.tableHeaderSort)
