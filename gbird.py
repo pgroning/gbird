@@ -247,12 +247,26 @@ class PinTableWidget(QtGui.QTableWidget):
         self.cellActivated.connect(self.parent.pinSelect)
         self.cellClicked.connect(self.parent.pinSelect)
         
-    def sort_table(self):
+    def sort_items(self):
         self.sortItems(0, QtCore.Qt.AscendingOrder)
-        self.parent.setpincoords()
+
+    def setpincoords(self):
+        """Update table with pin coordinates"""
+        
+        case_num = int(self.parent.case_cbox.currentIndex())
+        npin = len(self.parent.pinobjects[case_num])
+        self.setRowCount(npin)
+        
+        for i, pinobj in enumerate(self.parent.pinobjects[case_num]):
+            coord_item = QtGui.QTableWidgetItem(pinobj.coord)
+            self.setVerticalHeaderItem(i, coord_item)
+            i_item = QtGui.QTableWidgetItem()
+            i_item.setData(QtCore.Qt.EditRole, QtCore.QVariant(int(i)))
+            self.setItem(i, 0, i_item)
 
     def selectAll(self):  # redefine built-in selectAll method
-        self.sort_table() 
+        self.sort_items() 
+        self.setpincoords()
 
 
 class InfoLabel(QtGui.QLabel):
@@ -1011,9 +1025,10 @@ class MainWin(QtGui.QMainWindow):
         BA = segment.data.BA
         
         # Sorting table column 0 in ascending order
-        self.table.sortItems(0, QtCore.Qt.AscendingOrder)
+        self.table.sort_items()
+        #self.table.sortItems(0, QtCore.Qt.AscendingOrder)
         self.table.clearContents()
-        self.setpincoords()
+        self.table.setpincoords()
         
         k = 0
         for i in xrange(npst):
@@ -1140,20 +1155,6 @@ class MainWin(QtGui.QMainWindow):
         self.canvas.draw()
         self.plot_update()
         self.report_update()
-
-    def setpincoords(self):
-        """Update table with pin coordinates"""
-
-        case_num = int(self.case_cbox.currentIndex())
-        npin = len(self.pinobjects[case_num])
-        self.table.setRowCount(npin)
-        
-        for i, pinobj in enumerate(self.pinobjects[case_num]):
-            coord_item = QtGui.QTableWidgetItem(pinobj.coord)
-            self.table.setVerticalHeaderItem(i, coord_item)
-            i_item = QtGui.QTableWidgetItem()
-            i_item.setData(QtCore.Qt.EditRole, QtCore.QVariant(int(i)))
-            self.table.setItem(i, 0, i_item)
 
     def save_plot(self):
         file_choices = "PNG (*.png)|*.png"
