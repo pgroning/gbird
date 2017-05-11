@@ -2398,11 +2398,13 @@ class MainWin(QtGui.QMainWindow):
 
         enr_plus = self.create_action("Increase enr", slot=self.enr_add,
                                       tip="Increase enrichment",
-                                      shortcut="F2", icon="add-icon_32x32")
+                                      shortcut=QtCore.Qt.Key_Plus, 
+                                      icon="add-icon_32x32")
 
         enr_minus = self.create_action("Decrease enr", slot=self.enr_sub,
                                        tip="Decrease enrichment",
-                                       shortcut="F1", icon="remove-icon_32x32")
+                                       shortcut=QtCore.Qt.Key_Minus, 
+                                       icon="remove-icon_32x32")
 
         #self.allsegs_update = self.create_action("Update all segments",
         #                                         tip="Update all segments",
@@ -2423,7 +2425,7 @@ class MainWin(QtGui.QMainWindow):
                                      icon="original-icon_32x32")
         
         self.add_actions(self.edit_menu,
-                         (back, forward, None, enr_minus, enr_plus, 
+                         (back, forward, None, enr_plus, enr_minus, 
                           None,
                           segment, enrichment, quickcalc, None, replace, 
                           reset, preferences))
