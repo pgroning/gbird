@@ -854,8 +854,10 @@ class MainWin(QtGui.QMainWindow):
         """open bundle edit dialog"""
         self.bunedit_dlg = SegmentDialog(self)
         self.bunedit_dlg.exec_()
-        if self.bunedit_dlg.ok:
+        if self.bunedit_dlg.update_btf:
             self.bunlist[self.ibundle].new_btf()
+            self.fig_update()
+        elif self.bunedit_dlg.update_figure:
             self.fig_update()
 
     def open_bundle_dlg(self):

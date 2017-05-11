@@ -486,7 +486,8 @@ class SegmentDialog(QtGui.QDialog):
         self.parent = parent
         self.setup()
         self.set_table_data()
-        self.ok = False
+        self.update_btf = False
+        self.update_figure = False
 
     def setup(self):
         self.setWindowTitle("Edit segments")
@@ -507,7 +508,8 @@ class SegmentDialog(QtGui.QDialog):
 
         model.setHorizontalHeaderItem(0, QtGui.QStandardItem("Height (enr)"))
         model.setHorizontalHeaderItem(1, QtGui.QStandardItem("Height (btf)"))
-        model.setHorizontalHeaderItem(2, QtGui.QStandardItem("Segment"))
+        model.setHorizontalHeaderItem(2, QtGui.
+                                      QStandardItem("Connect segments"))
 
         horizontalheader = self.table_view.horizontalHeader()
         horizontalheader.setResizeMode(2, QtGui.QHeaderView.Stretch)
@@ -606,9 +608,14 @@ class SegmentDialog(QtGui.QDialog):
 
         ibundle = self.parent.ibundle
         bundle = self.parent.bunlist[ibundle]
-        bundle.data.nodes = self.data.heights
-        bundle.data.btf_nodes = self.data.btf_heights
+
+        if not np.array_equal(bundle.data.btf_nodes, self.data.btf_heights):
+            bundle.data.btf_nodes = self.data.btf_heights
+            self.update_btf = True
+        if not np.array_equal(bundle.data.nodes, self.data.heights):
+            bundle.data.nodes = self.data.heights
+            self.update_figure = True
         bundle.data.segment_connect_list = self.data.segment_connect_list
-        self.ok = True
+            
         self.close()
         
