@@ -1056,6 +1056,7 @@ class Segment(object):
                   model="c3", box_offset=0.0, c4ver=None, neulib=None, 
                   gamlib=None):
 
+        keepfiles = True
         #tic = time.time()
         
         file_base_name = "./tmp." + str(uuid.uuid4()).split('-')[0]
@@ -1074,12 +1075,15 @@ class Segment(object):
         #self.fill_statepoints()
         self.ave_enr_calc()
 
-        os.remove(file_base_name + ".inp")
-        os.remove(file_base_name + ".out")
-        os.remove(file_base_name + ".cax")
-        try:
-            os.remove(file_base_name + ".log")
-        except:
+        if not keepfiles:
+            os.remove(file_base_name + ".inp")
+            os.remove(file_base_name + ".out")
+            os.remove(file_base_name + ".cax")
+            try:
+                os.remove(file_base_name + ".log")
+            except:
+                pass
+        else:
             pass
 
         print "Done."
