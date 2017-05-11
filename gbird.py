@@ -217,6 +217,44 @@ class dataThread(QtCore.QThread):
 #            self.parent.enrpin_add_callback()
 #"""
 
+class PinTableWidget(QtGui.QTableWidget):
+    def __init__(self, parent=None):
+        QtGui.QTableWidget.__init__(self)
+        self.parent = parent
+        self.setup()
+
+    def setup(self):
+        self.setColumnCount(4)
+        self.setRowCount(100)
+        self.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
+        self.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
+        self.setSizePolicy(QtGui.QSizePolicy.Minimum,
+                                 QtGui.QSizePolicy.Minimum)
+        self.setMinimumWidth(180)
+        self.setHorizontalHeaderLabels(('Index', 'EXP', 'FINT', 'BTF'))
+        self.setSortingEnabled(True)
+        self.setColumnHidden(0, True)
+        verticalheader = self.verticalHeader()
+        verticalheader.setResizeMode(QtGui.QHeaderView.Fixed)
+        verticalheader.setDefaultSectionSize(25)
+
+        self.connect(self.horizontalHeader(),
+                     QtCore.SIGNAL('sectionClicked(int)'),
+                     self.parent.tableHeaderSort)
+        self.connect(self.verticalHeader(),
+                     QtCore.SIGNAL('sectionClicked(int)'), 
+                     self.parent.pinSelect)
+        self.cellActivated.connect(self.parent.pinSelect)
+        self.cellClicked.connect(self.parent.pinSelect)
+        
+    def sort_table(self):
+        self.sortItems(0, QtCore.Qt.AscendingOrder)
+        self.parent.setpincoords()
+
+    def selectAll(self):  # redefine built-in selectAll method
+        self.sort_table() 
+
+
 class InfoLabel(QtGui.QLabel):
     def __init__(self, parent=None, width=100):
         QtGui.QDialog.__init__(self)
@@ -974,6 +1012,7 @@ class MainWin(QtGui.QMainWindow):
         
         # Sorting table column 0 in ascending order
         self.table.sortItems(0, QtCore.Qt.AscendingOrder)
+        self.table.clearContents()
         self.setpincoords()
         
         k = 0
@@ -1105,7 +1144,6 @@ class MainWin(QtGui.QMainWindow):
     def setpincoords(self):
         """Update table with pin coordinates"""
 
-        self.table.clearContents()
         case_num = int(self.case_cbox.currentIndex())
         npin = len(self.pinobjects[case_num])
         self.table.setRowCount(npin)
@@ -2199,39 +2237,9 @@ class MainWin(QtGui.QMainWindow):
         #info_flo.addRow(QtCore.QString("Bundle %1 w/o")
         #                .arg(QtCore.QChar(0x0394)), self.bundle_denr_text)
         
-        # Define table widget
-        self.table = QtGui.QTableWidget()
-        self.table.setRowCount(100)
-        self.table.setColumnCount(4)
-        # self.table.verticalHeader().hide()
-        self.table.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
-        self.table.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
-        self.table.setSizePolicy(QtGui.QSizePolicy.Minimum,
-                                 QtGui.QSizePolicy.Minimum)
-        self.table.setMinimumWidth(180)
-        self.table.setHorizontalHeaderLabels(('Index', 'EXP', 'FINT', 'BTF'))
-        self.table.setSortingEnabled(True)
-        self.table.setColumnHidden(0, True)
-        verticalheader = self.table.verticalHeader()
-        verticalheader.setResizeMode(QtGui.QHeaderView.Fixed)
-        verticalheader.setDefaultSectionSize(25)
+        # Construct table widget instance
+        self.table = PinTableWidget(self)
 
-        # self.connect(self.table.horizontalHeader(),
-        # SIGNAL('QHeaderView.sortIndicatorChanged(int)'), self.openFile)
-        self.connect(self.table.horizontalHeader(),
-                     QtCore.SIGNAL('sectionClicked(int)'),
-                     self.tableHeaderSort)
-        self.connect(self.table.verticalHeader(),
-                     QtCore.SIGNAL('sectionClicked(int)'), self.pinSelect)
-        # self.connect(self.table,SIGNAL('cellClicked(int,int)'),
-        # self.pinSelect)
-        # self.connect(self.table,SIGNAL('currentChanged(int)'),
-        # self.pinSelect)
-        
-        self.table.cellActivated.connect(self.pinSelect)
-        self.table.cellClicked.connect(self.pinSelect)
-        # self.table.selectionModel().selectionChanged.connect(self.pinSelect)
-        
         tvbox = QtGui.QVBoxLayout()
         tvbox.addWidget(self.table)
         tableGbox = QtGui.QGroupBox()
