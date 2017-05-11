@@ -189,9 +189,9 @@ class EgvDialog(QtGui.QDialog):
             elif fuetype == "A10B":
                 fuel = "ATRIUM10B"
             elif fuetype == "OPT2":
-                fuel = "SVEA96OPT2"
+                fuel = "SVEA96OPTIMA2"
             elif fuetype == "OPT3":
-                fuel = "SVEA96OPT3"
+                fuel = "SVEA96OPTIMA3"
             elif fuetype == "AT11":
                 fuel = "ATRIUM11"
             else:
@@ -242,11 +242,11 @@ class EgvDialog(QtGui.QDialog):
             msgBox.setStandardButtons(QtGui.QMessageBox.Ok)
             
             if egv_status:
-                msgBox.setText("EGV-run passed")
+                msgBox.setText("EGV-run passed.\n\nCongratulations!")
                 msgBox.setIcon(QtGui.QMessageBox.Information)
             else:
                 if re.search("^\s*ERROR", infolines[0]):
-                    msgBox.setText("EGV-run failed")
+                    msgBox.setText("EGV-run failed.")
                     infolines.append("Check EGV input options!")
                     infotext = "\n".join(infolines)
                     msgBox.setDetailedText(QtCore.QString.fromUtf8(infotext))
@@ -259,7 +259,7 @@ class EgvDialog(QtGui.QDialog):
                         sublines.append(s)
                     sublines.insert(0, "The following criteria were not met:")
                     infotext = "\n".join(sublines) 
-                    msgBox.setText("EGV-run did not pass")
+                    msgBox.setText("EGV-run did not pass.\n\nSorry!")
                     msgBox.setDetailedText(QtCore.QString.fromUtf8(infotext))
                     msgBox.setIcon(QtGui.QMessageBox.Warning)
                 #msgBox.setIcon(QtGui.QMessageBox.Critical)
