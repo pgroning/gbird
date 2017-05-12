@@ -1233,41 +1233,51 @@ class MainWin(QtGui.QMainWindow):
         #    remove = True
         #    pass
         case_num = int(self.case_cbox.currentIndex())
-        i = np.nan
+
         if event.button is 1:  # left mouse click
             # print event.xdata, event.ydata
-            # i = np.nan
-            try:  # check if any pin is selected and return the index
-                i = next(i for i, cobj in enumerate(self.pinobjects[case_num])
-                         if cobj.is_clicked(event.xdata, event.ydata))
-            except:
-                pass
-            if i >= 0:  # A pin is selected
+            # check if any pin is selected and return the index
+            i = next((i for i, cobj in enumerate(self.pinobjects[case_num])
+                      if cobj.is_clicked(event.xdata, event.ydata)), None)
+            if i is not None and i >= 0:  # A pin is selected
                 self.tableSelectRow(i)
                 self.mark_pin(i)
                 # self.pinselection_index = i
                 # j = self.halfsym_pin(i)
 
         elif event.button is 3:  # right mouse click
-            #try:  # check if enr level pin is clicked
-            #    i = next(i for i, cobj in enumerate(self.enrpinlist[case_num])
-            #             if cobj.is_clicked(event.xdata, event.ydata))
-            #except:
-            #    pass
-            i = next((i for i, cobj in enumerate(self.enrpinlist[case_num])
-                      if cobj.is_clicked(event.xdata, event.ydata), None))
-            if i not None and i >= 0:  # An enr level pin is selected
-                self.pinselection_index = i
-                # self.mark_enrpin(i)
-                # print self.pinselection_index
+            # check if any fuel pin is clicked
+            i = next((i for i, cobj in enumerate(self.pinobjects[case_num])
+                      if cobj.is_clicked(event.xdata, event.ydata)), None)
+            if i is not None and i >= 0:  # A pin is right clicked
                 
-                self.popMenu = QtGui.QMenu(self)
-                self.popMenu.addAction("Add...", self.enrpin_add)
-                self.popMenu.addAction("Edit...", self.enrpin_edit)
-                self.popMenu.addAction("Remove", self.enrpin_remove)
-                self.popMenu.addAction("Sort", self.enrpin_sort)
+                if self.pinselection_index != i:
+                    self.tableSelectRow(i)
+                    self.mark_pin(i)
                 
-                self.popMenu.exec_(QtGui.QCursor.pos())
+                self.pin_popMenu = QtGui.QMenu(self)
+                enr_menu = self.pin_popMenu.addMenu("Enr list...")
+                enr_menu.addAction("#1")
+                enr_menu.addAction("#2")
+                enr_menu.addAction("#3")
+                self.pin_popMenu.exec_(QtGui.QCursor.pos())
+                
+
+            else: # check if enr level pin is clicked
+                i = next((i for i, cobj in enumerate(self.enrpinlist[case_num])
+                          if cobj.is_clicked(event.xdata, event.ydata)), None)
+                if i is not None and i >= 0:  # An enr level pin is selected
+                    self.pinselection_index = i
+                    # self.mark_enrpin(i)
+                    # print self.pinselection_index
+                
+                    self.popMenu = QtGui.QMenu(self)
+                    self.popMenu.addAction("Add...", self.enrpin_add)
+                    self.popMenu.addAction("Edit...", self.enrpin_edit)
+                    self.popMenu.addAction("Remove", self.enrpin_remove)
+                    self.popMenu.addAction("Sort", self.enrpin_sort)
+                    
+                    self.popMenu.exec_(QtGui.QCursor.pos())
 
     def halfsym_pin(self, i, case_num=None):
         """Find the corresponding pin for half symmetry"""
