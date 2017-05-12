@@ -10,6 +10,7 @@ from pyqt_trace import pyqt_trace as qtrace  # Break point that works with Qt
 import sys
 import time
 import numpy as np
+from multiprocessing import Pool
 
 from btf_opt2 import btf_opt2
 from btf_opt3 import btf_opt3
@@ -126,11 +127,23 @@ class Btf(object):
             print "Error: BTF is not implemented for this fuel type"
             return
 
+        #tic = time.time()
+        POW3_list = []
         for i, burnup in enumerate(x):
             POW3 = self.pow3d(voi, burnup, zdim)
-            #print POW3.shape
-            self.DOX[i, :, :] = rfact_fun(POW3)
-            # self.DOX[i, :, :] = self.rfact(POW3)
+            POW3_list.append(POW3)
+            #self.DOX[i, :, :] = rfact_fun(POW3)
+            ## self.DOX[i, :, :] = self.rfact(POW3)
+
+        n = min(len(POW3_list), 16)  # Number of threads
+        p = Pool(n)  # Make the Pool of workers
+        DOX_list = p.map(rfact_fun, POW3_list)
+        p.close()
+        p.join()
+        
+        for i, DOX in enumerate(DOX_list):
+            self.DOX[i, :, :] = DOX
+
         self.burnpoints = np.array(x).astype(float)
         
         print "Done."
