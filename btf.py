@@ -152,7 +152,7 @@ class Btf(object):
             print "Error: BTF is not implemented for this fuel type"
             return
 
-        tic = time.time()
+        #tic = time.time()
         POW3_list = []
         for i, burnup in enumerate(x):
             POW3 = self.pow3d(segments, voi, burnup, zdim)
@@ -171,8 +171,8 @@ class Btf(object):
 
         self.burnpoints = np.array(x).astype(float)
         
-        #print "Done."
-        print "Done in "+str(time.time()-tic)+" seconds."
+        print "Done."
+        #print "Done in "+str(time.time()-tic)+" seconds."
 
     #def rfact(self, POW3):
     #    fuetype = self.bundle.data.fuetype

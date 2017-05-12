@@ -1192,6 +1192,32 @@ class MainWin(QtGui.QMainWindow):
         index = int(self.table.item(i, 0).text())
         self.mark_pin(index)
 
+    def keyPressEvent(self, event):
+        key = event.key()
+        if key == QtCore.Qt.Key_8:  # Up arrow key was pressed
+            iseg = int(self.case_cbox.currentIndex())
+            imax = self.case_cbox.count() - 1
+            if iseg < imax:
+                iseg += 1
+                self.case_cbox.setCurrentIndex(iseg)  # increase segment
+        elif key == QtCore.Qt.Key_2:  # Down arrow key was pressed
+            iseg = int(self.case_cbox.currentIndex())
+            if iseg > 0:
+                iseg -= 1
+                self.case_cbox.setCurrentIndex(iseg)  # decrease segment
+        elif key == QtCore.Qt.Key_4:  # Left arrow key was pressed
+            ipoint = self.point_sbox.value()
+            imin = self.point_sbox.minimum()
+            if ipoint > imin:
+                ipoint -= 1
+                self.point_sbox.setValue(ipoint)  # increase state point
+        elif key == QtCore.Qt.Key_6:  # Right arrow key was pressed
+            ipoint = self.point_sbox.value()
+            imax = self.point_sbox.maximum()
+            if ipoint < imax:
+                ipoint += 1
+                self.point_sbox.setValue(ipoint)  # decrease state point
+
     def on_click(self, event):
         # The event received here is of the type
         # matplotlib.backend_bases.PickEvent
@@ -1201,10 +1227,11 @@ class MainWin(QtGui.QMainWindow):
         #
 
         # print event.x,event.y
-        # if qApp.keyboardModifiers() & Qt.ControlModifier: # ctrl+click
+        #if qApp.keyboardModifiers() & Qt.ControlModifier: # ctrl+click
         #    remove = False
-        # else:
+        #else:
         #    remove = True
+        #    pass
         case_num = int(self.case_cbox.currentIndex())
         i = np.nan
         if event.button is 1:  # left mouse click
@@ -1222,12 +1249,14 @@ class MainWin(QtGui.QMainWindow):
                 # j = self.halfsym_pin(i)
 
         elif event.button is 3:  # right mouse click
-            try:  # check if enr level pin is clicked
-                i = next(i for i, cobj in enumerate(self.enrpinlist[case_num])
-                         if cobj.is_clicked(event.xdata, event.ydata))
-            except:
-                pass
-            if i >= 0:  # An enr level pin is selected
+            #try:  # check if enr level pin is clicked
+            #    i = next(i for i, cobj in enumerate(self.enrpinlist[case_num])
+            #             if cobj.is_clicked(event.xdata, event.ydata))
+            #except:
+            #    pass
+            i = next((i for i, cobj in enumerate(self.enrpinlist[case_num])
+                      if cobj.is_clicked(event.xdata, event.ydata), None))
+            if i not None and i >= 0:  # An enr level pin is selected
                 self.pinselection_index = i
                 # self.mark_enrpin(i)
                 # print self.pinselection_index
@@ -1741,7 +1770,7 @@ class MainWin(QtGui.QMainWindow):
             pts = bundle.segments[iseg].statepoints
             burnlist = [p.burnup for p in pts]
 
-            # Only use state points (stp) where voi = vhi
+            # Only use state points where voi = vhi
             idx = next((i for i, p in 
                        enumerate(self.bunlist[0].segments[iseg].statepoints)
                        if p.voi != p.vhi), None)
