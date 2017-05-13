@@ -1257,12 +1257,12 @@ class MainWin(QtGui.QMainWindow):
                 
                 self.pin_popMenu = QtGui.QMenu(self)
                 enr_menu = self.pin_popMenu.addMenu("Enr list...")
-                enr_menu.addAction("#1")
-                enr_menu.addAction("#2")
-                enr_menu.addAction("#3")
+                npins = len(self.enrpinlist[case_num])
+                for i in range(npins):
+                    label = "#" + str(i + 1)
+                    enr_menu.addAction(label, self.pin_update)
                 self.pin_popMenu.exec_(QtGui.QCursor.pos())
                 
-
             else: # check if enr level pin is clicked
                 i = next((i for i, cobj in enumerate(self.enrpinlist[case_num])
                           if cobj.is_clicked(event.xdata, event.ydata)), None)
@@ -1333,6 +1333,12 @@ class MainWin(QtGui.QMainWindow):
         self.axes.add_patch(self.clickpatch)
         self.canvas.draw()
 
+    def pin_update(self):
+        print "update pin"
+        sender = QtCore.QObject.sender(self)
+        sender_label = str(sender.text())
+        print sender_label
+        
     def enr_add(self):
 
         case_num = int(self.case_cbox.currentIndex())
