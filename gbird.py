@@ -1250,11 +1250,11 @@ class MainWin(QtGui.QMainWindow):
             i = next((i for i, cobj in enumerate(self.pinobjects[case_num])
                       if cobj.is_clicked(event.xdata, event.ydata)), None)
             if i is not None and i >= 0:  # A pin is right clicked
-                
-                if self.pinselection_index != i:
+                if (not hasattr(self, "pinselection_index") or
+                    self.pinselection_index != i):
                     self.tableSelectRow(i)
                     self.mark_pin(i)
-                
+
                 self.pin_popMenu = QtGui.QMenu(self)
                 enr_menu = self.pin_popMenu.addMenu("Enr list...")
                 npins = len(self.enrpinlist[case_num])
