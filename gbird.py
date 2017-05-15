@@ -1247,37 +1247,45 @@ class MainWin(QtGui.QMainWindow):
 
         elif event.button is 3:  # right mouse click
             # check if any fuel pin is clicked
-            i = next((i for i, cobj in enumerate(self.pinobjects[case_num])
-                      if cobj.is_clicked(event.xdata, event.ydata)), None)
-            if i is not None and i >= 0:  # A pin is right clicked
-                if (not hasattr(self, "pinselection_index") or
-                    self.pinselection_index != i):
-                    self.tableSelectRow(i)
-                    self.mark_pin(i)
+            #i = next((i for i, cobj in enumerate(self.pinobjects[case_num])
+            #          if cobj.is_clicked(event.xdata, event.ydata)), None)
+            #if i is not None and i >= 0:  # A pin is right clicked
+            #    if (not hasattr(self, "pinselection_index") or
+            #        self.pinselection_index != i):
+            #        self.tableSelectRow(i)
+            #        self.mark_pin(i)
 
-                self.pin_popMenu = QtGui.QMenu(self)
-                enr_menu = self.pin_popMenu.addMenu("Enr list...")
-                npins = len(self.enrpinlist[case_num])
-                for i in range(npins):
-                    label = "#" + str(i + 1)
-                    enr_menu.addAction(label, self.pin_update)
-                self.pin_popMenu.exec_(QtGui.QCursor.pos())
+            #    self.pin_popMenu = QtGui.QMenu(self)
+            #    enr_menu = self.pin_popMenu.addMenu("Enr list...")
+            #    check_icon = self.appdir + "icons/ok-apply-icon_32x32.png"
+            #    icon = QtGui.QIcon(check_icon)
+            #    npins = len(self.enrpinlist[case_num])
+            #    for j in range(npins):
+            #        ipin = j + 1
+            #        label = "#" + str(ipin)
+            #        action = QtGui.QAction(icon, label, self)
+            #        action.triggered.connect(self.enr_update)
+            #        if self.pinobjects[case_num][i].LFU == ipin:
+            #            action.setIconVisibleInMenu(True)
+            #        enr_menu.addAction(action)
+            #        #enr_menu.addAction(label, self.pin_update)
+            #    self.pin_popMenu.exec_(QtGui.QCursor.pos())
                 
-            else: # check if enr level pin is clicked
-                i = next((i for i, cobj in enumerate(self.enrpinlist[case_num])
-                          if cobj.is_clicked(event.xdata, event.ydata)), None)
-                if i is not None and i >= 0:  # An enr level pin is selected
-                    self.pinselection_index = i
-                    # self.mark_enrpin(i)
-                    # print self.pinselection_index
+            #else: # check if enr level pin is clicked
+            i = next((i for i, cobj in enumerate(self.enrpinlist[case_num])
+                      if cobj.is_clicked(event.xdata, event.ydata)), None)
+            if i is not None and i >= 0:  # An enr level pin is selected
+                self.pinselection_index = i
+                # self.mark_enrpin(i)
+                # print self.pinselection_index
                 
-                    self.popMenu = QtGui.QMenu(self)
-                    self.popMenu.addAction("Add...", self.enrpin_add)
-                    self.popMenu.addAction("Edit...", self.enrpin_edit)
-                    self.popMenu.addAction("Remove", self.enrpin_remove)
-                    self.popMenu.addAction("Sort", self.enrpin_sort)
-                    
-                    self.popMenu.exec_(QtGui.QCursor.pos())
+                self.popMenu = QtGui.QMenu(self)
+                self.popMenu.addAction("Add...", self.enrpin_add)
+                self.popMenu.addAction("Edit...", self.enrpin_edit)
+                self.popMenu.addAction("Remove", self.enrpin_remove)
+                self.popMenu.addAction("Sort", self.enrpin_sort)
+                
+                self.popMenu.exec_(QtGui.QCursor.pos())
 
     def halfsym_pin(self, i, case_num=None):
         """Find the corresponding pin for half symmetry"""
@@ -1333,46 +1341,34 @@ class MainWin(QtGui.QMainWindow):
         self.axes.add_patch(self.clickpatch)
         self.canvas.draw()
 
-    def pin_update(self):
-        print "update pin"
-        sender = QtCore.QObject.sender(self)
-        sender_label = str(sender.text())
-        print sender_label
-        
     def enr_add(self):
-
-        case_num = int(self.case_cbox.currentIndex())
-        self.enr_modify("add", case_num)
-        
-        bundle = self.bunlist[self.ibundle]
-        if hasattr(bundle.data, "segment_connect_list"):
-            ncases = len(self.pinobjects)
-            for iseg in range(ncases):
-                if iseg != case_num and bundle.data.segment_connect_list[iseg]:
-                    self.enr_modify("add", iseg)
-
-        self.canvas.draw()
-        self.enr_update()  # Update info fields
+        self.enr_update("add")
         
     def enr_sub(self):
+        self.enr_update("sub")
 
-        case_num = int(self.case_cbox.currentIndex())
-        self.enr_modify("sub", case_num)
+    def enr_update(self, mod="add"):
+        """Update pin enrichment"""
+
+        #print "update pin"
+        #sender = QtCore.QObject.sender(self)
+        #label = str(sender.text())
+        #LFU = int(label.replace("#", ""))
         
+        case_num = int(self.case_cbox.currentIndex())
+        self.enr_modify(mod, case_num)
+
         bundle = self.bunlist[self.ibundle]
         if hasattr(bundle.data, "segment_connect_list"):
             ncases = len(self.pinobjects)
             for iseg in range(ncases):
                 if iseg != case_num and bundle.data.segment_connect_list[iseg]:
-                    self.enr_modify("sub", iseg)
-        
+                    self.enr_modify(mod, iseg)
+
         self.canvas.draw()
-        self.enr_update()  # Update info fields
+        self.enr_fields_update()  # Update info fields
 
-        # self.enrpin_remove()  # only for testing. should be removed
-        # enrArray = [x.ENR for x in self.enrpinlist][::-1] # Reverse order
-
-    def enr_update(self):
+    def enr_fields_update(self):
         """Update enr value in info fields"""
 
         iseg = int(self.case_cbox.currentIndex())
@@ -1437,8 +1433,8 @@ class MainWin(QtGui.QMainWindow):
                 ivec.append(isym)
         for i in ivec:
             # print "Increase enrichment for pin " + str(i)
-            pinEnr = self.pinobjects[case_num][i].ENR
-            pinBA = self.pinobjects[case_num][i].BA
+            #pinEnr = self.pinobjects[case_num][i].ENR
+            #pinBA = self.pinobjects[case_num][i].BA
             pinLFU = self.pinobjects[case_num][i].LFU
             
             #for j, x in enumerate(self.enrpinlist[case_num]):
@@ -1844,7 +1840,7 @@ class MainWin(QtGui.QMainWindow):
         self.sim_info_field.setText(text)
         #self.sim_text.setText(text)
 
-        self.enr_update()
+        self.enr_fields_update()
 
     def on_draw(self):
         """Setup the figure axis"""
@@ -2617,6 +2613,17 @@ class MainWin(QtGui.QMainWindow):
         forwardAction.setStatusTip('Forward to next design')
         forwardAction.triggered.connect(self.forward_state)
         
+        add_icon =  self.appdir + "icons/add-icon_32x32.png"
+        addAction = QtGui.QAction(QtGui.QIcon(add_icon),
+                                  'Increase enrichment', self)
+        addAction.setStatusTip('Increase enrichment') 
+        addAction.triggered.connect(self.enr_add)
+        sub_icon =  self.appdir + "icons/remove-icon_32x32.png"
+        subAction = QtGui.QAction(QtGui.QIcon(sub_icon),
+                                  'Decrease enrichment', self)
+        subAction.setStatusTip('Decrease enrichment')
+        subAction.triggered.connect(self.enr_sub)
+
         toolbar = self.addToolBar('Toolbar')
         toolbar.addAction(newAction)
         toolbar.addAction(fileAction)
@@ -2628,6 +2635,8 @@ class MainWin(QtGui.QMainWindow):
         toolbar.addAction(findAction)
         toolbar.addAction(backAction)
         toolbar.addAction(forwardAction)
+        toolbar.addAction(subAction)
+        toolbar.addAction(addAction)
         toolbar.addAction(exitAction)
 
         toolbar.setMovable(False)
@@ -2636,7 +2645,7 @@ class MainWin(QtGui.QMainWindow):
 
         self.toolbar_actions = [saveAction, calcAction, self.colorAction,
                                 plotAction, findAction, backAction, 
-                                forwardAction]
+                                forwardAction, subAction, addAction]
 
     def reset(self):
         self.init_pinobjects()
