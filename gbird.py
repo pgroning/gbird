@@ -365,6 +365,7 @@ class MainWin(QtGui.QMainWindow):
                                                              path_default,
                                                              file_choices))
         if filename:
+            self.setCursor(QtCore.Qt.WaitCursor)
             # Save default path to config file
             path = os.path.split(filename)[0]
             self.settings.beginGroup("PATH")
@@ -372,31 +373,30 @@ class MainWin(QtGui.QMainWindow):
             self.settings.endGroup()
 
             filext = os.path.splitext(filename)[1]
-            if filext == ".gbi":  # pickle file
-                #self.ibundle = -1
-                self.load_pickle(filename)
-                self.fig_update()
-                self.chanbow_sbox_update()
-                self.widgets_setenabled()
-            else:
-                msgBox = QtGui.QMessageBox()
-                status = msgBox.information(self, "Importing data",
-                                            "Continue?",
-                                            QtGui.QMessageBox.Yes |
-                                            QtGui.QMessageBox.Cancel)
-                self.statusBar().showMessage('Importing data from %s' 
-                                             % filename, 2000)
-                self._filename = filename
-                if status == QtGui.QMessageBox.Yes:
-                    self.setCursor(QtCore.Qt.WaitCursor)
-                    self.ibundle = 0
-                    #if filext == ".inp":
-                    #    self.read_inp(filename)
-                    #    #self.quick_calc(state_num=0)  # reference calculation
-                    if filext == ".cax":
-                        self.read_cax(filename)
-                        self.fig_update()
-                    self.setCursor(QtCore.Qt.ArrowCursor)
+            #if filext == ".gbi":  # pickle file
+            self.load_pickle(filename)
+            #self.fig_update()
+            self.chanbow_sbox_update()
+            self.widgets_setenabled()
+            #else:
+            #    msgBox = QtGui.QMessageBox()
+            #    status = msgBox.information(self, "Importing data",
+            #                                "Continue?",
+            #                                QtGui.QMessageBox.Yes |
+            #                                QtGui.QMessageBox.Cancel)
+            #    self.statusBar().showMessage('Importing data from %s' 
+            #                                 % filename, 2000)
+            #    self._filename = filename
+            #    if status == QtGui.QMessageBox.Yes:
+            #        self.setCursor(QtCore.Qt.WaitCursor)
+            #        self.ibundle = 0
+            #        #if filext == ".inp":
+            #        #    self.read_inp(filename)
+            #        #    #self.quick_calc(state_num=0)  # reference calculation
+            #        if filext == ".cax":
+            #            self.read_cax(filename)
+            #            self.fig_update()
+            self.setCursor(QtCore.Qt.ArrowCursor)
 
 #    def newProject(self):
 #        """Open project setup file"""
@@ -427,6 +427,7 @@ class MainWin(QtGui.QMainWindow):
         # self.bundle.loadpic(filename)
         print "Loading data from file " + filename
         self.clear_data()
+
         with open(filename, 'rb') as fp:
             self.params = pickle.load(fp)
             self.bunlist = pickle.load(fp)
@@ -470,6 +471,7 @@ class MainWin(QtGui.QMainWindow):
         # Update case number list box
         for i in range(1, ncases + 1):
             self.case_cbox.addItem(str(i))
+        
         self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'),
                      self.fig_update)
         self.fig_update()
@@ -548,7 +550,7 @@ class MainWin(QtGui.QMainWindow):
             self.init_cboxes()
 
             self.setCursor(QtCore.Qt.ArrowCursor)
-            self.fig_update()
+            #self.fig_update()
             self.widgets_setenabled(True)
         else:
             return
@@ -615,8 +617,8 @@ class MainWin(QtGui.QMainWindow):
         nsegments = len(self.bunlist[-1].segments)
         seglist = map(str, range(1, nsegments + 1))
         self.case_cbox.addItems(QtCore.QStringList(seglist))
-        self.connect(self.case_cbox, QtCore.SIGNAL('currentIndexChanged(int)'),
-                     self.fig_update)
+        #self.connect(self.case_cbox, QtCore.SIGNAL('currentIndexChanged(int)'),
+        #             self.fig_update)
         # init voi combo box
         #voilist = map(str, self.bunlist[-1].segments[0].data.voilist)
         #self.voi_cbox.addItems(QtCore.QStringList(voilist))
@@ -985,8 +987,8 @@ class MainWin(QtGui.QMainWindow):
         #        self.point_sbox.setValue(ipoint)
 
     def set_pinvalues(self):
-        """Update values"""
-        
+        """Update pin values"""
+
         param_str = str(self.param_cbox.currentText())
         iseg = int(self.case_cbox.currentIndex())
 
@@ -1189,8 +1191,9 @@ class MainWin(QtGui.QMainWindow):
         self.table.selectRow(index)
 
     def pinSelect(self, i):
-        index = int(self.table.item(i, 0).text())
-        self.mark_pin(index)
+        if hasattr(self.table.item(i, 0), "text"):
+            index = int(self.table.item(i, 0).text())
+            self.mark_pin(index)
 
     def keyPressEvent(self, event):
         key = event.key()
@@ -1232,6 +1235,10 @@ class MainWin(QtGui.QMainWindow):
         #else:
         #    remove = True
         #    pass
+        #qtrace()
+        if not hasattr(self, "pinobjects"):  # is data initialized?
+            return
+
         case_num = int(self.case_cbox.currentIndex())
 
         if event.button is 1:  # left mouse click
@@ -1239,6 +1246,7 @@ class MainWin(QtGui.QMainWindow):
             # check if any pin is selected and return the index
             i = next((i for i, cobj in enumerate(self.pinobjects[case_num])
                       if cobj.is_clicked(event.xdata, event.ydata)), None)
+
             if i is not None and i >= 0:  # A pin is selected
                 self.tableSelectRow(i)
                 self.mark_pin(i)
@@ -1913,6 +1921,9 @@ class MainWin(QtGui.QMainWindow):
         if hasattr(self, "bundle"):
             del self.bundle
         
+        if hasattr(self, "pinobjects"):
+            del self.pinobjects
+
         # Clear and restore figure
         self.axes.clear()  # Clears the figure axes
         self.fig.set_facecolor('0.75')  # set facecolor to gray
@@ -2077,6 +2088,8 @@ class MainWin(QtGui.QMainWindow):
         case_hbox = QtGui.QHBoxLayout()
         case_hbox.addWidget(case_label)
         case_hbox.addWidget(self.case_cbox)
+        self.connect(self.case_cbox, QtCore.SIGNAL('currentIndexChanged(int)'),
+                     self.fig_update)
 
         point_label = QtGui.QLabel('Point number:')
         self.point_sbox = QtGui.QSpinBox()
@@ -2749,7 +2762,7 @@ class MainWin(QtGui.QMainWindow):
     def widgets_setenabled(self, status=True):
 
         widgets = [self.param_cbox, self.case_cbox, self.point_sbox,
-                   self.chanbow_sbox]
+                   self.chanbow_sbox, self.table]
         for w in widgets:
             w.setEnabled(status)
     
