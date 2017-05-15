@@ -1364,14 +1364,16 @@ class MainWin(QtGui.QMainWindow):
         #LFU = int(label.replace("#", ""))
         
         case_num = int(self.case_cbox.currentIndex())
-        self.enr_modify(mod, case_num)
-
         bundle = self.bunlist[self.ibundle]
-        if hasattr(bundle.data, "segment_connect_list"):
+
+        if (hasattr(bundle.data, "segment_connect_list") and
+            bundle.data.segment_connect_list[case_num]):
             ncases = len(self.pinobjects)
             for iseg in range(ncases):
-                if iseg != case_num and bundle.data.segment_connect_list[iseg]:
+                if bundle.data.segment_connect_list[iseg]:
                     self.enr_modify(mod, iseg)
+        else:
+            self.enr_modify(mod, case_num)
 
         self.canvas.draw()
         self.enr_fields_update()  # Update info fields
