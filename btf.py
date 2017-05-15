@@ -10,6 +10,7 @@ from pyqt_trace import pyqt_trace as qtrace  # Break point that works with Qt
 import sys
 import time
 import numpy as np
+from multiprocessing import Pool
 
 from btf_opt2 import btf_opt2
 from btf_opt3 import btf_opt3
@@ -30,10 +31,11 @@ class Btf(object):
         # self.rfact()
         # self.pow3d(voi=50,burnup=0)
 
-    def lastindex(self, case_id):
+    def lastindex(self, segment):
         """Iterate over burnup points"""
         
-        statepoints = self.bundle.segments[case_id].statepoints
+        #statepoints = self.bundle.segments[case_id].statepoints
+        statepoints = segment.statepoints
         burnup_old = 0.0
         for idx, p in enumerate(statepoints):
             if p.burnup < burnup_old:
@@ -41,32 +43,47 @@ class Btf(object):
             burnup_old = p.burnup
         return idx
 
-    def intersect_points(self):
-        """Find intersection burnup points for all cases"""
+    def intersect_points(self, segments):
+        """Find intersection burnup points for segments"""
         
-        segments = self.bundle.segments
+        #segments = self.bundle.segments
         nsegments = len(segments)
-        idx = self.lastindex(0)
+        #idx = self.lastindex(0)
+        idx = self.lastindex(segments[0])
         
         x = [segments[0].statepoints[i].burnup for i in range(idx)]
         
         for j in range(1, nsegments):
-            idx = self.lastindex(j)
+            #idx = self.lastindex(j)
+            idx = self.lastindex(segments[j])
             x2 = ([segments[j].statepoints[i].burnup
                    for i in range(idx)])
             x = [val for val in x if val in x2]
         return x
 
-    def pow3d(self, voi, burnup, zdim):
+    def union_points(self):
+        """Find union burnup points for segments"""
+
+        segments = self.bundle.segments
+        nsegments = len(segments)
+        idx = self.lastindex(0)
+
+        xlist = []
+        for j, seg in enumerate(segments):
+            idx = self.lastindex(j)
+            x = [seg.statepoints[i].burnup for i in range(idx)]
+            xlist.append(x)
+        qtrace()
+
+    def pow3d(self, segments, voi, burnup, zdim):
         """Construct a 3D pin power distribution for specific void and burnup.
         Use interpolation if necessary."""
         
-        all_segments = self.bundle.segments
-
-        #btf_zones = self.bundle.data.btf_zones
-        #segments = [s for i, s in enumerate(all_segments) if btf_zones[i]]
-        nodes = self.bundle.data.btf_nodes
-        segments = [s for i, s in enumerate(all_segments) if nodes[i]]
+        #all_segments = self.bundle.segments
+        ##btf_zones = self.bundle.data.btf_zones
+        ##segments = [s for i, s in enumerate(all_segments) if btf_zones[i]]
+        #nodes = self.bundle.data.btf_nodes
+        #segments = [s for i, s in enumerate(all_segments) if nodes[i]]
         
         nsegments = len(segments)
         npst = segments[0].data.npst
@@ -87,7 +104,8 @@ class Btf(object):
                 P1 = segments[i].statepoints[i1].POW
                 P2 = segments[i].statepoints[i2].POW
                 POW[i, :, :] = self.bundle.interp2(P1, P2, voi1, voi2, voi)
-                
+        
+        nodes = self.bundle.data.btf_nodes
         POW3 = self.bundle.pow3(POW, nodes, zdim)
         return POW3
 
@@ -96,11 +114,19 @@ class Btf(object):
         print "Calculating BTF..."
 
         #tic = time.time()
-        x = self.intersect_points()
-        
-        npst = self.bundle.segments[0].data.npst
-        self.DOX = np.zeros((len(x), npst, npst))
 
+        # Find the segments included in BTF calculations
+        all_segments = self.bundle.segments
+        nodes = self.bundle.data.btf_nodes
+        segments = [s for i, s in enumerate(all_segments) if nodes[i]]
+
+        x = self.intersect_points(segments)
+        #x = self.union_points()
+        
+        #npst = self.bundle.segments[0].data.npst
+        npst = segments[0].data.npst
+        self.DOX = np.zeros((len(x), npst, npst))
+        
         fuetype = self.bundle.data.fuetype
         zdim = 25  # default number of nodes
         if fuetype == "OPT2":
@@ -126,11 +152,23 @@ class Btf(object):
             print "Error: BTF is not implemented for this fuel type"
             return
 
+        #tic = time.time()
+        POW3_list = []
         for i, burnup in enumerate(x):
-            POW3 = self.pow3d(voi, burnup, zdim)
-            #print POW3.shape
-            self.DOX[i, :, :] = rfact_fun(POW3)
-            # self.DOX[i, :, :] = self.rfact(POW3)
+            POW3 = self.pow3d(segments, voi, burnup, zdim)
+            POW3_list.append(POW3)
+            #self.DOX[i, :, :] = rfact_fun(POW3)
+            ## self.DOX[i, :, :] = self.rfact(POW3)
+        
+        n = min(len(POW3_list), 16)  # Number of threads
+        p = Pool(n)  # Make the Pool of workers
+        DOX_list = p.map(rfact_fun, POW3_list)
+        p.close()
+        p.join()
+        
+        for i, DOX in enumerate(DOX_list):
+            self.DOX[i, :, :] = DOX
+
         self.burnpoints = np.array(x).astype(float)
         
         print "Done."

@@ -1054,7 +1054,7 @@ class Segment(object):
 
     def quickcalc(self, voi=None, dep_max=None, dep_thres=None, grid=False,
                   model="c3", box_offset=0.0, c4ver=None, neulib=None, 
-                  gamlib=None):
+                  gamlib=None, keepfiles=False):
 
         #tic = time.time()
         
@@ -1076,11 +1076,16 @@ class Segment(object):
 
         os.remove(file_base_name + ".inp")
         os.remove(file_base_name + ".out")
-        os.remove(file_base_name + ".cax")
         try:
             os.remove(file_base_name + ".log")
         except:
             pass
+        if not keepfiles:
+            os.remove(file_base_name + ".cax")
+        else:
+            caxfile_old = file_base_name + ".cax"
+            caxfile_new = "gb-" + os.path.split(self.data.caxfile)[-1]
+            os.rename(caxfile_old, caxfile_new)
 
         print "Done."
         #print "Done in "+str(time.time()-tic)+" seconds."

@@ -217,6 +217,60 @@ class dataThread(QtCore.QThread):
 #            self.parent.enrpin_add_callback()
 #"""
 
+class PinTableWidget(QtGui.QTableWidget):
+    def __init__(self, parent=None):
+        QtGui.QTableWidget.__init__(self)
+        self.parent = parent
+        self.setup()
+
+    def setup(self):
+        self.setColumnCount(4)
+        self.setRowCount(100)
+        self.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
+        self.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
+        self.setSizePolicy(QtGui.QSizePolicy.Minimum,
+                                 QtGui.QSizePolicy.Minimum)
+        self.setMinimumWidth(180)
+        self.setHorizontalHeaderLabels(('Index', 'EXP', 'FINT', 'BTF'))
+        self.setSortingEnabled(True)
+        self.setColumnHidden(0, True)
+        verticalheader = self.verticalHeader()
+        verticalheader.setResizeMode(QtGui.QHeaderView.Fixed)
+        verticalheader.setDefaultSectionSize(25)
+
+        self.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+
+        self.connect(self.horizontalHeader(),
+                     QtCore.SIGNAL('sectionClicked(int)'),
+                     self.parent.tableHeaderSort)
+        self.connect(self.verticalHeader(),
+                     QtCore.SIGNAL('sectionClicked(int)'), 
+                     self.parent.pinSelect)
+        self.cellActivated.connect(self.parent.pinSelect)
+        self.cellClicked.connect(self.parent.pinSelect)
+        
+    def sort_items(self):
+        self.sortItems(0, QtCore.Qt.AscendingOrder)
+
+    def setpincoords(self):
+        """Update table with pin coordinates"""
+        
+        case_num = int(self.parent.case_cbox.currentIndex())
+        npin = len(self.parent.pinobjects[case_num])
+        self.setRowCount(npin)
+        
+        for i, pinobj in enumerate(self.parent.pinobjects[case_num]):
+            coord_item = QtGui.QTableWidgetItem(pinobj.coord)
+            self.setVerticalHeaderItem(i, coord_item)
+            i_item = QtGui.QTableWidgetItem()
+            i_item.setData(QtCore.Qt.EditRole, QtCore.QVariant(int(i)))
+            self.setItem(i, 0, i_item)
+
+    def selectAll(self):  # redefine built-in selectAll method
+        self.sort_items() 
+        self.setpincoords()
+
+
 class InfoLabel(QtGui.QLabel):
     def __init__(self, parent=None, width=100):
         QtGui.QDialog.__init__(self)
@@ -311,6 +365,7 @@ class MainWin(QtGui.QMainWindow):
                                                              path_default,
                                                              file_choices))
         if filename:
+            self.setCursor(QtCore.Qt.WaitCursor)
             # Save default path to config file
             path = os.path.split(filename)[0]
             self.settings.beginGroup("PATH")
@@ -318,31 +373,30 @@ class MainWin(QtGui.QMainWindow):
             self.settings.endGroup()
 
             filext = os.path.splitext(filename)[1]
-            if filext == ".gbi":  # pickle file
-                #self.ibundle = -1
-                self.load_pickle(filename)
-                self.fig_update()
-                self.chanbow_sbox_update()
-                self.widgets_setenabled()
-            else:
-                msgBox = QtGui.QMessageBox()
-                status = msgBox.information(self, "Importing data",
-                                            "Continue?",
-                                            QtGui.QMessageBox.Yes |
-                                            QtGui.QMessageBox.Cancel)
-                self.statusBar().showMessage('Importing data from %s' 
-                                             % filename, 2000)
-                self._filename = filename
-                if status == QtGui.QMessageBox.Yes:
-                    self.setCursor(QtCore.Qt.WaitCursor)
-                    self.ibundle = 0
-                    #if filext == ".inp":
-                    #    self.read_inp(filename)
-                    #    #self.quick_calc(state_num=0)  # reference calculation
-                    if filext == ".cax":
-                        self.read_cax(filename)
-                        self.fig_update()
-                    self.setCursor(QtCore.Qt.ArrowCursor)
+            #if filext == ".gbi":  # pickle file
+            self.load_pickle(filename)
+            #self.fig_update()
+            self.chanbow_sbox_update()
+            self.widgets_setenabled()
+            #else:
+            #    msgBox = QtGui.QMessageBox()
+            #    status = msgBox.information(self, "Importing data",
+            #                                "Continue?",
+            #                                QtGui.QMessageBox.Yes |
+            #                                QtGui.QMessageBox.Cancel)
+            #    self.statusBar().showMessage('Importing data from %s' 
+            #                                 % filename, 2000)
+            #    self._filename = filename
+            #    if status == QtGui.QMessageBox.Yes:
+            #        self.setCursor(QtCore.Qt.WaitCursor)
+            #        self.ibundle = 0
+            #        #if filext == ".inp":
+            #        #    self.read_inp(filename)
+            #        #    #self.quick_calc(state_num=0)  # reference calculation
+            #        if filext == ".cax":
+            #            self.read_cax(filename)
+            #            self.fig_update()
+            self.setCursor(QtCore.Qt.ArrowCursor)
 
 #    def newProject(self):
 #        """Open project setup file"""
@@ -373,6 +427,7 @@ class MainWin(QtGui.QMainWindow):
         # self.bundle.loadpic(filename)
         print "Loading data from file " + filename
         self.clear_data()
+
         with open(filename, 'rb') as fp:
             self.params = pickle.load(fp)
             self.bunlist = pickle.load(fp)
@@ -416,6 +471,7 @@ class MainWin(QtGui.QMainWindow):
         # Update case number list box
         for i in range(1, ncases + 1):
             self.case_cbox.addItem(str(i))
+        
         self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'),
                      self.fig_update)
         self.fig_update()
@@ -494,7 +550,7 @@ class MainWin(QtGui.QMainWindow):
             self.init_cboxes()
 
             self.setCursor(QtCore.Qt.ArrowCursor)
-            self.fig_update()
+            #self.fig_update()
             self.widgets_setenabled(True)
         else:
             return
@@ -561,8 +617,8 @@ class MainWin(QtGui.QMainWindow):
         nsegments = len(self.bunlist[-1].segments)
         seglist = map(str, range(1, nsegments + 1))
         self.case_cbox.addItems(QtCore.QStringList(seglist))
-        self.connect(self.case_cbox, QtCore.SIGNAL('currentIndexChanged(int)'),
-                     self.fig_update)
+        #self.connect(self.case_cbox, QtCore.SIGNAL('currentIndexChanged(int)'),
+        #             self.fig_update)
         # init voi combo box
         #voilist = map(str, self.bunlist[-1].segments[0].data.voilist)
         #self.voi_cbox.addItems(QtCore.QStringList(voilist))
@@ -854,8 +910,10 @@ class MainWin(QtGui.QMainWindow):
         """open bundle edit dialog"""
         self.bunedit_dlg = SegmentDialog(self)
         self.bunedit_dlg.exec_()
-        if self.bunedit_dlg.ok:
+        if self.bunedit_dlg.update_btf:
             self.bunlist[self.ibundle].new_btf()
+            self.fig_update()
+        elif self.bunedit_dlg.update_figure:
             self.fig_update()
 
     def open_bundle_dlg(self):
@@ -929,8 +987,8 @@ class MainWin(QtGui.QMainWindow):
         #        self.point_sbox.setValue(ipoint)
 
     def set_pinvalues(self):
-        """Update values"""
-        
+        """Update pin values"""
+
         param_str = str(self.param_cbox.currentText())
         iseg = int(self.case_cbox.currentIndex())
 
@@ -971,8 +1029,10 @@ class MainWin(QtGui.QMainWindow):
         BA = segment.data.BA
         
         # Sorting table column 0 in ascending order
-        self.table.sortItems(0, QtCore.Qt.AscendingOrder)
-        self.setpincoords()
+        self.table.sort_items()
+        #self.table.sortItems(0, QtCore.Qt.AscendingOrder)
+        self.table.clearContents()
+        self.table.setpincoords()
         
         k = 0
         for i in xrange(npst):
@@ -1100,21 +1160,6 @@ class MainWin(QtGui.QMainWindow):
         self.plot_update()
         self.report_update()
 
-    def setpincoords(self):
-        """Update table with pin coordinates"""
-
-        self.table.clearContents()
-        case_num = int(self.case_cbox.currentIndex())
-        npin = len(self.pinobjects[case_num])
-        self.table.setRowCount(npin)
-        
-        for i, pinobj in enumerate(self.pinobjects[case_num]):
-            coord_item = QtGui.QTableWidgetItem(pinobj.coord)
-            self.table.setVerticalHeaderItem(i, coord_item)
-            i_item = QtGui.QTableWidgetItem()
-            i_item.setData(QtCore.Qt.EditRole, QtCore.QVariant(int(i)))
-            self.table.setItem(i, 0, i_item)
-
     def save_plot(self):
         file_choices = "PNG (*.png)|*.png"
         
@@ -1146,8 +1191,35 @@ class MainWin(QtGui.QMainWindow):
         self.table.selectRow(index)
 
     def pinSelect(self, i):
-        index = int(self.table.item(i, 0).text())
-        self.mark_pin(index)
+        if hasattr(self.table.item(i, 0), "text"):
+            index = int(self.table.item(i, 0).text())
+            self.mark_pin(index)
+
+    def keyPressEvent(self, event):
+        key = event.key()
+        if key == QtCore.Qt.Key_8:  # Up arrow key was pressed
+            iseg = int(self.case_cbox.currentIndex())
+            imax = self.case_cbox.count() - 1
+            if iseg < imax:
+                iseg += 1
+                self.case_cbox.setCurrentIndex(iseg)  # increase segment
+        elif key == QtCore.Qt.Key_2:  # Down arrow key was pressed
+            iseg = int(self.case_cbox.currentIndex())
+            if iseg > 0:
+                iseg -= 1
+                self.case_cbox.setCurrentIndex(iseg)  # decrease segment
+        elif key == QtCore.Qt.Key_4:  # Left arrow key was pressed
+            ipoint = self.point_sbox.value()
+            imin = self.point_sbox.minimum()
+            if ipoint > imin:
+                ipoint -= 1
+                self.point_sbox.setValue(ipoint)  # increase state point
+        elif key == QtCore.Qt.Key_6:  # Right arrow key was pressed
+            ipoint = self.point_sbox.value()
+            imax = self.point_sbox.maximum()
+            if ipoint < imax:
+                ipoint += 1
+                self.point_sbox.setValue(ipoint)  # decrease state point
 
     def on_click(self, event):
         # The event received here is of the type
@@ -1158,33 +1230,59 @@ class MainWin(QtGui.QMainWindow):
         #
 
         # print event.x,event.y
-        # if qApp.keyboardModifiers() & Qt.ControlModifier: # ctrl+click
+        #if qApp.keyboardModifiers() & Qt.ControlModifier: # ctrl+click
         #    remove = False
-        # else:
+        #else:
         #    remove = True
+        #    pass
+        #qtrace()
+        if not hasattr(self, "pinobjects"):  # is data initialized?
+            return
+
         case_num = int(self.case_cbox.currentIndex())
-        i = np.nan
+
         if event.button is 1:  # left mouse click
             # print event.xdata, event.ydata
-            # i = np.nan
-            try:  # check if any pin is selected and return the index
-                i = next(i for i, cobj in enumerate(self.pinobjects[case_num])
-                         if cobj.is_clicked(event.xdata, event.ydata))
-            except:
-                pass
-            if i >= 0:  # A pin is selected
+            # check if any pin is selected and return the index
+            i = next((i for i, cobj in enumerate(self.pinobjects[case_num])
+                      if cobj.is_clicked(event.xdata, event.ydata)), None)
+
+            if i is not None and i >= 0:  # A pin is selected
                 self.tableSelectRow(i)
                 self.mark_pin(i)
                 # self.pinselection_index = i
                 # j = self.halfsym_pin(i)
 
         elif event.button is 3:  # right mouse click
-            try:  # check if enr level pin is clicked
-                i = next(i for i, cobj in enumerate(self.enrpinlist[case_num])
-                         if cobj.is_clicked(event.xdata, event.ydata))
-            except:
-                pass
-            if i >= 0:  # An enr level pin is selected
+            # check if any fuel pin is clicked
+            #i = next((i for i, cobj in enumerate(self.pinobjects[case_num])
+            #          if cobj.is_clicked(event.xdata, event.ydata)), None)
+            #if i is not None and i >= 0:  # A pin is right clicked
+            #    if (not hasattr(self, "pinselection_index") or
+            #        self.pinselection_index != i):
+            #        self.tableSelectRow(i)
+            #        self.mark_pin(i)
+
+            #    self.pin_popMenu = QtGui.QMenu(self)
+            #    enr_menu = self.pin_popMenu.addMenu("Enr list...")
+            #    check_icon = self.appdir + "icons/ok-apply-icon_32x32.png"
+            #    icon = QtGui.QIcon(check_icon)
+            #    npins = len(self.enrpinlist[case_num])
+            #    for j in range(npins):
+            #        ipin = j + 1
+            #        label = "#" + str(ipin)
+            #        action = QtGui.QAction(icon, label, self)
+            #        action.triggered.connect(self.enr_update)
+            #        if self.pinobjects[case_num][i].LFU == ipin:
+            #            action.setIconVisibleInMenu(True)
+            #        enr_menu.addAction(action)
+            #        #enr_menu.addAction(label, self.pin_update)
+            #    self.pin_popMenu.exec_(QtGui.QCursor.pos())
+                
+            #else: # check if enr level pin is clicked
+            i = next((i for i, cobj in enumerate(self.enrpinlist[case_num])
+                      if cobj.is_clicked(event.xdata, event.ydata)), None)
+            if i is not None and i >= 0:  # An enr level pin is selected
                 self.pinselection_index = i
                 # self.mark_enrpin(i)
                 # print self.pinselection_index
@@ -1252,37 +1350,35 @@ class MainWin(QtGui.QMainWindow):
         self.canvas.draw()
 
     def enr_add(self):
-        
-        if self.allsegs_update.isChecked():
-        #if self.enr_case_cb.isChecked():  # update all cases
-            ncases = len(self.pinobjects)
-            for case_num in range(ncases):
-                self.enr_modify("add", case_num)
-        else:
-            case_num = int(self.case_cbox.currentIndex())
-            self.enr_modify("add", case_num)
-
-        self.canvas.draw()
-        self.enr_update()  # Update info fields
+        self.enr_update("add")
         
     def enr_sub(self):
+        self.enr_update("sub")
 
-        if self.allsegs_update.isChecked():
-        #if self.enr_case_cb.isChecked():
-            ncases = len(self.pinobjects)
-            for case_num in range(ncases):
-                self.enr_modify("sub", case_num)
-        else:
-            case_num = int(self.case_cbox.currentIndex())
-            self.enr_modify("sub", case_num)
+    def enr_update(self, mod="add"):
+        """Update pin enrichment"""
+
+        #print "update pin"
+        #sender = QtCore.QObject.sender(self)
+        #label = str(sender.text())
+        #LFU = int(label.replace("#", ""))
         
+        case_num = int(self.case_cbox.currentIndex())
+        bundle = self.bunlist[self.ibundle]
+
+        if (hasattr(bundle.data, "segment_connect_list") and
+            bundle.data.segment_connect_list[case_num]):
+            ncases = len(self.pinobjects)
+            for iseg in range(ncases):
+                if bundle.data.segment_connect_list[iseg]:
+                    self.enr_modify(mod, iseg)
+        else:
+            self.enr_modify(mod, case_num)
+
         self.canvas.draw()
-        self.enr_update()  # Update info fields
+        self.enr_fields_update()  # Update info fields
 
-        # self.enrpin_remove()  # only for testing. should be removed
-        # enrArray = [x.ENR for x in self.enrpinlist][::-1] # Reverse order
-
-    def enr_update(self):
+    def enr_fields_update(self):
         """Update enr value in info fields"""
 
         iseg = int(self.case_cbox.currentIndex())
@@ -1347,8 +1443,8 @@ class MainWin(QtGui.QMainWindow):
                 ivec.append(isym)
         for i in ivec:
             # print "Increase enrichment for pin " + str(i)
-            pinEnr = self.pinobjects[case_num][i].ENR
-            pinBA = self.pinobjects[case_num][i].BA
+            #pinEnr = self.pinobjects[case_num][i].ENR
+            #pinBA = self.pinobjects[case_num][i].BA
             pinLFU = self.pinobjects[case_num][i].LFU
             
             #for j, x in enumerate(self.enrpinlist[case_num]):
@@ -1696,7 +1792,7 @@ class MainWin(QtGui.QMainWindow):
             pts = bundle.segments[iseg].statepoints
             burnlist = [p.burnup for p in pts]
 
-            # Only use state points (stp) where voi = vhi
+            # Only use state points where voi = vhi
             idx = next((i for i, p in 
                        enumerate(self.bunlist[0].segments[iseg].statepoints)
                        if p.voi != p.vhi), None)
@@ -1754,7 +1850,7 @@ class MainWin(QtGui.QMainWindow):
         self.sim_info_field.setText(text)
         #self.sim_text.setText(text)
 
-        self.enr_update()
+        self.enr_fields_update()
 
     def on_draw(self):
         """Setup the figure axis"""
@@ -1827,6 +1923,9 @@ class MainWin(QtGui.QMainWindow):
         if hasattr(self, "bundle"):
             del self.bundle
         
+        if hasattr(self, "pinobjects"):
+            del self.pinobjects
+
         # Clear and restore figure
         self.axes.clear()  # Clears the figure axes
         self.fig.set_facecolor('0.75')  # set facecolor to gray
@@ -1991,6 +2090,8 @@ class MainWin(QtGui.QMainWindow):
         case_hbox = QtGui.QHBoxLayout()
         case_hbox.addWidget(case_label)
         case_hbox.addWidget(self.case_cbox)
+        self.connect(self.case_cbox, QtCore.SIGNAL('currentIndexChanged(int)'),
+                     self.fig_update)
 
         point_label = QtGui.QLabel('Point number:')
         self.point_sbox = QtGui.QSpinBox()
@@ -2195,39 +2296,9 @@ class MainWin(QtGui.QMainWindow):
         #info_flo.addRow(QtCore.QString("Bundle %1 w/o")
         #                .arg(QtCore.QChar(0x0394)), self.bundle_denr_text)
         
-        # Define table widget
-        self.table = QtGui.QTableWidget()
-        self.table.setRowCount(100)
-        self.table.setColumnCount(4)
-        # self.table.verticalHeader().hide()
-        self.table.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
-        self.table.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
-        self.table.setSizePolicy(QtGui.QSizePolicy.Minimum,
-                                 QtGui.QSizePolicy.Minimum)
-        self.table.setMinimumWidth(180)
-        self.table.setHorizontalHeaderLabels(('Index', 'EXP', 'FINT', 'BTF'))
-        self.table.setSortingEnabled(True)
-        self.table.setColumnHidden(0, True)
-        verticalheader = self.table.verticalHeader()
-        verticalheader.setResizeMode(QtGui.QHeaderView.Fixed)
-        verticalheader.setDefaultSectionSize(25)
+        # Construct table widget instance
+        self.table = PinTableWidget(self)
 
-        # self.connect(self.table.horizontalHeader(),
-        # SIGNAL('QHeaderView.sortIndicatorChanged(int)'), self.openFile)
-        self.connect(self.table.horizontalHeader(),
-                     QtCore.SIGNAL('sectionClicked(int)'),
-                     self.tableHeaderSort)
-        self.connect(self.table.verticalHeader(),
-                     QtCore.SIGNAL('sectionClicked(int)'), self.pinSelect)
-        # self.connect(self.table,SIGNAL('cellClicked(int,int)'),
-        # self.pinSelect)
-        # self.connect(self.table,SIGNAL('currentChanged(int)'),
-        # self.pinSelect)
-        
-        self.table.cellActivated.connect(self.pinSelect)
-        self.table.cellClicked.connect(self.pinSelect)
-        # self.table.selectionModel().selectionChanged.connect(self.pinSelect)
-        
         tvbox = QtGui.QVBoxLayout()
         tvbox.addWidget(self.table)
         tableGbox = QtGui.QGroupBox()
@@ -2385,15 +2456,17 @@ class MainWin(QtGui.QMainWindow):
 
         enr_plus = self.create_action("Increase enr", slot=self.enr_add,
                                       tip="Increase enrichment",
-                                      shortcut="F2", icon="add-icon_32x32")
+                                      shortcut=QtCore.Qt.Key_Plus, 
+                                      icon="add-icon_32x32")
 
         enr_minus = self.create_action("Decrease enr", slot=self.enr_sub,
                                        tip="Decrease enrichment",
-                                       shortcut="F1", icon="remove-icon_32x32")
+                                       shortcut=QtCore.Qt.Key_Minus, 
+                                       icon="remove-icon_32x32")
 
-        self.allsegs_update = self.create_action("Update all segments",
-                                                 tip="Update all segments",
-                                                 checkable=True) 
+        #self.allsegs_update = self.create_action("Update all segments",
+        #                                         tip="Update all segments",
+        #                                         checkable=True)
         
         quickcalc = self.create_action("Quick calc...",
                                        tip="Quick calc model...",
@@ -2410,8 +2483,8 @@ class MainWin(QtGui.QMainWindow):
                                      icon="original-icon_32x32")
         
         self.add_actions(self.edit_menu,
-                         (back, forward, None, enr_minus, enr_plus, 
-                          self.allsegs_update, None,
+                         (back, forward, None, enr_plus, enr_minus, 
+                          None,
                           segment, enrichment, quickcalc, None, replace, 
                           reset, preferences))
         
@@ -2555,6 +2628,17 @@ class MainWin(QtGui.QMainWindow):
         forwardAction.setStatusTip('Forward to next design')
         forwardAction.triggered.connect(self.forward_state)
         
+        add_icon =  self.appdir + "icons/add-icon_32x32.png"
+        addAction = QtGui.QAction(QtGui.QIcon(add_icon),
+                                  'Increase enrichment', self)
+        addAction.setStatusTip('Increase enrichment') 
+        addAction.triggered.connect(self.enr_add)
+        sub_icon =  self.appdir + "icons/remove-icon_32x32.png"
+        subAction = QtGui.QAction(QtGui.QIcon(sub_icon),
+                                  'Decrease enrichment', self)
+        subAction.setStatusTip('Decrease enrichment')
+        subAction.triggered.connect(self.enr_sub)
+
         toolbar = self.addToolBar('Toolbar')
         toolbar.addAction(newAction)
         toolbar.addAction(fileAction)
@@ -2566,6 +2650,8 @@ class MainWin(QtGui.QMainWindow):
         toolbar.addAction(findAction)
         toolbar.addAction(backAction)
         toolbar.addAction(forwardAction)
+        toolbar.addAction(subAction)
+        toolbar.addAction(addAction)
         toolbar.addAction(exitAction)
 
         toolbar.setMovable(False)
@@ -2574,7 +2660,7 @@ class MainWin(QtGui.QMainWindow):
 
         self.toolbar_actions = [saveAction, calcAction, self.colorAction,
                                 plotAction, findAction, backAction, 
-                                forwardAction]
+                                forwardAction, subAction, addAction]
 
     def reset(self):
         self.init_pinobjects()
@@ -2678,7 +2764,7 @@ class MainWin(QtGui.QMainWindow):
     def widgets_setenabled(self, status=True):
 
         widgets = [self.param_cbox, self.case_cbox, self.point_sbox,
-                   self.chanbow_sbox]
+                   self.chanbow_sbox, self.table]
         for w in widgets:
             w.setEnabled(status)
     

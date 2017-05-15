@@ -486,7 +486,8 @@ class SegmentDialog(QtGui.QDialog):
         self.parent = parent
         self.setup()
         self.set_table_data()
-        self.ok = False
+        self.update_btf = False
+        self.update_figure = False
 
     def setup(self):
         self.setWindowTitle("Edit segments")
@@ -507,7 +508,8 @@ class SegmentDialog(QtGui.QDialog):
 
         model.setHorizontalHeaderItem(0, QtGui.QStandardItem("Height (enr)"))
         model.setHorizontalHeaderItem(1, QtGui.QStandardItem("Height (btf)"))
-        model.setHorizontalHeaderItem(2, QtGui.QStandardItem("Segment"))
+        model.setHorizontalHeaderItem(2, QtGui.
+                                      QStandardItem("Connect segments"))
 
         horizontalheader = self.table_view.horizontalHeader()
         horizontalheader.setResizeMode(2, QtGui.QHeaderView.Stretch)
@@ -545,6 +547,10 @@ class SegmentDialog(QtGui.QDialog):
         bundle = self.parent.bunlist[ibundle]
         heights = bundle.data.nodes[::-1]
         btf_heights = bundle.data.btf_nodes[::-1]
+        if hasattr(bundle.data, "segment_connect_list"):
+            connect_list = bundle.data.segment_connect_list[::-1]
+        else:
+            connect_list = [False for i in range(len(simlist))]
 
         nrows = len(simlist)
         for i in range(nrows):
@@ -558,6 +564,10 @@ class SegmentDialog(QtGui.QDialog):
 
             sim = simlist[i].replace("SIM", "").replace("'", "").strip()
             sim_item = QtGui.QStandardItem(sim)
+            sim_item.setCheckable(True)
+            sim_item.setSelectable(True)
+            if connect_list[i]:
+                sim_item.setCheckState(QtCore.Qt.Checked)
             sim_item.setEditable(False)
             #brush = QtGui.QBrush()
             #brush.setColor(QtGui.QColor().blue())
@@ -572,6 +582,7 @@ class SegmentDialog(QtGui.QDialog):
         """retreive data from table cells"""
         heights = []
         btf_heights = []
+        connects = []
 
         nrows = self.table_view.model().rowCount()
         for i in range(nrows):
@@ -579,12 +590,17 @@ class SegmentDialog(QtGui.QDialog):
             heights.append(float(height_item.text()))
             btf_height_item = self.table_view.model().item(i, 1)
             btf_heights.append(float(btf_height_item.text()))
+            seg_item = self.table_view.model().item(i, 2)
+            seg_state = True if seg_item.checkState() else False
+            connects.append(seg_state)
         heights.reverse()
         btf_heights.reverse()
+        connects.reverse()
 
         self.data = Data()
         self.data.heights = heights
         self.data.btf_heights = btf_heights
+        self.data.segment_connect_list = connects
         
     def ok_action(self):
         
@@ -592,8 +608,14 @@ class SegmentDialog(QtGui.QDialog):
 
         ibundle = self.parent.ibundle
         bundle = self.parent.bunlist[ibundle]
-        bundle.data.nodes = self.data.heights
-        bundle.data.btf_nodes = self.data.btf_heights
-        self.ok = True
+
+        if not np.array_equal(bundle.data.btf_nodes, self.data.btf_heights):
+            bundle.data.btf_nodes = self.data.btf_heights
+            self.update_btf = True
+        if not np.array_equal(bundle.data.nodes, self.data.heights):
+            bundle.data.nodes = self.data.heights
+            self.update_figure = True
+        bundle.data.segment_connect_list = self.data.segment_connect_list
+            
         self.close()
         
