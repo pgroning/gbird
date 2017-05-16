@@ -1102,14 +1102,17 @@ class MainWin(QtGui.QMainWindow):
         #    v = np.array([pin.EXP for pin in self.pinobjects[iseg]])
         #    uni_exp = np.unique(v)
         #    cmap = self.get_colormap(uni_exp.size, "bmr")
-         
-        if param_str == "FINT":
+
+        if param_str == "ENR":
+            v = np.array([pin.ENR for pin in self.pinobjects[iseg]])
+        if param_str == "EXP":
+            v = np.array([pin.EXP for pin in self.pinobjects[iseg]])
+        elif param_str == "FINT":
             v = np.array([pin.FINT for pin in self.pinobjects[iseg]])
         elif param_str == "BTF":
             v = np.array([pin.BTF for pin in self.pinobjects[iseg]])
    
         for i in xrange(npins):
-            
             #if self.pinobjects[iseg][i].BA < 0.00001:
             #    j = next(j for j, epin in enumerate(self.enrpinlist[iseg])
             #             if epin.ENR == self.pinobjects[iseg][i].ENR)
@@ -1123,9 +1126,17 @@ class MainWin(QtGui.QMainWindow):
             self.pinobjects[iseg][i].circle.set_facecolor(fc)
 
             if param_str == "ENR":
+                k = 2
+                x = self.pinobjects[iseg][i].ENR
+                xave = v.mean()
+                y = 1 / (1 + np.exp(-k * (x - xave)))  # sigmoid function
+                #y = (x - v.min()) / (v.max() - v.min())
+                ic = int(round(y * (npins - 1)))
+                self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic])
+
                 text = self.enrpinlist[iseg][j].text.get_text()
-                self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[i])
-                self.pinobjects[iseg][i].rectangle.set_facecolor((1, 1, 1))
+                #self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[i])
+                #self.pinobjects[iseg][i].rectangle.set_facecolor((1, 1, 1))
                 
             elif param_str == "BTF":
                 pin_btf = self.pinobjects[iseg][i].BTF
