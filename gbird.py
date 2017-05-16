@@ -1129,6 +1129,7 @@ class MainWin(QtGui.QMainWindow):
                 k = 2
                 x = self.pinobjects[iseg][i].ENR
                 xave = v.mean()
+                
                 y = 1 / (1 + np.exp(-k * (x - xave)))  # sigmoid function
                 #y = (x - v.min()) / (v.max() - v.min())
                 ic = int(round(y * (npins - 1)))
@@ -1139,39 +1140,80 @@ class MainWin(QtGui.QMainWindow):
                 #self.pinobjects[iseg][i].rectangle.set_facecolor((1, 1, 1))
                 
             elif param_str == "BTF":
-                pin_btf = self.pinobjects[iseg][i].BTF
-                if np.isnan(pin_btf):
-                    text = "nan"
-                    self.pinobjects[iseg][i].rectangle.set_facecolor((1, 1, 1))
-                else:
-                    btf_ratio = pin_btf / btf * 1000
-                    if int(btf_ratio) == 1000:
-                        text = "1e3"
+                k = 3
+                
+                x = self.pinobjects[iseg][i].BTF
+                if not np.isnan(x):
+                    xave = v.mean()
+                    xstd = v.std()
+                    if xstd == 0:
+                        y = 0
                     else:
-                        text = ('%.0f' % (btf_ratio))
-                    ic = next(i for i, v in enumerate(uni_btf) if v == pin_btf)
+                        y = 1 / (1 + np.exp(-k * (x - xave) / xstd))
+
+                    ic = int(round(y * (npins - 1)))
                     self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic])
+                    btf_ratio = x / btf * 1000
+                    text = ('%.0f' % (btf_ratio))
+                else:
+                    self.pinobjects[iseg][i].rectangle.set_facecolor((1, 1, 1))
+                    text = "nan"
+
+                #pin_btf = self.pinobjects[iseg][i].BTF
+                #if np.isnan(pin_btf):
+                #    text = "nan"
+                #    self.pinobjects[iseg][i].rectangle.set_facecolor((1, 1, 1))
+                #else:
+                #    btf_ratio = pin_btf / btf * 1000
+                #    if int(btf_ratio) == 1000:
+                #        text = "1e3"
+                #    else:
+                #        text = ('%.0f' % (btf_ratio))
+                #    ic = next(i for i, v in enumerate(uni_btf) if v == pin_btf)
+                #    self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic])
             
             elif param_str == "EXP":
-                if self.pinobjects[iseg][i].EXP < 10:
-                    text = ('%.1f' % (self.pinobjects[iseg][i].EXP))
+                k = 3
+
+                x = self.pinobjects[iseg][i].EXP
+                xave = v.mean()
+                xstd = v.std()
+                if xstd == 0:
+                    y = 0
                 else:
-                    text = ('%.0f' % (self.pinobjects[iseg][i].EXP))
-                pin_exp = self.pinobjects[iseg][i].EXP
-                ic = next(i for i, v in enumerate(uni_exp) if v == pin_exp)
+                    y = 1 / (1 + np.exp(-k * (x - xave) / xstd))
+                
+                ic = int(round(y * (npins - 1)))
                 self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic])
+                if x < 10:
+                    text = '{0:.1f}'.format(x)
+                else:
+                    text = '{0:.0f}'.format(x)
+
+                #if self.pinobjects[iseg][i].EXP < 10:
+                #    text = ('%.1f' % (self.pinobjects[iseg][i].EXP))
+                #else:
+                #    text = ('%.0f' % (self.pinobjects[iseg][i].EXP))
+                #pin_exp = self.pinobjects[iseg][i].EXP
+                #ic = next(i for i, v in enumerate(uni_exp) if v == pin_exp)
+                #self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic])
 
             elif param_str == "FINT":
-                k = 20
+                k = 3
+
                 x = self.pinobjects[iseg][i].FINT
                 xave = v.mean()
-                y = 1 / (1 + np.exp(-k * (x - xave)))  # sigmoid function
+                xstd = v.std()
+                if xstd == 0:
+                    y = 0
+                else:
+                    y = 1 / (1 + np.exp(-k * (x - xave) / xstd))
                 #y = (pinval - min(values)) / (max(values) - min(values))
-
+                
                 ic = int(round(y * (npins - 1)))
                 self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic])
 
-                text = ('%.0f' % (self.pinobjects[iseg][i].FINT * 100))
+                text = ('%.0f' % (x * 100))
                 #pin_fint = self.pinobjects[iseg][i].FINT
                 #ic = next(i for i, v in enumerate(uni_fint) if v == pin_fint)
                 #self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic])
