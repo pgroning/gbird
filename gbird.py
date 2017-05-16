@@ -1087,22 +1087,27 @@ class MainWin(QtGui.QMainWindow):
 #                                        tfu, tmo))
         
         npins = len(self.pinobjects[iseg])
-        cmap = self.get_colormap(npins)
+        cmap = self.get_colormap(npins, "bmr")
 
         # Sort params and get color map
+        #if param_str == "FINT":
+        #    v = np.array([pin.FINT for pin in self.pinobjects[iseg]])
+        #    uni_fint = np.unique(v)
+        #    cmap = self.get_colormap(uni_fint.size, "bmr")
+        #elif param_str == "BTF":
+        #    v = np.array([pin.BTF for pin in self.pinobjects[iseg]])
+        #    uni_btf = np.unique(v)
+        #    cmap = self.get_colormap(uni_btf.size, "bmr")
+        #elif param_str == "EXP":
+        #    v = np.array([pin.EXP for pin in self.pinobjects[iseg]])
+        #    uni_exp = np.unique(v)
+        #    cmap = self.get_colormap(uni_exp.size, "bmr")
+         
         if param_str == "FINT":
             v = np.array([pin.FINT for pin in self.pinobjects[iseg]])
-            uni_fint = np.unique(v)
-            cmap = self.get_colormap(uni_fint.size, "bmr")
         elif param_str == "BTF":
             v = np.array([pin.BTF for pin in self.pinobjects[iseg]])
-            uni_btf = np.unique(v)
-            cmap = self.get_colormap(uni_btf.size, "bmr")
-        elif param_str == "EXP":
-            v = np.array([pin.EXP for pin in self.pinobjects[iseg]])
-            uni_exp = np.unique(v)
-            cmap = self.get_colormap(uni_exp.size, "bmr")
-            
+   
         for i in xrange(npins):
             
             #if self.pinobjects[iseg][i].BA < 0.00001:
@@ -1146,10 +1151,19 @@ class MainWin(QtGui.QMainWindow):
                 self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic])
 
             elif param_str == "FINT":
-                text = ('%.0f' % (self.pinobjects[iseg][i].FINT * 100))
-                pin_fint = self.pinobjects[iseg][i].FINT
-                ic = next(i for i, v in enumerate(uni_fint) if v == pin_fint)
+                k = 20
+                x = self.pinobjects[iseg][i].FINT
+                xave = v.mean()
+                y = 1 / (1 + np.exp(-k * (x - xave)))  # sigmoid function
+                #y = (pinval - min(values)) / (max(values) - min(values))
+
+                ic = int(round(y * (npins - 1)))
                 self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic])
+
+                text = ('%.0f' % (self.pinobjects[iseg][i].FINT * 100))
+                #pin_fint = self.pinobjects[iseg][i].FINT
+                #ic = next(i for i, v in enumerate(uni_fint) if v == pin_fint)
+                #self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic])
             elif param_str == "ROD":
                 return
                 
