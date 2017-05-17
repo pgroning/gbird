@@ -1387,7 +1387,7 @@ class MainWin(QtGui.QMainWindow):
             j = np.nan
         return j
 
-    def mark_pin(self, i):
+    def mark_pin(self, i, edge_color=(0, 0, 0)):
 
         self.pinselection_index = i
         case_num = int(self.case_cbox.currentIndex())
@@ -1404,15 +1404,20 @@ class MainWin(QtGui.QMainWindow):
         #                                    fc=(1,1,1),alpha=1.0,ec=(1, 0, 0))
         # self.clickrect = mpatches.Rectangle((x,y), d, d,
         #                                   fc=(1,1,1),Fill=False,ec=(0, 0, 0))
-        r = self.pinobjects[case_num][i].circle.get_radius() * 1.3
+        r = self.pinobjects[case_num][i].circle.get_radius() * 1.2
         x = self.pinobjects[case_num][i].x
         y = self.pinobjects[case_num][i].y
 
+        alpha = self.pinobjects[case_num][i].rectangle.get_alpha()
+        if alpha > 0.0:
+            fc = self.pinobjects[case_num][i].rectangle.get_fc()
+            edge_color = (1 - np.array(fc)).tolist()  # complement color
+
         self.clickpatch = mpatches.Circle((x, y), r, fc=(1, 1, 1), alpha=1.0,
-                                          ec=(0.2, 0.2, 0.2))
+                                          ec=edge_color)
         self.clickpatch.set_linestyle('solid')
         self.clickpatch.set_fill(False)
-        self.clickpatch.set_linewidth(2.0)
+        self.clickpatch.set_linewidth(3.0)
         self.axes.add_patch(self.clickpatch)
         self.canvas.draw()
 
