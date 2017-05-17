@@ -136,7 +136,7 @@ class Btf(object):
             #print "Warning: BTF is not yet implemented for this fuel type."
             #print "Using OPT2 dryout performance calculation instead."
             zdim = 100
-            voi = 50
+            voi = 80
             rfact_fun = btf_opt3
         elif fuetype == "A10XM":
             voi = 60
