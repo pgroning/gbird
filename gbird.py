@@ -29,6 +29,8 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg \
 # as NavigationToolbar
 from matplotlib.figure import Figure
 import matplotlib.patches as mpatches
+import matplotlib.pyplot as plt
+
 #try:  # patheffects not available for older versions of matplotlib
 #    import matplotlib.patheffects as path_effects
 #except:
@@ -694,6 +696,10 @@ class MainWin(QtGui.QMainWindow):
     def report_update(self):
         if hasattr(self, "report_dlg"):
             self.report_dlg.update()
+
+    def get_colormap2(self, npins, colormap="rainbow"):
+        if colormap == "rainbow":
+            cm = plt.cm.gist_rainbow_r(np.linspace(0, 1, npins))[:,:3]
 
     def get_colormap(self, num_enr_levels, colormap="rainbow"):
 
