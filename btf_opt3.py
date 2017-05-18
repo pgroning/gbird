@@ -46,7 +46,6 @@ def btf_opt3(POW3in):
   noder = POW3.shape[0]
   ax_def = np.array(map(float,defaults.axial))  # typiska värden:
   APLHGR = get_ax_eff(noder,ax_def)
-  APLHGR = np.ones(100)
   APLHGR=APLHGR/np.sum(APLHGR)*noder
   LHGR  = np.zeros(POW3.shape)
   for k in range(noder):
