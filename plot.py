@@ -93,7 +93,16 @@ class PlotWin(QtGui.QMainWindow):
 
         statepoints = segment.get_statepoints(voi, vhi, tfu)
         x = [s.burnup for s in statepoints]
-        y = [s.fint for s in statepoints]
+        if self.plotmode_cbox.currentIndex() == 0:  # plot envelope
+            y = [s.fint for s in statepoints]
+        elif self.plotmode_cbox.currentIndex() == 1:  # plot pin
+            if hasattr(self.parent, "pinselection_index"):
+                ipin = self.parent.pinselection_index
+            else:
+                ipin = 0
+            iseg = int(self.parent.case_cbox.currentIndex())
+            i, j = self.parent.pinobjects[iseg][ipin].pos
+            y = [s.POW[i, j] for s in statepoints]
 
         if label == None:
             labstr = segment.data.sim
@@ -321,8 +330,8 @@ class PlotWin(QtGui.QMainWindow):
         param_label = QtGui.QLabel('Param:')
         self.param_cbox = QtGui.QComboBox()
         paramlist = ["KINF", "FINT", "BTF"]
-        for i in paramlist:
-            self.param_cbox.addItem(i)
+        for p in paramlist:
+            self.param_cbox.addItem(p)
 
         parent_param = str(self.parent.param_cbox.currentText())
         if parent_param in paramlist:
@@ -349,6 +358,14 @@ class PlotWin(QtGui.QMainWindow):
         self.previous_cb.setChecked(False)
         self.connect(self.previous_cb, QtCore.SIGNAL('stateChanged(int)'),
                      self.on_plot)
+
+        self.plotmode_cbox = QtGui.QComboBox()
+        modelist = ["Env.", "Pin"]
+        for t in modelist:
+            self.plotmode_cbox.addItem(t)
+
+        self.connect(self.plotmode_cbox,
+                     QtCore.SIGNAL('currentIndexChanged(int)'), self.on_plot)
 
         #type_label = QtGui.QLabel('Type:')
         #self.type_cbox = QtGui.QComboBox()
@@ -432,6 +449,7 @@ class PlotWin(QtGui.QMainWindow):
             #hbox.setAlignment(w, QtCore.Qt.AlignVCenter)
             #hbox.setAlignment(w, QtCore.Qt.AlignHCenter)
         hbox.addStretch(1)
+        hbox.addWidget(self.plotmode_cbox)
         hbox.addLayout(param_flo)
 
         vbox = QtGui.QVBoxLayout()
