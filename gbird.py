@@ -1447,7 +1447,29 @@ class MainWin(QtGui.QMainWindow):
         self.clickpatch.set_fill(False)
         self.clickpatch.set_linewidth(3.0)
         self.axes.add_patch(self.clickpatch)
+
+        # mark enr pin
+        LFU = self.pinobjects[case_num][i].LFU
+        self.mark_enrpin(self.enrpinlist[case_num][LFU - 1])
+
         self.canvas.draw()
+
+    def mark_enrpin(self, pin, edge_color=(0.4, 0.4, 0.4)):
+        if hasattr(self, 'clickpatch_e'):  # Remove old click
+            try:
+                self.clickpatch_e.remove()
+            except:
+                pass
+
+        r = pin.circle.get_radius() * 1.2
+        x = pin.x
+        y = pin.y
+        self.clickpatch_e = mpatches.Circle((x, y), r, fc=(1, 1, 1), alpha=1.0,
+                                          ec=edge_color)
+        self.clickpatch_e.set_linestyle('solid')
+        self.clickpatch_e.set_fill(False)
+        self.clickpatch_e.set_linewidth(3.0)
+        self.axes.add_patch(self.clickpatch_e)
 
     def enr_add(self):
         self.enr_update("add")
