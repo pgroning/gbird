@@ -705,47 +705,46 @@ class MainWin(QtGui.QMainWindow):
             cm = plt.cm.jet(np.linspace(0, 1, npins))[:,:3]
             #cm = plt.cm.Spectral_r(np.linspace(0, 1, npins))[:,:3]
         cmap = cm.tolist()
-        #qtrace()
         return cmap
 
-    def get_colormap_old(self, num_enr_levels, colormap="rainbow"):
-
-        n = num_enr_levels + 1
-        #n = int(np.ceil(num_enr_levels / 4.0)) + 1
-        v00 = np.zeros(n)
-        v11 = np.ones(n)
-        v01 = np.linspace(0, 1, n)
-        v10 = v01[::-1]  # revert array
-
-        if colormap == "rainbow":
-            # magenta -> blue
-            cm_mb = np.vstack((v10, v00, v11)).transpose()[:-1]  # remove last elem
-            # blue -> cyan
-            # remove last element
-            cm_bc = np.vstack((v00, v01, v11)).transpose()[:-1]
-            # cyan -> green
-            cm_cg = np.vstack((v00, v11, v10)).transpose()[:-1]
-            # green -> yellow
-            cm_gy = np.vstack((v01, v11, v00)).transpose()[:-1]
-            # yellow -> red
-            cm_yr = np.vstack((v11, v10, v00)).transpose()
-            cm = np.vstack((cm_mb, cm_bc, cm_cg, cm_gy, cm_yr))
-        elif colormap == "bmr":
-            # blue -> magenta
-            cm_bc = np.vstack((v01, v00, v11)).transpose()[:-1]
-            # magenta -> red
-            cm_mr = np.vstack((v11, v00, v10)).transpose()
-            cm = np.vstack((cm_bc, cm_mr))
-        elif colormap == "byr":
-            # blue -> yellow
-            cm_by = np.vstack((v01, v01, v10)).transpose()[:-1]
-            # yellow -> red
-            cm_yr = np.vstack((v11, v10, v00)).transpose()
-            cm = np.vstack((cm_by, cm_yr))
-            
-        ic = np.linspace(0, len(cm) - 1, num_enr_levels).astype(int).tolist()
-        cmap = [cm[i].tolist() for i in ic]
-        return cmap
+#    def get_colormap_old(self, num_enr_levels, colormap="rainbow"):
+#
+#        n = num_enr_levels + 1
+#        #n = int(np.ceil(num_enr_levels / 4.0)) + 1
+#        v00 = np.zeros(n)
+#        v11 = np.ones(n)
+#        v01 = np.linspace(0, 1, n)
+#        v10 = v01[::-1]  # revert array
+#
+#        if colormap == "rainbow":
+#            # magenta -> blue
+#            cm_mb = np.vstack((v10, v00, v11)).transpose()[:-1]  # remove last elem
+#            # blue -> cyan
+#            # remove last element
+#            cm_bc = np.vstack((v00, v01, v11)).transpose()[:-1]
+#            # cyan -> green
+#            cm_cg = np.vstack((v00, v11, v10)).transpose()[:-1]
+#            # green -> yellow
+#            cm_gy = np.vstack((v01, v11, v00)).transpose()[:-1]
+#            # yellow -> red
+#            cm_yr = np.vstack((v11, v10, v00)).transpose()
+#            cm = np.vstack((cm_mb, cm_bc, cm_cg, cm_gy, cm_yr))
+#        elif colormap == "bmr":
+#            # blue -> magenta
+#            cm_bc = np.vstack((v01, v00, v11)).transpose()[:-1]
+#            # magenta -> red
+#            cm_mr = np.vstack((v11, v00, v10)).transpose()
+#            cm = np.vstack((cm_bc, cm_mr))
+#        elif colormap == "byr":
+#            # blue -> yellow
+#            cm_by = np.vstack((v01, v01, v10)).transpose()[:-1]
+#            # yellow -> red
+#            cm_yr = np.vstack((v11, v10, v00)).transpose()
+#            cm = np.vstack((cm_by, cm_yr))
+#            
+#        ic = np.linspace(0, len(cm) - 1, num_enr_levels).astype(int).tolist()
+#        cmap = [cm[i].tolist() for i in ic]
+#        return cmap
 
     def init_pinobjects(self):
         self.pinobjects = []
