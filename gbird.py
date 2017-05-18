@@ -697,11 +697,18 @@ class MainWin(QtGui.QMainWindow):
         if hasattr(self, "report_dlg"):
             self.report_dlg.update()
 
-    def get_colormap2(self, npins, colormap="rainbow"):
+    def get_colormap(self, npins, colormap="rainbow"):
         if colormap == "rainbow":
             cm = plt.cm.gist_rainbow_r(np.linspace(0, 1, npins))[:,:3]
+        elif colormap == "jet":
+            #cm = plt.cm.RdBu_r(np.linspace(0, 1, npins))[:,:3]
+            cm = plt.cm.jet(np.linspace(0, 1, npins))[:,:3]
+            #cm = plt.cm.Spectral_r(np.linspace(0, 1, npins))[:,:3]
+        cmap = cm.tolist()
+        #qtrace()
+        return cmap
 
-    def get_colormap(self, num_enr_levels, colormap="rainbow"):
+    def get_colormap_old(self, num_enr_levels, colormap="rainbow"):
 
         n = num_enr_levels + 1
         #n = int(np.ceil(num_enr_levels / 4.0)) + 1
@@ -1093,7 +1100,7 @@ class MainWin(QtGui.QMainWindow):
 #                                        tfu, tmo))
         
         npins = len(self.pinobjects[iseg])
-        cmap = self.get_colormap(npins, "bmr")
+        cmap = self.get_colormap(npins, "jet")
 
         # Sort params and get color map
         #if param_str == "FINT":
@@ -1117,7 +1124,9 @@ class MainWin(QtGui.QMainWindow):
             v = np.array([pin.FINT for pin in self.pinobjects[iseg]])
         elif param_str == "BTF":
             v = np.array([pin.BTF for pin in self.pinobjects[iseg]])
-   
+        xmin = v.min()
+        xmax = v.max()
+
         for i in xrange(npins):
             #if self.pinobjects[iseg][i].BA < 0.00001:
             #    j = next(j for j, epin in enumerate(self.enrpinlist[iseg])
@@ -1132,12 +1141,14 @@ class MainWin(QtGui.QMainWindow):
             self.pinobjects[iseg][i].circle.set_facecolor(fc)
 
             if param_str == "ENR":
-                k = 2
                 x = self.pinobjects[iseg][i].ENR
-                xave = v.mean()
-                
-                y = 1 / (1 + np.exp(-k * (x - xave)))  # sigmoid function
-                #y = (x - v.min()) / (v.max() - v.min())
+                #xave = v.mean()
+                #k = 2
+                #y = 1 / (1 + np.exp(-k * (x - xave)))  # sigmoid function
+                if xmax == xmin:
+                    y = 0.5
+                else:
+                    y = (x - xmin) / (xmax - xmin)
                 ic = int(round(y * (npins - 1)))
                 self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic])
 
@@ -1146,17 +1157,20 @@ class MainWin(QtGui.QMainWindow):
                 #self.pinobjects[iseg][i].rectangle.set_facecolor((1, 1, 1))
                 
             elif param_str == "BTF":
-                k = 3
-                
                 x = self.pinobjects[iseg][i].BTF
+                
                 if not np.isnan(x):
-                    xave = v.mean()
-                    xstd = v.std()
-                    if xstd == 0:
-                        y = 0
+                    #xave = v.mean()
+                    #xstd = v.std()
+                    #if xstd == 0:
+                    #    y = 0
+                    #else:
+                    #    k = 3
+                    #    y = 1 / (1 + np.exp(-k * (x - xave) / xstd))
+                    if xmax == xmin:
+                        y = 0.5
                     else:
-                        y = 1 / (1 + np.exp(-k * (x - xave) / xstd))
-
+                        y = (x - xmin) / (xmax - xmin)
                     ic = int(round(y * (npins - 1)))
                     self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic])
                     btf_ratio = x / btf * 1000
@@ -1179,16 +1193,20 @@ class MainWin(QtGui.QMainWindow):
                 #    self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic])
             
             elif param_str == "EXP":
-                k = 3
-
                 x = self.pinobjects[iseg][i].EXP
-                xave = v.mean()
-                xstd = v.std()
-                if xstd == 0:
-                    y = 0
-                else:
-                    y = 1 / (1 + np.exp(-k * (x - xave) / xstd))
                 
+                #xave = v.mean()
+                #xstd = v.std()
+                #if xstd == 0:
+                #    y = 0
+                #else:
+                #    k = 3
+                #    y = 1 / (1 + np.exp(-k * (x - xave) / xstd))
+                if xmax == xmin:
+                    y = 0.1
+                else:
+                    y = (x - xmin) / (xmax - xmin)
+
                 ic = int(round(y * (npins - 1)))
                 self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic])
                 if x < 10:
@@ -1205,21 +1223,25 @@ class MainWin(QtGui.QMainWindow):
                 #self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic])
 
             elif param_str == "FINT":
-                k = 3
-
                 x = self.pinobjects[iseg][i].FINT
-                xave = v.mean()
-                xstd = v.std()
-                if xstd == 0:
-                    y = 0
-                else:
-                    y = 1 / (1 + np.exp(-k * (x - xave) / xstd))
-                #y = (pinval - min(values)) / (max(values) - min(values))
                 
+                #xave = v.mean()
+                #xstd = v.std()
+                #if xstd == 0:
+                #    y = 0
+                #else:
+                #    k = 3
+                #    y = 1 / (1 + np.exp(-k * (x - xave) / xstd))
+                if xmax == xmin:
+                    y = 0.5
+                else:
+                    y = (x - xmin) / (xmax - xmin)
+
                 ic = int(round(y * (npins - 1)))
                 self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic])
 
-                text = ('%.0f' % (x * 100))
+                text = '{0:.0f}'.format(x * 100)
+                #text = ('%.0f' % (x * 100))
                 #pin_fint = self.pinobjects[iseg][i].FINT
                 #ic = next(i for i, v in enumerate(uni_fint) if v == pin_fint)
                 #self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic])
