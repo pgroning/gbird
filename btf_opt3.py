@@ -42,7 +42,7 @@ def btf_opt3(POW3in):
   OUT: RFACTUT - Rfactors for assembly (2-D)
   """
   defaults = opt3_defaults()
-  POW3 , num_fuelrods = norm_sub(POW3in,100)
+  POW3 , num_fuelrods = norm_sub(POW3in,96)
   noder = POW3.shape[0]
   ax_def = np.array(map(float,defaults.axial))  # typiska värden:
   APLHGR = get_ax_eff(noder,ax_def)
@@ -52,8 +52,6 @@ def btf_opt3(POW3in):
     LHGR[k,:,:] = POW3[k,:,:]*APLHGR[k]
   #
   # initialize
-  #np.save('gbdata',POW3in)
-  #sys.exit()
   sub1=np.zeros((POW3.shape[0],5,5))  #  1 | 2  Sub-bundle order 
   sub2=np.zeros((POW3.shape[0],5,5))  #  -----
   sub3=np.zeros((POW3.shape[0],5,5))  #  4 | 3
@@ -101,10 +99,11 @@ def btf_opt3(POW3in):
   Fsub3 = np.sum(sub3)/SumTot*4
   Fsub4 = np.sum(sub4)/SumTot*4
   # subBundle Rfact
-  rfac1 = calc_sub(sub1, defaults) + mismatchCorr(Fsub1)
-  rfac2 = calc_sub(sub2, defaults) + mismatchCorr(Fsub2)
-  rfac3 = calc_sub(sub3, defaults) + mismatchCorr(Fsub3)
-  rfac4 = calc_sub(sub4, defaults) + mismatchCorr(Fsub4)
+  q_fuelrods = num_fuelrods/4
+  rfac1 = calc_sub(sub1, defaults, q_fuelrods) + mismatchCorr(Fsub1)
+  rfac2 = calc_sub(sub2, defaults, q_fuelrods) + mismatchCorr(Fsub2)
+  rfac3 = calc_sub(sub3, defaults, q_fuelrods) + mismatchCorr(Fsub3)
+  rfac4 = calc_sub(sub4, defaults, q_fuelrods) + mismatchCorr(Fsub4)
   # put together Rfact for full bundle
   RFACTUT = np.zeros((11,11))
   RFACTUT[0:5,0:5] = rfac1[MAPI[0:5,0:5],MAPJ[0:5,0:5]]
@@ -127,7 +126,7 @@ def mismatchCorr(fsub):
   deltaR = -1.1325 + 1.4900 * fsub - 0.3575 * fsub**2
   return deltaR
 
-def calc_sub(LHGRsub, defaults):
+def calc_sub(LHGRsub, defaults, fuelrods):
   """
   Subroutine calc_sub: calculates rfactors for a sub-bundle
   IN:  sub_bundle - pin power for sub-bundle (3-D)
@@ -137,14 +136,12 @@ def calc_sub(LHGRsub, defaults):
   epsilon  = 0.0001
   #
   ax_def = np.array(map(float,defaults.axial))  # typiska värden:
-  #ax_def = np.ones(25) # TEST
   rv70   = defaults.rv70                        # rv70 =  1    # relative gas density
   hfg    = defaults.hfg                         # hfg  =  1.5  # latent heat [MJ/kg
   G      = defaults.G                           # G    =  1.5  # Mass flow [10^3 kg/m2/s]
-  xin    = defaults.xin                         # xin  = -0.03 # typical subcooling
-  # ax power profile
-  noder = LHGRsub.shape[0]
+  xin    = defaults.xin                         # xin  = -0.01 # typical subcooling
   #
+  noder = LHGRsub.shape[0]
   I1rod = np.zeros(LHGRsub.shape)
   I2rod = np.zeros(LHGRsub.shape)
   xc    = np.zeros(LHGRsub.shape)
@@ -159,7 +156,7 @@ def calc_sub(LHGRsub, defaults):
   while (True):
     iloop += 1
     for i in range(noder):
-      APF[i] = np.sum(LHGRsub[i,:,:])/25
+      APF[i] = np.sum(LHGRsub[i,:,:])/fuelrods[i]
     Q     = np.cumsum(APF)*Lheat/noder
     Qnorm = Q/Q[-1]    
     x     = xin+(xout-xin)*Qnorm
@@ -174,7 +171,7 @@ def calc_sub(LHGRsub, defaults):
         I1rod[:,i,j]=np.cumsum(LHGRsub[:,i,j]*(x>0))*Lheat/noder
         I2rod[:,i,j]=np.cumsum(I1rod[:,i,j]*(x>0))*Lheat/noder/(Lheat*I1rod[:,i,j])
     #
-    R=RfacD5_1(I1,I2,I1rod,I2rod) # these are local rod R-factors
+    R=RfacD5(I1,I2,I1rod,I2rod) # these are local rod R-factors
     R[x<0,:,:]=0.0
     #
     mincpr=100
@@ -194,14 +191,18 @@ def calc_sub(LHGRsub, defaults):
     xout=xin+(xout-xin)*mincpr
     #
     if iloop > 5:
-      # TODO: ett felmeddelande här!!!
+      print "WARNING: no convergence in btf_opt3:calc_sub"  # TODO: returnera nåt felmeddelande??
       break  # no convergence
   #Tracer()()
+    
   return Rglob
 
 def get_ax_eff(noder,ax_def):
   """
   Subroutine get_ax_eff:
+  IN:  noder  - desired number of nodes in axial power profile 
+  IN:  ax_def - axial power profile
+  OUT: ax_ut  - the new interpolated axial power profile
   """
   ax_def = np.append(ax_def,0.0)   # append 0.0
   ax_def = np.insert(ax_def,0,0.0) # prepend 0.0
@@ -218,68 +219,11 @@ def get_ax_eff(noder,ax_def):
 def RfacD5(I1,I2,I1rod,I2rod):
   """
   Subroutine RfacD5:
-  """
-  e=np.array([[ 0.300,  -0.0086,-0.0189,  0.0426, 0.0456],
-              [-0.0086,  0.0332,-0.0119,  0.0269, 0.0304],
-              [-0.0189, -0.0119, 0.0094,  0.0521, 0.0412],
-              [ 0.0426,  0.0269, 0.0521, -0.0259, 0.1514],
-              [ 0.0456,  0.0304, 0.0412,  0.1514, 0.00  ]])
-  a=0.3
-  b=0.4406
-  c=0.0926
-  d=0.0553
-  Rfac = np.zeros(I1rod.shape)
-  epsilon = 0.0001
-  Rb  = I1rod[:,:,:]**b
-  dRb = d*Rb
-  cRb = c*Rb
-  I1b = I1**b
-  krange = xrange(I1rod.shape[0])
-  #I1bool = I1rod>epsilon
-  I1bool = np.ones(I1rod.shape,dtype=bool)
-  for i in xrange(5):
-    for j in xrange(5):
-      if (i==4 and j==4):
-        break # water      
-      for k in krange:
-        if I1rod[k,i,j]<epsilon:
-          continue
-        Ns=0
-        Nd=0
-        R=Rb[k,i,j]
-        if i>0 and I1bool[k,i-1,j]:
-          Ns=Ns+1
-          R=R+cRb[k,i-1,j]
-        if (i<4 and j!=4) and I1bool[k,i+1,j]:
-          Ns=Ns+1
-          R=R+cRb[k,i+1,j]
-        if (j>0) and I1bool[k,i,j-1]:
-          Ns=Ns+1
-          R=R+cRb[k,i,j-1]
-        if (j<4 and i!=4) and I1bool[k,i,j+1]:
-          Ns=Ns+1
-          R=R+cRb[k,i,j+1]
-        if (i>0 and j>0) and I1bool[k,i-1,j-1]:
-          Nd=Nd+1
-          R=R+dRb[k,i-1,j-1]
-        if (i>0 and j<4) and I1bool[k,i-1,j+1]:
-          Nd=Nd+1
-          R=R+dRb[k,i-1,j+1]
-        if (i<4 and j>0) and I1bool[k,i+1,j-1]:
-          Nd=Nd+1
-          R=R+dRb[k,i+1,j-1]
-        if (i<4 and j<4 and not (i==3 and j==3)) and I1bool[k,i+1,j+1]:
-          Nd=Nd+1
-          R=R+dRb[k,i+1,j+1]
-        Q1 = (I2[k]/I2rod[k,i,j])**a
-        Rfac[k,i,j]=R/((1+c*Ns+d*Nd)*I1b[k])*(1+e[i,j])*min(1.1,max(Q1,0.9))
-        #Rfac[k,i,j]=R/((1+c*Ns+d*Nd)*I1b[k])
-        #Rfac[k,i,j]=R/((1+c*Ns+d*Nd)*I1b[k])*(I2[k]/I2rod[k,i,j])**a*(1+e[i,j])
-  return Rfac
-
-def RfacD5_1(I1,I2,I1rod,I2rod):
-  """
-  Subroutine RfacD5:
+  IN:  I1
+  IN:  I2
+  IN:  I1rod
+  IN:  I2rod
+  OUT: Rfact - rfactors for subbundle
   """
   e=np.array([[ 0.300,  -0.0086,-0.0189,  0.0426, 0.0456],
               [-0.0086,  0.0332,-0.0119,  0.0269, 0.0304],
@@ -303,51 +247,45 @@ def RfacD5_1(I1,I2,I1rod,I2rod):
   for i in xrange(5):
     for j in xrange(5):
       if (i==4 and j==4):
-        break # water
+        break # water      
       for k in krange:
         if I1rod[k,i,j]<epsilon:
           continue
+        if (i==0 and j==0 and k>int(10./25*nodes)): continue                      # SLR in NW
+        if ((i==4 and j==3) or (i==3 and j==4)) and k>int(18./25*nodes): continue # PLR
+        Ns=0
+        Nd=0
         R=Rb[k,i,j]
-        if (i==0 and (j==0 or j==4)) or (i==4 and j==0):
-          # corners (NW,NE,SW)
-          Ns = 2
-          Nd = 1
-          if (i==0 and j==0 and k>int(10./25*nodes)): continue  # SLR in NW
-        elif ((i==0 or i==4) and (j>0 and j<4)) or ((j==0 or j==4) and (i>0 and i<4)):
-          # sides
-          Ns = 3
-          Nd = 2
-          if (i==3 and j==4) or (i==4 and j==3): Ns = 2
-          if ((i==4 and j==3) or (i==3 and j==4)) and k>int(18./25*nodes): continue # PLR
-        else:
-          # inside
-          Ns = 4
-          Nd = 4
-          if (i==3 and j==3): Nd = 3
-        #
         if i>0 and I1bool[k,i-1,j]:
+          Ns=Ns+1
           R=R+cRb[k,i-1,j]
         if i<4 and I1bool[k,i+1,j]:
-          if not (i==3 and j==4): R=R+cRb[k,i+1,j]
+          if not (i==3 and j==4):
+            Ns=Ns+1
+            R=R+cRb[k,i+1,j]
         if (j>0) and I1bool[k,i,j-1]:
+          Ns=Ns+1
           R=R+cRb[k,i,j-1]
         if j<4 and I1bool[k,i,j+1]:
-          if not (i==4 and j==3): R=R+cRb[k,i,j+1]
+          if not (i==4 and j==3):
+            Ns=Ns+1
+            R=R+cRb[k,i,j+1]
         if (i>0 and j>0) and I1bool[k,i-1,j-1]:
+          Nd=Nd+1
           R=R+dRb[k,i-1,j-1]
         if (i>0 and j<4) and I1bool[k,i-1,j+1]:
+          Nd=Nd+1
           R=R+dRb[k,i-1,j+1]
         if (i<4 and j>0) and I1bool[k,i+1,j-1]:
+          Nd=Nd+1
           R=R+dRb[k,i+1,j-1]
-        if ((i<4 and j<4) and not (i==3 and j==3)) and I1bool[k,i+1,j+1]:
+        if (i<4 and j<4 and not (i==3 and j==3)) and I1bool[k,i+1,j+1]:
+          Nd=Nd+1
           R=R+dRb[k,i+1,j+1]
         Q1 = (I2[k]/I2rod[k,i,j])**a
         Rfac[k,i,j]=R/((1+c*Ns+d*Nd)*I1b[k])*(1+e[i,j])*min(1.1,max(Q1,0.9))
-        #Rfac[k,i,j]=R/((1+c*Ns+d*Nd)*I1b[k])
-        #Rfac[k,i,j] = 1/((1+c*Ns+d*Nd)*I1b[k])
         #Rfac[k,i,j]=R/((1+c*Ns+d*Nd)*I1b[k])*(I2[k]/I2rod[k,i,j])**a*(1+e[i,j])
   return Rfac
-
 
 def invxcD5(xc,I2,G,rv70,hfg):
   """
@@ -379,11 +317,13 @@ def xcD5(R,I2,G,rv70,hfg):
   xc=(np.exp(1.0/(1+np.exp(a[0]+a[1]*G))+a[2]/(I2m+1)+a[3])*(rv70+a[4])*hfg**a[5]+a[6]*rv70)*np.exp(a[7]*R)
   return xc
   
-def norm_sub(sub_bundle, tot_fuelrods):
+def norm_sub(sub_bundle, fuelrods):
   """ 
   Subroutine norm_sub: normalizes subbundle
   IN:  sub_bundle      - sub-bundle
+  IN:  fuelrods        - number of fuelrods
   OUT: sub_bundle_norm - normalized sub-bundle
+  OUT: num_fuelrods    - fuelrods in each node-plane
   """
   sub_bundle_norm = np.zeros(sub_bundle.shape)
   nodes = sub_bundle.shape[0]
@@ -392,7 +332,7 @@ def norm_sub(sub_bundle, tot_fuelrods):
   for i in range(nodes):
     sum_nodplan  = np.sum(sub_bundle[i,:,:])                                  # sum av nodplan 
     num_fuelrods[i] = np.sum(sub_bundle[i,:,:]>epsilon)                       # antal bränslestavar i nodplanet
-    sub_bundle_norm[i,:,:] = sub_bundle[i,:,:]/sum_nodplan*tot_fuelrods       # normerat bränsleplan
+    sub_bundle_norm[i,:,:] = sub_bundle[i,:,:]/sum_nodplan*fuelrods           # normerat bränsleplan
   return sub_bundle_norm, num_fuelrods
 
 if __name__ == '__main__':

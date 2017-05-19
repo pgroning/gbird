@@ -3,4 +3,4 @@ axial: 0.828883, 1.611597, 1.879149, 1.938141, 1.908530, 1.815930, 1.758528, 1.6
 rv70:  1      # relative gas density
 hfg:   1.5    # latent heat [MJ/kg]
 G:     1.28   # Mass flow   [10^3 kg/m2/s]
-xin:  -0.033  # subcooling
+xin:  -0.01   # subcooling

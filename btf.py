@@ -134,7 +134,7 @@ class Btf(object):
             rfact_fun = btf_opt2
         elif fuetype == "OPT3":
             zdim = 100
-            voi = 80
+            voi = 50
             rfact_fun = btf_opt3
         elif fuetype == "A10XM":
             voi = 60
