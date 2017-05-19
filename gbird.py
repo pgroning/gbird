@@ -1250,6 +1250,9 @@ class MainWin(QtGui.QMainWindow):
             self.pinobjects[iseg][i].text.remove()
             self.pinobjects[iseg][i].set_text(text)
 
+        if self.track_maxpin.isChecked():
+            self.mark_maxpin()
+
         self.canvas.draw()
         self.plot_update()
         self.report_update()
@@ -1978,8 +1981,55 @@ class MainWin(QtGui.QMainWindow):
         text = sim.replace("SIM", "").replace("'", "").strip()
         self.sim_info_field.setText(text)
         #self.sim_text.setText(text)
-
         self.enr_fields_update()
+
+        # Mark pin with maximum value
+        #self.mark_maxpin()
+
+    def mark_maxpin(self, param=None):
+        """Mark pin with maximum value"""
+
+        if hasattr(self, "maxpin"):
+            try:
+                self.maxpin.maxpin_patch.remove()
+            except:
+                pass
+
+        iseg = int(self.case_cbox.currentIndex())
+        ipoint = int(self.point_sbox.value())
+        bundle = self.bunlist[self.ibundle]
+        segment = bundle.segments[iseg]
+        if param == None:
+            param = str(self.param_cbox.currentText())
+        if param not in ["FINT", "EXP", "BTF"]:
+            param = "FINT"
+        if param == "FINT":
+            M = segment.statepoints[ipoint].POW
+        elif param == "EXP":
+            M = segment.statepoints[ipoint].EXP
+        elif param == "BTF":
+            burnup = segment.statepoints[ipoint].burnup
+            btf_burnpoints = bundle.btf.burnpoints
+            index_array = np.where(btf_burnpoints == burnup)[0]
+            if len(index_array) > 0:
+                ipoint = index_array[0]
+                M = bundle.btf.DOX[ipoint, :, :]
+            else:
+                s = np.shape(segment.statepoints[ipoint].POW)
+                M = np.zeros(s)
+        
+        ncols = M.shape[0]
+        index = M.argmax()
+        ipos = [index / ncols , index % ncols]  # [i, j]
+        self.maxpin = next(p for p in self.pinobjects[iseg] if p.pos == ipos)
+        self.maxpin.set_maxpin_patch()
+        #self.toggle_pin_bgcolors()  # must update pin alpha values
+        #if self.maxpin.rectangle.get_alpha() > 0.0:
+        #    fc = self.maxpin.rectangle.get_fc()
+        #    edge_color = (1 - np.array(fc)).tolist()  # complement color
+        #    self.maxpin.set_maxpin_patch(edge_color=(0, 0, 0))
+        #else:
+        #    self.maxpin.set_maxpin_patch()
 
     def on_draw(self):
         """Setup the figure axis"""
@@ -2655,10 +2705,15 @@ class MainWin(QtGui.QMainWindow):
                                             tip="Show background color map",
                                             slot=self.toggle_pin_bgcolors)
 
+        self.track_maxpin = self.create_action("Track max pin", 
+                                               checkable=True,
+                                               tip="Track maximum value pin",
+                                               slot=self.toggle_maxpin)
+
         self.add_actions(self.tools_menu,
                          (plot_action, casmo_action, casinp_action,
                           data_action, find_action, egv_action, 
-                          self.show_cmap))
+                          self.show_cmap, self.track_maxpin))
 
         self.run_menu = self.menuBar().addMenu("&Run")
         quickcalc_action = self.create_action("&Quick calc", shortcut="F9",
@@ -2863,7 +2918,19 @@ class MainWin(QtGui.QMainWindow):
             for pin in self.pinobjects[iseg]:
                 pin.rectangle.set_alpha(0.0)
         self.canvas.draw()
-            
+
+    def toggle_maxpin(self):
+        """track maxpin on/off"""
+        if self.track_maxpin.isChecked():
+            self.mark_maxpin()
+        else:
+            if hasattr(self, "maxpin"):
+                try:
+                    self.maxpin.maxpin_patch.remove()
+                except:
+                    pass
+        self.canvas.draw()
+
     def add_actions(self, target, actions):
         for action in actions:
             if action is None:
