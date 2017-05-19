@@ -449,8 +449,8 @@ class PlotWin(QtGui.QMainWindow):
             #hbox.setAlignment(w, QtCore.Qt.AlignVCenter)
             #hbox.setAlignment(w, QtCore.Qt.AlignHCenter)
         hbox.addStretch(1)
-        hbox.addWidget(self.plotmode_cbox)
         hbox.addLayout(param_flo)
+        hbox.addWidget(self.plotmode_cbox)
 
         vbox = QtGui.QVBoxLayout()
         # vbox.addLayout(hbox)
