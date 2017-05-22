@@ -1463,6 +1463,7 @@ class MainWin(QtGui.QMainWindow):
         self.mark_enrpin(self.enrpinlist[case_num][LFU - 1])
 
         self.canvas.draw()
+        self.plot_update()
 
     def mark_enrpin(self, pin, edge_color=(0.4, 0.4, 0.4)):
         if hasattr(self, 'clickpatch_e'):  # Remove old click

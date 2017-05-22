@@ -109,7 +109,7 @@ class PlotWin(QtGui.QMainWindow):
             labstr = labstr.replace("SIM", "").replace("'", "").strip()
         else:
             labstr = label
-        self.plot_xy(x, y, "K-inf", labstr, linestyle)
+        self.plot_xy(x, y, "Fint", labstr, linestyle)
 
     def plot_btf(self, bundle, linestyle="-", label=None):
 
