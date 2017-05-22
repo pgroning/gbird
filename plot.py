@@ -28,7 +28,7 @@ from bundle import Bundle
 
 
 class PlotWin(QtGui.QMainWindow):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, plotmode=None):
         super(PlotWin, self).__init__(parent)
         self.parent = parent
         # QMainWindow.__init__(self, parent)
@@ -48,6 +48,9 @@ class PlotWin(QtGui.QMainWindow):
         # self.textbox.setText('1 2 3 4')
         # self.data_init()
         
+        if plotmode == "pin":  # plot single pin
+            self.plotmode_cbox.setCurrentIndex(1)
+
         # self.case_cbox.setCurrentIndex(0) # Set default plot case
         # self.case_id_current = 0
         self.on_plot()  # Init plot
@@ -107,6 +110,9 @@ class PlotWin(QtGui.QMainWindow):
         if label == None:
             labstr = segment.data.sim
             labstr = labstr.replace("SIM", "").replace("'", "").strip()
+            if self.plotmode_cbox.currentIndex() == 1:
+                coordstr = self.parent.pinobjects[iseg][ipin].coord
+                labstr = coordstr + ": " + labstr
         else:
             labstr = label
         self.plot_xy(x, y, "Fint", labstr, linestyle)

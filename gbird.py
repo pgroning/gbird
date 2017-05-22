@@ -676,13 +676,16 @@ class MainWin(QtGui.QMainWindow):
             
             self.canvas.print_figure(filename, dpi=self.dpi)
             self.statusBar().showMessage('Saved to %s' % filename, 2000)
+
+    def plot_pin(self):
+        self.open_plotwin(plotmode="pin")
             
-    def open_plotwin(self):
+    def open_plotwin(self, plotmode=None):
         """Open plot window"""
 
         if hasattr(self, "bunlist"):  # data is imported
             if not hasattr(self, "plotwin"):  # plot win is not already open
-                self.plotwin = PlotWin(self)
+                self.plotwin = PlotWin(self, plotmode)
                 self.plotwin.show()
         else:
             msg = "There is no data to plot."
@@ -1361,7 +1364,7 @@ class MainWin(QtGui.QMainWindow):
                     self.mark_pin(i)
                     
                 popMenu = QtGui.QMenu(self)
-                popMenu.addAction("Plot", self.open_plotwin)
+                popMenu.addAction("Plot", self.plot_pin)
                 popMenu.exec_(QtGui.QCursor.pos())
  
             #    self.pin_popMenu = QtGui.QMenu(self)
