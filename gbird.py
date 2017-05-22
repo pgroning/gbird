@@ -703,11 +703,25 @@ class MainWin(QtGui.QMainWindow):
     def get_colormap(self, npins, colormap="rainbow"):
         if colormap == "rainbow":
             cm = plt.cm.gist_rainbow_r(np.linspace(0, 1, npins))[:,:3]
+            cmap = cm.tolist()
         elif colormap == "jet":
             #cm = plt.cm.RdBu_r(np.linspace(0, 1, npins))[:,:3]
             cm = plt.cm.jet(np.linspace(0, 1, npins))[:,:3]
             #cm = plt.cm.Spectral_r(np.linspace(0, 1, npins))[:,:3]
-        cmap = cm.tolist()
+            cmap = cm.tolist()
+        elif colormap == "bmr":
+            n = npins + 1
+            v00 = np.zeros(n)
+            v11 = np.ones(n)
+            v01 = np.linspace(0, 1, n)
+            v10 = v01[::-1]  # revert array
+            # blue -> magenta
+            cm_bm = np.vstack((v01, v00, v11)).transpose()[:-1]
+            # magenta -> red
+            cm_mr = np.vstack((v11, v00, v10)).transpose()
+            cm = np.vstack((cm_bm, cm_mr))
+            ic = np.linspace(0, len(cm) - 1, npins).astype(int).tolist()
+            cmap = [cm[i] for i in ic]
         return cmap
 
 #    def get_colormap_old(self, num_enr_levels, colormap="rainbow"):
@@ -1102,6 +1116,7 @@ class MainWin(QtGui.QMainWindow):
 #                                        tfu, tmo))
         
         npins = len(self.pinobjects[iseg])
+        #cmap = self.get_colormap(npins, "bmr")
         cmap = self.get_colormap(npins, "jet")
 
         # Sort params and get color map
