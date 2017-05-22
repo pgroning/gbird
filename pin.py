@@ -51,16 +51,18 @@ class FuePin(object):
         else:
             return False
 
-    def set_clickpatch(self, edge_color=(0, 0, 0)):
+    def set_clickpatch(self, edge_color=None):
         r = self.circle.get_radius() * 1.2
         x = self.x
         y = self.y
         
-        alpha = self.rectangle.get_alpha()
-        if alpha > 0.0:
-            fc = self.rectangle.get_fc()
-            edge_color = (1 - np.array(fc)).tolist()  # complement color
-
+        if edge_color is None:
+            alpha = self.rectangle.get_alpha()        
+            if alpha > 0.0:
+                fc = self.rectangle.get_fc()
+                edge_color = (1 - np.array(fc)).tolist()  # complement color
+            else:
+                edge_color = (0, 0, 0)
         self.clickpatch = mpatches.Circle((x, y), r, fc=(1, 1, 1), alpha=1.0,
                                           ec=edge_color)
         self.clickpatch.set_linestyle('solid')
@@ -79,7 +81,8 @@ class FuePin(object):
         self.maxpin_patch.set_linewidth(3.0)
         self.axes.add_patch(self.maxpin_patch)
 
-
+    #def set_enrpin_patch(self, edge_color=(0.4, 0.4, 0.4)):
+        
 
 class EnrDialog(QtGui.QDialog):
     def __init__(self, parent, mode="edit"):

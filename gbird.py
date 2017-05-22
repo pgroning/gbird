@@ -1465,21 +1465,14 @@ class MainWin(QtGui.QMainWindow):
         self.plot_update()
 
     def mark_enrpin(self, pin, edge_color=(0.4, 0.4, 0.4)):
-        if hasattr(self, 'clickpatch_e'):  # Remove old click
+
+        if hasattr(self, "marked_enrpin"):
             try:
-                self.clickpatch_e.remove()
+                self.marked_enrpin.clickpatch.remove()
             except:
                 pass
-
-        r = pin.circle.get_radius() * 1.2
-        x = pin.x
-        y = pin.y
-        self.clickpatch_e = mpatches.Circle((x, y), r, fc=(1, 1, 1), alpha=1.0,
-                                          ec=edge_color)
-        self.clickpatch_e.set_linestyle('solid')
-        self.clickpatch_e.set_fill(False)
-        self.clickpatch_e.set_linewidth(3.0)
-        self.axes.add_patch(self.clickpatch_e)
+        self.marked_enrpin = pin
+        self.marked_enrpin.set_clickpatch(edge_color=edge_color)
 
     def enr_add(self):
         self.enr_update("add")
