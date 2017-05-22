@@ -1444,40 +1444,21 @@ class MainWin(QtGui.QMainWindow):
         return j
 
     def mark_pin(self, i, edge_color=(0, 0, 0)):
-
-        self.pinselection_index = i
-        case_num = int(self.case_cbox.currentIndex())
-        d = self.pinobjects[case_num][i].circle.get_radius() * 2 * 1.25
-        x = self.pinobjects[case_num][i].x - d / 2
-        y = self.pinobjects[case_num][i].y - d / 2
-
-        if hasattr(self, 'clickpatch'):  # Remove any previously selected pins
+        
+        if hasattr(self, "clicked_pin"):
             try:
-                self.clickpatch.remove()
+                self.clicked_pin.clickpatch.remove()
             except:
                 pass
-        # self.clickrect = mpatches.Rectangle((x,y), d, d,hatch='.',
-        #                                    fc=(1,1,1),alpha=1.0,ec=(1, 0, 0))
-        # self.clickrect = mpatches.Rectangle((x,y), d, d,
-        #                                   fc=(1,1,1),Fill=False,ec=(0, 0, 0))
-        r = self.pinobjects[case_num][i].circle.get_radius() * 1.2
-        x = self.pinobjects[case_num][i].x
-        y = self.pinobjects[case_num][i].y
-
-        alpha = self.pinobjects[case_num][i].rectangle.get_alpha()
-        if alpha > 0.0:
-            fc = self.pinobjects[case_num][i].rectangle.get_fc()
-            edge_color = (1 - np.array(fc)).tolist()  # complement color
-
-        self.clickpatch = mpatches.Circle((x, y), r, fc=(1, 1, 1), alpha=1.0,
-                                          ec=edge_color)
-        self.clickpatch.set_linestyle('solid')
-        self.clickpatch.set_fill(False)
-        self.clickpatch.set_linewidth(3.0)
-        self.axes.add_patch(self.clickpatch)
-
+            
+        self.pinselection_index = i
+        case_num = int(self.case_cbox.currentIndex())
+        self.clicked_pin = self.pinobjects[case_num][i]
+        self.clicked_pin.set_clickpatch()
+        
         # mark enr pin
-        LFU = self.pinobjects[case_num][i].LFU
+        #LFU = self.pinobjects[case_num][i].LFU
+        LFU = self.clicked_pin.LFU
         self.mark_enrpin(self.enrpinlist[case_num][LFU - 1])
 
         self.canvas.draw()

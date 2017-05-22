@@ -51,6 +51,23 @@ class FuePin(object):
         else:
             return False
 
+    def set_clickpatch(self, edge_color=(0, 0, 0)):
+        r = self.circle.get_radius() * 1.2
+        x = self.x
+        y = self.y
+        
+        alpha = self.rectangle.get_alpha()
+        if alpha > 0.0:
+            fc = self.rectangle.get_fc()
+            edge_color = (1 - np.array(fc)).tolist()  # complement color
+
+        self.clickpatch = mpatches.Circle((x, y), r, fc=(1, 1, 1), alpha=1.0,
+                                          ec=edge_color)
+        self.clickpatch.set_linestyle('solid')
+        self.clickpatch.set_fill(False)
+        self.clickpatch.set_linewidth(3.0)
+        self.axes.add_patch(self.clickpatch)
+
     def set_maxpin_patch(self, edge_color=(1, 0, 0)):
         d = self.circle.get_radius() * 2 * 1.25
         x = self.x - d / 2
