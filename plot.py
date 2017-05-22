@@ -98,7 +98,7 @@ class PlotWin(QtGui.QMainWindow):
         x = [s.burnup for s in statepoints]
         if self.plotmode_cbox.currentIndex() == 0:  # plot envelope
             y = [s.fint for s in statepoints]
-        elif self.plotmode_cbox.currentIndex() == 1:  # plot pin
+        elif self.plotmode_cbox.currentIndex() == 1:  # plot specific pin
             if hasattr(self.parent, "pinselection_index"):
                 ipin = self.parent.pinselection_index
             else:
@@ -121,7 +121,18 @@ class PlotWin(QtGui.QMainWindow):
 
         x = bundle.btf.burnpoints
         DOX = bundle.btf.DOX
-        y = [e.max() for e in DOX]
+        if self.plotmode_cbox.currentIndex() == 0:  # plot envelope
+            y = [e.max() for e in DOX]
+        elif self.plotmode_cbox.currentIndex() == 1:  # plot pin
+            if hasattr(self.parent, "pinselection_index"):
+                ipin = self.parent.pinselection_index
+            else:
+                ipin = 0
+            iseg = int(self.parent.case_cbox.currentIndex())
+            i, j = self.parent.pinobjects[iseg][ipin].pos
+            y = [e[i, j] for e in DOX]
+            label = self.parent.pinobjects[iseg][ipin].coord
+
         self.plot_xy(x, y, "BTF", label, linestyle)
 
     def save_figure(self):
