@@ -135,6 +135,11 @@ class PlotWin(QtGui.QMainWindow):
 
         self.plot_xy(x, y, "BTF", label, linestyle)
 
+    def export_to_ascii(self):
+        print "export data to ascii file"
+        qtrace()
+
+
     def save_figure(self):
         """save figure"""
 
@@ -494,7 +499,8 @@ class PlotWin(QtGui.QMainWindow):
                                          shortcut="Ctrl+W",
                                          tip="Close the application")
         
-        export_action = self.create_action("&Export to ascii",
+        export_action = self.create_action("&Export to ascii...",
+                                           slot=self.export_to_ascii,
                                            tip="Export data to ascii file")
 
         self.add_actions(self.file_menu,
