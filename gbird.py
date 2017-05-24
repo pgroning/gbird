@@ -1269,7 +1269,7 @@ class MainWin(QtGui.QMainWindow):
             self.pinobjects[iseg][i].set_text(text)
 
         if self.track_maxpin.isChecked():
-            self.mark_maxpin()
+            self.mark_maxpins()
 
         self.canvas.draw()
         self.plot_update()
@@ -1979,16 +1979,10 @@ class MainWin(QtGui.QMainWindow):
         # Mark pin with maximum value
         #self.mark_maxpin()
 
-    def mark_maxpin(self, param=None):
+    def mark_maxpins(self, param=None):
         """Mark pin with maximum value"""
 
-        if hasattr(self, "maxpins"):
-            #qtrace()
-            for ipin in range(len(self.maxpins)):
-                try:
-                    self.maxpins[ipin].maxpin_patch.remove()
-                except:
-                    pass
+        self.remove_maxpins()
 
         iseg = int(self.case_cbox.currentIndex())
         ipoint = int(self.point_sbox.value())
@@ -2939,14 +2933,18 @@ class MainWin(QtGui.QMainWindow):
     def toggle_maxpins(self):
         """track maxpin on/off"""
         if self.track_maxpin.isChecked():
-            self.mark_maxpin()
+            self.mark_maxpins()
         else:
-            if hasattr(self, "maxpin"):
+            self.remove_maxpins()
+        self.canvas.draw()
+
+    def remove_maxpins(self):
+        if hasattr(self, "maxpins"):
+            for ipin in range(len(self.maxpins)):
                 try:
-                    self.maxpin.maxpin_patch.remove()
+                    self.maxpins[ipin].maxpin_patch.remove()
                 except:
                     pass
-        self.canvas.draw()
 
     def add_actions(self, target, actions):
         for action in actions:
