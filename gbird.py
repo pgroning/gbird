@@ -1982,11 +1982,13 @@ class MainWin(QtGui.QMainWindow):
     def mark_maxpin(self, param=None):
         """Mark pin with maximum value"""
 
-        if hasattr(self, "maxpin"):
-            try:
-                self.maxpin.maxpin_patch.remove()
-            except:
-                pass
+        if hasattr(self, "maxpins"):
+            #qtrace()
+            for ipin in range(len(self.maxpins)):
+                try:
+                    self.maxpins[ipin].maxpin_patch.remove()
+                except:
+                    pass
 
         iseg = int(self.case_cbox.currentIndex())
         ipoint = int(self.point_sbox.value())
@@ -1995,7 +1997,8 @@ class MainWin(QtGui.QMainWindow):
         if param == None:
             param = str(self.param_cbox.currentText())
         if param not in ["FINT", "EXP", "BTF"]:
-            param = "FINT"
+            #param = "FINT"
+            return
         if param == "FINT":
             M = segment.statepoints[ipoint].POW
         elif param == "EXP":
@@ -2011,11 +2014,32 @@ class MainWin(QtGui.QMainWindow):
                 s = np.shape(segment.statepoints[ipoint].POW)
                 M = np.zeros(s)
         
-        ncols = M.shape[0]
-        index = M.argmax()
-        ipos = [index / ncols , index % ncols]  # [i, j]
-        self.maxpin = next(p for p in self.pinobjects[iseg] if p.pos == ipos)
-        self.maxpin.set_maxpin_patch()
+        #ncols = M.shape[0]
+        #index = M.argmax()
+        #ipos = [index / ncols , index % ncols]  # [i, j]
+
+        self.maxpins = []
+        M_max = M.max()
+        if M_max > 0.00001:
+            #i_arr, j_arr = np.where(M == M.max())
+            i_arr, j_arr = np.where(M > M.max()*0.99999)
+            for i, j in zip(i_arr, j_arr):
+                maxpin = next(p for p in self.pinobjects[iseg] 
+                                   if p.pos == [i, j])
+                maxpin.set_maxpin_patch()
+                self.maxpins.append(maxpin)
+        
+            #ipos = pos_tuple[0].tolist()
+            #ipos = ipos_array.tolist()
+            #self.maxpin = next(p for p in self.pinobjects[iseg] 
+            #                   if p.pos == ipos)
+            #self.maxpin.set_maxpin_patch()
+
+        #pos_tuple = np.where(M == M.max())
+        #ipos = pos_tuple[0].tolist()
+        #mpin = next(p for p in self.pinobjects[iseg] if p.pos == ipos)
+        
+        
         #self.toggle_pin_bgcolors()  # must update pin alpha values
         #if self.maxpin.rectangle.get_alpha() > 0.0:
         #    fc = self.maxpin.rectangle.get_fc()
@@ -2698,10 +2722,10 @@ class MainWin(QtGui.QMainWindow):
                                             tip="Show background color map",
                                             slot=self.toggle_pin_bgcolors)
 
-        self.track_maxpin = self.create_action("Track max pin", 
+        self.track_maxpin = self.create_action("Track max pins", 
                                                checkable=True,
-                                               tip="Track maximum value pin",
-                                               slot=self.toggle_maxpin)
+                                               tip="Mark pins with highest value",
+                                               slot=self.toggle_maxpins)
 
         self.add_actions(self.tools_menu,
                          (plot_action, casmo_action, casinp_action,
@@ -2912,7 +2936,7 @@ class MainWin(QtGui.QMainWindow):
                 pin.rectangle.set_alpha(0.0)
         self.canvas.draw()
 
-    def toggle_maxpin(self):
+    def toggle_maxpins(self):
         """track maxpin on/off"""
         if self.track_maxpin.isChecked():
             self.mark_maxpin()
