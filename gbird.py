@@ -29,6 +29,8 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg \
 # as NavigationToolbar
 from matplotlib.figure import Figure
 import matplotlib.patches as mpatches
+import matplotlib.pyplot as plt
+
 #try:  # patheffects not available for older versions of matplotlib
 #    import matplotlib.patheffects as path_effects
 #except:
@@ -674,13 +676,16 @@ class MainWin(QtGui.QMainWindow):
             
             self.canvas.print_figure(filename, dpi=self.dpi)
             self.statusBar().showMessage('Saved to %s' % filename, 2000)
+
+    def plot_pin(self):
+        self.open_plotwin(plotmode="pin")
             
-    def open_plotwin(self):
+    def open_plotwin(self, plotmode=None):
         """Open plot window"""
 
         if hasattr(self, "bunlist"):  # data is imported
             if not hasattr(self, "plotwin"):  # plot win is not already open
-                self.plotwin = PlotWin(self)
+                self.plotwin = PlotWin(self, plotmode)
                 self.plotwin.show()
         else:
             msg = "There is no data to plot."
@@ -695,44 +700,68 @@ class MainWin(QtGui.QMainWindow):
         if hasattr(self, "report_dlg"):
             self.report_dlg.update()
 
-    def get_colormap(self, num_enr_levels, colormap="rainbow"):
-
-        n = num_enr_levels + 1
-        #n = int(np.ceil(num_enr_levels / 4.0)) + 1
-        v00 = np.zeros(n)
-        v11 = np.ones(n)
-        v01 = np.linspace(0, 1, n)
-        v10 = v01[::-1]  # revert array
-
+    def get_colormap(self, npins, colormap="rainbow"):
         if colormap == "rainbow":
-            # magenta -> blue
-            cm_mb = np.vstack((v10, v00, v11)).transpose()[:-1]  # remove last elem
-            # blue -> cyan
-            # remove last element
-            cm_bc = np.vstack((v00, v01, v11)).transpose()[:-1]
-            # cyan -> green
-            cm_cg = np.vstack((v00, v11, v10)).transpose()[:-1]
-            # green -> yellow
-            cm_gy = np.vstack((v01, v11, v00)).transpose()[:-1]
-            # yellow -> red
-            cm_yr = np.vstack((v11, v10, v00)).transpose()
-            cm = np.vstack((cm_mb, cm_bc, cm_cg, cm_gy, cm_yr))
+            cm = plt.cm.gist_rainbow_r(np.linspace(0, 1, npins))[:,:3]
+            cmap = cm.tolist()
+        elif colormap == "jet":
+            #cm = plt.cm.RdBu_r(np.linspace(0, 1, npins))[:,:3]
+            cm = plt.cm.jet(np.linspace(0, 1, npins))[:,:3]
+            #cm = plt.cm.Spectral_r(np.linspace(0, 1, npins))[:,:3]
+            cmap = cm.tolist()
         elif colormap == "bmr":
+            n = npins + 1
+            v00 = np.zeros(n)
+            v11 = np.ones(n)
+            v01 = np.linspace(0, 1, n)
+            v10 = v01[::-1]  # revert array
             # blue -> magenta
-            cm_bc = np.vstack((v01, v00, v11)).transpose()[:-1]
+            cm_bm = np.vstack((v01, v00, v11)).transpose()[:-1]
             # magenta -> red
             cm_mr = np.vstack((v11, v00, v10)).transpose()
-            cm = np.vstack((cm_bc, cm_mr))
-        elif colormap == "byr":
-            # blue -> yellow
-            cm_by = np.vstack((v01, v01, v10)).transpose()[:-1]
-            # yellow -> red
-            cm_yr = np.vstack((v11, v10, v00)).transpose()
-            cm = np.vstack((cm_by, cm_yr))
-            
-        ic = np.linspace(0, len(cm) - 1, num_enr_levels).astype(int).tolist()
-        cmap = [cm[i].tolist() for i in ic]
+            cm = np.vstack((cm_bm, cm_mr))
+            ic = np.linspace(0, len(cm) - 1, npins).astype(int).tolist()
+            cmap = [cm[i] for i in ic]
         return cmap
+
+#    def get_colormap_old(self, num_enr_levels, colormap="rainbow"):
+#
+#        n = num_enr_levels + 1
+#        #n = int(np.ceil(num_enr_levels / 4.0)) + 1
+#        v00 = np.zeros(n)
+#        v11 = np.ones(n)
+#        v01 = np.linspace(0, 1, n)
+#        v10 = v01[::-1]  # revert array
+#
+#        if colormap == "rainbow":
+#            # magenta -> blue
+#            cm_mb = np.vstack((v10, v00, v11)).transpose()[:-1]  # remove last elem
+#            # blue -> cyan
+#            # remove last element
+#            cm_bc = np.vstack((v00, v01, v11)).transpose()[:-1]
+#            # cyan -> green
+#            cm_cg = np.vstack((v00, v11, v10)).transpose()[:-1]
+#            # green -> yellow
+#            cm_gy = np.vstack((v01, v11, v00)).transpose()[:-1]
+#            # yellow -> red
+#            cm_yr = np.vstack((v11, v10, v00)).transpose()
+#            cm = np.vstack((cm_mb, cm_bc, cm_cg, cm_gy, cm_yr))
+#        elif colormap == "bmr":
+#            # blue -> magenta
+#            cm_bc = np.vstack((v01, v00, v11)).transpose()[:-1]
+#            # magenta -> red
+#            cm_mr = np.vstack((v11, v00, v10)).transpose()
+#            cm = np.vstack((cm_bc, cm_mr))
+#        elif colormap == "byr":
+#            # blue -> yellow
+#            cm_by = np.vstack((v01, v01, v10)).transpose()[:-1]
+#            # yellow -> red
+#            cm_yr = np.vstack((v11, v10, v00)).transpose()
+#            cm = np.vstack((cm_by, cm_yr))
+#            
+#        ic = np.linspace(0, len(cm) - 1, num_enr_levels).astype(int).tolist()
+#        cmap = [cm[i].tolist() for i in ic]
+#        return cmap
 
     def init_pinobjects(self):
         self.pinobjects = []
@@ -1087,24 +1116,35 @@ class MainWin(QtGui.QMainWindow):
 #                                        tfu, tmo))
         
         npins = len(self.pinobjects[iseg])
-        cmap = self.get_colormap(npins)
+        #cmap = self.get_colormap(npins, "bmr")
+        cmap = self.get_colormap(npins, "jet")
 
         # Sort params and get color map
-        if param_str == "FINT":
+        #if param_str == "FINT":
+        #    v = np.array([pin.FINT for pin in self.pinobjects[iseg]])
+        #    uni_fint = np.unique(v)
+        #    cmap = self.get_colormap(uni_fint.size, "bmr")
+        #elif param_str == "BTF":
+        #    v = np.array([pin.BTF for pin in self.pinobjects[iseg]])
+        #    uni_btf = np.unique(v)
+        #    cmap = self.get_colormap(uni_btf.size, "bmr")
+        #elif param_str == "EXP":
+        #    v = np.array([pin.EXP for pin in self.pinobjects[iseg]])
+        #    uni_exp = np.unique(v)
+        #    cmap = self.get_colormap(uni_exp.size, "bmr")
+
+        if param_str == "ENR":
+            v = np.array([pin.ENR for pin in self.pinobjects[iseg]])
+        if param_str == "EXP":
+            v = np.array([pin.EXP for pin in self.pinobjects[iseg]])
+        elif param_str == "FINT":
             v = np.array([pin.FINT for pin in self.pinobjects[iseg]])
-            uni_fint = np.unique(v)
-            cmap = self.get_colormap(uni_fint.size, "bmr")
         elif param_str == "BTF":
             v = np.array([pin.BTF for pin in self.pinobjects[iseg]])
-            uni_btf = np.unique(v)
-            cmap = self.get_colormap(uni_btf.size, "bmr")
-        elif param_str == "EXP":
-            v = np.array([pin.EXP for pin in self.pinobjects[iseg]])
-            uni_exp = np.unique(v)
-            cmap = self.get_colormap(uni_exp.size, "bmr")
-            
+        xmin = v.min()
+        xmax = v.max()
+
         for i in xrange(npins):
-            
             #if self.pinobjects[iseg][i].BA < 0.00001:
             #    j = next(j for j, epin in enumerate(self.enrpinlist[iseg])
             #             if epin.ENR == self.pinobjects[iseg][i].ENR)
@@ -1118,43 +1158,118 @@ class MainWin(QtGui.QMainWindow):
             self.pinobjects[iseg][i].circle.set_facecolor(fc)
 
             if param_str == "ENR":
-                text = self.enrpinlist[iseg][j].text.get_text()
-                self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[i])
-                self.pinobjects[iseg][i].rectangle.set_facecolor((1, 1, 1))
-                
-            elif param_str == "BTF":
-                pin_btf = self.pinobjects[iseg][i].BTF
-                if np.isnan(pin_btf):
-                    text = "nan"
-                    self.pinobjects[iseg][i].rectangle.set_facecolor((1, 1, 1))
+                x = self.pinobjects[iseg][i].ENR
+                #xave = v.mean()
+                #k = 2
+                #y = 1 / (1 + np.exp(-k * (x - xave)))  # sigmoid function
+                if xmax == xmin:
+                    y = 0.5
                 else:
-                    btf_ratio = pin_btf / btf * 1000
-                    if int(btf_ratio) == 1000:
-                        text = "1e3"
-                    else:
-                        text = ('%.0f' % (btf_ratio))
-                    ic = next(i for i, v in enumerate(uni_btf) if v == pin_btf)
-                    self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic])
-            
-            elif param_str == "EXP":
-                if self.pinobjects[iseg][i].EXP < 10:
-                    text = ('%.1f' % (self.pinobjects[iseg][i].EXP))
-                else:
-                    text = ('%.0f' % (self.pinobjects[iseg][i].EXP))
-                pin_exp = self.pinobjects[iseg][i].EXP
-                ic = next(i for i, v in enumerate(uni_exp) if v == pin_exp)
+                    y = (x - xmin) / (xmax - xmin)
+                ic = int(round(y * (npins - 1)))
                 self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic])
 
-            elif param_str == "FINT":
-                text = ('%.0f' % (self.pinobjects[iseg][i].FINT * 100))
-                pin_fint = self.pinobjects[iseg][i].FINT
-                ic = next(i for i, v in enumerate(uni_fint) if v == pin_fint)
+                text = self.enrpinlist[iseg][j].text.get_text()
+                #self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[i])
+                #self.pinobjects[iseg][i].rectangle.set_facecolor((1, 1, 1))
+                
+            elif param_str == "BTF":
+                x = self.pinobjects[iseg][i].BTF
+                
+                if not np.isnan(x):
+                    #xave = v.mean()
+                    #xstd = v.std()
+                    #if xstd == 0:
+                    #    y = 0
+                    #else:
+                    #    k = 3
+                    #    y = 1 / (1 + np.exp(-k * (x - xave) / xstd))
+                    if xmax == xmin:
+                        y = 0.5
+                    else:
+                        y = (x - xmin) / (xmax - xmin)
+                    ic = int(round(y * (npins - 1)))
+                    self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic])
+                    btf_ratio = x / btf * 1000
+                    text = ('%.0f' % (btf_ratio))
+                else:
+                    self.pinobjects[iseg][i].rectangle.set_facecolor((1, 1, 1))
+                    text = "nan"
+
+                #pin_btf = self.pinobjects[iseg][i].BTF
+                #if np.isnan(pin_btf):
+                #    text = "nan"
+                #    self.pinobjects[iseg][i].rectangle.set_facecolor((1, 1, 1))
+                #else:
+                #    btf_ratio = pin_btf / btf * 1000
+                #    if int(btf_ratio) == 1000:
+                #        text = "1e3"
+                #    else:
+                #        text = ('%.0f' % (btf_ratio))
+                #    ic = next(i for i, v in enumerate(uni_btf) if v == pin_btf)
+                #    self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic])
+            
+            elif param_str == "EXP":
+                x = self.pinobjects[iseg][i].EXP
+                
+                #xave = v.mean()
+                #xstd = v.std()
+                #if xstd == 0:
+                #    y = 0
+                #else:
+                #    k = 3
+                #    y = 1 / (1 + np.exp(-k * (x - xave) / xstd))
+                if xmax == xmin:
+                    y = 0.1
+                else:
+                    y = (x - xmin) / (xmax - xmin)
+
+                ic = int(round(y * (npins - 1)))
                 self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic])
+                if x < 10:
+                    text = '{0:.1f}'.format(x)
+                else:
+                    text = '{0:.0f}'.format(x)
+
+                #if self.pinobjects[iseg][i].EXP < 10:
+                #    text = ('%.1f' % (self.pinobjects[iseg][i].EXP))
+                #else:
+                #    text = ('%.0f' % (self.pinobjects[iseg][i].EXP))
+                #pin_exp = self.pinobjects[iseg][i].EXP
+                #ic = next(i for i, v in enumerate(uni_exp) if v == pin_exp)
+                #self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic])
+
+            elif param_str == "FINT":
+                x = self.pinobjects[iseg][i].FINT
+                
+                #xave = v.mean()
+                #xstd = v.std()
+                #if xstd == 0:
+                #    y = 0
+                #else:
+                #    k = 3
+                #    y = 1 / (1 + np.exp(-k * (x - xave) / xstd))
+                if xmax == xmin:
+                    y = 0.5
+                else:
+                    y = (x - xmin) / (xmax - xmin)
+
+                ic = int(round(y * (npins - 1)))
+                self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic])
+
+                text = '{0:.0f}'.format(x * 100)
+                #text = ('%.0f' % (x * 100))
+                #pin_fint = self.pinobjects[iseg][i].FINT
+                #ic = next(i for i, v in enumerate(uni_fint) if v == pin_fint)
+                #self.pinobjects[iseg][i].rectangle.set_facecolor(cmap[ic])
             elif param_str == "ROD":
                 return
                 
             self.pinobjects[iseg][i].text.remove()
             self.pinobjects[iseg][i].set_text(text)
+
+        if self.track_maxpin.isChecked():
+            self.mark_maxpins()
 
         self.canvas.draw()
         self.plot_update()
@@ -1255,14 +1370,18 @@ class MainWin(QtGui.QMainWindow):
 
         elif event.button is 3:  # right mouse click
             # check if any fuel pin is clicked
-            #i = next((i for i, cobj in enumerate(self.pinobjects[case_num])
-            #          if cobj.is_clicked(event.xdata, event.ydata)), None)
-            #if i is not None and i >= 0:  # A pin is right clicked
-            #    if (not hasattr(self, "pinselection_index") or
-            #        self.pinselection_index != i):
-            #        self.tableSelectRow(i)
-            #        self.mark_pin(i)
-
+            i = next((i for i, cobj in enumerate(self.pinobjects[case_num])
+                      if cobj.is_clicked(event.xdata, event.ydata)), None)
+            if i is not None and i >= 0:  # A pin is right clicked
+                if (not hasattr(self, "pinselection_index") or
+                    self.pinselection_index != i):
+                    self.tableSelectRow(i)
+                    self.mark_pin(i)
+                    
+                popMenu = QtGui.QMenu(self)
+                popMenu.addAction("Plot", self.plot_pin)
+                popMenu.exec_(QtGui.QCursor.pos())
+ 
             #    self.pin_popMenu = QtGui.QMenu(self)
             #    enr_menu = self.pin_popMenu.addMenu("Enr list...")
             #    check_icon = self.appdir + "icons/ok-apply-icon_32x32.png"
@@ -1279,21 +1398,25 @@ class MainWin(QtGui.QMainWindow):
             #        #enr_menu.addAction(label, self.pin_update)
             #    self.pin_popMenu.exec_(QtGui.QCursor.pos())
                 
-            #else: # check if enr level pin is clicked
-            i = next((i for i, cobj in enumerate(self.enrpinlist[case_num])
-                      if cobj.is_clicked(event.xdata, event.ydata)), None)
-            if i is not None and i >= 0:  # An enr level pin is selected
-                self.pinselection_index = i
-                # self.mark_enrpin(i)
-                # print self.pinselection_index
-                
-                self.popMenu = QtGui.QMenu(self)
-                self.popMenu.addAction("Add...", self.enrpin_add)
-                self.popMenu.addAction("Edit...", self.enrpin_edit)
-                self.popMenu.addAction("Remove", self.enrpin_remove)
-                self.popMenu.addAction("Sort", self.enrpin_sort)
-                
-                self.popMenu.exec_(QtGui.QCursor.pos())
+            else: # check if enr level pin is clicked
+                i = next((i for i, cobj in enumerate(self.enrpinlist[case_num])
+                          if cobj.is_clicked(event.xdata, event.ydata)), None)
+                if i is not None and i >= 0:  # An enr level pin is selected
+                    self.pinselection_index = i
+                    
+                    popMenu = QtGui.QMenu(self)
+                    popMenu.addAction("Add...", self.enrpin_add)
+                    popMenu.addAction("Edit...", self.enrpin_edit)
+                    popMenu.addAction("Remove", self.enrpin_remove)
+                    popMenu.addAction("Sort", self.enrpin_sort)
+                    popMenu.exec_(QtGui.QCursor.pos())
+
+                    #self.popMenu = QtGui.QMenu(self)
+                    #self.popMenu.addAction("Add...", self.enrpin_add)
+                    #self.popMenu.addAction("Edit...", self.enrpin_edit)
+                    #self.popMenu.addAction("Remove", self.enrpin_remove)
+                    #self.popMenu.addAction("Sort", self.enrpin_sort)
+                    #self.popMenu.exec_(QtGui.QCursor.pos())
 
     def halfsym_pin(self, i, case_num=None):
         """Find the corresponding pin for half symmetry"""
@@ -1320,34 +1443,36 @@ class MainWin(QtGui.QMainWindow):
             j = np.nan
         return j
 
-    def mark_pin(self, i):
-
-        self.pinselection_index = i
-        case_num = int(self.case_cbox.currentIndex())
-        d = self.pinobjects[case_num][i].circle.get_radius() * 2 * 1.25
-        x = self.pinobjects[case_num][i].x - d / 2
-        y = self.pinobjects[case_num][i].y - d / 2
-
-        if hasattr(self, 'clickpatch'):  # Remove any previously selected pins
+    def mark_pin(self, i, edge_color=(0, 0, 0)):
+        
+        if hasattr(self, "clicked_pin"):
             try:
-                self.clickpatch.remove()
+                self.clicked_pin.clickpatch.remove()
             except:
                 pass
-        # self.clickrect = mpatches.Rectangle((x,y), d, d,hatch='.',
-        #                                    fc=(1,1,1),alpha=1.0,ec=(1, 0, 0))
-        # self.clickrect = mpatches.Rectangle((x,y), d, d,
-        #                                   fc=(1,1,1),Fill=False,ec=(0, 0, 0))
-        r = self.pinobjects[case_num][i].circle.get_radius() * 1.3
-        x = self.pinobjects[case_num][i].x
-        y = self.pinobjects[case_num][i].y
+            
+        self.pinselection_index = i
+        case_num = int(self.case_cbox.currentIndex())
+        self.clicked_pin = self.pinobjects[case_num][i]
+        self.clicked_pin.set_clickpatch()
+        
+        # mark enr pin
+        #LFU = self.pinobjects[case_num][i].LFU
+        LFU = self.clicked_pin.LFU
+        self.mark_enrpin(self.enrpinlist[case_num][LFU - 1])
 
-        self.clickpatch = mpatches.Circle((x, y), r, fc=(1, 1, 1), alpha=1.0,
-                                          ec=(0.2, 0.2, 0.2))
-        self.clickpatch.set_linestyle('solid')
-        self.clickpatch.set_fill(False)
-        self.clickpatch.set_linewidth(2.0)
-        self.axes.add_patch(self.clickpatch)
         self.canvas.draw()
+        self.plot_update()
+
+    def mark_enrpin(self, pin, edge_color=(0.4, 0.4, 0.4)):
+
+        if hasattr(self, "marked_enrpin"):
+            try:
+                self.marked_enrpin.clickpatch.remove()
+            except:
+                pass
+        self.marked_enrpin = pin
+        self.marked_enrpin.set_clickpatch(edge_color=edge_color)
 
     def enr_add(self):
         self.enr_update("add")
@@ -1849,8 +1974,73 @@ class MainWin(QtGui.QMainWindow):
         text = sim.replace("SIM", "").replace("'", "").strip()
         self.sim_info_field.setText(text)
         #self.sim_text.setText(text)
-
         self.enr_fields_update()
+
+        # Mark pin with maximum value
+        #self.mark_maxpin()
+
+    def mark_maxpins(self, param=None):
+        """Mark pin with maximum value"""
+
+        self.remove_maxpins()
+
+        iseg = int(self.case_cbox.currentIndex())
+        ipoint = int(self.point_sbox.value())
+        bundle = self.bunlist[self.ibundle]
+        segment = bundle.segments[iseg]
+        if param == None:
+            param = str(self.param_cbox.currentText())
+        if param not in ["FINT", "EXP", "BTF"]:
+            #param = "FINT"
+            return
+        if param == "FINT":
+            M = segment.statepoints[ipoint].POW
+        elif param == "EXP":
+            M = segment.statepoints[ipoint].EXP
+        elif param == "BTF":
+            burnup = segment.statepoints[ipoint].burnup
+            btf_burnpoints = bundle.btf.burnpoints
+            index_array = np.where(btf_burnpoints == burnup)[0]
+            if len(index_array) > 0:
+                ipoint = index_array[0]
+                M = bundle.btf.DOX[ipoint, :, :]
+            else:
+                s = np.shape(segment.statepoints[ipoint].POW)
+                M = np.zeros(s)
+        
+        #ncols = M.shape[0]
+        #index = M.argmax()
+        #ipos = [index / ncols , index % ncols]  # [i, j]
+
+        self.maxpins = []
+        M_max = M.max()
+        if M_max > 0.00001:
+            #i_arr, j_arr = np.where(M == M.max())
+            i_arr, j_arr = np.where(M > M.max()*0.99999)
+            for i, j in zip(i_arr, j_arr):
+                maxpin = next(p for p in self.pinobjects[iseg] 
+                                   if p.pos == [i, j])
+                maxpin.set_maxpin_patch()
+                self.maxpins.append(maxpin)
+        
+            #ipos = pos_tuple[0].tolist()
+            #ipos = ipos_array.tolist()
+            #self.maxpin = next(p for p in self.pinobjects[iseg] 
+            #                   if p.pos == ipos)
+            #self.maxpin.set_maxpin_patch()
+
+        #pos_tuple = np.where(M == M.max())
+        #ipos = pos_tuple[0].tolist()
+        #mpin = next(p for p in self.pinobjects[iseg] if p.pos == ipos)
+        
+        
+        #self.toggle_pin_bgcolors()  # must update pin alpha values
+        #if self.maxpin.rectangle.get_alpha() > 0.0:
+        #    fc = self.maxpin.rectangle.get_fc()
+        #    edge_color = (1 - np.array(fc)).tolist()  # complement color
+        #    self.maxpin.set_maxpin_patch(edge_color=(0, 0, 0))
+        #else:
+        #    self.maxpin.set_maxpin_patch()
 
     def on_draw(self):
         """Setup the figure axis"""
@@ -2526,10 +2716,15 @@ class MainWin(QtGui.QMainWindow):
                                             tip="Show background color map",
                                             slot=self.toggle_pin_bgcolors)
 
+        self.track_maxpin = self.create_action("Track max pins", 
+                                               checkable=True,
+                                               tip="Mark pins with highest value",
+                                               slot=self.toggle_maxpins)
+
         self.add_actions(self.tools_menu,
                          (plot_action, casmo_action, casinp_action,
                           data_action, find_action, egv_action, 
-                          self.show_cmap))
+                          self.show_cmap, self.track_maxpin))
 
         self.run_menu = self.menuBar().addMenu("&Run")
         quickcalc_action = self.create_action("&Quick calc", shortcut="F9",
@@ -2734,7 +2929,23 @@ class MainWin(QtGui.QMainWindow):
             for pin in self.pinobjects[iseg]:
                 pin.rectangle.set_alpha(0.0)
         self.canvas.draw()
-            
+
+    def toggle_maxpins(self):
+        """track maxpin on/off"""
+        if self.track_maxpin.isChecked():
+            self.mark_maxpins()
+        else:
+            self.remove_maxpins()
+        self.canvas.draw()
+
+    def remove_maxpins(self):
+        if hasattr(self, "maxpins"):
+            for ipin in range(len(self.maxpins)):
+                try:
+                    self.maxpins[ipin].maxpin_patch.remove()
+                except:
+                    pass
+
     def add_actions(self, target, actions):
         for action in actions:
             if action is None:

@@ -28,7 +28,7 @@ from bundle import Bundle
 
 
 class PlotWin(QtGui.QMainWindow):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, plotmode=None):
         super(PlotWin, self).__init__(parent)
         self.parent = parent
         # QMainWindow.__init__(self, parent)
@@ -48,6 +48,9 @@ class PlotWin(QtGui.QMainWindow):
         # self.textbox.setText('1 2 3 4')
         # self.data_init()
         
+        if plotmode == "pin":  # plot single pin
+            self.plotmode_cbox.setCurrentIndex(1)
+
         # self.case_cbox.setCurrentIndex(0) # Set default plot case
         # self.case_id_current = 0
         self.on_plot()  # Init plot
@@ -93,20 +96,43 @@ class PlotWin(QtGui.QMainWindow):
 
         statepoints = segment.get_statepoints(voi, vhi, tfu)
         x = [s.burnup for s in statepoints]
-        y = [s.fint for s in statepoints]
+        if self.plotmode_cbox.currentIndex() == 0:  # plot envelope
+            y = [s.fint for s in statepoints]
+        elif self.plotmode_cbox.currentIndex() == 1:  # plot specific pin
+            if hasattr(self.parent, "pinselection_index"):
+                ipin = self.parent.pinselection_index
+            else:
+                ipin = 0
+            iseg = int(self.parent.case_cbox.currentIndex())
+            i, j = self.parent.pinobjects[iseg][ipin].pos
+            y = [s.POW[i, j] for s in statepoints]
 
         if label == None:
             labstr = segment.data.sim
             labstr = labstr.replace("SIM", "").replace("'", "").strip()
+            if self.plotmode_cbox.currentIndex() == 1:
+                coordstr = self.parent.pinobjects[iseg][ipin].coord
+                labstr = coordstr + ": " + labstr
         else:
             labstr = label
-        self.plot_xy(x, y, "K-inf", labstr, linestyle)
+        self.plot_xy(x, y, "Fint", labstr, linestyle)
 
     def plot_btf(self, bundle, linestyle="-", label=None):
 
         x = bundle.btf.burnpoints
         DOX = bundle.btf.DOX
-        y = [e.max() for e in DOX]
+        if self.plotmode_cbox.currentIndex() == 0:  # plot envelope
+            y = [e.max() for e in DOX]
+        elif self.plotmode_cbox.currentIndex() == 1:  # plot pin
+            if hasattr(self.parent, "pinselection_index"):
+                ipin = self.parent.pinselection_index
+            else:
+                ipin = 0
+            iseg = int(self.parent.case_cbox.currentIndex())
+            i, j = self.parent.pinobjects[iseg][ipin].pos
+            y = [e[i, j] for e in DOX]
+            label = self.parent.pinobjects[iseg][ipin].coord
+
         self.plot_xy(x, y, "BTF", label, linestyle)
 
     def save_figure(self):
@@ -321,8 +347,8 @@ class PlotWin(QtGui.QMainWindow):
         param_label = QtGui.QLabel('Param:')
         self.param_cbox = QtGui.QComboBox()
         paramlist = ["KINF", "FINT", "BTF"]
-        for i in paramlist:
-            self.param_cbox.addItem(i)
+        for p in paramlist:
+            self.param_cbox.addItem(p)
 
         parent_param = str(self.parent.param_cbox.currentText())
         if parent_param in paramlist:
@@ -349,6 +375,14 @@ class PlotWin(QtGui.QMainWindow):
         self.previous_cb.setChecked(False)
         self.connect(self.previous_cb, QtCore.SIGNAL('stateChanged(int)'),
                      self.on_plot)
+
+        self.plotmode_cbox = QtGui.QComboBox()
+        modelist = ["Env.", "Pin"]
+        for t in modelist:
+            self.plotmode_cbox.addItem(t)
+
+        self.connect(self.plotmode_cbox,
+                     QtCore.SIGNAL('currentIndexChanged(int)'), self.on_plot)
 
         #type_label = QtGui.QLabel('Type:')
         #self.type_cbox = QtGui.QComboBox()
@@ -433,6 +467,7 @@ class PlotWin(QtGui.QMainWindow):
             #hbox.setAlignment(w, QtCore.Qt.AlignHCenter)
         hbox.addStretch(1)
         hbox.addLayout(param_flo)
+        hbox.addWidget(self.plotmode_cbox)
 
         vbox = QtGui.QVBoxLayout()
         # vbox.addLayout(hbox)

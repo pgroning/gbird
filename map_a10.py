@@ -6,7 +6,7 @@ import numpy as np
 def a10xm(self):
     
     # Draw water channel
-    p_fancy = mpatches.FancyBboxPatch((0.445, 0.364), 0.2, 0.2,
+    p_fancy = mpatches.FancyBboxPatch((0.445, 0.360), 0.202, 0.202,
                                           boxstyle="round,pad=0.02",
                                           fc=(0.8,0.898,1), ec=(0.3, 0.3, 0.3))
     p_fancy.set_linewidth(2.0)

@@ -7,7 +7,7 @@ def at11(self):
     
     # Draw water channel
     f = 0.88
-    p_fancy = mpatches.FancyBboxPatch((0.445-0.03, 0.364+0.05), 0.2*f, 0.2*f,
+    p_fancy = mpatches.FancyBboxPatch((0.417, 0.414), 0.177, 0.177,
                                           boxstyle="round,pad=0.02",
                                           fc=(0.8,0.898,1), ec=(0.3, 0.3, 0.3))
     p_fancy.set_linewidth(2.0)
