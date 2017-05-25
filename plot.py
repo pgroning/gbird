@@ -77,6 +77,8 @@ class PlotWin(QtGui.QMainWindow):
         self.axes.set_xlabel('Burnup (MWd/kgU)')
         self.axes.set_ylabel(ylabel)
         self.on_draw()
+        self.x_data = x
+        self.y_data = y
 
     def plot_kinf(self, segment, voi, vhi, tfu, linestyle="-", label=None):
         """Plot kinf as a function of burnup"""
@@ -136,9 +138,27 @@ class PlotWin(QtGui.QMainWindow):
         self.plot_xy(x, y, "BTF", label, linestyle)
 
     def export_to_ascii(self):
+        """Write data to YAML format"""
         print "export data to ascii file"
-        qtrace()
-
+        #points = np.column_stack((self.x_data, self.y_data))
+        fname = "gb-export.yml"
+        f = open(fname, "w")
+        f.write("- x: [")
+        for i, x in enumerate(self.x_data):
+            if i == 0:
+                f.write(str(x))
+            else:
+                f.write(", " + str(x))
+        f.write("]")
+        f.write("\n")
+        f.write("- y: [")
+        for i, y in enumerate(self.y_data):
+            if i == 0:
+                f.write(str(y))
+            else:
+                f.write(", " + str(y))
+        f.write("]")
+        f.close()
 
     def save_figure(self):
         """save figure"""
