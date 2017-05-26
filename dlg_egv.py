@@ -114,7 +114,10 @@ class EgvDialog(QtGui.QDialog):
         
         if hasattr(self.parent, "bunlist"):
             bundle = self.parent.bunlist[0]
-            caxfiles = bundle.data.caxfiles[::-1]
+
+            orgfiles = bundle.data.caxfiles[::-1]
+            caxfiles = ["gb-" + os.path.split(f)[-1] for f in orgfiles]
+
             zone_list = ["None", "Upper End", "Upper Active", "Lower Active",
                          "Lower End"]
             
