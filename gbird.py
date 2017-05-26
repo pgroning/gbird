@@ -656,7 +656,8 @@ class MainWin(QtGui.QMainWindow):
             print "Project saved to file " + filename
 
     def saveFigure(self):
-
+        """Save fuel map to .png format"""
+ 
         # Import default path from config file
         self.settings.beginGroup("PATH")
         path_default = self.settings.value("path_save_figure",
@@ -676,6 +677,55 @@ class MainWin(QtGui.QMainWindow):
             
             self.canvas.print_figure(filename, dpi=self.dpi)
             self.statusBar().showMessage('Saved to %s' % filename, 2000)
+
+    def export_to_ascii(self):
+        """Export data to file using YAML format"""
+
+        iseg = int(self.case_cbox.currentIndex())
+        param = str(self.param_cbox.currentText())
+
+        LFU = self.bunlist[self.ibundle].segments[iseg].data.LFU
+        M = np.zeros(LFU.shape).astype(float)
+
+        P = [getattr(pin, param) for pin in self.pinobjects[iseg]]
+
+        k = 0
+        for i in range(M.shape[0]):
+            for j in range(M.shape[1]):
+                if LFU[i, j] > 0:
+                    M[i, j] = P[k]
+                    k += 1
+
+        outfile = self.select_yamlfile()
+        #outfile = "gb-export.yml"
+        f = open(outfile, "w")
+        for v in M:
+            line = ', '.join(map(str, v))
+            f.write("- [" + line + "]\n")
+        f.close()
+
+    def select_yamlfile(self):
+        """Select file for writing"""
+        
+        # Import default path from config file
+        self.settings.beginGroup("PATH")
+        path_default = self.settings.value("path_save_file",
+                                           QtCore.QString("")).toString()
+        self.settings.endGroup()
+        file_choices = "YAML (*.yml *.yaml)"
+        filename = unicode(QtGui.QFileDialog.getSaveFileName(self, 'Save file',
+                                                             path_default,
+                                                             file_choices))
+        if filename:
+            fname_split =  os.path.splitext(filename)
+            if fname_split[1] not in [".yml", ".yaml"]:
+                filename = filename + ".yml"  # add file extension
+            # Save default path to config file
+            path = os.path.split(filename)[0]
+            self.settings.beginGroup("PATH")
+            self.settings.setValue("path_save_file", QtCore.QString(path))
+            self.settings.endGroup()    
+        return filename
 
     def plot_pin(self):
         self.open_plotwin(plotmode="pin")
@@ -2609,6 +2659,11 @@ class MainWin(QtGui.QMainWindow):
                                               tip="Save data to file",
                                               icon="save-icon_32x32")
 
+        save_file_action = self.create_action("&Export to ascii...",
+                                                slot=self.export_to_ascii,
+                                                tip="Export data to file",
+                                                icon="export-icon_32x32")
+
         save_figure_action = self.create_action("&Export Figure...",
                                                 slot=self.saveFigure,
                                                 tip="Export fuel map to file",
@@ -2616,7 +2671,7 @@ class MainWin(QtGui.QMainWindow):
         
         self.add_actions(self.file_menu, (new_project_action, open_file_action,
                                           save_data_action,
-                                          clear_action,
+                                          clear_action, save_file_action,
                                           save_figure_action, None,
                                           quit_action))
 
@@ -2748,7 +2803,7 @@ class MainWin(QtGui.QMainWindow):
         
         self.add_actions(self.help_menu, (about_action,))
 
-        self.menu_actions = [save_data_action, clear_action, 
+        self.menu_actions = [save_data_action, clear_action, save_file_action,
                              save_figure_action, back, forward, reset, 
                              enrichment, segment, enr_plus, enr_minus, 
                              quickcalc, replace, plot_action, casmo_action,
