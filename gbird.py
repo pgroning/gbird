@@ -635,7 +635,7 @@ class MainWin(QtGui.QMainWindow):
 
         # Import default path from config file
         self.settings.beginGroup("PATH")
-        path_default = self.settings.value("path_default",
+        path_default = self.settings.value("path_save_file",
                                            QtCore.QString("")).toString()
         self.settings.endGroup()
 

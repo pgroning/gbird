@@ -139,11 +139,14 @@ class PlotWin(QtGui.QMainWindow):
 
     def export_to_ascii(self):
         """Write data to YAML format"""
-        print "export data to ascii file"
-        #points = np.column_stack((self.x_data, self.y_data))
-        fname = "gb-export.yml"
-        f = open(fname, "w")
-        f.write("- x: [")
+
+        outfile = self.select_outfile()
+        if not outfile:
+            return
+        print "Export data to file: " + outfile
+
+        f = open(outfile, "w")
+        f.write("x: [")
         for i, x in enumerate(self.x_data):
             if i == 0:
                 f.write(str(x))
@@ -151,7 +154,7 @@ class PlotWin(QtGui.QMainWindow):
                 f.write(", " + str(x))
         f.write("]")
         f.write("\n")
-        f.write("- y: [")
+        f.write("y: [")
         for i, y in enumerate(self.y_data):
             if i == 0:
                 f.write(str(y))
@@ -565,6 +568,29 @@ class PlotWin(QtGui.QMainWindow):
         if checkable:
             action.setCheckable(True)
         return action
+
+    def select_outfile(self):
+        """Select file for writing"""
+
+        # Import default path from config file
+        self.settings.beginGroup("PATH")
+        path_default = self.settings.value("path_save_file",
+                                           QtCore.QString("")).toString()
+        self.settings.endGroup()
+        file_choices = "YAML (*.yml *.yaml)"
+        filename = unicode(QtGui.QFileDialog.getSaveFileName(self, 'Save file',
+                                                             path_default,
+                                                             file_choices))
+        if filename:
+            fname_split =  os.path.splitext(filename)
+            if fname_split[1] not in [".yml", ".yaml"]:
+                filename = filename + ".yml"  # add file extension
+            # Save default path to config file
+            path = os.path.split(filename)[0]
+            self.settings.beginGroup("PATH")
+            self.settings.setValue("path_save_file", QtCore.QString(path))
+            self.settings.endGroup()    
+        return filename
 
     def closeEvent(self, event):
         """This method is called before closing the window"""
