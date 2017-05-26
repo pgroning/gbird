@@ -1786,7 +1786,7 @@ class MainWin(QtGui.QMainWindow):
     #                                        gamlib=gamlib)
 
     def cas_calc(self):
-        """Performing plain CASMO calculations..."""
+        """Performing ordinary CASMO calculations..."""
 
         self.setCursor(QtCore.Qt.WaitCursor)
 
@@ -1811,9 +1811,10 @@ class MainWin(QtGui.QMainWindow):
         neulib = self.params.cas_neulib
         gamlib = self.params.cas_gamlib
         grid = True if self.params.cas_cpu == "grid" else False
+        keepfiles = self.params.cas_keepfiles
 
         bundle.new_calc(model=model, c4ver=c4ver, neulib=neulib, 
-                        gamlib=gamlib, grid=grid)
+                        gamlib=gamlib, grid=grid, keepfiles=keepfiles)
         bundle.new_btf()
         self.bunlist.append(bundle)
         self.ibundle = len(self.bunlist) - 1

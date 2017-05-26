@@ -245,7 +245,7 @@ class Bundle(object):
 
     def new_calc(self, voi=None, dep_max=None, dep_thres=None, grid=False,
                  model="c3", box_offset=0.0, c4ver=None, neulib=None,
-                 gamlib=None):
+                 gamlib=None, keepfiles=False):
         
         # For storage of new calculation
         #self.new_state()
@@ -276,7 +276,7 @@ class Bundle(object):
         segments = self.segments
         for s in segments:
             inlist.append((s, voi, dep_max, dep_thres, grid, model,
-                           box_offset, c4ver, neulib, gamlib))
+                           box_offset, c4ver, neulib, gamlib, keepfiles))
         
         #quickcalc_fun(inlist[0])
         

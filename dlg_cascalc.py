@@ -51,7 +51,8 @@ class CasDialog(QtGui.QDialog):
         self.parent.params.cas_neulib = str(self.neulib_cbox.currentText()) 
         self.parent.params.cas_gamlib = str(self.gamlib_cbox.currentText())
         self.parent.params.cas_cpu = str(self.cpu_cbox.currentText())
-        
+        self.parent.params.cas_keepfiles = self.file_chbox.isChecked()
+
         self.parent.cas_calc()
 
         #self.parent.pert_model = str(self.model_cbox.currentText())
@@ -109,12 +110,18 @@ class CasDialog(QtGui.QDialog):
         else:
             self.cpu_cbox.setCurrentIndex(0)
 
+        self.file_chbox = QtGui.QCheckBox()
+        if hasattr(self.parent.params, "cas_keepfiles"):
+            if self.parent.params.cas_keepfiles:
+                self.file_chbox.setChecked(True)
+
         #self.owrite_chbox = QtGui.QCheckBox()
         
         flo.addRow("Version:", self.version_cbox)
         flo.addRow("Neutron library:", self.neulib_cbox)
         flo.addRow("Gamma library:", self.gamlib_cbox)
         flo.addRow("CPU:", self.cpu_cbox)
+        flo.addRow("Keep files:", self.file_chbox)
         #flo.addRow("Overwrite orig. inp. file:", self.owrite_chbox)
 
         groupbox = QtGui.QGroupBox()
