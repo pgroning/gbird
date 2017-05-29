@@ -1099,17 +1099,24 @@ class Segment(object):
         #self.fill_statepoints()
         self.ave_enr_calc()
 
-        os.remove(file_base_name + ".inp")
+        #os.remove(file_base_name + ".inp")
         os.remove(file_base_name + ".out")
         try:
             os.remove(file_base_name + ".log")
         except:
             pass
         if not keepfiles:
+            os.remove(file_base_name + ".inp")
             os.remove(file_base_name + ".cax")
         else:
+            inpfile_old = file_base_name + ".inp"
+            bname = os.path.basename(self.data.caxfile)
+            inpfile_new = "gb-" + os.path.splitext(bname)[0] + ".inp"
+            os.rename(inpfile_old, inpfile_new)
+            
             caxfile_old = file_base_name + ".cax"
-            caxfile_new = "gb-" + os.path.split(self.data.caxfile)[-1]
+            caxfile_new = "gb-" + os.path.basename(self.data.caxfile)
+            #caxfile_new = "gb-" + os.path.split(self.data.caxfile)[-1]
             os.rename(caxfile_old, caxfile_new)
 
         print "Done."
