@@ -72,7 +72,7 @@ class Segment(object):
         if opt == 'all':
             out = [i for i, x in enumerate(flines) if rec.match(x)]
         elif opt == 'next':
-            out = next(i for i, x in enumerate(flines) if rec.match(x))
+            out = next((i for i, x in enumerate(flines) if rec.match(x)), None)
         elif opt == 'object':
             out = (i for i, x in enumerate(flines) if rec.match(x))
         return out
@@ -226,6 +226,9 @@ class Segment(object):
         iWRI = self.__matchcontent(flines, '^\s*WRI', 'next')
         iSTA = self.__matchcontent(flines, '^\s*STA', 'next')
 
+        iLDX = self.__matchcontent(flines, '^\s*LDX', 'next')
+        iLDY = self.__matchcontent(flines, '^\s*LDY', 'next')
+        
         # Miscellaneous compositions
         iMIx = self.__matchcontent(flines[:iLPI], '^\s*MI[1-9]')
 
@@ -264,6 +267,16 @@ class Segment(object):
         LFU = self.__symmap(maplines, npst, int)
         # LFU = self.__symmetry_map(flines, iLFU, npst)
 
+        # If exist, read LDX and LDY displacement maps
+        if iLDX:
+            self.data.ldx_lines = flines[iLDX + 1 : iLDX + 1 + npst]
+        else:
+            self.data.ldx_lines = []
+        if iLDY:
+            self.data.ldy_lines = flines[iLDY + 1 : iLDY + 1 + npst]
+        else:
+            self.data.ldy_lines = []
+        
         # Get MIx strings
         self.data.milines = [flines[i] for i in iMIx]
         
@@ -812,6 +825,18 @@ class Segment(object):
                 f.write('%d ' % info.LPI[i, j])
             f.write('\n')
 
+        # Displacement
+        if model == "c4e":
+            if info.ldx_lines:
+                f.write("LDX\n")
+                for line in info.ldx_lines:
+                    f.write(line + "\n")
+            if info.ldy_lines:
+                f.write("LDY\n")
+                for line in info.ldy_lines:
+                    f.write(line + "\n")
+
+        # Spacer
         f.write(info.spa.strip() + '\n')
         
         f.write("DEP" + '\n')
