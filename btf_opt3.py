@@ -1,8 +1,8 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 # for debugging. Add Tracer()() inside the code at desired line to break at that line
-from IPython.core.debugger import Tracer 
-import matplotlib.pyplot as plt           # nice with plot-possibilities for debugging
+#from IPython.core.debugger import Tracer 
+#import matplotlib.pyplot as plt           # nice with plot-possibilities for debugging
 #
 import numpy as np
 import sys
@@ -43,12 +43,12 @@ def btf_opt3(POW3in):
   """
   defaults = opt3_defaults()
   POW3 , num_fuelrods = norm_sub(POW3in,96)
-  noder = POW3.shape[0]
+  nodes = POW3.shape[0]
   ax_def = np.array(map(float,defaults.axial))  # typiska värden:
-  APLHGR = get_ax_eff(noder,ax_def)
-  APLHGR=APLHGR/np.sum(APLHGR)*noder
+  APLHGR = get_ax_eff(nodes,ax_def)
+  APLHGR=APLHGR/np.sum(APLHGR)*nodes
   LHGR  = np.zeros(POW3.shape)
-  for k in range(noder):
+  for k in range(nodes):
     LHGR[k,:,:] = POW3[k,:,:]*APLHGR[k]
   #
   # initialize
@@ -141,7 +141,7 @@ def calc_sub(LHGRsub, defaults, fuelrods):
   G      = defaults.G                           # G    =  1.5  # Mass flow [10^3 kg/m2/s]
   xin    = defaults.xin                         # xin  = -0.01 # typical subcooling
   #
-  noder = LHGRsub.shape[0]
+  nodes = LHGRsub.shape[0]
   I1rod = np.zeros(LHGRsub.shape)
   I2rod = np.zeros(LHGRsub.shape)
   xc    = np.zeros(LHGRsub.shape)
@@ -155,21 +155,21 @@ def calc_sub(LHGRsub, defaults, fuelrods):
   APF = np.zeros(LHGRsub.shape[0])
   while (True):
     iloop += 1
-    for i in range(noder):
+    for i in range(nodes):
       APF[i] = np.sum(LHGRsub[i,:,:])/fuelrods[i]
-    Q     = np.cumsum(APF)*Lheat/noder
+    Q     = np.cumsum(APF)*Lheat/nodes
     Qnorm = Q/Q[-1]    
     x     = xin+(xout-xin)*Qnorm
     # I1 integrates only the boiling part
-    I1=np.cumsum(APF*(x>0))*Lheat/noder
-    I2=np.cumsum(I1*(x>0))*Lheat/noder/(Lheat*I1)
+    I1=np.cumsum(APF*(x>0))*Lheat/nodes
+    I2=np.cumsum(I1*(x>0))*Lheat/nodes/(Lheat*I1)
     I2[x<0]=0.0
     for i in range(5):
       for j in range(5):
         if i==4 and j==4:
           break
-        I1rod[:,i,j]=np.cumsum(LHGRsub[:,i,j]*(x>0))*Lheat/noder
-        I2rod[:,i,j]=np.cumsum(I1rod[:,i,j]*(x>0))*Lheat/noder/(Lheat*I1rod[:,i,j])
+        I1rod[:,i,j]=np.cumsum(LHGRsub[:,i,j]*(x>0))*Lheat/nodes
+        I2rod[:,i,j]=np.cumsum(I1rod[:,i,j]*(x>0))*Lheat/nodes/(Lheat*I1rod[:,i,j])
     #
     R=RfacD5(I1,I2,I1rod,I2rod) # these are local rod R-factors
     R[x<0,:,:]=0.0
@@ -197,21 +197,21 @@ def calc_sub(LHGRsub, defaults, fuelrods):
     
   return Rglob
 
-def get_ax_eff(noder,ax_def):
+def get_ax_eff(nodes,ax_def):
   """
   Subroutine get_ax_eff:
-  IN:  noder  - desired number of nodes in axial power profile 
+  IN:  nodes  - desired number of nodes in axial power profile 
   IN:  ax_def - axial power profile
   OUT: ax_ut  - the new interpolated axial power profile
   """
   ax_def = np.append(ax_def,0.0)   # append 0.0
   ax_def = np.insert(ax_def,0,0.0) # prepend 0.0
-  ax_ut    = np.zeros(noder)
+  ax_ut    = np.zeros(nodes)
   xp       = np.zeros(25+2)
   xp[-1]   = 1.0
   xp[1:-1] = np.linspace(1./25,1,25)-1./50
   #
-  x = np.linspace(1./noder,1,noder)-1./(2*noder)
+  x = np.linspace(1./nodes,1,nodes)-1./(2*nodes)
   ax_ut = np.interp(x,xp,ax_def)
   #
   return ax_ut
