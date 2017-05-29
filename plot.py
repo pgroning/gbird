@@ -77,6 +77,8 @@ class PlotWin(QtGui.QMainWindow):
         self.axes.set_xlabel('Burnup (MWd/kgU)')
         self.axes.set_ylabel(ylabel)
         self.on_draw()
+        self.x_data = x
+        self.y_data = y
 
     def plot_kinf(self, segment, voi, vhi, tfu, linestyle="-", label=None):
         """Plot kinf as a function of burnup"""
@@ -134,6 +136,32 @@ class PlotWin(QtGui.QMainWindow):
             label = self.parent.pinobjects[iseg][ipin].coord
 
         self.plot_xy(x, y, "BTF", label, linestyle)
+
+    def export_to_ascii(self):
+        """Write data to YAML format"""
+
+        outfile = self.select_outfile()
+        if not outfile:
+            return
+        print "Export data to file: " + outfile
+
+        f = open(outfile, "w")
+        f.write("x: [")
+        for i, x in enumerate(self.x_data):
+            if i == 0:
+                f.write(str(x))
+            else:
+                f.write(", " + str(x))
+        f.write("]")
+        f.write("\n")
+        f.write("y: [")
+        for i, y in enumerate(self.y_data):
+            if i == 0:
+                f.write(str(y))
+            else:
+                f.write(", " + str(y))
+        f.write("]")
+        f.close()
 
     def save_figure(self):
         """save figure"""
@@ -494,7 +522,8 @@ class PlotWin(QtGui.QMainWindow):
                                          shortcut="Ctrl+W",
                                          tip="Close the application")
         
-        export_action = self.create_action("&Export to ascii",
+        export_action = self.create_action("&Export to ascii...",
+                                           slot=self.export_to_ascii,
                                            tip="Export data to ascii file")
 
         self.add_actions(self.file_menu,
@@ -539,6 +568,29 @@ class PlotWin(QtGui.QMainWindow):
         if checkable:
             action.setCheckable(True)
         return action
+
+    def select_outfile(self):
+        """Select file for writing"""
+
+        # Import default path from config file
+        self.settings.beginGroup("PATH")
+        path_default = self.settings.value("path_save_file",
+                                           QtCore.QString("")).toString()
+        self.settings.endGroup()
+        file_choices = "YAML (*.yml *.yaml)"
+        filename = unicode(QtGui.QFileDialog.getSaveFileName(self, 'Save file',
+                                                             path_default,
+                                                             file_choices))
+        if filename:
+            fname_split =  os.path.splitext(filename)
+            if fname_split[1] not in [".yml", ".yaml"]:
+                filename = filename + ".yml"  # add file extension
+            # Save default path to config file
+            path = os.path.split(filename)[0]
+            self.settings.beginGroup("PATH")
+            self.settings.setValue("path_save_file", QtCore.QString(path))
+            self.settings.endGroup()    
+        return filename
 
     def closeEvent(self, event):
         """This method is called before closing the window"""
