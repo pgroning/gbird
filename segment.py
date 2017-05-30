@@ -168,8 +168,9 @@ class Segment(object):
             try:
                 i = oTIT.next()
             except:  # Reaching end of flines
+                i = len(flines)
                 break
-                # split on spaces or '/'
+            # split on spaces or '/'
             rstr = re.split('[/\s+]+', flines[i+2].strip())
             voi, vhi = rstr[1], rstr[2]
             if voi != vhi:
@@ -180,7 +181,7 @@ class Segment(object):
         tmp_voilist = [x for x in tmp_voilist if x not in tmp and (tmp.append(x)
                                                                    or True)]
         voilist = map(int, map(float, tmp_voilist))
-        
+
         if content == "filtered":
             flines = flines[:i]  # Reduce the number of lines in list
 
