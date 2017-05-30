@@ -253,12 +253,14 @@ class Segment(object):
         # GAM
         self.data.gam = flines[iGAM[0]]
         # WRI
-        self.data.wri = flines[iWRI]
+        if iWRI:
+            self.data.wri = flines[iWRI]
         # STA
         self.data.sta = flines[iSTA]
         # CRD
-        self.data.crd = flines[iCRD[0]]
-
+        if iCRD:
+            self.data.crd = flines[iCRD[0]]
+        
         # get fuel dimension
         npst = int(flines[iBWR][5:7])
         # Read LFU map
