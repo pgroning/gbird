@@ -842,9 +842,12 @@ class Segment(object):
         # Spacer
         f.write(info.spa.strip() + '\n')
         
-        f.write("DEP" + '\n')
-        for x in burnlist[0]:
-            f.write(str(x) + '\n')
+        if model == "c3":
+            f.write("DEP" + '\n')
+            for x in burnlist[0]:
+                f.write(str(x) + '\n')
+        elif model == "c4e":
+            f.write(self.data.dep.strip() + "\n")
         
         f.write('NLI\n')
         f.write('STA\n')
@@ -857,9 +860,12 @@ class Segment(object):
                 f.write(res + '\n')
                 f.write("VOI " + str(voilist[i]) + '\n')
 
-                f.write("DEP" + '\n')
-                for x in burnlist[i]:
-                    f.write(str(x) + '\n')
+                if model == "c3":
+                    f.write("DEP" + '\n')
+                    for x in burnlist[i]:
+                        f.write(str(x) + '\n')
+                elif model == "c4e":
+                    f.write(self.data.dep.strip() + "\n")
 
                 f.write('STA\n')
 
