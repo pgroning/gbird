@@ -275,13 +275,13 @@ class PinTableWidget(QtGui.QTableWidget):
 
 class InfoLabel(QtGui.QLabel):
     def __init__(self, parent=None, width=100):
-        QtGui.QDialog.__init__(self)
+        #QtGui.QDialog.__init__(self)
+        QtGui.QLabel.__init__(self)
         self.setStyleSheet("""QLabel {background-color : rgb(245, 245, 245); 
                               color : black;}""")
         self.setFrameStyle(QtGui.QFrame.Panel | 
                            QtGui.QFrame.Sunken)
-        self.setAlignment(QtCore.Qt.AlignBottom | 
-                          QtCore.Qt.AlignLeft)
+        self.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         self.setFixedHeight(20)
         self.setFixedWidth(width)
 
