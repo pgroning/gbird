@@ -168,8 +168,9 @@ class Segment(object):
             try:
                 i = oTIT.next()
             except:  # Reaching end of flines
+                i = len(flines)
                 break
-                # split on spaces or '/'
+            # split on spaces or '/'
             rstr = re.split('[/\s+]+', flines[i+2].strip())
             voi, vhi = rstr[1], rstr[2]
             if voi != vhi:
@@ -180,7 +181,7 @@ class Segment(object):
         tmp_voilist = [x for x in tmp_voilist if x not in tmp and (tmp.append(x)
                                                                    or True)]
         voilist = map(int, map(float, tmp_voilist))
-        
+
         if content == "filtered":
             flines = flines[:i]  # Reduce the number of lines in list
 
@@ -253,12 +254,14 @@ class Segment(object):
         # GAM
         self.data.gam = flines[iGAM[0]]
         # WRI
-        self.data.wri = flines[iWRI]
+        if iWRI:
+            self.data.wri = flines[iWRI]
         # STA
         self.data.sta = flines[iSTA]
         # CRD
-        self.data.crd = flines[iCRD[0]]
-
+        if iCRD:
+            self.data.crd = flines[iCRD[0]]
+        
         # get fuel dimension
         npst = int(flines[iBWR][5:7])
         # Read LFU map
@@ -839,9 +842,12 @@ class Segment(object):
         # Spacer
         f.write(info.spa.strip() + '\n')
         
-        f.write("DEP" + '\n')
-        for x in burnlist[0]:
-            f.write(str(x) + '\n')
+        if model == "c3":
+            f.write("DEP" + '\n')
+            for x in burnlist[0]:
+                f.write(str(x) + '\n')
+        elif model == "c4e":
+            f.write(self.data.dep.strip() + "\n")
         
         f.write('NLI\n')
         f.write('STA\n')
@@ -854,9 +860,12 @@ class Segment(object):
                 f.write(res + '\n')
                 f.write("VOI " + str(voilist[i]) + '\n')
 
-                f.write("DEP" + '\n')
-                for x in burnlist[i]:
-                    f.write(str(x) + '\n')
+                if model == "c3":
+                    f.write("DEP" + '\n')
+                    for x in burnlist[i]:
+                        f.write(str(x) + '\n')
+                elif model == "c4e":
+                    f.write(self.data.dep.strip() + "\n")
 
                 f.write('STA\n')
 

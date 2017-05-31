@@ -50,7 +50,6 @@ class Btf(object):
         nsegments = len(segments)
         #idx = self.lastindex(0)
         idx = self.lastindex(segments[0])
-        
         x = [segments[0].statepoints[i].burnup for i in range(idx)]
         
         for j in range(1, nsegments):
@@ -73,7 +72,7 @@ class Btf(object):
             idx = self.lastindex(j)
             x = [seg.statepoints[i].burnup for i in range(idx)]
             xlist.append(x)
-        qtrace()
+        #qtrace()
 
     def pow3d(self, segments, voi, burnup, zdim):
         """Construct a 3D pin power distribution for specific void and burnup.
@@ -92,7 +91,6 @@ class Btf(object):
         # determine which voids are present in data
         for i in range(nsegments):
             voilist = segments[i].data.voilist
-            
             if int(voi) in voilist:
                 i1 = segments[i].findpoint(burnup=burnup, vhi=voi, voi=voi)
                 POW[i, :, :] = segments[i].statepoints[i1].POW
