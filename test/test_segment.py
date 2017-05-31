@@ -58,6 +58,13 @@ class UnitTest(unittest.TestCase):
         self.assertEqual(19482, Nstatepoints,
                         "Number of state points is incorrect")
 
+    def test_readcax_topol_opt3_small(self):  # read small cax file
+        testfile = "test/topol/OPT3_small/e31OPT3-220-00g00eb-seg.cax"
+        s = Segment(testfile)
+        Nstatepoints = len(s.statepoints)
+        self.assertEqual(84, Nstatepoints, 
+                         "Number of state points is incorrect")
+
     #@unittest.skip("skip this test")
     def test_readcax_tosim_at11(self):
         testfile = "test/tosim/AT11/14g35top/exxAT11-384-14g35top-cas.cax"
