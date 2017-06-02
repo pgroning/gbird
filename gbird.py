@@ -54,7 +54,7 @@ from progbar import ProgressBar
 from map_s96 import s96o2
 from map_a10 import a10xm
 from map_a11 import at11
-from threads import importThread
+from threads import ImportThread, RunC4Thread
 
 
 class dataThread(QtCore.QThread):
@@ -532,7 +532,7 @@ class MainWin(QtGui.QMainWindow):
         #self._filename = filename
         if status == QtGui.QMessageBox.Yes:
             
-            self.thread = importThread(self)
+            self.thread = ImportThread(self)
             #self.connect(self.thread, QtCore.SIGNAL('finished()'), 
             #             self.__import_data_finished)
             self.connect(self.thread, QtCore.SIGNAL('import_data_finished()'), 
@@ -1821,38 +1821,47 @@ class MainWin(QtGui.QMainWindow):
     def cas_calc(self):
         """Performing ordinary CASMO calculations..."""
 
+        self.thread = RunC4Thread(self)
+        self.connect(self.thread, QtCore.SIGNAL('finished()'), 
+                         self.__cas_calc_finished)
+        self.thread.start()
+
         self.setCursor(QtCore.Qt.WaitCursor)
 
-        #istate = self.ibundle
-
-        # create new bundle
-        bundle = Bundle(parent=self.bunlist[0])
-
-        # update bundle attributes
-        voi = None
-        chanbow = self.chanbow_sbox.value() / 10  # mm -> cm
-        nsegs = len(bundle.segments)
-        for iseg in xrange(nsegs):
-            LFU = self.__lfumap(iseg)
-            FUE = self.__fuemap(iseg)
-            BA = self.__bamap(iseg)
-            bundle.segments[iseg].set_data(LFU, FUE, BA, voi, chanbow)
         
-        # set calc. parameters
-        model = "C4E"
-        c4ver = self.params.cas_version
-        neulib = self.params.cas_neulib
-        gamlib = self.params.cas_gamlib
-        grid = True if self.params.cas_cpu == "grid" else False
-        keepfiles = self.params.cas_keepfiles
+        ##istate = self.ibundle
 
-        bundle.new_calc(model=model, c4ver=c4ver, neulib=neulib, 
-                        gamlib=gamlib, grid=grid, keepfiles=keepfiles)
-        bundle.new_btf()
-        self.bunlist.append(bundle)
+        ## create new bundle
+        #bundle = Bundle(parent=self.bunlist[0])
+
+        ## update bundle attributes
+        #voi = None
+        #chanbow = self.chanbow_sbox.value() / 10  # mm -> cm
+        #nsegs = len(bundle.segments)
+        #for iseg in xrange(nsegs):
+        #    LFU = self.__lfumap(iseg)
+        #    FUE = self.__fuemap(iseg)
+        #    BA = self.__bamap(iseg)
+        #    bundle.segments[iseg].set_data(LFU, FUE, BA, voi, chanbow)
+        
+        ## set calc. parameters
+        #model = "C4E"
+        #c4ver = self.params.cas_version
+        #neulib = self.params.cas_neulib
+        #gamlib = self.params.cas_gamlib
+        #grid = True if self.params.cas_cpu == "grid" else False
+        #keepfiles = self.params.cas_keepfiles
+
+        #bundle.new_calc(model=model, c4ver=c4ver, neulib=neulib, 
+        #                gamlib=gamlib, grid=grid, keepfiles=keepfiles)
+        #bundle.new_btf()
+        #self.bunlist.append(bundle)
+        
+    def __cas_calc_finished(self):
+        """C4 calc finished"""
+
         self.ibundle = len(self.bunlist) - 1
         self.fig_update()
-
         self.setCursor(QtCore.Qt.ArrowCursor)
 
     def quick_calc(self):
