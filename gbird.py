@@ -54,6 +54,7 @@ from progbar import ProgressBar
 from map_s96 import s96o2
 from map_a10 import a10xm
 from map_a11 import at11
+from threads import importThread
 
 
 class dataThread(QtCore.QThread):
@@ -530,40 +531,72 @@ class MainWin(QtGui.QMainWindow):
         #self.statusBar().showMessage('Importing data from %s' % filename, 2000)
         #self._filename = filename
         if status == QtGui.QMessageBox.Yes:
+            
+            self.thread = importThread(self)
+            #self.connect(self.thread, QtCore.SIGNAL('finished()'), 
+            #             self.__import_data_finished)
+            self.connect(self.thread, QtCore.SIGNAL('import_data_finished()'), 
+                         self.__import_data_finished)
+            self.connect(self.thread, QtCore.SIGNAL('finished()'), 
+                         self.__quickcalc_setenabled)
+
             self.setCursor(QtCore.Qt.WaitCursor)
+
+            self.ibundle = 0
+            self.thread.start()
+            print "Importing data..."
+
             #self.clear_data()
             #bundle = Bundle()
             #if not bundle.readpro(filename):  # stop if error is encountered
             #    self.setCursor(QtCore.Qt.ArrowCursor)
             #    return
             # inarg content="unfiltered" reads the whole file content
-            self.ibundle = 0
-            bundle = self.bunlist[0]
-            bundle.readcax(content=bundle.data.content)
-            bundle.new_btf()
 
-            # Perform reference calculation
-            print "Performing reference calculation..."
-            self.biascalc = Bundle(parent=self.bunlist[0])
-            self.biascalc.new_calc(model="C3", dep_max=None,
-                                   dep_thres=None, voi=None)
             
-            self.init_pinobjects()
-            self.init_cboxes()
+            #bundle = self.bunlist[0]
+            #bundle.readcax(content=bundle.data.content)
+            #bundle.new_btf()
+            
+            # Perform reference calculation
+            #print "Performing reference calculation..."
+            #self.biascalc = Bundle(parent=self.bunlist[0])
+            #self.biascalc.new_calc(model="C3", dep_max=None,
+            #                       dep_thres=None, voi=None)
+            
+            #self.init_pinobjects()
+            #self.init_cboxes()
 
-            self.setCursor(QtCore.Qt.ArrowCursor)
-            #self.fig_update()
-            self.widgets_setenabled(True)
+            #self.setCursor(QtCore.Qt.ArrowCursor)
+            #qtrace()
+
+            #self.progressbar = ProgressBar()
+            #xpos = self.pos().x() + self.width()/2 - self.progressbar.width()/2
+            #ypos = self.pos().y() + self.height()/2 - self.progressbar.height()/2
+            #self.progressbar.move(xpos,ypos)
+            #self.progressbar.show()
+
+            #self.thread.wait()
+            #self.thread.terminate()
+            ##self.fig_update()
+            #self.widgets_setenabled(True)
         else:
             return
             
+    def __import_data_finished(self):
+        """importation of data finished"""
 
+        self.init_pinobjects()
+        self.init_cboxes()
+        self.setCursor(QtCore.Qt.ArrowCursor)
+        self.widgets_setenabled(True)
+        # QtGui.QMessageBox.information(self,"Done!","All data imported!")
 
-        #self.fig_update()
-            #self.setCursor(QtCore.Qt.ArrowCursor)
-            # self.canvas.draw()
-            # self.axes.clear()
-            # self.draw_fuelmap()
+    def __quickcalc_setenabled(self, status=True):
+        """Enable/disable quickcalc"""
+        self.calcAction.setEnabled(status)
+        self.quickcalc_action.setEnabled(status)
+
 
         '''
         #self.progressbar = ProgressBar()
@@ -2783,10 +2816,11 @@ class MainWin(QtGui.QMainWindow):
                           self.show_cmap, self.track_maxpin))
 
         self.run_menu = self.menuBar().addMenu("&Run")
-        quickcalc_action = self.create_action("&Quick calc", shortcut="F9",
-                                         slot=self.quick_calc,
-                                         tip="Run quick calc",
-                                         icon="flame-red-icon_32x32")
+        self.quickcalc_action = self.create_action("&Quick calc", shortcut="F9",
+                                                   slot=self.quick_calc,
+                                                   tip="Run quick calc",
+                                                   icon="flame-red-icon_32x32")
+        self.quickcalc_action.setEnabled(False)
 
         #smallcalc_action = self.create_action("&Small calc",
         #                                  slot=self.quick_calc,
@@ -2795,7 +2829,7 @@ class MainWin(QtGui.QMainWindow):
         #fullcalc_action = self.create_action("&Complete calc...",
         #                                     slot=self.open_fullcalc_dlg,
         #                                     tip="Run complete calculation")
-        self.add_actions(self.run_menu, (None, quickcalc_action))
+        self.add_actions(self.run_menu, (None, self.quickcalc_action))
         
         self.help_menu = self.menuBar().addMenu("&Help")
         about_action = self.create_action("&About", #shortcut='F1',
@@ -2809,7 +2843,8 @@ class MainWin(QtGui.QMainWindow):
                              enrichment, segment, enr_plus, enr_minus, 
                              quickcalc, replace, plot_action, casmo_action,
                              casinp_action, data_action, find_action, 
-                             egv_action, quickcalc_action]
+                             # egv_action, quickcalc_action]
+                             egv_action]
 
     def create_toolbar(self):
 
@@ -2844,10 +2879,11 @@ class MainWin(QtGui.QMainWindow):
         self.colorAction.triggered.connect(self.toggle_cmap)
 
         calc_icon = self.appdir + "icons/flame-red-icon_32x32.png"
-        calcAction = QtGui.QAction(QtGui.QIcon(calc_icon),
-                                   'Run quick calc', self)
-        calcAction.setStatusTip('Run simulation')
-        calcAction.triggered.connect(self.quick_calc)
+        self.calcAction = QtGui.QAction(QtGui.QIcon(calc_icon),
+                                        'Run quick calc', self)
+        self.calcAction.setStatusTip('Run simulation')
+        self.calcAction.triggered.connect(self.quick_calc)
+        self.calcAction.setEnabled(False)
 
         pre_icon = self.appdir + "icons/preferences-icon_32x32.png"
         settingsAction = QtGui.QAction(QtGui.QIcon(pre_icon), 'Settings', self)
@@ -2894,7 +2930,7 @@ class MainWin(QtGui.QMainWindow):
         toolbar.addAction(newAction)
         toolbar.addAction(fileAction)
         toolbar.addAction(saveAction)
-        toolbar.addAction(calcAction)
+        toolbar.addAction(self.calcAction)
         toolbar.addAction(settingsAction)
         toolbar.addAction(self.colorAction)
         toolbar.addAction(plotAction)
@@ -2909,8 +2945,9 @@ class MainWin(QtGui.QMainWindow):
         toolbar.setFloatable(True)
         toolbar.setAutoFillBackground(False)
 
-        self.toolbar_actions = [saveAction, calcAction, self.colorAction,
-                                plotAction, findAction, backAction, 
+        self.toolbar_actions = [saveAction, self.colorAction,
+                                # [saveAction, calcAction, self.colorAction,
+                                plotAction, findAction, backAction,
                                 forwardAction, subAction, addAction]
 
     def reset(self):
