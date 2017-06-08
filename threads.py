@@ -66,10 +66,24 @@ class QuickCalcThread(QtCore.QThread):
                 BA = ba_map(segment, pins)
                 bundle.segments[iseg].set_data(LFU, FUE, BA, voi, chanbow)
 
-            pert_model = "C3"
-            pert_depmax = None
-            pert_depthres = None
-            pert_voi = None
+            # Set pert. calc parameters
+            if hasattr(self.parent.params, "pert_model"):
+                pert_model = self.parent.params.pert_model
+            else:
+                pert_model = "C3"
+            if hasattr(self.parent.params, "pert_depmax"):
+                pert_depmax = self.parent.params.pert_depmax
+            else:
+                pert_depmax = None
+            if hasattr(self.parent.params, "pert_depthres"):
+                pert_depthres = self.parent.params.pert_depthres
+            else:
+                pert_depthres = None
+            if hasattr(self.parent.params, "pert_voi"):
+                pert_voi = self.parent.params.pert_voi
+            else:
+                pert_voi = None
+
             bundle.new_calc(model=pert_model, dep_max=pert_depmax, 
                         dep_thres=pert_depthres, voi=pert_voi)
 

@@ -1882,60 +1882,60 @@ class MainWin(QtGui.QMainWindow):
             del self.bunlist[1]
             self.ibundle = len(self.bunlist) - 1
         
-        # Set pert. calc parameters
-        if hasattr(self.params, "pert_model"):
-            pert_model = self.params.pert_model
-        else:
-            pert_model = "C3"
-        if hasattr(self.params, "pert_depmax"):
-            pert_depmax = self.params.pert_depmax
-        else:
-            pert_depmax = None
-        if hasattr(self.params, "pert_depthres"):
-            pert_depthres = self.params.pert_depthres
-        else:
-            pert_depthres = None
-        if hasattr(self.params, "pert_voi"):
-            pert_voi = self.params.pert_voi
-        else:
-            pert_voi = None
+#        # Set pert. calc parameters
+#        if hasattr(self.params, "pert_model"):
+#            pert_model = self.params.pert_model
+#        else:
+#            pert_model = "C3"
+#        if hasattr(self.params, "pert_depmax"):
+#            pert_depmax = self.params.pert_depmax
+#        else:
+#            pert_depmax = None
+#        if hasattr(self.params, "pert_depthres"):
+#            pert_depthres = self.params.pert_depthres
+#        else:
+#            pert_depthres = None
+#        if hasattr(self.params, "pert_voi"):
+#            pert_voi = self.params.pert_voi
+#        else:
+#            pert_voi = None
         
-        if not hasattr(self, "biascalc"):  # make bias calc?
-            print "Performing reference calculation..."
-            self.biascalc = Bundle(parent=self.bunlist[0])
-            #if self.biascalc.data.voi is not None:
-            #    for s in self.biascalc.segments:
-            #        s.set_data(voi=self.biascalc.data.voi)
-            #dep_max = self.biascalc.data.dep_max
-            #dep_thres = self.biascalc.data.dep_thres
-            #model = self.biascalc.data.model
-            self.biascalc.new_calc(model=pert_model, dep_max=pert_depmax,
-                                   dep_thres=pert_depthres, voi=pert_voi)
-            #self.biascalc.new_btf()
-        
-        # New perturbation calc
-        bundle = Bundle(parent=self.bunlist[0])  # parent is set to orig bundle
-        nsegments = len(bundle.segments)
-
-        #voi = bundle.data.voi
-        voi = None
-        chanbow = self.chanbow_sbox.value() / 10  # mm -> cm
-        for iseg in xrange(nsegments):
-            LFU = self.__lfumap(iseg)
-            FUE = self.__fuemap(iseg)
-            BA = self.__bamap(iseg)
-            bundle.segments[iseg].set_data(LFU, FUE, BA, voi, chanbow)
-        #dep_max = bundle.data.dep_max
-        #dep_thres = bundle.data.dep_thres
-        #model = bundle.data.model
-        bundle.new_calc(model=pert_model, dep_max=pert_depmax, 
-                        dep_thres=pert_depthres, voi=pert_voi)
-
-        if pert_voi is None:
-            bundle = self.bias_subtract(bundle)
-        else:
-            bundle = self.bias_subtract_svoi(bundle)
-
+#        if not hasattr(self, "biascalc"):  # make bias calc?
+#            print "Performing reference calculation..."
+#            self.biascalc = Bundle(parent=self.bunlist[0])
+#            #if self.biascalc.data.voi is not None:
+#            #    for s in self.biascalc.segments:
+#            #        s.set_data(voi=self.biascalc.data.voi)
+#            #dep_max = self.biascalc.data.dep_max
+#            #dep_thres = self.biascalc.data.dep_thres
+#            #model = self.biascalc.data.model
+#            self.biascalc.new_calc(model=pert_model, dep_max=pert_depmax,
+#                                   dep_thres=pert_depthres, voi=pert_voi)
+#            #self.biascalc.new_btf()
+#        
+#        # New perturbation calc
+#        bundle = Bundle(parent=self.bunlist[0])  # parent is set to orig bundle
+#        nsegments = len(bundle.segments)
+#
+#        #voi = bundle.data.voi
+#        voi = None
+#        chanbow = self.chanbow_sbox.value() / 10  # mm -> cm
+#        for iseg in xrange(nsegments):
+#            LFU = self.__lfumap(iseg)
+#            FUE = self.__fuemap(iseg)
+#            BA = self.__bamap(iseg)
+#            bundle.segments[iseg].set_data(LFU, FUE, BA, voi, chanbow)
+#        #dep_max = bundle.data.dep_max
+#        #dep_thres = bundle.data.dep_thres
+#        #model = bundle.data.model
+#        bundle.new_calc(model=pert_model, dep_max=pert_depmax, 
+#                        dep_thres=pert_depthres, voi=pert_voi)
+#
+#        if pert_voi is None:
+#            bundle = self.bias_subtract(bundle)
+#        else:
+#            bundle = self.bias_subtract_svoi(bundle)
+#
         ## remove bias from perturbation calc
         #for iseg in xrange(len(bundle.segments)):
         #    pts = bundle.segments[iseg].statepoints
@@ -1964,15 +1964,16 @@ class MainWin(QtGui.QMainWindow):
         #        bundle.segments[iseg].statepoints[i].fint = fint[i]
         #        bundle.segments[iseg].statepoints[i].kinf = kinf[i]
         
-        bundle.new_btf()
-        self.bunlist.append(bundle)
+#        bundle.new_btf()
+#        self.bunlist.append(bundle)
+        #self.ibundle = len(self.bunlist) - 1
+        #self.fig_update()
+        #self.setCursor(QtCore.Qt.ArrowCursor)
+
+    def __quick_calc_finished(self):
         self.ibundle = len(self.bunlist) - 1
         self.fig_update()
         self.setCursor(QtCore.Qt.ArrowCursor)
-
-    def __quick_calc_finished(self):
-        print "Quick calc finished."
-
 
     def bias_subtract(self, bundle):
         """remove bias from perturbation calc"""
