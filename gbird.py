@@ -54,7 +54,7 @@ from progbar import ProgressBar
 from map_s96 import s96o2
 from map_a10 import a10xm
 from map_a11 import at11
-from threads import ImportThread, RunC4Thread
+from threads import ImportThread, QuickCalcThread, RunC4Thread
 
 
 class dataThread(QtCore.QThread):
@@ -1867,6 +1867,11 @@ class MainWin(QtGui.QMainWindow):
     def quick_calc(self):
         """Performing perturbation calculation"""
         
+        self.thread = QuickCalcThread(self)
+        self.connect(self.thread, QtCore.SIGNAL('finished()'), 
+                     self.__quick_calc_finished)
+        self.thread.start()
+
         self.setCursor(QtCore.Qt.WaitCursor)
         
         # remove irrelevant bundle calcs
@@ -1964,6 +1969,10 @@ class MainWin(QtGui.QMainWindow):
         self.ibundle = len(self.bunlist) - 1
         self.fig_update()
         self.setCursor(QtCore.Qt.ArrowCursor)
+
+    def __quick_calc_finished(self):
+        print "Quick calc finished."
+
 
     def bias_subtract(self, bundle):
         """remove bias from perturbation calc"""
