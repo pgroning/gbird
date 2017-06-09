@@ -456,53 +456,55 @@ class MainWin(QtGui.QMainWindow):
         self.init_pinobjects()
         #self.fig_update()
 
-    def dataobj_finished(self):
-        print "dataobject constructed"
-        self.init_pinobjects()
-
-        # Perform reference quick calculation for base case
-        print "Performing a reference quick calculation..."
-        ncases = len(self.dataobj.cases)
-        for case_num in range(ncases):
-            self.quick_calc(case_num)
-
-        # self.thread.quit()
-        # self.draw_fuelmap()
-        # self.set_pinvalues()
-        self.timer.stop()
-
-        # Update case number list box
-        for i in range(1, ncases + 1):
-            self.case_cbox.addItem(str(i))
-        
-        self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'),
-                     self.fig_update)
-        self.fig_update()
-
-        self.progressbar.update(100)
-        self.progressbar.setWindowTitle('All data imported')
-        self.progressbar.button.setText('Ok')
-        self.progressbar.button.clicked.disconnect(self.killThread)
-        self.progressbar.button.clicked.connect(self.progressbar.close)
-        self.progressbar.button.setEnabled(True)
+#    def dataobj_finished(self):
+#        print "dataobject constructed"
+#        self.init_pinobjects()
+#
+#        # Perform reference quick calculation for base case
+#        print "Performing a reference quick calculation..."
+#        ncases = len(self.dataobj.cases)
+#        for case_num in range(ncases):
+#            self.quick_calc(case_num)
+#
+#        # self.thread.quit()
+#        # self.draw_fuelmap()
+#        # self.set_pinvalues()
+#        self.timer.stop()
+#
+#        # Update case number list box
+#        for i in range(1, ncases + 1):
+#            self.case_cbox.addItem(str(i))
+#        
+#        self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'),
+#                     self.fig_update)
+#        self.fig_update()
+#
+#        self.progressbar.update(100)
+#        self.progressbar.setWindowTitle("All data imported")
+#        self.progressbar.button.setText("Ok")
+#        self.progressbar.button.clicked.disconnect(self.killThread)
+#        self.progressbar.button.clicked.connect(self.progressbar.close)
+#        self.progressbar.button.setEnabled(True)
 
         # QtGui.QMessageBox.information(self,"Done!","All data imported!")
 
-    def progressbar_update(self, val=None):
+    def __progressbar_update(self, val=None):
         if val is not None:
             self.progressbar._value = max(val, self.progressbar._value)
         self.progressbar.update(self.progressbar._value)
         self.progressbar._value += 1
 
     def killThread(self):
-        print 'killThread'
+        """Kill progress thread"""
+
         self.disconnect(self.timer, QtCore.SIGNAL('timeout()'),
-                        self.progressbar_update)
-        self.disconnect(self.thread, QtCore.SIGNAL('finished()'),
-                        self.dataobj_finished)
-        self.disconnect(self.thread, QtCore.SIGNAL('progressbar_update(int)'),
-                        self.progressbar_update)
+                        self.__progressbar_update)
+        #self.disconnect(self.thread, QtCore.SIGNAL('finished()'),
+        #                self.dataobj_finished)
+        #self.disconnect(self.thread, QtCore.SIGNAL('progressbar_update(int)'),
+        #                self.progressbar_update)
         self.thread._kill = True
+        self.thread.terminate()
         self.progressbar.close()
         # self.progressbar.close
         # self.thread.wait()
@@ -533,14 +535,12 @@ class MainWin(QtGui.QMainWindow):
         if status == QtGui.QMessageBox.Yes:
             
             self.thread = ImportThread(self)
-            #self.connect(self.thread, QtCore.SIGNAL('finished()'), 
-            #             self.__import_data_finished)
             self.connect(self.thread, QtCore.SIGNAL('import_data_finished()'), 
                          self.__import_data_finished)
             self.connect(self.thread, QtCore.SIGNAL('finished()'), 
                          self.__quickcalc_setenabled)
 
-            self.setCursor(QtCore.Qt.WaitCursor)
+            # self.setCursor(QtCore.Qt.WaitCursor)
 
             self.ibundle = 0
             self.thread.start()
@@ -570,11 +570,18 @@ class MainWin(QtGui.QMainWindow):
             #self.setCursor(QtCore.Qt.ArrowCursor)
             #qtrace()
 
-            #self.progressbar = ProgressBar()
-            #xpos = self.pos().x() + self.width()/2 - self.progressbar.width()/2
-            #ypos = self.pos().y() + self.height()/2 - self.progressbar.height()/2
-            #self.progressbar.move(xpos,ypos)
-            #self.progressbar.show()
+            self.progressbar = ProgressBar()
+            xpos = self.pos().x() + self.width()/2 - self.progressbar.width()/2
+            ypos = self.pos().y() + self.height()/2 - self.progressbar.height()/2
+            self.progressbar.move(xpos, ypos)
+            self.progressbar.show()
+            self.progressbar.button.clicked.connect(self.killThread)
+
+            self.timer = QtCore.QTimer()
+            self.connect(self.timer, QtCore.SIGNAL('timeout()'), 
+                         self.__progressbar_update)
+            self.progressbar._value = 1
+            self.timer.start(1000)  # argument is update period in ms
 
             #self.thread.wait()
             #self.thread.terminate()
@@ -588,9 +595,15 @@ class MainWin(QtGui.QMainWindow):
 
         self.init_pinobjects()
         self.init_cboxes()
-        self.setCursor(QtCore.Qt.ArrowCursor)
+        # self.setCursor(QtCore.Qt.ArrowCursor)
         self.widgets_setenabled(True)
-        # QtGui.QMessageBox.information(self,"Done!","All data imported!")
+
+        self.timer.stop()
+        self.progressbar.update(100)
+        self.progressbar.setWindowTitle("All data imported")
+        self.progressbar.button.setText("Ok")
+        self.progressbar.button.clicked.disconnect(self.killThread)
+        self.progressbar.button.clicked.connect(self.progressbar.close)
 
     def __quickcalc_setenabled(self, status=True):
         """Enable/disable quickcalc"""
