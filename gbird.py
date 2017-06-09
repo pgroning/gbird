@@ -507,6 +507,7 @@ class MainWin(QtGui.QMainWindow):
         self.thread._kill = True
         self.thread.terminate()
         self.progressbar.close()
+        self.__file_cleanup()
         # self.progressbar.close
         # self.thread.wait()
 
@@ -519,6 +520,15 @@ class MainWin(QtGui.QMainWindow):
 #        self.bunlist = []
 #        self.bunlist.append(bundle)
 #        self.ibundle = 0
+
+    def __file_cleanup(self):
+        """Cleanup files"""
+        filenames = os.listdir(".")
+        regexp = "^tmp.+\.(inp|out|cax|cfg|log)$"
+        rec = re.compile(regexp)
+        for fname in filenames:
+            if rec.match(fname):
+                os.remove(fname)
 
     def init_bundle(self):
         """initialize a bundle instance"""
@@ -574,6 +584,7 @@ class MainWin(QtGui.QMainWindow):
             #qtrace()
 
         self.progressbar = ProgressBar()
+        self.progressbar.setWindowTitle("Importing data...")
         xpos = self.pos().x() + self.width()/2 - self.progressbar.width()/2
         ypos = self.pos().y() + self.height()/2 - self.progressbar.height()/2
         self.progressbar.move(xpos, ypos)
@@ -1845,10 +1856,24 @@ class MainWin(QtGui.QMainWindow):
         self.connect(self.thread, QtCore.SIGNAL('finished()'), 
                          self.__cas_calc_finished)
         self.thread.start()
+        self.statusBar().showMessage("Running Casmo...")
 
         self.setCursor(QtCore.Qt.WaitCursor)
 
-        
+        self.progressbar = ProgressBar()
+        self.progressbar.setWindowTitle("Running Casmo")
+        xpos = self.pos().x() + self.width()/2 - self.progressbar.width()/2
+        ypos = self.pos().y() + self.height()/2 - self.progressbar.height()/2
+        self.progressbar.move(xpos, ypos)
+        self.progressbar.show()
+        self.progressbar.button.clicked.connect(self.__killThread)
+
+        self.timer = QtCore.QTimer()
+        self.connect(self.timer, QtCore.SIGNAL('timeout()'), 
+                     self.__progressbar_update)
+        self.progressbar._value = 1
+        self.timer.start(2000)
+
         ##istate = self.ibundle
 
         ## create new bundle
@@ -1883,6 +1908,14 @@ class MainWin(QtGui.QMainWindow):
         self.ibundle = len(self.bunlist) - 1
         self.fig_update()
         self.setCursor(QtCore.Qt.ArrowCursor)
+
+        self.timer.stop()
+        self.progressbar.update(100)
+        self.progressbar.setWindowTitle("Casmo run completed")
+        self.progressbar.button.setText("Ok")
+        self.progressbar.button.clicked.disconnect(self.__killThread)
+        self.progressbar.button.clicked.connect(self.progressbar.close)
+        self.statusBar().showMessage("Done!", 2000)
 
     def quick_calc(self):
         """Performing perturbation calculation"""
@@ -3132,13 +3165,8 @@ class MainWin(QtGui.QMainWindow):
         if hasattr(self, "findpoint_dlg"):
             self.findpoint_dlg.close()
 
-        # Clean up files
-        filenames = os.listdir(".")
-        regexp = "^tmp.*.(inp$|out$|cax$|cfg$)"
-        rec = re.compile(regexp)
-        for fname in filenames:
-            if rec.match(fname):
-                os.remove(fname)
+        # Cleanup files
+        self.__file_cleanup()
 
         print "Good bye!"
 

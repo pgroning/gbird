@@ -24,7 +24,7 @@ class ProgressBar(QtGui.QDialog):
         #main_layout.addWidget(self.progressbar, 0, 0)
         #main_layout.addWidget(self.button, 1, 0)
         #self.setLayout(main_layout)
-        self.setWindowTitle("Importing data...")
+        #self.setWindowTitle("Importing data...")
         self.resize(300, 50)
         self.setMaximumHeight(50)
         self.move(500, 500)
