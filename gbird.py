@@ -547,7 +547,7 @@ class MainWin(QtGui.QMainWindow):
 
         self.ibundle = 0
         self.thread.start()
-        #print "Importing data..."
+        self.statusBar().showMessage("Importing data...")
 
             #self.clear_data()
             #bundle = Bundle()
@@ -610,6 +610,7 @@ class MainWin(QtGui.QMainWindow):
         self.progressbar.button.setText("Ok")
         self.progressbar.button.clicked.disconnect(self.__killThread)
         self.progressbar.button.clicked.connect(self.progressbar.close)
+        self.statusBar().showMessage("Done!", 2000)
 
     def __quickcalc_setenabled(self, status=True):
         """Enable/disable quickcalc"""
