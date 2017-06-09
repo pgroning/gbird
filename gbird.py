@@ -584,7 +584,10 @@ class MainWin(QtGui.QMainWindow):
         self.connect(self.timer, QtCore.SIGNAL('timeout()'), 
                      self.__progressbar_update)
         self.progressbar._value = 1
-        self.timer.start(1000)  # argument is update period in ms
+        if self.bunlist[0].data.content == "filtered":
+            self.timer.start(60)  # argument is update period in ms
+        else:
+            self.timer.start(1000)
 
             #self.thread.wait()
             #self.thread.terminate()
