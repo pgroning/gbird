@@ -526,25 +526,25 @@ class MainWin(QtGui.QMainWindow):
     def import_data(self):
         """Importing data from card image file"""
         
-        msgBox = QtGui.QMessageBox()
-        status = msgBox.information(self, "Importing data", "Continue?",
-                                    QtGui.QMessageBox.Yes |
-                                    QtGui.QMessageBox.Cancel)
+        #msgBox = QtGui.QMessageBox()
+        #status = msgBox.information(self, "Importing data", "Continue?",
+        #                            QtGui.QMessageBox.Yes |
+        #                            QtGui.QMessageBox.Cancel)
         #self.statusBar().showMessage('Importing data from %s' % filename, 2000)
         #self._filename = filename
-        if status == QtGui.QMessageBox.Yes:
-            
-            self.thread = ImportThread(self)
-            self.connect(self.thread, QtCore.SIGNAL('import_data_finished()'), 
-                         self.__import_data_finished)
-            self.connect(self.thread, QtCore.SIGNAL('finished()'), 
-                         self.__quickcalc_setenabled)
+        #if status == QtGui.QMessageBox.Yes:
+        
+        self.thread = ImportThread(self)
+        self.connect(self.thread, QtCore.SIGNAL('import_data_finished()'), 
+                     self.__import_data_finished)
+        self.connect(self.thread, QtCore.SIGNAL('finished()'), 
+                     self.__quickcalc_setenabled)
 
-            # self.setCursor(QtCore.Qt.WaitCursor)
+        # self.setCursor(QtCore.Qt.WaitCursor)
 
-            self.ibundle = 0
-            self.thread.start()
-            print "Importing data..."
+        self.ibundle = 0
+        self.thread.start()
+        #print "Importing data..."
 
             #self.clear_data()
             #bundle = Bundle()
@@ -570,25 +570,25 @@ class MainWin(QtGui.QMainWindow):
             #self.setCursor(QtCore.Qt.ArrowCursor)
             #qtrace()
 
-            self.progressbar = ProgressBar()
-            xpos = self.pos().x() + self.width()/2 - self.progressbar.width()/2
-            ypos = self.pos().y() + self.height()/2 - self.progressbar.height()/2
-            self.progressbar.move(xpos, ypos)
-            self.progressbar.show()
-            self.progressbar.button.clicked.connect(self.killThread)
-
-            self.timer = QtCore.QTimer()
-            self.connect(self.timer, QtCore.SIGNAL('timeout()'), 
-                         self.__progressbar_update)
-            self.progressbar._value = 1
-            self.timer.start(1000)  # argument is update period in ms
+        self.progressbar = ProgressBar()
+        xpos = self.pos().x() + self.width()/2 - self.progressbar.width()/2
+        ypos = self.pos().y() + self.height()/2 - self.progressbar.height()/2
+        self.progressbar.move(xpos, ypos)
+        self.progressbar.show()
+        self.progressbar.button.clicked.connect(self.killThread)
+        
+        self.timer = QtCore.QTimer()
+        self.connect(self.timer, QtCore.SIGNAL('timeout()'), 
+                     self.__progressbar_update)
+        self.progressbar._value = 1
+        self.timer.start(1000)  # argument is update period in ms
 
             #self.thread.wait()
             #self.thread.terminate()
             ##self.fig_update()
             #self.widgets_setenabled(True)
-        else:
-            return
+        #else:
+        #    return
             
     def __import_data_finished(self):
         """importation of data finished"""
