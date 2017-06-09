@@ -19,6 +19,7 @@ import sys
 import os
 import time
 import copy
+import re
 import numpy as np
 from PyQt4 import QtGui, QtCore
 
@@ -494,15 +495,15 @@ class MainWin(QtGui.QMainWindow):
         self.progressbar.update(self.progressbar._value)
         self.progressbar._value += 1
 
-    def killThread(self):
+    def __killThread(self):
         """Kill progress thread"""
 
         self.disconnect(self.timer, QtCore.SIGNAL('timeout()'),
                         self.__progressbar_update)
         #self.disconnect(self.thread, QtCore.SIGNAL('finished()'),
         #                self.dataobj_finished)
-        #self.disconnect(self.thread, QtCore.SIGNAL('progressbar_update(int)'),
-        #                self.progressbar_update)
+        self.disconnect(self.thread, QtCore.SIGNAL('progressbar_update(int)'),
+                        self.__progressbar_update)
         self.thread._kill = True
         self.thread.terminate()
         self.progressbar.close()
@@ -539,6 +540,8 @@ class MainWin(QtGui.QMainWindow):
                      self.__import_data_finished)
         self.connect(self.thread, QtCore.SIGNAL('finished()'), 
                      self.__quickcalc_setenabled)
+        self.connect(self.thread, QtCore.SIGNAL('progressbar_update(int)'),
+                     self.__progressbar_update)
 
         # self.setCursor(QtCore.Qt.WaitCursor)
 
@@ -575,7 +578,7 @@ class MainWin(QtGui.QMainWindow):
         ypos = self.pos().y() + self.height()/2 - self.progressbar.height()/2
         self.progressbar.move(xpos, ypos)
         self.progressbar.show()
-        self.progressbar.button.clicked.connect(self.killThread)
+        self.progressbar.button.clicked.connect(self.__killThread)
         
         self.timer = QtCore.QTimer()
         self.connect(self.timer, QtCore.SIGNAL('timeout()'), 
@@ -602,7 +605,7 @@ class MainWin(QtGui.QMainWindow):
         self.progressbar.update(100)
         self.progressbar.setWindowTitle("All data imported")
         self.progressbar.button.setText("Ok")
-        self.progressbar.button.clicked.disconnect(self.killThread)
+        self.progressbar.button.clicked.disconnect(self.__killThread)
         self.progressbar.button.clicked.connect(self.progressbar.close)
 
     def __quickcalc_setenabled(self, status=True):
@@ -3124,6 +3127,14 @@ class MainWin(QtGui.QMainWindow):
             self.report_dlg.close()
         if hasattr(self, "findpoint_dlg"):
             self.findpoint_dlg.close()
+
+        # Clean up files
+        filenames = os.listdir(".")
+        regexp = "^tmp.*.(inp$|out$|cax$|cfg$)"
+        rec = re.compile(regexp)
+        for fname in filenames:
+            if rec.match(fname):
+                os.remove(fname)
 
         print "Good bye!"
 

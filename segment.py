@@ -357,6 +357,7 @@ class Segment(object):
         # xfl2map = [flines[i+3+npst:i+3+2*npst] for i in iXFL]
 
         for i in range(Nburnpts):
+
             # Read burnup, voids, tfu and tmo
             rvec = re.split('[/\s+]+', flines[iTIT[i]+2].strip())
             burnup[i] = rvec[0]

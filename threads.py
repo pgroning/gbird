@@ -21,6 +21,7 @@ class ImportThread(QtCore.QThread):
             bundle = self.parent.bunlist[0]
             # Importing data
             bundle.readcax(content=bundle.data.content)
+            self.emit(QtCore.SIGNAL('progressbar_update(int)'), 90)
             bundle.new_btf()
 
             self.parent.bunlist.pop()
@@ -31,7 +32,7 @@ class ImportThread(QtCore.QThread):
             print "Performing reference calculation..."
             biascalc = Bundle(parent=bundle)
             biascalc.new_calc(model="C3", dep_max=None,
-                                   dep_thres=None, voi=None)
+                              dep_thres=None, voi=None)
             self.parent.biascalc = biascalc
             
 
