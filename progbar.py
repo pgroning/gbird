@@ -10,6 +10,7 @@ class ProgressBar(QtGui.QDialog):
         self.progressbar = QtGui.QProgressBar()
         self.progressbar.setMinimum(0)
         self.progressbar.setMaximum(total)
+        self.progressbar.setTextVisible(False)
         self.button = QtGui.QPushButton('Cancel')
         vbox = QtGui.QVBoxLayout()
         hbox = QtGui.QHBoxLayout()
