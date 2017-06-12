@@ -19,6 +19,7 @@ import sys
 import os
 import time
 import copy
+import re
 import numpy as np
 from PyQt4 import QtGui, QtCore
 
@@ -54,6 +55,7 @@ from progbar import ProgressBar
 from map_s96 import s96o2
 from map_a10 import a10xm
 from map_a11 import at11
+from threads import ImportThread, QuickCalcThread, RunC4Thread
 
 
 class dataThread(QtCore.QThread):
@@ -455,54 +457,57 @@ class MainWin(QtGui.QMainWindow):
         self.init_pinobjects()
         #self.fig_update()
 
-    def dataobj_finished(self):
-        print "dataobject constructed"
-        self.init_pinobjects()
-
-        # Perform reference quick calculation for base case
-        print "Performing a reference quick calculation..."
-        ncases = len(self.dataobj.cases)
-        for case_num in range(ncases):
-            self.quick_calc(case_num)
-
-        # self.thread.quit()
-        # self.draw_fuelmap()
-        # self.set_pinvalues()
-        self.timer.stop()
-
-        # Update case number list box
-        for i in range(1, ncases + 1):
-            self.case_cbox.addItem(str(i))
-        
-        self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'),
-                     self.fig_update)
-        self.fig_update()
-
-        self.progressbar.update(100)
-        self.progressbar.setWindowTitle('All data imported')
-        self.progressbar.button.setText('Ok')
-        self.progressbar.button.clicked.disconnect(self.killThread)
-        self.progressbar.button.clicked.connect(self.progressbar.close)
-        self.progressbar.button.setEnabled(True)
+#    def dataobj_finished(self):
+#        print "dataobject constructed"
+#        self.init_pinobjects()
+#
+#        # Perform reference quick calculation for base case
+#        print "Performing a reference quick calculation..."
+#        ncases = len(self.dataobj.cases)
+#        for case_num in range(ncases):
+#            self.quick_calc(case_num)
+#
+#        # self.thread.quit()
+#        # self.draw_fuelmap()
+#        # self.set_pinvalues()
+#        self.timer.stop()
+#
+#        # Update case number list box
+#        for i in range(1, ncases + 1):
+#            self.case_cbox.addItem(str(i))
+#        
+#        self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'),
+#                     self.fig_update)
+#        self.fig_update()
+#
+#        self.progressbar.update(100)
+#        self.progressbar.setWindowTitle("All data imported")
+#        self.progressbar.button.setText("Ok")
+#        self.progressbar.button.clicked.disconnect(self.killThread)
+#        self.progressbar.button.clicked.connect(self.progressbar.close)
+#        self.progressbar.button.setEnabled(True)
 
         # QtGui.QMessageBox.information(self,"Done!","All data imported!")
 
-    def progressbar_update(self, val=None):
+    def __progressbar_update(self, val=None):
         if val is not None:
             self.progressbar._value = max(val, self.progressbar._value)
         self.progressbar.update(self.progressbar._value)
         self.progressbar._value += 1
 
-    def killThread(self):
-        print 'killThread'
+    def __killThread(self):
+        """Kill progress thread"""
+
         self.disconnect(self.timer, QtCore.SIGNAL('timeout()'),
-                        self.progressbar_update)
-        self.disconnect(self.thread, QtCore.SIGNAL('finished()'),
-                        self.dataobj_finished)
+                        self.__progressbar_update)
+        #self.disconnect(self.thread, QtCore.SIGNAL('finished()'),
+        #                self.dataobj_finished)
         self.disconnect(self.thread, QtCore.SIGNAL('progressbar_update(int)'),
-                        self.progressbar_update)
+                        self.__progressbar_update)
         self.thread._kill = True
+        self.thread.terminate()
         self.progressbar.close()
+        self.__file_cleanup()
         # self.progressbar.close
         # self.thread.wait()
 
@@ -516,6 +521,15 @@ class MainWin(QtGui.QMainWindow):
 #        self.bunlist.append(bundle)
 #        self.ibundle = 0
 
+    def __file_cleanup(self):
+        """Cleanup files"""
+        filenames = os.listdir(".")
+        regexp = "^tmp.+\.(inp|out|cax|cfg|log)$"
+        rec = re.compile(regexp)
+        for fname in filenames:
+            if rec.match(fname):
+                os.remove(fname)
+
     def init_bundle(self):
         """initialize a bundle instance"""
         self.bunlist = [Bundle()]
@@ -523,47 +537,97 @@ class MainWin(QtGui.QMainWindow):
     def import_data(self):
         """Importing data from card image file"""
         
-        msgBox = QtGui.QMessageBox()
-        status = msgBox.information(self, "Importing data", "Continue?",
-                                    QtGui.QMessageBox.Yes |
-                                    QtGui.QMessageBox.Cancel)
+        #msgBox = QtGui.QMessageBox()
+        #status = msgBox.information(self, "Importing data", "Continue?",
+        #                            QtGui.QMessageBox.Yes |
+        #                            QtGui.QMessageBox.Cancel)
         #self.statusBar().showMessage('Importing data from %s' % filename, 2000)
         #self._filename = filename
-        if status == QtGui.QMessageBox.Yes:
-            self.setCursor(QtCore.Qt.WaitCursor)
+        #if status == QtGui.QMessageBox.Yes:
+        
+        self.thread = ImportThread(self)
+        self.connect(self.thread, QtCore.SIGNAL('import_data_finished()'), 
+                     self.__import_data_finished)
+        self.connect(self.thread, QtCore.SIGNAL('finished()'), 
+                     self.__quickcalc_setenabled)
+        self.connect(self.thread, QtCore.SIGNAL('progressbar_update(int)'),
+                     self.__progressbar_update)
+
+        # self.setCursor(QtCore.Qt.WaitCursor)
+
+        self.ibundle = 0
+        self.thread.start()
+        self.statusBar().showMessage("Importing data...")
+
             #self.clear_data()
             #bundle = Bundle()
             #if not bundle.readpro(filename):  # stop if error is encountered
             #    self.setCursor(QtCore.Qt.ArrowCursor)
             #    return
             # inarg content="unfiltered" reads the whole file content
-            self.ibundle = 0
-            bundle = self.bunlist[0]
-            bundle.readcax(content=bundle.data.content)
-            bundle.new_btf()
 
+            
+            #bundle = self.bunlist[0]
+            #bundle.readcax(content=bundle.data.content)
+            #bundle.new_btf()
+            
             # Perform reference calculation
-            print "Performing reference calculation..."
-            self.biascalc = Bundle(parent=self.bunlist[0])
-            self.biascalc.new_calc(model="C3", dep_max=None,
-                                   dep_thres=None, voi=None)
+            #print "Performing reference calculation..."
+            #self.biascalc = Bundle(parent=self.bunlist[0])
+            #self.biascalc.new_calc(model="C3", dep_max=None,
+            #                       dep_thres=None, voi=None)
             
-            self.init_pinobjects()
-            self.init_cboxes()
+            #self.init_pinobjects()
+            #self.init_cboxes()
 
-            self.setCursor(QtCore.Qt.ArrowCursor)
-            #self.fig_update()
-            self.widgets_setenabled(True)
-        else:
-            return
-            
-
-
-        #self.fig_update()
             #self.setCursor(QtCore.Qt.ArrowCursor)
-            # self.canvas.draw()
-            # self.axes.clear()
-            # self.draw_fuelmap()
+            #qtrace()
+
+        self.progressbar = ProgressBar()
+        self.progressbar.setWindowTitle("Importing data...")
+        xpos = self.pos().x() + self.width()/2 - self.progressbar.width()/2
+        ypos = self.pos().y() + self.height()/2 - self.progressbar.height()/2
+        self.progressbar.move(xpos, ypos)
+        self.progressbar.show()
+        self.progressbar.button.clicked.connect(self.__killThread)
+        
+        self.timer = QtCore.QTimer()
+        self.connect(self.timer, QtCore.SIGNAL('timeout()'), 
+                     self.__progressbar_update)
+        self.progressbar._value = 1
+        if self.bunlist[0].data.content == "filtered":
+            self.timer.start(60)  # argument is update period in ms
+        else:
+            self.timer.start(1000)
+
+            #self.thread.wait()
+            #self.thread.terminate()
+            ##self.fig_update()
+            #self.widgets_setenabled(True)
+        #else:
+        #    return
+            
+    def __import_data_finished(self):
+        """importation of data finished"""
+
+        self.init_pinobjects()
+        self.init_cboxes()
+        # self.setCursor(QtCore.Qt.ArrowCursor)
+        self.widgets_setenabled(True)
+
+        self.timer.stop()
+        self.progressbar.update(100)
+        self.progressbar.setWindowTitle("All data imported")
+        self.progressbar.button.setText("Ok")
+        self.progressbar.button.clicked.disconnect(self.__killThread)
+        self.progressbar.button.clicked.connect(self.progressbar.close)
+        self.statusBar().showMessage("Done!", 2000)
+
+    def __quickcalc_setenabled(self, status=True):
+        """Enable/disable quickcalc"""
+        self.calcAction.setEnabled(status)
+        self.quickcalc_action.setEnabled(status)
+
 
         '''
         #self.progressbar = ProgressBar()
@@ -1788,43 +1852,80 @@ class MainWin(QtGui.QMainWindow):
     def cas_calc(self):
         """Performing ordinary CASMO calculations..."""
 
+        self.thread = RunC4Thread(self)
+        self.connect(self.thread, QtCore.SIGNAL('finished()'), 
+                         self.__cas_calc_finished)
+        self.thread.start()
+        self.statusBar().showMessage("Running Casmo...")
+
         self.setCursor(QtCore.Qt.WaitCursor)
 
-        #istate = self.ibundle
+        self.progressbar = ProgressBar()
+        self.progressbar.setWindowTitle("Running Casmo")
+        xpos = self.pos().x() + self.width()/2 - self.progressbar.width()/2
+        ypos = self.pos().y() + self.height()/2 - self.progressbar.height()/2
+        self.progressbar.move(xpos, ypos)
+        self.progressbar.show()
+        self.progressbar.button.clicked.connect(self.__killThread)
 
-        # create new bundle
-        bundle = Bundle(parent=self.bunlist[0])
+        self.timer = QtCore.QTimer()
+        self.connect(self.timer, QtCore.SIGNAL('timeout()'), 
+                     self.__progressbar_update)
+        self.progressbar._value = 1
+        self.timer.start(2000)
 
-        # update bundle attributes
-        voi = None
-        chanbow = self.chanbow_sbox.value() / 10  # mm -> cm
-        nsegs = len(bundle.segments)
-        for iseg in xrange(nsegs):
-            LFU = self.__lfumap(iseg)
-            FUE = self.__fuemap(iseg)
-            BA = self.__bamap(iseg)
-            bundle.segments[iseg].set_data(LFU, FUE, BA, voi, chanbow)
+        ##istate = self.ibundle
+
+        ## create new bundle
+        #bundle = Bundle(parent=self.bunlist[0])
+
+        ## update bundle attributes
+        #voi = None
+        #chanbow = self.chanbow_sbox.value() / 10  # mm -> cm
+        #nsegs = len(bundle.segments)
+        #for iseg in xrange(nsegs):
+        #    LFU = self.__lfumap(iseg)
+        #    FUE = self.__fuemap(iseg)
+        #    BA = self.__bamap(iseg)
+        #    bundle.segments[iseg].set_data(LFU, FUE, BA, voi, chanbow)
         
-        # set calc. parameters
-        model = "C4E"
-        c4ver = self.params.cas_version
-        neulib = self.params.cas_neulib
-        gamlib = self.params.cas_gamlib
-        grid = True if self.params.cas_cpu == "grid" else False
-        keepfiles = self.params.cas_keepfiles
+        ## set calc. parameters
+        #model = "C4E"
+        #c4ver = self.params.cas_version
+        #neulib = self.params.cas_neulib
+        #gamlib = self.params.cas_gamlib
+        #grid = True if self.params.cas_cpu == "grid" else False
+        #keepfiles = self.params.cas_keepfiles
 
-        bundle.new_calc(model=model, c4ver=c4ver, neulib=neulib, 
-                        gamlib=gamlib, grid=grid, keepfiles=keepfiles)
-        bundle.new_btf()
-        self.bunlist.append(bundle)
+        #bundle.new_calc(model=model, c4ver=c4ver, neulib=neulib, 
+        #                gamlib=gamlib, grid=grid, keepfiles=keepfiles)
+        #bundle.new_btf()
+        #self.bunlist.append(bundle)
+        
+    def __cas_calc_finished(self):
+        """C4 calc finished"""
+
         self.ibundle = len(self.bunlist) - 1
         self.fig_update()
-
         self.setCursor(QtCore.Qt.ArrowCursor)
+
+        self.timer.stop()
+        self.progressbar.update(100)
+        self.progressbar.setWindowTitle("Casmo run completed")
+        self.progressbar.button.setText("Ok")
+        self.progressbar.button.clicked.disconnect(self.__killThread)
+        self.progressbar.button.clicked.connect(self.progressbar.close)
+        self.statusBar().showMessage("Done!", 2000)
 
     def quick_calc(self):
         """Performing perturbation calculation"""
         
+        self.thread = QuickCalcThread(self)
+        self.connect(self.thread, QtCore.SIGNAL('finished()'), 
+                     self.__quick_calc_finished)
+        self.thread.start()
+        self.statusBar().showMessage("Running quick calc...")
+
         self.setCursor(QtCore.Qt.WaitCursor)
         
         # remove irrelevant bundle calcs
@@ -1835,60 +1936,73 @@ class MainWin(QtGui.QMainWindow):
             del self.bunlist[1]
             self.ibundle = len(self.bunlist) - 1
         
-        # Set pert. calc parameters
-        if hasattr(self.params, "pert_model"):
-            pert_model = self.params.pert_model
-        else:
-            pert_model = "C3"
-        if hasattr(self.params, "pert_depmax"):
-            pert_depmax = self.params.pert_depmax
-        else:
-            pert_depmax = None
-        if hasattr(self.params, "pert_depthres"):
-            pert_depthres = self.params.pert_depthres
-        else:
-            pert_depthres = None
-        if hasattr(self.params, "pert_voi"):
-            pert_voi = self.params.pert_voi
-        else:
-            pert_voi = None
+        self.progressbar = ProgressBar(button=False)
+        self.progressbar.setWindowTitle("Running Quick calc")
+        xpos = self.pos().x() + self.width()/2 - self.progressbar.width()/2
+        ypos = self.pos().y() + self.height()/2 - self.progressbar.height()/2
+        self.progressbar.move(xpos, ypos)
+        self.progressbar.show()
+
+        self.timer = QtCore.QTimer()
+        self.connect(self.timer, QtCore.SIGNAL('timeout()'), 
+                     self.__progressbar_update)
+        self.progressbar._value = 1
+        self.timer.start(150)
+
+#        # Set pert. calc parameters
+#        if hasattr(self.params, "pert_model"):
+#            pert_model = self.params.pert_model
+#        else:
+#            pert_model = "C3"
+#        if hasattr(self.params, "pert_depmax"):
+#            pert_depmax = self.params.pert_depmax
+#        else:
+#            pert_depmax = None
+#        if hasattr(self.params, "pert_depthres"):
+#            pert_depthres = self.params.pert_depthres
+#        else:
+#            pert_depthres = None
+#        if hasattr(self.params, "pert_voi"):
+#            pert_voi = self.params.pert_voi
+#        else:
+#            pert_voi = None
         
-        if not hasattr(self, "biascalc"):  # make bias calc?
-            print "Performing reference calculation..."
-            self.biascalc = Bundle(parent=self.bunlist[0])
-            #if self.biascalc.data.voi is not None:
-            #    for s in self.biascalc.segments:
-            #        s.set_data(voi=self.biascalc.data.voi)
-            #dep_max = self.biascalc.data.dep_max
-            #dep_thres = self.biascalc.data.dep_thres
-            #model = self.biascalc.data.model
-            self.biascalc.new_calc(model=pert_model, dep_max=pert_depmax,
-                                   dep_thres=pert_depthres, voi=pert_voi)
-            #self.biascalc.new_btf()
-        
-        # New perturbation calc
-        bundle = Bundle(parent=self.bunlist[0])  # parent is set to orig bundle
-        nsegments = len(bundle.segments)
-
-        #voi = bundle.data.voi
-        voi = None
-        chanbow = self.chanbow_sbox.value() / 10  # mm -> cm
-        for iseg in xrange(nsegments):
-            LFU = self.__lfumap(iseg)
-            FUE = self.__fuemap(iseg)
-            BA = self.__bamap(iseg)
-            bundle.segments[iseg].set_data(LFU, FUE, BA, voi, chanbow)
-        #dep_max = bundle.data.dep_max
-        #dep_thres = bundle.data.dep_thres
-        #model = bundle.data.model
-        bundle.new_calc(model=pert_model, dep_max=pert_depmax, 
-                        dep_thres=pert_depthres, voi=pert_voi)
-
-        if pert_voi is None:
-            bundle = self.bias_subtract(bundle)
-        else:
-            bundle = self.bias_subtract_svoi(bundle)
-
+#        if not hasattr(self, "biascalc"):  # make bias calc?
+#            print "Performing reference calculation..."
+#            self.biascalc = Bundle(parent=self.bunlist[0])
+#            #if self.biascalc.data.voi is not None:
+#            #    for s in self.biascalc.segments:
+#            #        s.set_data(voi=self.biascalc.data.voi)
+#            #dep_max = self.biascalc.data.dep_max
+#            #dep_thres = self.biascalc.data.dep_thres
+#            #model = self.biascalc.data.model
+#            self.biascalc.new_calc(model=pert_model, dep_max=pert_depmax,
+#                                   dep_thres=pert_depthres, voi=pert_voi)
+#            #self.biascalc.new_btf()
+#        
+#        # New perturbation calc
+#        bundle = Bundle(parent=self.bunlist[0])  # parent is set to orig bundle
+#        nsegments = len(bundle.segments)
+#
+#        #voi = bundle.data.voi
+#        voi = None
+#        chanbow = self.chanbow_sbox.value() / 10  # mm -> cm
+#        for iseg in xrange(nsegments):
+#            LFU = self.__lfumap(iseg)
+#            FUE = self.__fuemap(iseg)
+#            BA = self.__bamap(iseg)
+#            bundle.segments[iseg].set_data(LFU, FUE, BA, voi, chanbow)
+#        #dep_max = bundle.data.dep_max
+#        #dep_thres = bundle.data.dep_thres
+#        #model = bundle.data.model
+#        bundle.new_calc(model=pert_model, dep_max=pert_depmax, 
+#                        dep_thres=pert_depthres, voi=pert_voi)
+#
+#        if pert_voi is None:
+#            bundle = self.bias_subtract(bundle)
+#        else:
+#            bundle = self.bias_subtract_svoi(bundle)
+#
         ## remove bias from perturbation calc
         #for iseg in xrange(len(bundle.segments)):
         #    pts = bundle.segments[iseg].statepoints
@@ -1917,11 +2031,22 @@ class MainWin(QtGui.QMainWindow):
         #        bundle.segments[iseg].statepoints[i].fint = fint[i]
         #        bundle.segments[iseg].statepoints[i].kinf = kinf[i]
         
-        bundle.new_btf()
-        self.bunlist.append(bundle)
+#        bundle.new_btf()
+#        self.bunlist.append(bundle)
+        #self.ibundle = len(self.bunlist) - 1
+        #self.fig_update()
+        #self.setCursor(QtCore.Qt.ArrowCursor)
+
+    def __quick_calc_finished(self):
         self.ibundle = len(self.bunlist) - 1
         self.fig_update()
         self.setCursor(QtCore.Qt.ArrowCursor)
+        
+        self.timer.stop()
+        self.progressbar.update(100)
+        time.sleep(1)
+        self.progressbar.close()
+        self.statusBar().showMessage("Done!", 2000)
 
     def bias_subtract(self, bundle):
         """remove bias from perturbation calc"""
@@ -2783,10 +2908,11 @@ class MainWin(QtGui.QMainWindow):
                           self.show_cmap, self.track_maxpin))
 
         self.run_menu = self.menuBar().addMenu("&Run")
-        quickcalc_action = self.create_action("&Quick calc", shortcut="F9",
-                                         slot=self.quick_calc,
-                                         tip="Run quick calc",
-                                         icon="flame-red-icon_32x32")
+        self.quickcalc_action = self.create_action("&Quick calc", shortcut="F9",
+                                                   slot=self.quick_calc,
+                                                   tip="Run quick calc",
+                                                   icon="flame-red-icon_32x32")
+        self.quickcalc_action.setEnabled(False)
 
         #smallcalc_action = self.create_action("&Small calc",
         #                                  slot=self.quick_calc,
@@ -2795,7 +2921,7 @@ class MainWin(QtGui.QMainWindow):
         #fullcalc_action = self.create_action("&Complete calc...",
         #                                     slot=self.open_fullcalc_dlg,
         #                                     tip="Run complete calculation")
-        self.add_actions(self.run_menu, (None, quickcalc_action))
+        self.add_actions(self.run_menu, (None, self.quickcalc_action))
         
         self.help_menu = self.menuBar().addMenu("&Help")
         about_action = self.create_action("&About", #shortcut='F1',
@@ -2809,7 +2935,8 @@ class MainWin(QtGui.QMainWindow):
                              enrichment, segment, enr_plus, enr_minus, 
                              quickcalc, replace, plot_action, casmo_action,
                              casinp_action, data_action, find_action, 
-                             egv_action, quickcalc_action]
+                             # egv_action, quickcalc_action]
+                             egv_action]
 
     def create_toolbar(self):
 
@@ -2844,10 +2971,11 @@ class MainWin(QtGui.QMainWindow):
         self.colorAction.triggered.connect(self.toggle_cmap)
 
         calc_icon = self.appdir + "icons/flame-red-icon_32x32.png"
-        calcAction = QtGui.QAction(QtGui.QIcon(calc_icon),
-                                   'Run quick calc', self)
-        calcAction.setStatusTip('Run simulation')
-        calcAction.triggered.connect(self.quick_calc)
+        self.calcAction = QtGui.QAction(QtGui.QIcon(calc_icon),
+                                        'Run quick calc', self)
+        self.calcAction.setStatusTip('Run simulation')
+        self.calcAction.triggered.connect(self.quick_calc)
+        self.calcAction.setEnabled(False)
 
         pre_icon = self.appdir + "icons/preferences-icon_32x32.png"
         settingsAction = QtGui.QAction(QtGui.QIcon(pre_icon), 'Settings', self)
@@ -2894,7 +3022,7 @@ class MainWin(QtGui.QMainWindow):
         toolbar.addAction(newAction)
         toolbar.addAction(fileAction)
         toolbar.addAction(saveAction)
-        toolbar.addAction(calcAction)
+        toolbar.addAction(self.calcAction)
         toolbar.addAction(settingsAction)
         toolbar.addAction(self.colorAction)
         toolbar.addAction(plotAction)
@@ -2909,8 +3037,9 @@ class MainWin(QtGui.QMainWindow):
         toolbar.setFloatable(True)
         toolbar.setAutoFillBackground(False)
 
-        self.toolbar_actions = [saveAction, calcAction, self.colorAction,
-                                plotAction, findAction, backAction, 
+        self.toolbar_actions = [saveAction, self.colorAction,
+                                # [saveAction, calcAction, self.colorAction,
+                                plotAction, findAction, backAction,
                                 forwardAction, subAction, addAction]
 
     def reset(self):
@@ -3055,6 +3184,9 @@ class MainWin(QtGui.QMainWindow):
             self.report_dlg.close()
         if hasattr(self, "findpoint_dlg"):
             self.findpoint_dlg.close()
+
+        # Cleanup files
+        self.__file_cleanup()
 
         print "Good bye!"
 

@@ -37,7 +37,7 @@ class BundleDialog(QtGui.QDialog):
         self.setWindowTitle("New bundle")
         xpos = self.parent.pos().x() + self.parent.size().width() / 2
         ypos = self.parent.pos().y() + self.parent.size().height() / 2
-        self.setGeometry(QtCore.QRect(0.5*xpos, 0.8*ypos, 800, 300))
+        self.setGeometry(QtCore.QRect(0.5 * xpos, 0.8 * ypos, 800, 300))
 
         self.table_view = QtGui.QTableView()
         #self.table_view.setShowGrid(False)
