@@ -29,6 +29,7 @@ from matplotlib.figure import Figure
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 
+from ui import Ui_MainWindow
 from bundle import Bundle
 from btf import Btf
 from plot import PlotWin
@@ -159,10 +160,13 @@ class MainWin(QtGui.QMainWindow):
 
         self.resizeEvent = self.on_resize
 
+        self.ui = Ui_MainWindow()
+        self.ui.setup(self)
+
         self.create_menu()
         self.create_toolbar()
         self.create_main_frame()
-        self.create_status_bar()
+        #self.create_status_bar()
 
         self.on_draw()  # Init plot
 
