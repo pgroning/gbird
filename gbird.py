@@ -1936,7 +1936,7 @@ class MainWin(QtGui.QMainWindow):
             del self.bunlist[1]
             self.ibundle = len(self.bunlist) - 1
         
-        self.progressbar = ProgressBar()
+        self.progressbar = ProgressBar(button=False)
         self.progressbar.setWindowTitle("Running Quick calc")
         xpos = self.pos().x() + self.width()/2 - self.progressbar.width()/2
         ypos = self.pos().y() + self.height()/2 - self.progressbar.height()/2

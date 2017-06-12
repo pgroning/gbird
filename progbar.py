@@ -5,20 +5,21 @@ from PyQt4 import QtGui, QtCore
 
 
 class ProgressBar(QtGui.QDialog):
-    def __init__(self, parent=None, total=100):
+    def __init__(self, parent=None, total=100, button=True):
         super(ProgressBar, self).__init__(parent)
         self.progressbar = QtGui.QProgressBar()
         self.progressbar.setMinimum(0)
         self.progressbar.setMaximum(total)
         self.progressbar.setTextVisible(False)
-        self.button = QtGui.QPushButton('Cancel')
         vbox = QtGui.QVBoxLayout()
         hbox = QtGui.QHBoxLayout()
         spacerItemH = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, 
                                         QtGui.QSizePolicy.Minimum)
         vbox.addWidget(self.progressbar)
         hbox.addItem(spacerItemH)
-        hbox.addWidget(self.button)
+        if button:
+            self.button = QtGui.QPushButton('Cancel')
+            hbox.addWidget(self.button)
         vbox.addLayout(hbox)
         self.setLayout(vbox)
         #main_layout = QGridLayout()
