@@ -28,6 +28,7 @@ import uuid  # used for random generated file names
 import shlex  # used for splitting subprocess call argument string into a list
 import copy
 
+
 '''
 #from multiprocessing import Pool
 #from btf import btf
@@ -356,7 +357,7 @@ class Segment(object):
         # xfl1map = [flines[i+2:i+2+npst] for i in iXFL]
         # xfl2map = [flines[i+3+npst:i+3+2*npst] for i in iXFL]
 
-        for i in range(Nburnpts):
+        for i in xrange(Nburnpts):
 
             # Read burnup, voids, tfu and tmo
             rvec = re.split('[/\s+]+', flines[iTIT[i]+2].strip())
