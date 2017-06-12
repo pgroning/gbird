@@ -1924,6 +1924,7 @@ class MainWin(QtGui.QMainWindow):
         self.connect(self.thread, QtCore.SIGNAL('finished()'), 
                      self.__quick_calc_finished)
         self.thread.start()
+        self.statusBar().showMessage("Running quick calc...")
 
         self.setCursor(QtCore.Qt.WaitCursor)
         
@@ -1935,6 +1936,19 @@ class MainWin(QtGui.QMainWindow):
             del self.bunlist[1]
             self.ibundle = len(self.bunlist) - 1
         
+        self.progressbar = ProgressBar()
+        self.progressbar.setWindowTitle("Running Quick calc")
+        xpos = self.pos().x() + self.width()/2 - self.progressbar.width()/2
+        ypos = self.pos().y() + self.height()/2 - self.progressbar.height()/2
+        self.progressbar.move(xpos, ypos)
+        self.progressbar.show()
+
+        self.timer = QtCore.QTimer()
+        self.connect(self.timer, QtCore.SIGNAL('timeout()'), 
+                     self.__progressbar_update)
+        self.progressbar._value = 1
+        self.timer.start(150)
+
 #        # Set pert. calc parameters
 #        if hasattr(self.params, "pert_model"):
 #            pert_model = self.params.pert_model
@@ -2027,6 +2041,12 @@ class MainWin(QtGui.QMainWindow):
         self.ibundle = len(self.bunlist) - 1
         self.fig_update()
         self.setCursor(QtCore.Qt.ArrowCursor)
+        
+        self.timer.stop()
+        self.progressbar.update(100)
+        time.sleep(1)
+        self.progressbar.close()
+        self.statusBar().showMessage("Done!", 2000)
 
     def bias_subtract(self, bundle):
         """remove bias from perturbation calc"""
