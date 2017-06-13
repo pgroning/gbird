@@ -162,15 +162,15 @@ class MainWin(QtGui.QMainWindow):
 
         self.ui = Ui_MainWindow()
         self.ui.setup(self)
-
+        
         self.create_menu()
-        self.create_toolbar()
+        #self.create_toolbar()
         self.create_main_frame()
         #self.create_status_bar()
 
         self.on_draw()  # Init plot
 
-        self.widgets_setenabled(False)
+        #self.widgets_setenabled(False)
 
     def on_resize(self, event):
         self.axes.set_xlim(0, 1.2)
@@ -1835,9 +1835,9 @@ class MainWin(QtGui.QMainWindow):
         self.main_frame.setLayout(hbox)
         self.setCentralWidget(self.main_frame)
     
-    def create_status_bar(self):
-        self.status_text = QtGui.QLabel("Main window")
-        self.statusBar().addWidget(self.status_text, 1)
+    #def create_status_bar(self):
+    #    self.status_text = QtGui.QLabel("Main window")
+    #    self.statusBar().addWidget(self.status_text, 1)
         
     def create_menu(self):
         self.file_menu = self.menuBar().addMenu("&File")
@@ -2006,104 +2006,104 @@ class MainWin(QtGui.QMainWindow):
                              casinp_action, data_action, find_action,
                              egv_action]
 
-    def create_toolbar(self):
+#    def create_toolbar(self):
+#
+#        exit_icon = self.appdir + "icons/exit-icon_32x32.png"
+#        exitAction = QtGui.QAction(QtGui.QIcon(exit_icon), 'Exit', self)
+#        # exitAction.setShortcut('Ctrl+Q')
+#        exitAction.setStatusTip('Exit application')
+#        exitAction.triggered.connect(self.close)
 
-        exit_icon = self.appdir + "icons/exit-icon_32x32.png"
-        exitAction = QtGui.QAction(QtGui.QIcon(exit_icon), 'Exit', self)
-        # exitAction.setShortcut('Ctrl+Q')
-        exitAction.setStatusTip('Exit application')
-        exitAction.triggered.connect(self.close)
-
-        new_icon = self.appdir + "icons/new-icon_32x32.png"
-        newAction = QtGui.QAction(QtGui.QIcon(new_icon),
-                                   'Create new bundle', self)
-        newAction.setStatusTip('Create a new bundle')
-        newAction.triggered.connect(self.open_bundle_dlg)
+#        new_icon = self.appdir + "icons/new-icon_32x32.png"
+#        newAction = QtGui.QAction(QtGui.QIcon(new_icon),
+#                                   'Create new bundle', self)
+#        newAction.setStatusTip('Create a new bundle')
+#        newAction.triggered.connect(self.open_bundle_dlg)
         
-        file_icon = self.appdir + "icons/open-file-icon_32x32.png"
-        fileAction = QtGui.QAction(QtGui.QIcon(file_icon), 'Open file', self)
-        fileAction.setStatusTip('Open file')
-        fileAction.triggered.connect(self.openFile)
+#        file_icon = self.appdir + "icons/open-file-icon_32x32.png"
+#        fileAction = QtGui.QAction(QtGui.QIcon(file_icon), 'Open file', self)
+#        fileAction.setStatusTip('Open file')
+#        fileAction.triggered.connect(self.openFile)
 
-        save_icon = self.appdir + "icons/save-icon_32x32.png"
-        saveAction = QtGui.QAction(QtGui.QIcon(save_icon), 'Save to file', self)
-        saveAction.setStatusTip('Save to file')
-        saveAction.triggered.connect(self.saveData)
+#        save_icon = self.appdir + "icons/save-icon_32x32.png"
+#        saveAction = QtGui.QAction(QtGui.QIcon(save_icon), 'Save to file', self)
+#        saveAction.setStatusTip('Save to file')
+#        saveAction.triggered.connect(self.saveData)
         
-        color_icon = self.appdir + "icons/color-icon_32x32.png"
-        self.colorAction = QtGui.QAction(QtGui.QIcon(color_icon), 
-                                         'Show color map', self)
-        self.colorAction.setStatusTip('Show color map')
-        self.colorAction.setCheckable(True)
-        self.colorAction.triggered.connect(self.toggle_cmap)
+#        color_icon = self.appdir + "icons/color-icon_32x32.png"
+#        self.colorAction = QtGui.QAction(QtGui.QIcon(color_icon), 
+#                                         'Show color map', self)
+#        self.colorAction.setStatusTip('Show color map')
+#        self.colorAction.setCheckable(True)
+#        self.colorAction.triggered.connect(self.toggle_cmap)
 
-        calc_icon = self.appdir + "icons/flame-red-icon_32x32.png"
-        self.calcAction = QtGui.QAction(QtGui.QIcon(calc_icon),
-                                        'Run quick calc', self)
-        self.calcAction.setStatusTip('Run simulation')
-        self.calcAction.triggered.connect(self.quick_calc)
-        self.calcAction.setEnabled(False)
-
-        pre_icon = self.appdir + "icons/preferences-icon_32x32.png"
-        settingsAction = QtGui.QAction(QtGui.QIcon(pre_icon), 'Settings', self)
-        settingsAction.setStatusTip('Settings')
-
-        diagram_icon = self.appdir + "icons/diagram-icon_32x32.png"
-        plotAction = QtGui.QAction(QtGui.QIcon(diagram_icon), 'Plot', self)
-        plotAction.setStatusTip('Open plot window')
-        plotAction.triggered.connect(self.open_plotwin)
-
-        find_icon = self.appdir + "icons/binoculars-icon_32x32.png"
-        findAction = QtGui.QAction(QtGui.QIcon(find_icon), 'Find state point', 
-                                   self)
-        findAction.setStatusTip('Find state point')
-        findAction.triggered.connect(self.open_findpoint_dlg)
-
-        arrow_undo_icon =  self.appdir + "icons/arrow-undo-icon_32x32.png"
-        backAction = QtGui.QAction(QtGui.QIcon(arrow_undo_icon),
-                                   'Back to previous design', self)
-        backAction.setStatusTip('Back to previous design')
-        backAction.triggered.connect(self.back_state)
-
-        arrow_redo_icon =  self.appdir + "icons/arrow-redo-icon_32x32.png"
-        forwardAction = QtGui.QAction(QtGui.QIcon(arrow_redo_icon),
-                                      'Forward to next design', self)
-        forwardAction.setStatusTip('Forward to next design')
-        forwardAction.triggered.connect(self.forward_state)
-        
-        add_icon =  self.appdir + "icons/add-icon_32x32.png"
-        addAction = QtGui.QAction(QtGui.QIcon(add_icon),
-                                  'Increase enrichment', self)
-        addAction.setStatusTip('Increase enrichment') 
-        addAction.triggered.connect(self.enr_add)
-        sub_icon =  self.appdir + "icons/remove-icon_32x32.png"
-        subAction = QtGui.QAction(QtGui.QIcon(sub_icon),
-                                  'Decrease enrichment', self)
-        subAction.setStatusTip('Decrease enrichment')
-        subAction.triggered.connect(self.enr_sub)
-
-        toolbar = self.addToolBar('Toolbar')
-        toolbar.addAction(newAction)
-        toolbar.addAction(fileAction)
-        toolbar.addAction(saveAction)
-        toolbar.addAction(self.calcAction)
-        toolbar.addAction(settingsAction)
-        toolbar.addAction(self.colorAction)
-        toolbar.addAction(plotAction)
-        toolbar.addAction(findAction)
-        toolbar.addAction(backAction)
-        toolbar.addAction(forwardAction)
-        toolbar.addAction(subAction)
-        toolbar.addAction(addAction)
-        toolbar.addAction(exitAction)
-
-        toolbar.setMovable(False)
-        toolbar.setFloatable(True)
-        toolbar.setAutoFillBackground(False)
-
-        self.toolbar_actions = [saveAction, self.colorAction,
-                                plotAction, findAction, backAction,
-                                forwardAction, subAction, addAction]
+#        calc_icon = self.appdir + "icons/flame-red-icon_32x32.png"
+#        self.calcAction = QtGui.QAction(QtGui.QIcon(calc_icon),
+#                                        'Run quick calc', self)
+#        self.calcAction.setStatusTip('Run simulation')
+#        self.calcAction.triggered.connect(self.quick_calc)
+#        self.calcAction.setEnabled(False)
+#
+#        pre_icon = self.appdir + "icons/preferences-icon_32x32.png"
+#        settingsAction = QtGui.QAction(QtGui.QIcon(pre_icon), 'Settings', self)
+#        settingsAction.setStatusTip('Settings')
+#
+#        diagram_icon = self.appdir + "icons/diagram-icon_32x32.png"
+#        plotAction = QtGui.QAction(QtGui.QIcon(diagram_icon), 'Plot', self)
+#        plotAction.setStatusTip('Open plot window')
+#        plotAction.triggered.connect(self.open_plotwin)
+#
+#        find_icon = self.appdir + "icons/binoculars-icon_32x32.png"
+#        findAction = QtGui.QAction(QtGui.QIcon(find_icon), 'Find state point', 
+#                                   self)
+#        findAction.setStatusTip('Find state point')
+#        findAction.triggered.connect(self.open_findpoint_dlg)
+#
+#        arrow_undo_icon =  self.appdir + "icons/arrow-undo-icon_32x32.png"
+#        backAction = QtGui.QAction(QtGui.QIcon(arrow_undo_icon),
+#                                   'Back to previous design', self)
+#        backAction.setStatusTip('Back to previous design')
+#        backAction.triggered.connect(self.back_state)
+#
+#        arrow_redo_icon =  self.appdir + "icons/arrow-redo-icon_32x32.png"
+#        forwardAction = QtGui.QAction(QtGui.QIcon(arrow_redo_icon),
+#                                      'Forward to next design', self)
+#        forwardAction.setStatusTip('Forward to next design')
+#        forwardAction.triggered.connect(self.forward_state)
+#        
+#        add_icon =  self.appdir + "icons/add-icon_32x32.png"
+#        addAction = QtGui.QAction(QtGui.QIcon(add_icon),
+#                                  'Increase enrichment', self)
+#        addAction.setStatusTip('Increase enrichment') 
+#        addAction.triggered.connect(self.enr_add)
+#        sub_icon =  self.appdir + "icons/remove-icon_32x32.png"
+#        subAction = QtGui.QAction(QtGui.QIcon(sub_icon),
+#                                  'Decrease enrichment', self)
+#        subAction.setStatusTip('Decrease enrichment')
+#        subAction.triggered.connect(self.enr_sub)
+#
+#        toolbar = self.addToolBar('Toolbar')
+#        toolbar.addAction(newAction)
+#        toolbar.addAction(fileAction)
+#        toolbar.addAction(saveAction)
+#        toolbar.addAction(self.calcAction)
+#        toolbar.addAction(settingsAction)
+#        toolbar.addAction(self.colorAction)
+#        toolbar.addAction(plotAction)
+#        toolbar.addAction(findAction)
+#        toolbar.addAction(backAction)
+#        toolbar.addAction(forwardAction)
+#        toolbar.addAction(subAction)
+#        toolbar.addAction(addAction)
+#        toolbar.addAction(exitAction)
+#
+#        toolbar.setMovable(False)
+#        toolbar.setFloatable(True)
+#        toolbar.setAutoFillBackground(False)
+#
+#        self.toolbar_actions = [saveAction, self.colorAction,
+#                                plotAction, findAction, backAction,
+#                                forwardAction, subAction, addAction]
 
     def reset(self):
         self.init_pinobjects()
