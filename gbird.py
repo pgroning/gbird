@@ -163,7 +163,7 @@ class MainWin(QtGui.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setup(self)
         
-        self.create_menu()
+        #self.create_menu()
         #self.create_toolbar()
         self.create_main_frame()
         #self.create_status_bar()
