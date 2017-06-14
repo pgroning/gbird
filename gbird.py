@@ -170,7 +170,7 @@ class MainWin(QtGui.QMainWindow):
 
         self.on_draw()  # Init plot
 
-        #self.widgets_setenabled(False)
+        self.widgets_setenabled(False)
 
     def on_resize(self, event):
         self.axes.set_xlim(0, 1.2)
@@ -316,7 +316,7 @@ class MainWin(QtGui.QMainWindow):
 
     def __quickcalc_setenabled(self, status=True):
         """Enable/disable quickcalc"""
-        self.calcAction.setEnabled(status)
+        #self.calcAction.setEnabled(status)
         self.quickcalc_action.setEnabled(status)
 
     def init_cboxes(self):

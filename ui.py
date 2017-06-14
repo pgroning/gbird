@@ -31,25 +31,25 @@ class Ui_MainWindow(object):
         text = "&New..."
         tip = "Create new bundle"
         args = (text, new_icon, tip, parent.open_bundle_dlg)
-        new_action = self.__create_action(*args)
-        parent.file_menu.addAction(new_action)
-        parent.menu_actions.append(new_action)
+        self.new_action = self.__create_action(*args)
+        parent.file_menu.addAction(self.new_action)
+        #parent.menu_actions.append(new_action)
 
         file_icon = "open-file-icon_32x32"
         text = "&Open..."
         tip = "Open file"
         args = (text, file_icon, tip, parent.openFile)
-        file_action = self.__create_action(*args)
-        parent.file_menu.addAction(file_action)
-        parent.menu_actions.append(file_action)
+        self.file_action = self.__create_action(*args)
+        parent.file_menu.addAction(self.file_action)
+        #parent.menu_actions.append(file_action)
 
         save_icon = "save-icon_32x32"
         text = "&Save project..."
         tip = "Save data to file"
         args = (text, save_icon, tip, parent.saveData)
-        save_action = self.__create_action(*args)
-        parent.file_menu.addAction(save_action)
-        parent.menu_actions.append(save_action)
+        self.save_action = self.__create_action(*args)
+        parent.file_menu.addAction(self.save_action)
+        parent.menu_actions.append(self.save_action)
 
         delete_icon = "delete-icon_32x32"
         text = "&Clear project..."
@@ -82,9 +82,9 @@ class Ui_MainWindow(object):
         tip = "Exit application"
         shortcut = "Ctrl+Q"
         args = (text, quit_icon, tip, parent.close, False, shortcut)
-        quit_action = self.__create_action(*args)
-        parent.file_menu.addAction(quit_action)
-        parent.menu_actions.append(quit_action)
+        self.quit_action = self.__create_action(*args)
+        parent.file_menu.addAction(self.quit_action)
+        #parent.menu_actions.append(quit_action)
 
         #for action in parent.menu_actions:
         #    if action is None:
@@ -179,9 +179,9 @@ class Ui_MainWindow(object):
         text = "Preferences..."
         tip = text
         args = (text, icon, tip)
-        preferences_action = self.__create_action(*args)
-        parent.edit_menu.addAction(preferences_action)
-        parent.menu_actions.append(preferences_action)
+        self.preferences_action = self.__create_action(*args)
+        parent.edit_menu.addAction(self.preferences_action)
+        #parent.menu_actions.append(self.preferences_action)
 
         # --- Tools menu ---
         parent.tools_menu = parent.menuBar().addMenu("&Tools")
@@ -190,9 +190,9 @@ class Ui_MainWindow(object):
         text = "Plot..."
         tip = text
         args = (text, icon, tip, parent.open_plotwin)
-        plot_action = self.__create_action(*args)
-        parent.tools_menu.addAction(plot_action)
-        parent.menu_actions.append(plot_action)
+        self.plot_action = self.__create_action(*args)
+        parent.tools_menu.addAction(self.plot_action)
+        parent.menu_actions.append(self.plot_action)
         
         icon = "grid-icon_32x32"
         text = "CASMO..."
@@ -222,9 +222,9 @@ class Ui_MainWindow(object):
         text = "Find point..."
         tip = "Find state point..."
         args = (text, icon, tip, parent.open_findpoint_dlg)
-        find_action = self.__create_action(*args)
-        parent.tools_menu.addAction(find_action)
-        parent.menu_actions.append(find_action)
+        self.find_action = self.__create_action(*args)
+        parent.tools_menu.addAction(self.find_action)
+        parent.menu_actions.append(self.find_action)
 
         icon = "letter-e-icon_32x32"
         text = "EGV..."
@@ -280,60 +280,71 @@ class Ui_MainWindow(object):
         parent = self.parent
         parent.toolbar_actions = []
 
-        new_icon = "new-icon_32x32"
-        text = "Create new bundle"
-        args = (text, new_icon, text, parent.open_bundle_dlg)
-        new_action = self.__create_action(*args)
-        parent.toolbar_actions.append(new_action)
+        toolbar = parent.addToolBar("Toolbar")
 
-        file_icon = "open-file-icon_32x32"
-        text = "Open file"
-        args = (text, file_icon, text, parent.openFile)
-        file_action = self.__create_action(*args)
-        parent.toolbar_actions.append(file_action)
+        #new_icon = "new-icon_32x32"
+        #text = "Create new bundle"
+        #args = (text, new_icon, text, parent.open_bundle_dlg)
+        #new_action = self.__create_action(*args)
+        #parent.toolbar_actions.append(self.new_action)
+        toolbar.addAction(self.new_action)
 
-        save_icon = "save-icon_32x32"
-        text = "Save to file"
-        args = (text, save_icon, text, parent.saveData)
-        save_action = self.__create_action(*args)
-        parent.toolbar_actions.append(save_action)
+        #file_icon = "open-file-icon_32x32"
+        #text = "Open file"
+        #args = (text, file_icon, text, parent.openFile)
+        #file_action = self.__create_action(*args)
+        #parent.toolbar_actions.append(file_action)
+        toolbar.addAction(self.file_action)
 
-        calc_icon = "flame-red-icon_32x32"
-        text = "Run quick calc"
-        args = (text, calc_icon, text, parent.quick_calc)
-        parent.calcAction = self.__create_action(*args)
-        parent.toolbar_actions.append(parent.calcAction)
+        #save_icon = "save-icon_32x32"
+        #text = "Save to file"
+        #args = (text, save_icon, text, parent.saveData)
+        #save_action = self.__create_action(*args)
+        #parent.toolbar_actions.append(save_action)
+        toolbar.addAction(self.save_action)
+
+        #calc_icon = "flame-red-icon_32x32"
+        #text = "Run quick calc"
+        #args = (text, calc_icon, text, parent.quick_calc)
+        #parent.calcAction = self.__create_action(*args)
+        #parent.toolbar_actions.append(parent.calcAction)
+        toolbar.addAction(parent.quickcalc_action)
                                                          
-        pref_icon = "preferences-icon_32x32"
-        text = "Settings"
-        args = (text, pref_icon, text)
-        pref_action = self.__create_action(*args)
-        parent.toolbar_actions.append(pref_action)
+        #pref_icon = "preferences-icon_32x32"
+        #text = "Settings"
+        #args = (text, pref_icon, text)
+        #pref_action = self.__create_action(*args)
+        #parent.toolbar_actions.append(pref_action)
+        toolbar.addAction(self.preferences_action)
 
         color_icon = "color-icon_32x32"
         text = "Show color map"
         args = (text, color_icon, text, parent.toggle_cmap, True)
         parent.colorAction = self.__create_action(*args)
         parent.toolbar_actions.append(parent.colorAction)
+        toolbar.addAction(parent.colorAction)
 
-        plot_icon = "diagram-icon_32x32"
-        text = "Plot"
-        tip = "Open plot window"
-        args = (text, plot_icon, tip, parent.open_plotwin)
-        plot_action = self.__create_action(*args)
-        parent.toolbar_actions.append(plot_action)
+        #plot_icon = "diagram-icon_32x32"
+        #text = "Plot"
+        #tip = "Open plot window"
+        #args = (text, plot_icon, tip, parent.open_plotwin)
+        #plot_action = self.__create_action(*args)
+        #parent.toolbar_actions.append(plot_action)
+        toolbar.addAction(self.plot_action)
 
-        find_icon = "binoculars-icon_32x32"
-        text = "Find state point"
-        args = (text, find_icon, text, parent.open_findpoint_dlg)
-        find_action = self.__create_action(*args)
-        parent.toolbar_actions.append(find_action)
+        #find_icon = "binoculars-icon_32x32"
+        #text = "Find state point"
+        #args = (text, find_icon, text, parent.open_findpoint_dlg)
+        #find_action = self.__create_action(*args)
+        #parent.toolbar_actions.append(find_action)
+        toolbar.addAction(self.find_action)
 
         arrow_undo_icon = "arrow-undo-icon_32x32"
         text = "Back to previous design"
         args = (text, arrow_undo_icon, text, parent.back_state)
         back_action = self.__create_action(*args)
         parent.toolbar_actions.append(back_action)
+        
 
         arrow_redo_icon = "arrow-redo-icon_32x32"
         text = "Forward to next design"
@@ -361,10 +372,11 @@ class Ui_MainWindow(object):
         args = (text, exit_icon, tip, parent.close)
         exit_action = self.__create_action(*args)
         parent.toolbar_actions.append(exit_action)
+        #parent.toolbar_actions.append(self.quit_action)
 
-        toolbar = parent.addToolBar("Toolbar")
-        for action in parent.toolbar_actions:
-            toolbar.addAction(action)
+        #toolbar = parent.addToolBar("Toolbar")
+        #for action in parent.toolbar_actions:
+        #    toolbar.addAction(action)
         
         toolbar.setMovable(False)
         toolbar.setFloatable(True)
