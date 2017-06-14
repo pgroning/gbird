@@ -1839,172 +1839,172 @@ class MainWin(QtGui.QMainWindow):
     #    self.status_text = QtGui.QLabel("Main window")
     #    self.statusBar().addWidget(self.status_text, 1)
         
-    def create_menu(self):
-        self.file_menu = self.menuBar().addMenu("&File")
-        
-        clear_action = self.create_action("&Clear project...",
-                                          shortcut="Ctrl+C",
-                                          slot=self.clear_project,
-                                          tip="Clear current project",
-                                          icon="delete-icon_32x32")
-
-        quit_action = self.create_action("&Quit", slot=self.close,
-                                         shortcut="Ctrl+Q",
-                                         tip="Close the application",
-                                         icon="exit-icon_32x32")
-
-        new_project_action = self.create_action("&New...",
-                                                slot=self.open_bundle_dlg,
-                                                shortcut="Ctrl+N",
-                                                tip="Create new bundle",
-                                                icon="new-icon_32x32")
-        
-        open_file_action = self.create_action("&Open...",
-                                              slot=self.openFile,
-                                              shortcut="Ctrl+O",
-                                              tip="Open file",
-                                              icon="open-file-icon_32x32")
-
-        save_data_action = self.create_action("&Save project...",
-                                              slot=self.saveData,
-                                              shortcut="Ctrl+S",
-                                              tip="Save data to file",
-                                              icon="save-icon_32x32")
-
-        save_file_action = self.create_action("&Export to ascii...",
-                                                slot=self.export_to_ascii,
-                                                tip="Export data to file",
-                                                icon="export-icon_32x32")
-
-        save_figure_action = self.create_action("&Export Figure...",
-                                                slot=self.saveFigure,
-                                                tip="Export fuel map to file",
-                                                icon="export-icon_32x32")
-        
-        self.add_actions(self.file_menu, (new_project_action, open_file_action,
-                                          save_data_action,
-                                          clear_action, save_file_action,
-                                          save_figure_action, None,
-                                          quit_action))
-
-        self.edit_menu = self.menuBar().addMenu("&Edit")
-
-        back = self.create_action("Back", slot=self.back_state,
-                                  tip="Back to previous",
-                                  icon="arrow-undo-icon_32x32")
-
-        forward = self.create_action("Forward", slot=self.forward_state,
-                                     tip="Forward to next",
-                                     icon="arrow-redo-icon_32x32")
-
-        reset = self.create_action("Reset...", slot=self.reset_state,
-                                   tip="Reset all changes...",
-                                   icon="undo-icon_32x32")
-
-        enrichment = self.create_action("Enrichments...",
-                                        slot=self.open_enrichment_dlg,
-                                        tip="Edit enrichment levels...",
-                                        icon="table-icon_32x32")
-        
-        segment = self.create_action("Segments...",
-                                    slot=self.open_segment_dlg,
-                                    tip="Edit segment heights...",
-                                    icon="layers-icon_32x32")
-
-        enr_plus = self.create_action("Increase enr", slot=self.enr_add,
-                                      tip="Increase enrichment",
-                                      shortcut=QtCore.Qt.Key_Plus, 
-                                      icon="add-icon_32x32")
-
-        enr_minus = self.create_action("Decrease enr", slot=self.enr_sub,
-                                       tip="Decrease enrichment",
-                                       shortcut=QtCore.Qt.Key_Minus, 
-                                       icon="remove-icon_32x32")
-
-        quickcalc = self.create_action("Quick calc...",
-                                       tip="Quick calc model...",
-                                       slot=self.open_pert_dlg,
-                                       icon="flame-red-icon_32x32")
-        
-        preferences = self.create_action("Preferences...",
-                                         tip="Preferences...",
-                                         icon="preferences-icon_32x32")
-
-        replace = self.create_action("Replace original...",
-                                     tip="Replace original design...",
-                                     slot=self.replace_original_design,
-                                     icon="original-icon_32x32")
-        
-        self.add_actions(self.edit_menu,
-                         (back, forward, None, enr_plus, enr_minus, None,
-                          segment, enrichment, quickcalc, None, replace, 
-                          reset, preferences))
-        
-        self.tools_menu = self.menuBar().addMenu("&Tools")
-        plot_action = self.create_action("Plot...", tip="Plot...",
-                                         slot=self.open_plotwin,
-                                         icon="diagram-icon_32x32")
-        
-        casmo_action = self.create_action("CASMO...", tip="CASMO...",
-                                          slot=self.open_cas_dlg,
-                                          icon="grid-icon_32x32")
-
-        casinp_action = self.create_action("Generate inp files",
-                                           tip="Generate CASMO input files...",
-                                           slot=self.generate_inpfiles,
-                                           icon="write-icon_32x32")
-        
-        data_action = self.create_action("Report...", tip="Fuel report...",
-                                         slot=self.open_report_dlg,
-                                         icon="document-icon_32x32")
-        
-        find_action = self.create_action("Find point...",
-                                         tip="Find state point...",
-                                         shortcut="Ctrl+F",
-                                         slot=self.open_findpoint_dlg,
-                                         icon="binoculars-icon_32x32")
-                
-        egv_action = self.create_action("EGV...", tip="EGV...",
-                                        slot=self.open_egv_dlg,
-                                        icon="letter-e-icon_32x32")
-
-        self.show_cmap = self.create_action("Show color map", checkable=True,
-                                            tip="Show background color map",
-                                            slot=self.toggle_pin_bgcolors)
-
-        self.track_maxpin = self.create_action("Track max pins", 
-                                               checkable=True,
-                                               tip=
-                                               "Mark pins with highest value",
-                                               slot=self.toggle_maxpins)
-
-        self.add_actions(self.tools_menu,
-                         (plot_action, casmo_action, casinp_action,
-                          data_action, find_action, egv_action, 
-                          self.show_cmap, self.track_maxpin))
-
-        self.run_menu = self.menuBar().addMenu("&Run")
-        self.quickcalc_action = self.create_action("&Quick calc", shortcut="F9",
-                                                   slot=self.quick_calc,
-                                                   tip="Run quick calc",
-                                                   icon="flame-red-icon_32x32")
-        self.quickcalc_action.setEnabled(False)
-        
-        self.add_actions(self.run_menu, (None, self.quickcalc_action))
-        
-        self.help_menu = self.menuBar().addMenu("&Help")
-        about_action = self.create_action("&About", #shortcut='F1',
-                                          slot=self.on_about, tip='About',
-                                          icon="help-about-icon_32x32")
-        
-        self.add_actions(self.help_menu, (about_action,))
-
-        self.menu_actions = [save_data_action, clear_action, save_file_action,
-                             save_figure_action, back, forward, reset, 
-                             enrichment, segment, enr_plus, enr_minus, 
-                             quickcalc, replace, plot_action, casmo_action,
-                             casinp_action, data_action, find_action,
-                             egv_action]
+#    def create_menu(self):
+#        self.file_menu = self.menuBar().addMenu("&File")
+#        
+#        clear_action = self.create_action("&Clear project...",
+#                                          shortcut="Ctrl+C",
+#                                          slot=self.clear_project,
+#                                          tip="Clear current project",
+#                                          icon="delete-icon_32x32")
+#
+#        quit_action = self.create_action("&Quit", slot=self.close,
+#                                         shortcut="Ctrl+Q",
+#                                         tip="Close the application",
+#                                         icon="exit-icon_32x32")
+#
+#        new_project_action = self.create_action("&New...",
+#                                                slot=self.open_bundle_dlg,
+#                                                shortcut="Ctrl+N",
+#                                                tip="Create new bundle",
+#                                                icon="new-icon_32x32")
+#        
+#        open_file_action = self.create_action("&Open...",
+#                                              slot=self.openFile,
+#                                              shortcut="Ctrl+O",
+#                                              tip="Open file",
+#                                              icon="open-file-icon_32x32")
+#
+#        save_data_action = self.create_action("&Save project...",
+#                                              slot=self.saveData,
+#                                              shortcut="Ctrl+S",
+#                                              tip="Save data to file",
+#                                              icon="save-icon_32x32")
+#
+#        save_file_action = self.create_action("&Export to ascii...",
+#                                                slot=self.export_to_ascii,
+#                                                tip="Export data to file",
+#                                                icon="export-icon_32x32")
+#
+#        save_figure_action = self.create_action("&Export Figure...",
+#                                                slot=self.saveFigure,
+#                                                tip="Export fuel map to file",
+#                                                icon="export-icon_32x32")
+#        
+#        self.add_actions(self.file_menu, (new_project_action, open_file_action,
+#                                          save_data_action,
+#                                          clear_action, save_file_action,
+#                                          save_figure_action, None,
+#                                          quit_action))
+#
+#        self.edit_menu = self.menuBar().addMenu("&Edit")
+#
+#        back = self.create_action("Back", slot=self.back_state,
+#                                  tip="Back to previous",
+#                                  icon="arrow-undo-icon_32x32")
+#
+#        forward = self.create_action("Forward", slot=self.forward_state,
+#                                     tip="Forward to next",
+#                                     icon="arrow-redo-icon_32x32")
+#
+#        reset = self.create_action("Reset...", slot=self.reset_state,
+#                                   tip="Reset all changes...",
+#                                   icon="undo-icon_32x32")
+#
+#        enrichment = self.create_action("Enrichments...",
+#                                        slot=self.open_enrichment_dlg,
+#                                        tip="Edit enrichment levels...",
+#                                        icon="table-icon_32x32")
+#        
+#        segment = self.create_action("Segments...",
+#                                    slot=self.open_segment_dlg,
+#                                    tip="Edit segment heights...",
+#                                    icon="layers-icon_32x32")
+#
+#        enr_plus = self.create_action("Increase enr", slot=self.enr_add,
+#                                      tip="Increase enrichment",
+#                                      shortcut=QtCore.Qt.Key_Plus, 
+#                                      icon="add-icon_32x32")
+#
+#        enr_minus = self.create_action("Decrease enr", slot=self.enr_sub,
+#                                       tip="Decrease enrichment",
+#                                       shortcut=QtCore.Qt.Key_Minus, 
+#                                       icon="remove-icon_32x32")
+#
+#        quickcalc = self.create_action("Quick calc...",
+#                                       tip="Quick calc model...",
+#                                       slot=self.open_pert_dlg,
+#                                       icon="flame-red-icon_32x32")
+#        
+#        preferences = self.create_action("Preferences...",
+#                                         tip="Preferences...",
+#                                         icon="preferences-icon_32x32")
+#
+#        replace = self.create_action("Replace original...",
+#                                     tip="Replace original design...",
+#                                     slot=self.replace_original_design,
+#                                     icon="original-icon_32x32")
+#        
+#        self.add_actions(self.edit_menu,
+#                         (back, forward, None, enr_plus, enr_minus, None,
+#                          segment, enrichment, quickcalc, None, replace, 
+#                          reset, preferences))
+#        
+#        self.tools_menu = self.menuBar().addMenu("&Tools")
+#        plot_action = self.create_action("Plot...", tip="Plot...",
+#                                         slot=self.open_plotwin,
+#                                         icon="diagram-icon_32x32")
+#        
+#        casmo_action = self.create_action("CASMO...", tip="CASMO...",
+#                                          slot=self.open_cas_dlg,
+#                                          icon="grid-icon_32x32")
+#
+#        casinp_action = self.create_action("Generate inp files",
+#                                           tip="Generate CASMO input files...",
+#                                           slot=self.generate_inpfiles,
+#                                           icon="write-icon_32x32")
+#        
+#        data_action = self.create_action("Report...", tip="Fuel report...",
+#                                         slot=self.open_report_dlg,
+#                                         icon="document-icon_32x32")
+#        
+#        find_action = self.create_action("Find point...",
+#                                         tip="Find state point...",
+#                                         shortcut="Ctrl+F",
+#                                         slot=self.open_findpoint_dlg,
+#                                         icon="binoculars-icon_32x32")
+#                
+#        egv_action = self.create_action("EGV...", tip="EGV...",
+#                                        slot=self.open_egv_dlg,
+#                                        icon="letter-e-icon_32x32")
+#
+#        self.show_cmap = self.create_action("Show color map", checkable=True,
+#                                            tip="Show background color map",
+#                                            slot=self.toggle_pin_bgcolors)
+#
+#        self.track_maxpin = self.create_action("Track max pins", 
+#                                               checkable=True,
+#                                               tip=
+#                                               "Mark pins with highest value",
+#                                               slot=self.toggle_maxpins)
+#
+#        self.add_actions(self.tools_menu,
+#                         (plot_action, casmo_action, casinp_action,
+#                          data_action, find_action, egv_action, 
+#                          self.show_cmap, self.track_maxpin))
+#
+#        self.run_menu = self.menuBar().addMenu("&Run")
+#        self.quickcalc_action = self.create_action("&Quick calc", shortcut="F9",#
+#                                                   slot=self.quick_calc,
+#                                                   tip="Run quick calc",
+#                                                   icon="flame-red-icon_32x32")
+#        self.quickcalc_action.setEnabled(False)
+#        
+#        self.add_actions(self.run_menu, (None, self.quickcalc_action))
+#        
+#        self.help_menu = self.menuBar().addMenu("&Help")
+#        about_action = self.create_action("&About", #shortcut='F1',
+#                                          slot=self.on_about, tip='About',
+#                                          icon="help-about-icon_32x32")
+#        
+#        self.add_actions(self.help_menu, (about_action,))
+#
+#        self.menu_actions = [save_data_action, clear_action, save_file_action,
+#                             save_figure_action, back, forward, reset, 
+#                             enrichment, segment, enr_plus, enr_minus, 
+#                             quickcalc, replace, plot_action, casmo_action,
+#                             casinp_action, data_action, find_action,
+#                             egv_action]
 
 #    def create_toolbar(self):
 #
