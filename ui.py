@@ -99,17 +99,17 @@ class Ui_MainWindow(object):
         text = "Back"
         tip = "Back to previous"
         args = (text, back_icon, tip, parent.back_state)
-        back_action = self.__create_action(*args)
-        parent.edit_menu.addAction(back_action)
-        parent.menu_actions.append(back_action)
+        self.back_action = self.__create_action(*args)
+        parent.edit_menu.addAction(self.back_action)
+        parent.menu_actions.append(self.back_action)
 
         forward_icon = "arrow-redo-icon_32x32"
         text = "Forward"
         tip = "Forward to next"
         args = (text, forward_icon, tip, parent.forward_state)
-        forward_action = self.__create_action(*args)
-        parent.edit_menu.addAction(forward_action)
-        parent.menu_actions.append(forward_action)
+        self.forward_action = self.__create_action(*args)
+        parent.edit_menu.addAction(self.forward_action)
+        parent.menu_actions.append(self.forward_action)
 
         parent.edit_menu.addSeparator()
 
@@ -118,18 +118,18 @@ class Ui_MainWindow(object):
         tip = "Increase enrichment"
         shortcut = QtCore.Qt.Key_Plus
         args = (text, plus_icon, tip, parent.enr_add, False, shortcut)
-        increase_enr_action = self.__create_action(*args)
-        parent.edit_menu.addAction(increase_enr_action)
-        parent.menu_actions.append(increase_enr_action)
+        self.increase_enr_action = self.__create_action(*args)
+        parent.edit_menu.addAction(self.increase_enr_action)
+        parent.menu_actions.append(self.increase_enr_action)
         
         minus_icon = "remove-icon_32x32"
         text = "Decrease enr"
         tip = "Decrease enrichment"
         shortcut = QtCore.Qt.Key_Minus
         args = (text, minus_icon, tip, parent.enr_sub, False, shortcut)
-        decrease_enr_action = self.__create_action(*args)
-        parent.edit_menu.addAction(decrease_enr_action)
-        parent.menu_actions.append(decrease_enr_action)
+        self.decrease_enr_action = self.__create_action(*args)
+        parent.edit_menu.addAction(self.decrease_enr_action)
+        parent.menu_actions.append(self.decrease_enr_action)
 
         parent.edit_menu.addSeparator()
 
@@ -339,41 +339,45 @@ class Ui_MainWindow(object):
         #parent.toolbar_actions.append(find_action)
         toolbar.addAction(self.find_action)
 
-        arrow_undo_icon = "arrow-undo-icon_32x32"
-        text = "Back to previous design"
-        args = (text, arrow_undo_icon, text, parent.back_state)
-        back_action = self.__create_action(*args)
-        parent.toolbar_actions.append(back_action)
+        #arrow_undo_icon = "arrow-undo-icon_32x32"
+        #text = "Back to previous design"
+        #args = (text, arrow_undo_icon, text, parent.back_state)
+        #back_action = self.__create_action(*args)
+        #parent.toolbar_actions.append(back_action)
+        toolbar.addAction(self.back_action)
+
+        #arrow_redo_icon = "arrow-redo-icon_32x32"
+        #text = "Forward to next design"
+        #args = (text, arrow_redo_icon, text, parent.forward_state)
+        #forward_action = self.__create_action(*args)
+        #parent.toolbar_actions.append(forward_action)
+        toolbar.addAction(self.forward_action)
+
+        #minus_icon = "remove-icon_32x32"
+        #text = "Decrease enrichment"
+        #tip = text
+        #args = (text, minus_icon, tip, parent.enr_sub)
+        #decrease_enr_action = self.__create_action(*args)
+        #parent.toolbar_actions.append(decrease_enr_action)
+        toolbar.addAction(self.decrease_enr_action)
+
+        #plus_icon = "add-icon_32x32"
+        #text = "Increase enrichment"
+        #tip = text
+        #args = (text, plus_icon, tip, parent.enr_add)
+        #increase_enr_action = self.__create_action(*args)
+        #parent.toolbar_actions.append(increase_enr_action)
+        toolbar.addAction(self.increase_enr_action)
         
-
-        arrow_redo_icon = "arrow-redo-icon_32x32"
-        text = "Forward to next design"
-        args = (text, arrow_redo_icon, text, parent.forward_state)
-        forward_action = self.__create_action(*args)
-        parent.toolbar_actions.append(forward_action)
-
-        minus_icon = "remove-icon_32x32"
-        text = "Decrease enrichment"
-        tip = text
-        args = (text, minus_icon, tip, parent.enr_sub)
-        decrease_enr_action = self.__create_action(*args)
-        parent.toolbar_actions.append(decrease_enr_action)
-
-        plus_icon = "add-icon_32x32"
-        text = "Increase enrichment"
-        tip = text
-        args = (text, plus_icon, tip, parent.enr_add)
-        increase_enr_action = self.__create_action(*args)
-        parent.toolbar_actions.append(increase_enr_action)
-
         exit_icon = "exit-icon_32x32"
         text = "Exit"
         tip = "Exit application"
         args = (text, exit_icon, tip, parent.close)
         exit_action = self.__create_action(*args)
-        parent.toolbar_actions.append(exit_action)
+        #parent.toolbar_actions.append(exit_action)
         #parent.toolbar_actions.append(self.quit_action)
-
+        toolbar.addAction(self.quit_action)
+        
         #toolbar = parent.addToolBar("Toolbar")
         #for action in parent.toolbar_actions:
         #    toolbar.addAction(action)
