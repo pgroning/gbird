@@ -325,7 +325,7 @@ class MainWin(QtGui.QMainWindow):
         # init segment combo box
         nsegments = len(self.bunlist[-1].segments)
         seglist = map(str, range(1, nsegments + 1))
-        self.case_cbox.addItems(QtCore.QStringList(seglist))
+        self.ui.case_cbox.addItems(QtCore.QStringList(seglist))
 
     def saveData(self):
         """Save bundle object to pickle file"""
@@ -378,8 +378,8 @@ class MainWin(QtGui.QMainWindow):
     def export_to_ascii(self):
         """Export data to file using YAML format"""
 
-        iseg = int(self.case_cbox.currentIndex())
-        param = str(self.param_cbox.currentText())
+        iseg = int(self.ui.case_cbox.currentIndex())
+        param = str(self.ui.param_cbox.currentText())
 
         LFU = self.bunlist[self.ibundle].segments[iseg].data.LFU
         M = np.zeros(LFU.shape).astype(float)
@@ -521,7 +521,7 @@ class MainWin(QtGui.QMainWindow):
     def enrpin_add_callback(self):
         """enr pin add callback"""
 
-        case_num = int(self.case_cbox.currentIndex())
+        case_num = int(self.ui.case_cbox.currentIndex())
         ipin = self.pinselection_index  # copy attributes from selected pin
 
         enrobj = FuePin(self.axes)
@@ -546,7 +546,7 @@ class MainWin(QtGui.QMainWindow):
     def enrpin_edit_callback(self):
         """enr pin edit callback"""
 
-        case_num = int(self.case_cbox.currentIndex())
+        case_num = int(self.ui.case_cbox.currentIndex())
         ipin = self.pinselection_index  # index of enr level pin to be edited
         enrpin = self.enrpinlist[case_num][ipin]
 
@@ -575,7 +575,7 @@ class MainWin(QtGui.QMainWindow):
         if status == QtGui.QMessageBox.Cancel:
             return
 
-        case_num = int(self.case_cbox.currentIndex())
+        case_num = int(self.ui.case_cbox.currentIndex())
         ipin = self.pinselection_index  # index of enr level pin to be removed
         
         del self.enrpinlist[case_num][ipin]  # remove the selected pin
@@ -607,7 +607,7 @@ class MainWin(QtGui.QMainWindow):
         if status == QtGui.QMessageBox.Cancel:
             return
 
-        case_num = int(self.case_cbox.currentIndex())
+        case_num = int(self.ui.case_cbox.currentIndex())
         enrlist = [pin.ENR for pin in self.enrpinlist[case_num]]
         isort = [i for i, e in sorted(enumerate(enrlist), key=lambda x:x[1])]
         
@@ -684,8 +684,8 @@ class MainWin(QtGui.QMainWindow):
         self.egv_dlg.exec_()
 
     def set_point_number(self, voi=40.0, vhi=40.0, exp_pc=0):
-        ipoint = int(self.point_sbox.value())
-        iseg = int(self.case_cbox.currentIndex())
+        ipoint = int(self.ui.point_sbox.value())
+        iseg = int(self.ui.case_cbox.currentIndex())
         bundle = self.bunlist[self.ibundle]
         segment = bundle.segments[iseg]
         statepoint = segment.statepoints[ipoint]
@@ -704,20 +704,20 @@ class MainWin(QtGui.QMainWindow):
         
         ipoint = segment.findpoint(burnup=exp, voi=voi, vhi=vhi)
         if ipoint is not None:
-            self.point_sbox.setValue(ipoint)
+            self.ui.point_sbox.setValue(ipoint)
 
     def set_pinvalues(self):
         """Update pin values"""
 
-        param_str = str(self.param_cbox.currentText())
-        iseg = int(self.case_cbox.currentIndex())
+        param_str = str(self.ui.param_cbox.currentText())
+        iseg = int(self.ui.case_cbox.currentIndex())
 
         state_num = self.ibundle
         bundle = self.bunlist[state_num]
         segment = bundle.segments[iseg]
         
-        self.point_sbox.setMaximum(len(segment.statepoints) - 1)
-        point_num = int(self.point_sbox.value())
+        self.ui.point_sbox.setMaximum(len(segment.statepoints) - 1)
+        point_num = int(self.ui.point_sbox.value())
         
         ENR = segment.data.ENR
         
@@ -740,10 +740,10 @@ class MainWin(QtGui.QMainWindow):
         BA = segment.data.BA
         
         # Sorting table column 0 in ascending order
-        self.table.sort_items()
+        self.ui.table.sort_items()
         #self.table.sortItems(0, QtCore.Qt.AscendingOrder)
-        self.table.clearContents()
-        self.table.setpincoords()
+        self.ui.table.clearContents()
+        self.ui.table.setpincoords()
         
         k = 0
         for i in xrange(npst):
@@ -763,9 +763,9 @@ class MainWin(QtGui.QMainWindow):
                     btfItem.setData(QtCore.Qt.EditRole, QtCore.QVariant(
                         float(np.round(BTF[i, j], 3))))
 
-                    self.table.setItem(k, 1, expItem)
-                    self.table.setItem(k, 2, fintItem)
-                    self.table.setItem(k, 3, btfItem)
+                    self.ui.table.setItem(k, 1, expItem)
+                    self.ui.table.setItem(k, 2, fintItem)
+                    self.ui.table.setItem(k, 3, btfItem)
                     k += 1
         
         statepoint = segment.statepoints[point_num]
@@ -779,17 +779,17 @@ class MainWin(QtGui.QMainWindow):
         tmo = statepoint.tmo
         
         formstr = "{0:.0f} / {1:.0f}".format(voi, vhi)
-        self.voi_vhi_text.setText(formstr)
+        self.ui.voi_vhi_text.setText(formstr)
         formstr = "{0:.0f} / {1:.0f}".format(tfu, tmo)
-        self.tfu_tmo_text.setText(formstr)
+        self.ui.tfu_tmo_text.setText(formstr)
         formstr = "{0:.3f}".format(burnup)
-        self.burnup_text.setText(formstr)
+        self.ui.burnup_text.setText(formstr)
         formstr = "{0:.5f}".format(kinf)
-        self.kinf_text.setText(formstr)
+        self.ui.kinf_text.setText(formstr)
         formstr = "{0:.3f}".format(fint)
-        self.fint_text.setText(formstr)
+        self.ui.fint_text.setText(formstr)
         formstr = "{0:.4f}".format(btf)
-        self.btf_text.setText(formstr)
+        self.ui.btf_text.setText(formstr)
         
         npins = len(self.pinobjects[iseg])
         #cmap = self.get_colormap(npins, "bmr")
@@ -916,48 +916,48 @@ class MainWin(QtGui.QMainWindow):
 
     def tableHeaderSort(self):
         # Sort header
-        case_num = int(self.case_cbox.currentIndex())
+        case_num = int(self.ui.case_cbox.currentIndex())
         for i, pinobj in enumerate(self.pinobjects[case_num]):
-            index = int(self.table.item(i, 0).text())
+            index = int(self.ui.table.item(i, 0).text())
             item = QtGui.QTableWidgetItem(
                 str(self.pinobjects[case_num][index].coord))
-            self.table.setVerticalHeaderItem(i, item)
+            self.ui.table.setVerticalHeaderItem(i, item)
 
     def tableSelectRow(self, i):
-        index = next(j for j in range(self.table.rowCount())
-                     if int(self.table.item(j, 0).text()) == i)
-        self.table.selectRow(index)
+        index = next(j for j in range(self.ui.table.rowCount())
+                     if int(self.ui.table.item(j, 0).text()) == i)
+        self.ui.table.selectRow(index)
 
     def pinSelect(self, i):
-        if hasattr(self.table.item(i, 0), "text"):
-            index = int(self.table.item(i, 0).text())
+        if hasattr(self.ui.table.item(i, 0), "text"):
+            index = int(self.ui.table.item(i, 0).text())
             self.mark_pin(index)
 
     def keyPressEvent(self, event):
         key = event.key()
         if key == QtCore.Qt.Key_8:  # Up arrow key was pressed
-            iseg = int(self.case_cbox.currentIndex())
-            imax = self.case_cbox.count() - 1
+            iseg = int(self.ui.case_cbox.currentIndex())
+            imax = self.ui.case_cbox.count() - 1
             if iseg < imax:
                 iseg += 1
-                self.case_cbox.setCurrentIndex(iseg)  # increase segment
+                self.ui.case_cbox.setCurrentIndex(iseg)  # increase segment
         elif key == QtCore.Qt.Key_2:  # Down arrow key was pressed
-            iseg = int(self.case_cbox.currentIndex())
+            iseg = int(self.ui.case_cbox.currentIndex())
             if iseg > 0:
                 iseg -= 1
-                self.case_cbox.setCurrentIndex(iseg)  # decrease segment
+                self.ui.case_cbox.setCurrentIndex(iseg)  # decrease segment
         elif key == QtCore.Qt.Key_4:  # Left arrow key was pressed
-            ipoint = self.point_sbox.value()
-            imin = self.point_sbox.minimum()
+            ipoint = self.ui.point_sbox.value()
+            imin = self.ui.point_sbox.minimum()
             if ipoint > imin:
                 ipoint -= 1
-                self.point_sbox.setValue(ipoint)  # increase state point
+                self.ui.point_sbox.setValue(ipoint)  # increase state point
         elif key == QtCore.Qt.Key_6:  # Right arrow key was pressed
-            ipoint = self.point_sbox.value()
-            imax = self.point_sbox.maximum()
+            ipoint = self.ui.point_sbox.value()
+            imax = self.ui.point_sbox.maximum()
             if ipoint < imax:
                 ipoint += 1
-                self.point_sbox.setValue(ipoint)  # decrease state point
+                self.ui.point_sbox.setValue(ipoint)  # decrease state point
 
     def on_click(self, event):
         # The event received here is of the type
@@ -973,7 +973,7 @@ class MainWin(QtGui.QMainWindow):
         if not hasattr(self, "pinobjects"):  # is data initialized?
             return
 
-        case_num = int(self.case_cbox.currentIndex())
+        case_num = int(self.ui.case_cbox.currentIndex())
 
         if event.button is 1:  # left mouse click
             # print event.xdata, event.ydata
@@ -1016,7 +1016,7 @@ class MainWin(QtGui.QMainWindow):
         """Find the corresponding pin for half symmetry"""
 
         if case_num is None:
-            case_num = int(self.case_cbox.currentIndex())
+            case_num = int(self.ui.case_cbox.currentIndex())
 
         pos = self.pinobjects[case_num][i].pos
         sympos = list(reversed(pos))
@@ -1027,7 +1027,7 @@ class MainWin(QtGui.QMainWindow):
     def casecor_pin(self, case_num):
         """Find the corresponding pin for another segment"""
         
-        current_case_num = int(self.case_cbox.currentIndex())
+        current_case_num = int(self.ui.case_cbox.currentIndex())
         i = self.pinselection_index
         ipos = self.pinobjects[current_case_num][i].pos
         try:
@@ -1046,7 +1046,7 @@ class MainWin(QtGui.QMainWindow):
                 pass
             
         self.pinselection_index = i
-        case_num = int(self.case_cbox.currentIndex())
+        case_num = int(self.ui.case_cbox.currentIndex())
         self.clicked_pin = self.pinobjects[case_num][i]
         self.clicked_pin.set_clickpatch()
         
@@ -1080,7 +1080,7 @@ class MainWin(QtGui.QMainWindow):
         #label = str(sender.text())
         #LFU = int(label.replace("#", ""))
         
-        case_num = int(self.case_cbox.currentIndex())
+        case_num = int(self.ui.case_cbox.currentIndex())
         bundle = self.bunlist[self.ibundle]
 
         if (hasattr(bundle.data, "segment_connect_list") and
@@ -1098,7 +1098,7 @@ class MainWin(QtGui.QMainWindow):
     def enr_fields_update(self):
         """Update enr value in info fields"""
 
-        iseg = int(self.case_cbox.currentIndex())
+        iseg = int(self.ui.case_cbox.currentIndex())
         istate = self.ibundle
         bundle = self.bunlist[istate]
 
@@ -1118,7 +1118,7 @@ class MainWin(QtGui.QMainWindow):
         orig_seg_enr = self.bunlist[0].segments[iseg].data.ave_enr
         diff_seg_enr = segment.ave_enr - orig_seg_enr
         formstr = '{0:.4f} ({1:+.4f})'.format(segment.ave_enr, diff_seg_enr)
-        self.ave_enr_text.setText(formstr)
+        self.ui.ave_enr_text.setText(formstr)
         
         # Update bundle enr
         bundle_enr = bundle.ave_enr_calc()
@@ -1128,20 +1128,20 @@ class MainWin(QtGui.QMainWindow):
         orig_bundle_enr = self.bunlist[0].ave_enr
         diff_bundle_enr = bundle_enr - orig_bundle_enr
         formstr = '{0:.4f} ({1:+.4f})'.format(bundle_enr, diff_bundle_enr)
-        self.bundle_enr_text.setText(formstr)
+        self.ui.bundle_enr_text.setText(formstr)
 
         # Update number of pin types
         fuetype = self.bunlist[0].data.fuetype
         pins = PinCount(LFU_list, FUE_list, fuetype)
         formstr = '{0:d}'.format(pins.noofpintypes)
-        self.rod_types_text.setText(formstr)
+        self.ui.rod_types_text.setText(formstr)
 
         self.report_update()
 
     def enr_modify(self, mod, case_num=None, ipin=None):
         halfsym = True
         if case_num is None:
-            case_num = int(self.case_cbox.currentIndex())
+            case_num = int(self.ui.case_cbox.currentIndex())
         ivec = []
         if ipin is None:
             ipin = self.casecor_pin(case_num)
@@ -1163,7 +1163,7 @@ class MainWin(QtGui.QMainWindow):
 
     def __pinenr_update(self, i, pinLFU, case_num=None):
         if case_num is None:
-            case_num = int(self.case_cbox.currentIndex())
+            case_num = int(self.ui.case_cbox.currentIndex())
         j = pinLFU - 1
         self.pinobjects[case_num][i].LFU = pinLFU
         self.pinobjects[case_num][i].ENR = self.enrpinlist[case_num][j].ENR
@@ -1173,12 +1173,12 @@ class MainWin(QtGui.QMainWindow):
         else:
             self.pinobjects[case_num][i].BA = self.enrpinlist[case_num][j].BA
 
-        if case_num == int(self.case_cbox.currentIndex()):
+        if case_num == int(self.ui.case_cbox.currentIndex()):
             fc = self.enrpinlist[case_num][j].circle.get_facecolor()
             self.pinobjects[case_num][i].circle.set_facecolor(fc)
             
             text = self.enrpinlist[case_num][j].text.get_text()
-            if str(self.param_cbox.currentText()) == 'ENR':
+            if str(self.ui.param_cbox.currentText()) == 'ENR':
                 self.pinobjects[case_num][i].text.remove()
                 self.pinobjects[case_num][i].set_text(text)
 
@@ -1453,10 +1453,10 @@ class MainWin(QtGui.QMainWindow):
         self.toggle_pin_bgcolors()
         
         # Update info field
-        iseg = int(self.case_cbox.currentIndex())
+        iseg = int(self.ui.case_cbox.currentIndex())
         sim = self.bunlist[0].segments[iseg].data.sim
         text = sim.replace("SIM", "").replace("'", "").strip()
-        self.sim_info_field.setText(text)
+        self.ui.sim_info_field.setText(text)
         self.enr_fields_update()
 
     def mark_maxpins(self, param=None):
@@ -1464,12 +1464,12 @@ class MainWin(QtGui.QMainWindow):
 
         self.remove_maxpins()
 
-        iseg = int(self.case_cbox.currentIndex())
-        ipoint = int(self.point_sbox.value())
+        iseg = int(self.ui.case_cbox.currentIndex())
+        ipoint = int(self.ui.point_sbox.value())
         bundle = self.bunlist[self.ibundle]
         segment = bundle.segments[iseg]
         if param == None:
-            param = str(self.param_cbox.currentText())
+            param = str(self.ui.param_cbox.currentText())
         if param not in ["FINT", "EXP", "BTF"]:
             return
         if param == "FINT":
@@ -1524,19 +1524,20 @@ class MainWin(QtGui.QMainWindow):
     def clear_data(self):
         """Clear fuel map figure axes and delete bundle and GUI field data"""
 
-        self.param_cbox.setCurrentIndex(0)
-        self.point_sbox.setValue(0)
-        self.chanbow_sbox.setValue(0)
+        self.ui.param_cbox.setCurrentIndex(0)
+        self.ui.point_sbox.setValue(0)
+        self.ui.chanbow_sbox.setValue(0)
 
-        widgets = [self.case_cbox, self.sim_info_field, self.rod_types_text,
-                   self.ave_enr_text, self.bundle_enr_text,
-                   self.burnup_text, self.kinf_text, self.fint_text,
-                   self.btf_text, self.voi_vhi_text, self.tfu_tmo_text]
+        widgets = [self.ui.case_cbox, self.ui.sim_info_field, 
+                   self.ui.rod_types_text,
+                   self.ui.ave_enr_text, self.ui.bundle_enr_text,
+                   self.ui.burnup_text, self.ui.kinf_text, self.ui.fint_text,
+                   self.ui.btf_text, self.ui.voi_vhi_text, self.ui.tfu_tmo_text]
         for w in widgets:
             w.clear()
 
         self.show_cmap.setChecked(False)
-        self.table.clearContents()
+        self.ui.table.clearContents()
 
         if hasattr(self, "bundle"):
             del self.bundle
@@ -1680,21 +1681,21 @@ class MainWin(QtGui.QMainWindow):
 #                     self.set_pinvalues)
 #
 #        case_label = QtGui.QLabel('Segment:')
-#        self.case_cbox = QtGui.QComboBox()
+#        self.ui.case_cbox = QtGui.QComboBox()
 #        case_hbox = QtGui.QHBoxLayout()
 #        case_hbox.addWidget(case_label)
-#        case_hbox.addWidget(self.case_cbox)
-#        self.connect(self.case_cbox, QtCore.SIGNAL('currentIndexChanged(int)'),
+#        case_hbox.addWidget(self.ui.case_cbox)
+#        self.connect(self.ui.case_cbox, QtCore.SIGNAL('currentIndexChanged(int)'),
 #                     self.fig_update)
 #
 #        point_label = QtGui.QLabel('Point number:')
-#        self.point_sbox = QtGui.QSpinBox()
-#        self.point_sbox.setMinimum(0)
-#        self.point_sbox.setMaximum(10000)
+#        self.ui.point_sbox = QtGui.QSpinBox()
+#        self.ui.point_sbox.setMinimum(0)
+#        self.ui.point_sbox.setMaximum(10000)
 #        point_hbox = QtGui.QHBoxLayout()
 #        point_hbox.addWidget(point_label)
-#        point_hbox.addWidget(self.point_sbox)
-#        self.connect(self.point_sbox, QtCore.SIGNAL('valueChanged(int)'),
+#        point_hbox.addWidget(self.ui.point_sbox)
+#        self.connect(self.ui.point_sbox, QtCore.SIGNAL('valueChanged(int)'),
 #                     self.set_pinvalues)
 #
 #        chanbow_hbox = QtGui.QHBoxLayout()
@@ -2147,13 +2148,13 @@ class MainWin(QtGui.QMainWindow):
     def chanbow_sbox_update(self):
         """Update chanbow spinbox value"""
         
-        iseg = int(self.case_cbox.currentIndex())
+        iseg = int(self.ui.case_cbox.currentIndex())
         segment = self.bunlist[self.ibundle].segments[iseg]
         if hasattr(segment.data, "box_offset"):
             box_offset = segment.data.box_offset * 10
         else:
             box_offset = 0
-        self.chanbow_sbox.setValue(box_offset)
+        self.ui.chanbow_sbox.setValue(box_offset)
         
     def toggle_cmap(self, status):
         """slot triggered on colorAction signal"""
@@ -2167,7 +2168,7 @@ class MainWin(QtGui.QMainWindow):
     def toggle_pin_bgcolors(self):
         """Toggle pin background colors"""
         
-        iseg = int(self.case_cbox.currentIndex())
+        iseg = int(self.ui.case_cbox.currentIndex())
         if self.show_cmap.isChecked():
             self.colorAction.setChecked(True)
             for pin in self.pinobjects[iseg]:
@@ -2221,8 +2222,8 @@ class MainWin(QtGui.QMainWindow):
 
     def widgets_setenabled(self, status=True):
 
-        widgets = [self.param_cbox, self.case_cbox, self.point_sbox,
-                   self.chanbow_sbox, self.table]
+        widgets = [self.ui.param_cbox, self.ui.case_cbox, self.ui.point_sbox,
+                   self.ui.chanbow_sbox, self.ui.table]
         for w in widgets:
             w.setEnabled(status)
     

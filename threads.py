@@ -57,7 +57,7 @@ class QuickCalcThread(QtCore.QThread):
             bundle = Bundle(parent=self.parent.bunlist[0])
             nsegs = len(bundle.segments)
             voi = None
-            chanbow = self.parent.chanbow_sbox.value() / 10  # mm -> cm
+            chanbow = self.parent.ui.chanbow_sbox.value() / 10  # mm -> cm
             for iseg in xrange(nsegs):
                 segment = bundle.segments[iseg]
                 pins = self.parent.pinobjects[iseg]

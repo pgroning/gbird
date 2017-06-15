@@ -105,7 +105,7 @@ class PlotWin(QtGui.QMainWindow):
                 ipin = self.parent.pinselection_index
             else:
                 ipin = 0
-            iseg = int(self.parent.case_cbox.currentIndex())
+            iseg = int(self.parent.ui.case_cbox.currentIndex())
             i, j = self.parent.pinobjects[iseg][ipin].pos
             y = [s.POW[i, j] for s in statepoints]
 
@@ -130,7 +130,7 @@ class PlotWin(QtGui.QMainWindow):
                 ipin = self.parent.pinselection_index
             else:
                 ipin = 0
-            iseg = int(self.parent.case_cbox.currentIndex())
+            iseg = int(self.parent.ui.case_cbox.currentIndex())
             i, j = self.parent.pinobjects[iseg][ipin].pos
             y = [e[i, j] for e in DOX]
             label = self.parent.pinobjects[iseg][ipin].coord
@@ -250,14 +250,14 @@ class PlotWin(QtGui.QMainWindow):
 
     def on_plot(self):
 
-        case_id = int(self.parent.case_cbox.currentIndex())
+        case_id = int(self.parent.ui.case_cbox.currentIndex())
         case_id_max = len(self.parent.bunlist[-1].segments)
         
         param = self.param_cbox.currentText()
         
         ibundle = self.parent.ibundle
         bunlist = self.parent.bunlist
-        ipoint = self.parent.point_sbox.value()
+        ipoint = self.parent.ui.point_sbox.value()
         
         statepoint = (self.parent.bunlist[ibundle]
                       .segments[case_id].statepoints[ipoint])
@@ -378,7 +378,7 @@ class PlotWin(QtGui.QMainWindow):
         for p in paramlist:
             self.param_cbox.addItem(p)
 
-        parent_param = str(self.parent.param_cbox.currentText())
+        parent_param = str(self.parent.ui.param_cbox.currentText())
         if parent_param in paramlist:
             i = paramlist.index(parent_param)
             self.param_cbox.setCurrentIndex(i)

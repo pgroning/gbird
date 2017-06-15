@@ -14,7 +14,7 @@ def at11(self):
     #self.axes.add_patch(p_fancy)
 
     # Draw enrichment levels
-    case_num = int(self.case_cbox.currentIndex())
+    case_num = int(self.ui.case_cbox.currentIndex())
     state_num = -1
 
     pin_radius = 0.0252*0.9

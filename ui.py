@@ -55,7 +55,7 @@ class PinTableWidget(QtGui.QTableWidget):
     def setpincoords(self):
         """Update table with pin coordinates"""
         
-        case_num = int(self.parent.case_cbox.currentIndex())
+        case_num = int(self.parent.ui.case_cbox.currentIndex())
         npin = len(self.parent.pinobjects[case_num])
         self.setRowCount(npin)
         
@@ -512,99 +512,99 @@ class Ui_MainWindow(object):
 
         # Other GUI controls
         sim_hbox = QtGui.QHBoxLayout()
-        parent.sim_info_field = InfoLabel(width=210)
-        sim_hbox.addWidget(parent.sim_info_field)
+        self.sim_info_field = InfoLabel(width=210)
+        sim_hbox.addWidget(self.sim_info_field)
 
         param_label = QtGui.QLabel('Parameter:')
-        parent.param_cbox = QtGui.QComboBox()
+        self.param_cbox = QtGui.QComboBox()
         paramlist = ['ENR', 'FINT', 'EXP', 'BTF']
-        parent.param_cbox.addItems(QtCore.QStringList(paramlist))
+        self.param_cbox.addItems(QtCore.QStringList(paramlist))
         
         param_hbox = QtGui.QHBoxLayout()
         param_hbox.addWidget(param_label)
-        param_hbox.addWidget(parent.param_cbox)
-        parent.connect(parent.param_cbox,
+        param_hbox.addWidget(self.param_cbox)
+        parent.connect(self.param_cbox,
                      QtCore.SIGNAL('currentIndexChanged(int)'),
                      parent.set_pinvalues)
 
         case_label = QtGui.QLabel('Segment:')
-        parent.case_cbox = QtGui.QComboBox()
+        self.case_cbox = QtGui.QComboBox()
         case_hbox = QtGui.QHBoxLayout()
         case_hbox.addWidget(case_label)
-        case_hbox.addWidget(parent.case_cbox)
-        parent.connect(parent.case_cbox, 
+        case_hbox.addWidget(self.case_cbox)
+        parent.connect(self.case_cbox, 
                      QtCore.SIGNAL('currentIndexChanged(int)'),
                      parent.fig_update)
 
         point_label = QtGui.QLabel('Point number:')
-        parent.point_sbox = QtGui.QSpinBox()
-        parent.point_sbox.setMinimum(0)
-        parent.point_sbox.setMaximum(10000)
+        self.point_sbox = QtGui.QSpinBox()
+        self.point_sbox.setMinimum(0)
+        self.point_sbox.setMaximum(10000)
         point_hbox = QtGui.QHBoxLayout()
         point_hbox.addWidget(point_label)
-        point_hbox.addWidget(parent.point_sbox)
-        parent.connect(parent.point_sbox, QtCore.SIGNAL('valueChanged(int)'),
+        point_hbox.addWidget(self.point_sbox)
+        parent.connect(self.point_sbox, QtCore.SIGNAL('valueChanged(int)'),
                      parent.set_pinvalues)
 
         chanbow_hbox = QtGui.QHBoxLayout()
-        parent.chanbow_sbox = QtGui.QDoubleSpinBox()
-        parent.chanbow_sbox.setRange(-3, 3)
-        parent.chanbow_sbox.setSingleStep(0.25)
-        parent.chanbow_sbox.setSuffix(" mm")
+        self.chanbow_sbox = QtGui.QDoubleSpinBox()
+        self.chanbow_sbox.setRange(-3, 3)
+        self.chanbow_sbox.setSingleStep(0.25)
+        self.chanbow_sbox.setSuffix(" mm")
         chanbow_hbox.addWidget(QtGui.QLabel("Channel bow:"))
-        chanbow_hbox.addWidget(parent.chanbow_sbox)
+        chanbow_hbox.addWidget(self.chanbow_sbox)
 
         # Info form layout
         info_flo = QtGui.QFormLayout()
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum,
                                        QtGui.QSizePolicy.Minimum)
 
-        parent.burnup_text = InfoLabel()
-        parent.burnup_text.setSizePolicy(sizePolicy)
-        info_flo.addRow("Burnup", parent.burnup_text)
+        self.burnup_text = InfoLabel()
+        self.burnup_text.setSizePolicy(sizePolicy)
+        info_flo.addRow("Burnup", self.burnup_text)
         
-        parent.kinf_text = InfoLabel()
-        parent.kinf_text.setSizePolicy(sizePolicy)
-        info_flo.addRow("Kinf", parent.kinf_text)
+        self.kinf_text = InfoLabel()
+        self.kinf_text.setSizePolicy(sizePolicy)
+        info_flo.addRow("Kinf", self.kinf_text)
 
-        parent.fint_text = InfoLabel()
-        parent.fint_text.setSizePolicy(sizePolicy)
-        info_flo.addRow("Fint", parent.fint_text)
+        self.fint_text = InfoLabel()
+        self.fint_text.setSizePolicy(sizePolicy)
+        info_flo.addRow("Fint", self.fint_text)
 
-        parent.btf_text = InfoLabel()
-        parent.btf_text.setSizePolicy(sizePolicy)
-        info_flo.addRow("BTF", parent.btf_text)
+        self.btf_text = InfoLabel()
+        self.btf_text.setSizePolicy(sizePolicy)
+        info_flo.addRow("BTF", self.btf_text)
 
-        parent.voi_vhi_text = InfoLabel()
-        parent.voi_vhi_text.setSizePolicy(sizePolicy)
-        info_flo.addRow("VOI / VHI", parent.voi_vhi_text)
+        self.voi_vhi_text = InfoLabel()
+        self.voi_vhi_text.setSizePolicy(sizePolicy)
+        info_flo.addRow("VOI / VHI", self.voi_vhi_text)
 
-        parent.tfu_tmo_text = InfoLabel()
-        parent.tfu_tmo_text.setSizePolicy(sizePolicy)
-        info_flo.addRow("TFU / TMO", parent.tfu_tmo_text)
+        self.tfu_tmo_text = InfoLabel()
+        self.tfu_tmo_text.setSizePolicy(sizePolicy)
+        info_flo.addRow("TFU / TMO", self.tfu_tmo_text)
 
-        parent.rod_types_text = InfoLabel()
-        parent.rod_types_text.setSizePolicy(sizePolicy)
-        info_flo.addRow("Rod types", parent.rod_types_text)
+        self.rod_types_text = InfoLabel()
+        self.rod_types_text.setSizePolicy(sizePolicy)
+        info_flo.addRow("Rod types", self.rod_types_text)
 
-        parent.ave_enr_text = InfoLabel()
-        parent.ave_enr_text.setSizePolicy(sizePolicy)
-        info_flo.addRow("Segment w/o U-235", parent.ave_enr_text)
+        self.ave_enr_text = InfoLabel()
+        self.ave_enr_text.setSizePolicy(sizePolicy)
+        info_flo.addRow("Segment w/o U-235", self.ave_enr_text)
 
-        parent.bundle_enr_text = InfoLabel()
-        parent.bundle_enr_text.setSizePolicy(sizePolicy)
-        info_flo.addRow("Bundle w/o U-235", parent.bundle_enr_text)
+        self.bundle_enr_text = InfoLabel()
+        self.bundle_enr_text.setSizePolicy(sizePolicy)
+        info_flo.addRow("Bundle w/o U-235", self.bundle_enr_text)
 
         # Construct table widget instance
-        parent.table = PinTableWidget(parent)
+        self.table = PinTableWidget(parent)
         
         tvbox = QtGui.QVBoxLayout()
-        tvbox.addWidget(parent.table)
+        tvbox.addWidget(self.table)
         tableGbox = QtGui.QGroupBox()
         tableGbox.setStyleSheet("QGroupBox { background-color: rgb(200, 200,\
         200); border:1px solid gray; border-radius:5px;}")
         tableGbox.setLayout(tvbox)
-        parent.table.resizeColumnsToContents()
+        self.table.resizeColumnsToContents()
 
         # Layout with box sizers
         vbox = QtGui.QVBoxLayout()
@@ -628,5 +628,3 @@ class Ui_MainWindow(object):
 
         self.main_frame.setLayout(hbox)
         parent.setCentralWidget(self.main_frame)
-
-        

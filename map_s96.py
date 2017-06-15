@@ -71,7 +71,7 @@ def s96o2(self):
     #self.axes.add_patch(rect)
 
     # Draw enrichment levels
-    case_num = int(self.case_cbox.currentIndex())
+    case_num = int(self.ui.case_cbox.currentIndex())
     state_num = -1
     
     #pin_radius = 0.028
