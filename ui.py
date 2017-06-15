@@ -354,41 +354,10 @@ class Ui_MainWindow(object):
 
         toolbar = QtGui.QToolBar()
 
-        #toolbar = parent.addToolBar("Toolbar")
-
-        #new_icon = "new-icon_32x32"
-        #text = "Create new bundle"
-        #args = (text, new_icon, text, parent.open_bundle_dlg)
-        #new_action = self.__create_action(*args)
-        #parent.toolbar_actions.append(self.new_action)
         toolbar.addAction(self.new_action)
-
-        #file_icon = "open-file-icon_32x32"
-        #text = "Open file"
-        #args = (text, file_icon, text, parent.openFile)
-        #file_action = self.__create_action(*args)
-        #parent.toolbar_actions.append(file_action)
         toolbar.addAction(self.file_action)
-
-        #save_icon = "save-icon_32x32"
-        #text = "Save to file"
-        #args = (text, save_icon, text, parent.saveData)
-        #save_action = self.__create_action(*args)
-        #parent.toolbar_actions.append(save_action)
         toolbar.addAction(self.save_action)
-
-        #calc_icon = "flame-red-icon_32x32"
-        #text = "Run quick calc"
-        #args = (text, calc_icon, text, parent.quick_calc)
-        #parent.calcAction = self.__create_action(*args)
-        #parent.toolbar_actions.append(parent.calcAction)
-        toolbar.addAction(self.parent.quickcalc_action)
-                                                         
-        #pref_icon = "preferences-icon_32x32"
-        #text = "Settings"
-        #args = (text, pref_icon, text)
-        #pref_action = self.__create_action(*args)
-        #parent.toolbar_actions.append(pref_action)
+        toolbar.addAction(self.parent.quickcalc_action)              
         toolbar.addAction(self.preferences_action)
 
         color_icon = "color-icon_32x32"
@@ -398,64 +367,13 @@ class Ui_MainWindow(object):
         self.parent.toolbar_actions.append(self.parent.colorAction)
         toolbar.addAction(self.parent.colorAction)
 
-        #plot_icon = "diagram-icon_32x32"
-        #text = "Plot"
-        #tip = "Open plot window"
-        #args = (text, plot_icon, tip, parent.open_plotwin)
-        #plot_action = self.__create_action(*args)
-        #parent.toolbar_actions.append(plot_action)
         toolbar.addAction(self.plot_action)
-
-        #find_icon = "binoculars-icon_32x32"
-        #text = "Find state point"
-        #args = (text, find_icon, text, parent.open_findpoint_dlg)
-        #find_action = self.__create_action(*args)
-        #parent.toolbar_actions.append(find_action)
         toolbar.addAction(self.find_action)
-
-        #arrow_undo_icon = "arrow-undo-icon_32x32"
-        #text = "Back to previous design"
-        #args = (text, arrow_undo_icon, text, parent.back_state)
-        #back_action = self.__create_action(*args)
-        #parent.toolbar_actions.append(back_action)
         toolbar.addAction(self.back_action)
-
-        #arrow_redo_icon = "arrow-redo-icon_32x32"
-        #text = "Forward to next design"
-        #args = (text, arrow_redo_icon, text, parent.forward_state)
-        #forward_action = self.__create_action(*args)
-        #parent.toolbar_actions.append(forward_action)
         toolbar.addAction(self.forward_action)
-
-        #minus_icon = "remove-icon_32x32"
-        #text = "Decrease enrichment"
-        #tip = text
-        #args = (text, minus_icon, tip, parent.enr_sub)
-        #decrease_enr_action = self.__create_action(*args)
-        #parent.toolbar_actions.append(decrease_enr_action)
         toolbar.addAction(self.decrease_enr_action)
-
-        #plus_icon = "add-icon_32x32"
-        #text = "Increase enrichment"
-        #tip = text
-        #args = (text, plus_icon, tip, parent.enr_add)
-        #increase_enr_action = self.__create_action(*args)
-        #parent.toolbar_actions.append(increase_enr_action)
         toolbar.addAction(self.increase_enr_action)
-        
-        #exit_icon = "exit-icon_32x32"
-        #text = "Exit"
-        #tip = "Exit application"
-        #args = (text, exit_icon, tip, self.parent.close)
-        #exit_action = self.__create_action(*args)
-
-        #parent.toolbar_actions.append(exit_action)
-        #parent.toolbar_actions.append(self.quit_action)
         toolbar.addAction(self.quit_action)
-        
-        #toolbar = parent.addToolBar("Toolbar")
-        #for action in parent.toolbar_actions:
-        #    toolbar.addAction(action)
         
         toolbar.setMovable(False)
         toolbar.setFloatable(True)
@@ -463,7 +381,6 @@ class Ui_MainWindow(object):
 
         self.parent.addToolBar(toolbar)
         
-        #parent.toolbar_actions = [save_action, parent.colorAction]
         
     def __create_action(self, text, icon=None, tip=None, slot=None,
                                 checkable=False, shortcut=None):
