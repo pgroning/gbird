@@ -52,71 +52,71 @@ from threads import ImportThread, QuickCalcThread, RunC4Thread
 
 
 
-class PinTableWidget(QtGui.QTableWidget):
-    def __init__(self, parent=None):
-        QtGui.QTableWidget.__init__(self)
-        self.parent = parent
-        self.setup()
-
-    def setup(self):
-        self.setColumnCount(4)
-        self.setRowCount(100)
-        self.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
-        self.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
-        self.setSizePolicy(QtGui.QSizePolicy.Minimum,
-                                 QtGui.QSizePolicy.Minimum)
-        self.setMinimumWidth(180)
-        self.setHorizontalHeaderLabels(('Index', 'EXP', 'FINT', 'BTF'))
-        self.setSortingEnabled(True)
-        self.setColumnHidden(0, True)
-        verticalheader = self.verticalHeader()
-        verticalheader.setResizeMode(QtGui.QHeaderView.Fixed)
-        verticalheader.setDefaultSectionSize(25)
-
-        self.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
-
-        self.connect(self.horizontalHeader(),
-                     QtCore.SIGNAL('sectionClicked(int)'),
-                     self.parent.tableHeaderSort)
-        self.connect(self.verticalHeader(),
-                     QtCore.SIGNAL('sectionClicked(int)'), 
-                     self.parent.pinSelect)
-        self.cellActivated.connect(self.parent.pinSelect)
-        self.cellClicked.connect(self.parent.pinSelect)
-        
-    def sort_items(self):
-        self.sortItems(0, QtCore.Qt.AscendingOrder)
-
-    def setpincoords(self):
-        """Update table with pin coordinates"""
-        
-        case_num = int(self.parent.case_cbox.currentIndex())
-        npin = len(self.parent.pinobjects[case_num])
-        self.setRowCount(npin)
-        
-        for i, pinobj in enumerate(self.parent.pinobjects[case_num]):
-            coord_item = QtGui.QTableWidgetItem(pinobj.coord)
-            self.setVerticalHeaderItem(i, coord_item)
-            i_item = QtGui.QTableWidgetItem()
-            i_item.setData(QtCore.Qt.EditRole, QtCore.QVariant(int(i)))
-            self.setItem(i, 0, i_item)
-
-    def selectAll(self):  # redefine built-in selectAll method
-        self.sort_items() 
-        self.setpincoords()
-
-
-class InfoLabel(QtGui.QLabel):
-    def __init__(self, parent=None, width=100):
-        #QtGui.QDialog.__init__(self)
-        QtGui.QLabel.__init__(self)
-        self.setStyleSheet("""QLabel {background-color : rgb(245, 245, 245); 
-                              color : black;}""")
-        self.setFrameStyle(QtGui.QFrame.Panel | 
-                           QtGui.QFrame.Sunken)
-        self.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        self.setFixedHeight(20)
-        self.setFixedWidth(width)
+#class PinTableWidget(QtGui.QTableWidget):
+#    def __init__(self, parent=None):
+#        QtGui.QTableWidget.__init__(self)
+#        self.parent = parent
+#        self.setup()
+#
+#    def setup(self):
+#        self.setColumnCount(4)
+#        self.setRowCount(100)
+#        self.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
+#        self.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
+#        self.setSizePolicy(QtGui.QSizePolicy.Minimum,
+#                                 QtGui.QSizePolicy.Minimum)
+#        self.setMinimumWidth(180)
+#        self.setHorizontalHeaderLabels(('Index', 'EXP', 'FINT', 'BTF'))
+#        self.setSortingEnabled(True)
+#        self.setColumnHidden(0, True)
+#        verticalheader = self.verticalHeader()
+#        verticalheader.setResizeMode(QtGui.QHeaderView.Fixed)
+#        verticalheader.setDefaultSectionSize(25)
+#
+#        self.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+#
+#        self.connect(self.horizontalHeader(),
+#                     QtCore.SIGNAL('sectionClicked(int)'),
+#                     self.parent.tableHeaderSort)
+#        self.connect(self.verticalHeader(),
+#                     QtCore.SIGNAL('sectionClicked(int)'), 
+#                     self.parent.pinSelect)
+#        self.cellActivated.connect(self.parent.pinSelect)
+#        self.cellClicked.connect(self.parent.pinSelect)
+#        
+#    def sort_items(self):
+#        self.sortItems(0, QtCore.Qt.AscendingOrder)
+#
+#    def setpincoords(self):
+#        """Update table with pin coordinates"""
+#        
+#        case_num = int(self.parent.case_cbox.currentIndex())
+#        npin = len(self.parent.pinobjects[case_num])
+#        self.setRowCount(npin)
+#        
+#        for i, pinobj in enumerate(self.parent.pinobjects[case_num]):
+#            coord_item = QtGui.QTableWidgetItem(pinobj.coord)
+#            self.setVerticalHeaderItem(i, coord_item)
+#            i_item = QtGui.QTableWidgetItem()
+#            i_item.setData(QtCore.Qt.EditRole, QtCore.QVariant(int(i)))
+#            self.setItem(i, 0, i_item)
+#
+#    def selectAll(self):  # redefine built-in selectAll method
+#        self.sort_items() 
+#        self.setpincoords()
+#
+#
+#class InfoLabel(QtGui.QLabel):
+#    def __init__(self, parent=None, width=100):
+#        #QtGui.QDialog.__init__(self)
+#        QtGui.QLabel.__init__(self)
+#        self.setStyleSheet("""QLabel {background-color : rgb(245, 245, 245); 
+##                              color : black;}""")
+#        self.setFrameStyle(QtGui.QFrame.Panel | 
+#                           QtGui.QFrame.Sunken)
+#        self.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+#        self.setFixedHeight(20)
+#        self.setFixedWidth(width)
 
 
 class Data(object):
