@@ -349,10 +349,12 @@ class Ui_MainWindow(object):
         
 
     def create_toolbar(self):
-        parent = self.parent
-        parent.toolbar_actions = []
 
-        toolbar = parent.addToolBar("Toolbar")
+        self.parent.toolbar_actions = []
+
+        toolbar = QtGui.QToolBar()
+
+        #toolbar = parent.addToolBar("Toolbar")
 
         #new_icon = "new-icon_32x32"
         #text = "Create new bundle"
@@ -380,7 +382,7 @@ class Ui_MainWindow(object):
         #args = (text, calc_icon, text, parent.quick_calc)
         #parent.calcAction = self.__create_action(*args)
         #parent.toolbar_actions.append(parent.calcAction)
-        toolbar.addAction(parent.quickcalc_action)
+        toolbar.addAction(self.parent.quickcalc_action)
                                                          
         #pref_icon = "preferences-icon_32x32"
         #text = "Settings"
@@ -391,10 +393,10 @@ class Ui_MainWindow(object):
 
         color_icon = "color-icon_32x32"
         text = "Show color map"
-        args = (text, color_icon, text, parent.toggle_cmap, True)
-        parent.colorAction = self.__create_action(*args)
-        parent.toolbar_actions.append(parent.colorAction)
-        toolbar.addAction(parent.colorAction)
+        args = (text, color_icon, text, self.parent.toggle_cmap, True)
+        self.parent.colorAction = self.__create_action(*args)
+        self.parent.toolbar_actions.append(self.parent.colorAction)
+        toolbar.addAction(self.parent.colorAction)
 
         #plot_icon = "diagram-icon_32x32"
         #text = "Plot"
@@ -441,11 +443,12 @@ class Ui_MainWindow(object):
         #parent.toolbar_actions.append(increase_enr_action)
         toolbar.addAction(self.increase_enr_action)
         
-        exit_icon = "exit-icon_32x32"
-        text = "Exit"
-        tip = "Exit application"
-        args = (text, exit_icon, tip, parent.close)
-        exit_action = self.__create_action(*args)
+        #exit_icon = "exit-icon_32x32"
+        #text = "Exit"
+        #tip = "Exit application"
+        #args = (text, exit_icon, tip, self.parent.close)
+        #exit_action = self.__create_action(*args)
+
         #parent.toolbar_actions.append(exit_action)
         #parent.toolbar_actions.append(self.quit_action)
         toolbar.addAction(self.quit_action)
@@ -457,6 +460,8 @@ class Ui_MainWindow(object):
         toolbar.setMovable(False)
         toolbar.setFloatable(True)
         toolbar.setAutoFillBackground(False)
+
+        self.parent.addToolBar(toolbar)
         
         #parent.toolbar_actions = [save_action, parent.colorAction]
         
@@ -485,7 +490,7 @@ class Ui_MainWindow(object):
     def create_main_frame(self):
         parent = self.parent
 
-        self.main_frame = QtGui.QWidget()
+        main_frame = QtGui.QWidget()
 
         # Create the mpl Figure and FigCanvas objects.
         r = 1.0  # resolution factor
@@ -493,7 +498,7 @@ class Ui_MainWindow(object):
         self.fig = Figure((6 / r, 5 / r), dpi=self.dpi)
         self.canvas = FigureCanvas(self.fig)
         self.canvas.mpl_connect('button_press_event', parent.on_click)
-        self.canvas.setParent(self.main_frame)
+        self.canvas.setParent(main_frame)
         self.canvas.setSizePolicy(QtGui.QSizePolicy.Expanding,
                                   QtGui.QSizePolicy.Expanding)
         self.canvas.setMinimumWidth(500)
@@ -626,5 +631,5 @@ class Ui_MainWindow(object):
         hbox.addWidget(canvasGbox)
         hbox.addWidget(tableGbox)
 
-        self.main_frame.setLayout(hbox)
-        parent.setCentralWidget(self.main_frame)
+        main_frame.setLayout(hbox)
+        parent.setCentralWidget(main_frame)
