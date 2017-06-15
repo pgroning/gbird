@@ -1632,208 +1632,208 @@ class MainWin(QtGui.QMainWindow):
             idx0 = case.findpoint(voi=voi_val, vhi=vhi_val)
         return idx0
 
-    def create_main_frame(self):
-
-        self.main_frame = QtGui.QWidget()
-
-        # Create the mpl Figure and FigCanvas objects.
-        r = 1.0  # resolution factor
-        self.dpi = 100 * r
-        self.fig = Figure((6 / r, 5 / r), dpi=self.dpi)
-        self.canvas = FigureCanvas(self.fig)
-        self.canvas.mpl_connect('button_press_event', self.on_click)
-        self.canvas.setParent(self.main_frame)
-        self.canvas.setSizePolicy(QtGui.QSizePolicy.Expanding,
-                                  QtGui.QSizePolicy.Expanding)
-        self.canvas.setMinimumWidth(500)
-        self.canvas.setMinimumHeight(416)
-        
-        cvbox = QtGui.QVBoxLayout()
-        cvbox.addWidget(self.canvas)
-        canvasGbox = QtGui.QGroupBox()
-        canvasGbox.setStyleSheet("QGroupBox { background-color: rgb(200, 200,\
-        200); border:1px solid gray; border-radius:5px;}")
-        canvasGbox.setLayout(cvbox)
-
-        # Since we have only one plot, we can use add_axes instead of 
-        # add_subplot.
-        self.axes = self.fig.add_subplot(111)
-        
-        # Other GUI controls
-        sim_hbox = QtGui.QHBoxLayout()
-        self.sim_info_field = InfoLabel(width=210)
-        sim_hbox.addWidget(self.sim_info_field)
-
-        param_label = QtGui.QLabel('Parameter:')
-        self.param_cbox = QtGui.QComboBox()
-        paramlist = ['ENR', 'FINT', 'EXP', 'BTF']
-        #paramlist = ['ENR', 'FINT', 'EXP', 'BTF', 'BTFP', 'XFL1', 'XFL2',
-        #             'ROD', 'LOCK']
-        for i in paramlist:
-            self.param_cbox.addItem(i)
-
-        param_hbox = QtGui.QHBoxLayout()
-        param_hbox.addWidget(param_label)
-        param_hbox.addWidget(self.param_cbox)
-        self.connect(self.param_cbox,
-                     QtCore.SIGNAL('currentIndexChanged(int)'),
-                     self.set_pinvalues)
-
-        case_label = QtGui.QLabel('Segment:')
-        self.case_cbox = QtGui.QComboBox()
-        case_hbox = QtGui.QHBoxLayout()
-        case_hbox.addWidget(case_label)
-        case_hbox.addWidget(self.case_cbox)
-        self.connect(self.case_cbox, QtCore.SIGNAL('currentIndexChanged(int)'),
-                     self.fig_update)
-
-        point_label = QtGui.QLabel('Point number:')
-        self.point_sbox = QtGui.QSpinBox()
-        self.point_sbox.setMinimum(0)
-        self.point_sbox.setMaximum(10000)
-        point_hbox = QtGui.QHBoxLayout()
-        point_hbox.addWidget(point_label)
-        point_hbox.addWidget(self.point_sbox)
-        self.connect(self.point_sbox, QtCore.SIGNAL('valueChanged(int)'),
-                     self.set_pinvalues)
-
-        chanbow_hbox = QtGui.QHBoxLayout()
-        self.chanbow_sbox = QtGui.QDoubleSpinBox()
-        self.chanbow_sbox.setRange(-3, 3)
-        self.chanbow_sbox.setSingleStep(0.25)
-        self.chanbow_sbox.setSuffix(" mm")
-        chanbow_hbox.addWidget(QtGui.QLabel("Channel bow:"))
-        chanbow_hbox.addWidget(self.chanbow_sbox)
-        
-        voi_hbox = QtGui.QHBoxLayout()
-        type_label = QtGui.QLabel('Type:')
-        self.type_cbox = QtGui.QComboBox()
-        typelist = ['Hot', 'HCr', 'CCl', 'CCr']
-        for i in typelist:
-            self.type_cbox.addItem(i)
-        voi_hbox.addWidget(type_label)
-        voi_hbox.addWidget(self.type_cbox)
-
-        voi_hbox = QtGui.QHBoxLayout()
-        voi_label = QtGui.QLabel('VOI:')
-        self.voi_cbox = QtGui.QComboBox()
-        voi_hbox.addWidget(voi_label)
-        voi_hbox.addWidget(self.voi_cbox)
-
-        vhi_hbox = QtGui.QHBoxLayout()
-        vhi_label = QtGui.QLabel('VHI:')
-        self.vhi_cbox = QtGui.QComboBox()
-        vhi_hbox.addWidget(vhi_label)
-        vhi_hbox.addWidget(self.vhi_cbox)
-
-        type_hbox = QtGui.QHBoxLayout()
-        type_label = QtGui.QLabel('Type:')
-        self.type_cbox = QtGui.QComboBox()
-        typelist = ['Hot', 'HCr', 'CCl', 'CCr']
-        for i in typelist:
-            self.type_cbox.addItem(i)
-        type_hbox.addWidget(type_label)
-        type_hbox.addWidget(self.type_cbox)
-
-        exp_hbox = QtGui.QHBoxLayout()
-        exp_label = QtGui.QLabel('EXP:')
-        self.exp_cbox = QtGui.QComboBox()
-        exp_hbox.addWidget(exp_label)
-        exp_hbox.addWidget(self.exp_cbox)
-
-        findpoint_gbox = QtGui.QGroupBox()
-        findpoint_gbox.setTitle("Find state point")
-        findpoint_gbox.setStyleSheet("QGroupBox {border: 1px solid gray;\
-        border-radius:5px; font: bold; subcontrol-origin: margin;\
-        padding: 10px -5px -5px -5px}")
-        findpoint_vbox = QtGui.QVBoxLayout()
-        findpoint_vbox.addLayout(voi_hbox)
-        findpoint_vbox.addLayout(vhi_hbox)
-        findpoint_vbox.addLayout(type_hbox)
-        findpoint_vbox.addLayout(exp_hbox)
-        findpoint_gbox.setLayout(findpoint_vbox)
-        
-        # Info form layout
-        info_flo = QtGui.QFormLayout()
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum,
-                                       QtGui.QSizePolicy.Minimum)
-
-        self.burnup_text = InfoLabel()
-        self.burnup_text.setSizePolicy(sizePolicy)
-        info_flo.addRow("Burnup", self.burnup_text)
-
-        self.kinf_text = InfoLabel()
-        self.kinf_text.setSizePolicy(sizePolicy)
-        info_flo.addRow("Kinf", self.kinf_text)
-
-        self.fint_text = InfoLabel()
-        self.fint_text.setSizePolicy(sizePolicy)
-        info_flo.addRow("Fint", self.fint_text)
-
-        self.btf_text = InfoLabel()
-        self.btf_text.setSizePolicy(sizePolicy)
-        info_flo.addRow("BTF", self.btf_text)
-
-        self.voi_vhi_text = InfoLabel()
-        self.voi_vhi_text.setSizePolicy(sizePolicy)
-        info_flo.addRow("VOI / VHI", self.voi_vhi_text)
-
-        self.tfu_tmo_text = InfoLabel()
-        self.tfu_tmo_text.setSizePolicy(sizePolicy)
-        info_flo.addRow("TFU / TMO", self.tfu_tmo_text)
-        
-        self.rod_types_text = InfoLabel()
-        self.rod_types_text.setSizePolicy(sizePolicy)
-        info_flo.addRow("Rod types", self.rod_types_text)
-        
-        self.ave_enr_text = InfoLabel()
-        self.ave_enr_text.setSizePolicy(sizePolicy)
-        info_flo.addRow("Segment w/o U-235", self.ave_enr_text)
-        
-        self.bundle_enr_text = InfoLabel()
-        self.bundle_enr_text.setSizePolicy(sizePolicy)
-        info_flo.addRow("Bundle w/o U-235", self.bundle_enr_text)
-        
-        # Construct table widget instance
-        self.table = PinTableWidget(self)
-
-        tvbox = QtGui.QVBoxLayout()
-        tvbox.addWidget(self.table)
-        tableGbox = QtGui.QGroupBox()
-        tableGbox.setStyleSheet("QGroupBox { background-color: rgb(200, 200,\
-        200); border:1px solid gray; border-radius:5px;}")
-        tableGbox.setLayout(tvbox)
-        self.table.resizeColumnsToContents()
-
-        # Layout with box sizers
-        vbox = QtGui.QVBoxLayout()
-        vbox.addLayout(sim_hbox)
-        vbox.addLayout(case_hbox)
-        vbox.addLayout(param_hbox)
-        vbox.addLayout(chanbow_hbox)
-        vbox.addStretch(1)
-        vbox.addLayout(point_hbox)
-        vbox.addLayout(info_flo)
-        
-        groupbox = QtGui.QGroupBox()
-        groupbox.setStyleSheet("QGroupBox { background-color: rgb(200, 200,\
-        200); border:1px solid gray; border-radius:5px;}")
-        groupbox.setLayout(vbox)
-
-        hbox = QtGui.QHBoxLayout()
-        
-        #spacerItemH = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding,
-        #                                QtGui.QSizePolicy.Minimum)
-
-        hbox.addWidget(groupbox)
-        # hbox.addItem(spacerItemH)
-        hbox.addWidget(canvasGbox)
-        # hbox.addItem(spacerItemH)
-        hbox.addWidget(tableGbox)
-        # hbox.addItem(spacerItemH)
-
-        self.main_frame.setLayout(hbox)
-        self.setCentralWidget(self.main_frame)
+#    def create_main_frame(self):
+#
+#        self.main_frame = QtGui.QWidget()
+#
+#        # Create the mpl Figure and FigCanvas objects.
+#        r = 1.0  # resolution factor
+#        self.dpi = 100 * r
+#        self.fig = Figure((6 / r, 5 / r), dpi=self.dpi)
+#        self.canvas = FigureCanvas(self.fig)
+#        self.canvas.mpl_connect('button_press_event', self.on_click)
+#        self.canvas.setParent(self.main_frame)
+#        self.canvas.setSizePolicy(QtGui.QSizePolicy.Expanding,
+#                                  QtGui.QSizePolicy.Expanding)
+#        self.canvas.setMinimumWidth(500)
+#        self.canvas.setMinimumHeight(416)
+#        
+#        cvbox = QtGui.QVBoxLayout()
+#        cvbox.addWidget(self.canvas)
+#        canvasGbox = QtGui.QGroupBox()
+#        canvasGbox.setStyleSheet("QGroupBox { background-color: rgb(200, 200,\
+#        200); border:1px solid gray; border-radius:5px;}")
+#        canvasGbox.setLayout(cvbox)
+#
+#        # Since we have only one plot, we can use add_axes instead of 
+#        # add_subplot.
+#        self.axes = self.fig.add_subplot(111)
+#        
+#        # Other GUI controls
+#        sim_hbox = QtGui.QHBoxLayout()
+#        self.sim_info_field = InfoLabel(width=210)
+#        sim_hbox.addWidget(self.sim_info_field)
+#
+#        param_label = QtGui.QLabel('Parameter:')
+#        self.param_cbox = QtGui.QComboBox()
+#        paramlist = ['ENR', 'FINT', 'EXP', 'BTF']
+#        #paramlist = ['ENR', 'FINT', 'EXP', 'BTF', 'BTFP', 'XFL1', 'XFL2',
+#        #             'ROD', 'LOCK']
+#        for i in paramlist:
+#            self.param_cbox.addItem(i)
+#
+#        param_hbox = QtGui.QHBoxLayout()
+#        param_hbox.addWidget(param_label)
+#        param_hbox.addWidget(self.param_cbox)
+#        self.connect(self.param_cbox,
+#                     QtCore.SIGNAL('currentIndexChanged(int)'),
+#                     self.set_pinvalues)
+#
+#        case_label = QtGui.QLabel('Segment:')
+#        self.case_cbox = QtGui.QComboBox()
+#        case_hbox = QtGui.QHBoxLayout()
+#        case_hbox.addWidget(case_label)
+#        case_hbox.addWidget(self.case_cbox)
+#        self.connect(self.case_cbox, QtCore.SIGNAL('currentIndexChanged(int)'),
+#                     self.fig_update)
+#
+#        point_label = QtGui.QLabel('Point number:')
+#        self.point_sbox = QtGui.QSpinBox()
+#        self.point_sbox.setMinimum(0)
+#        self.point_sbox.setMaximum(10000)
+#        point_hbox = QtGui.QHBoxLayout()
+#        point_hbox.addWidget(point_label)
+#        point_hbox.addWidget(self.point_sbox)
+#        self.connect(self.point_sbox, QtCore.SIGNAL('valueChanged(int)'),
+#                     self.set_pinvalues)
+#
+#        chanbow_hbox = QtGui.QHBoxLayout()
+#        self.chanbow_sbox = QtGui.QDoubleSpinBox()
+#        self.chanbow_sbox.setRange(-3, 3)
+#        self.chanbow_sbox.setSingleStep(0.25)
+#        self.chanbow_sbox.setSuffix(" mm")
+#        chanbow_hbox.addWidget(QtGui.QLabel("Channel bow:"))
+#        chanbow_hbox.addWidget(self.chanbow_sbox)
+#        
+#        voi_hbox = QtGui.QHBoxLayout()
+#        type_label = QtGui.QLabel('Type:')
+#        self.type_cbox = QtGui.QComboBox()
+#        typelist = ['Hot', 'HCr', 'CCl', 'CCr']
+#        for i in typelist:
+#            self.type_cbox.addItem(i)
+#        voi_hbox.addWidget(type_label)
+#        voi_hbox.addWidget(self.type_cbox)
+#
+#        voi_hbox = QtGui.QHBoxLayout()
+#        voi_label = QtGui.QLabel('VOI:')
+#        self.voi_cbox = QtGui.QComboBox()
+#        voi_hbox.addWidget(voi_label)
+#        voi_hbox.addWidget(self.voi_cbox)
+#
+#        vhi_hbox = QtGui.QHBoxLayout()
+#        vhi_label = QtGui.QLabel('VHI:')
+#        self.vhi_cbox = QtGui.QComboBox()
+#        vhi_hbox.addWidget(vhi_label)
+#        vhi_hbox.addWidget(self.vhi_cbox)
+#
+#        type_hbox = QtGui.QHBoxLayout()
+#        type_label = QtGui.QLabel('Type:')
+#        self.type_cbox = QtGui.QComboBox()
+#        typelist = ['Hot', 'HCr', 'CCl', 'CCr']
+#        for i in typelist:
+#            self.type_cbox.addItem(i)
+#        type_hbox.addWidget(type_label)
+#        type_hbox.addWidget(self.type_cbox)
+#
+#        exp_hbox = QtGui.QHBoxLayout()
+#        exp_label = QtGui.QLabel('EXP:')
+#        self.exp_cbox = QtGui.QComboBox()
+#        exp_hbox.addWidget(exp_label)
+#        exp_hbox.addWidget(self.exp_cbox)
+#
+#        findpoint_gbox = QtGui.QGroupBox()
+#        findpoint_gbox.setTitle("Find state point")
+#        findpoint_gbox.setStyleSheet("QGroupBox {border: 1px solid gray;\
+#        border-radius:5px; font: bold; subcontrol-origin: margin;\
+#        padding: 10px -5px -5px -5px}")
+#        findpoint_vbox = QtGui.QVBoxLayout()
+#        findpoint_vbox.addLayout(voi_hbox)
+#        findpoint_vbox.addLayout(vhi_hbox)
+#        findpoint_vbox.addLayout(type_hbox)
+#        findpoint_vbox.addLayout(exp_hbox)
+#        findpoint_gbox.setLayout(findpoint_vbox)
+#        
+#        # Info form layout
+#        info_flo = QtGui.QFormLayout()
+#        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum,
+#                                       QtGui.QSizePolicy.Minimum)
+#
+#        self.burnup_text = InfoLabel()
+#        self.burnup_text.setSizePolicy(sizePolicy)
+#        info_flo.addRow("Burnup", self.burnup_text)
+#
+#        self.kinf_text = InfoLabel()
+#        self.kinf_text.setSizePolicy(sizePolicy)
+#        info_flo.addRow("Kinf", self.kinf_text)
+#
+#        self.fint_text = InfoLabel()
+#        self.fint_text.setSizePolicy(sizePolicy)
+#        info_flo.addRow("Fint", self.fint_text)
+#
+#        self.btf_text = InfoLabel()
+#        self.btf_text.setSizePolicy(sizePolicy)
+#        info_flo.addRow("BTF", self.btf_text)
+#
+#        self.voi_vhi_text = InfoLabel()
+#        self.voi_vhi_text.setSizePolicy(sizePolicy)
+#        info_flo.addRow("VOI / VHI", self.voi_vhi_text)
+#
+#        self.tfu_tmo_text = InfoLabel()
+#        self.tfu_tmo_text.setSizePolicy(sizePolicy)
+#        info_flo.addRow("TFU / TMO", self.tfu_tmo_text)
+#        
+#        self.rod_types_text = InfoLabel()
+#        self.rod_types_text.setSizePolicy(sizePolicy)
+#        info_flo.addRow("Rod types", self.rod_types_text)
+#        
+#        self.ave_enr_text = InfoLabel()
+#        self.ave_enr_text.setSizePolicy(sizePolicy)
+#        info_flo.addRow("Segment w/o U-235", self.ave_enr_text)
+#        
+#        self.bundle_enr_text = InfoLabel()
+#        self.bundle_enr_text.setSizePolicy(sizePolicy)
+#        info_flo.addRow("Bundle w/o U-235", self.bundle_enr_text)
+#        
+#        # Construct table widget instance
+#        self.table = PinTableWidget(self)
+#
+#        tvbox = QtGui.QVBoxLayout()
+#        tvbox.addWidget(self.table)
+#        tableGbox = QtGui.QGroupBox()
+#        tableGbox.setStyleSheet("QGroupBox { background-color: rgb(200, 200,\
+#        200); border:1px solid gray; border-radius:5px;}")
+#        tableGbox.setLayout(tvbox)
+#        self.table.resizeColumnsToContents()
+#
+#        # Layout with box sizers
+#        vbox = QtGui.QVBoxLayout()
+#        vbox.addLayout(sim_hbox)
+#        vbox.addLayout(case_hbox)
+#        vbox.addLayout(param_hbox)
+#        vbox.addLayout(chanbow_hbox)
+#        vbox.addStretch(1)
+#        vbox.addLayout(point_hbox)
+#        vbox.addLayout(info_flo)
+#        
+#        groupbox = QtGui.QGroupBox()
+#        groupbox.setStyleSheet("QGroupBox { background-color: rgb(200, 200,\
+#        200); border:1px solid gray; border-radius:5px;}")
+#        groupbox.setLayout(vbox)
+#
+#        hbox = QtGui.QHBoxLayout()
+#        
+#        #spacerItemH = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding,
+#        #                                QtGui.QSizePolicy.Minimum)
+#
+#        hbox.addWidget(groupbox)
+#        # hbox.addItem(spacerItemH)
+#        hbox.addWidget(canvasGbox)
+#        # hbox.addItem(spacerItemH)
+#        hbox.addWidget(tableGbox)
+#        # hbox.addItem(spacerItemH)
+#
+#        self.main_frame.setLayout(hbox)
+#        self.setCentralWidget(self.main_frame)
     
     #def create_status_bar(self):
     #    self.status_text = QtGui.QLabel("Main window")
