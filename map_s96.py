@@ -19,7 +19,7 @@ def s96o2(self):
     poly.set_facecolor((0.8,0.898,1))
     poly.set_linewidth(1.5)
     poly.set_closed(False)
-    self.axes.add_patch(poly)
+    self.ui.axes.add_patch(poly)
     # East
     pp = [[0.922, y0+0.515], [0.91, y0+0.503], [0.88, y0+0.503],
           [0.86, y0+0.515], [0.69, y0+0.515], [0.67, y0+0.503],
@@ -30,7 +30,7 @@ def s96o2(self):
     poly.set_facecolor((0.8, 0.898, 1))
     poly.set_linewidth(1.5)
     poly.set_closed(False)
-    self.axes.add_patch(poly)
+    self.ui.axes.add_patch(poly)
     # South
     x0 = 0.004
     pp = [[x0+0.485, 0.088], [x0+0.497, 0.1], [x0+0.497, 0.13], [x0+0.485, 0.15],
@@ -41,7 +41,7 @@ def s96o2(self):
     poly.set_facecolor((0.8, 0.898, 1))
     poly.set_linewidth(1.5)
     poly.set_closed(False)
-    self.axes.add_patch(poly)
+    self.ui.axes.add_patch(poly)
     # North
     pp = [[x0+0.485, 0.922], [x0+0.497, 0.91], [x0+0.497, 0.88], [x0+0.485, 0.86],
           [x0+0.485, 0.69], [x0+0.497, 0.67], [x0+0.497, 0.63], [x0+0.503, 0.63],
@@ -51,7 +51,7 @@ def s96o2(self):
     poly.set_facecolor((0.8, 0.898, 1))
     poly.set_linewidth(1.5)
     poly.set_closed(False)
-    self.axes.add_patch(poly)
+    self.ui.axes.add_patch(poly)
 
     # Draw water channel
     # Rectangle center at origo
@@ -63,12 +63,12 @@ def s96o2(self):
     rect.set_linewidth(2.0)
     # 1. Translate rectangle along x-axis a distance 1/sqrt(2).
     # 2. Rotate 45 degrees
-    rot45 = mpatches.transforms.Affine2D().rotate_deg(45) + self.axes.transData
+    rot45 = mpatches.transforms.Affine2D().rotate_deg(45) + self.ui.axes.transData
     x0 = 0.70711+0.0055
     transrot = mpatches.transforms.Affine2D().translate(x0, 0.0) + rot45
     #transrot = mpatches.transforms.Affine2D().translate(0.70711, 0.0) + rot45
     rect.set_transform(transrot)
-    #self.axes.add_patch(rect)
+    #self.ui.axes.add_patch(rect)
 
     # Draw enrichment levels
     case_num = int(self.ui.case_cbox.currentIndex())
@@ -89,18 +89,18 @@ def s96o2(self):
         #y = 0.95 - i*pin_delta  # vertical positions
         self.enrpinlist[case_num][i].set_circle(x, y, pin_radius)
         enr = self.enrpinlist[case_num][i].ENR
-        self.axes.text(x + 0.05, y, "%.2f" % enr, fontsize=8)
+        self.ui.axes.text(x + 0.05, y, "%.2f" % enr, fontsize=8)
         ba = self.enrpinlist[case_num][i].BA
         if np.isnan(ba) or ba < 0.00001:  # no BA pin
             self.enrpinlist[case_num][i].set_text(str(i+1))
         else:
             self.enrpinlist[case_num][i].set_text('Ba')
-            self.axes.text(x + 0.05, y - 0.025, "%.2f" % ba, fontsize=8)
-        self.axes.add_patch(self.enrpinlist[case_num][i].circle)
+            self.ui.axes.text(x + 0.05, y - 0.025, "%.2f" % ba, fontsize=8)
+        self.ui.axes.add_patch(self.enrpinlist[case_num][i].circle)
     
     # Print average enrichment
     #ave_enr = self.bundle.cases[case_num].states[state_num].ave_enr
-    #self.axes.text(1.02,0.05,"%.3f %%U-235" % ave_enr,fontsize=8)
+    #self.ui.axes.text(1.02,0.05,"%.3f %%U-235" % ave_enr,fontsize=8)
 
     # List of pin coordinates
     self.xlist = ('1','2','3','4','5','6','7','8','9','10')
@@ -131,26 +131,26 @@ def s96o2(self):
                 self.pinobjects[case_num][k].coord = (self.ylist[i]
                                                       + self.xlist[j])
                 self.pinobjects[case_num][k].set_text()
-                self.axes.add_patch(self.pinobjects[case_num][k].rectangle)
-                self.axes.add_patch(self.pinobjects[case_num][k].circle)
+                self.ui.axes.add_patch(self.pinobjects[case_num][k].rectangle)
+                self.ui.axes.add_patch(self.pinobjects[case_num][k].circle)
                 k += 1
 
     # Add water channel patch
-    self.axes.add_patch(rect)
+    self.ui.axes.add_patch(rect)
                 
     # Draw pin coordinates x-axis
     for i in range(5):
-        self.axes.text(0.13 + i*pin_delta, 0.015, self.xlist[i],
+        self.ui.axes.text(0.13 + i*pin_delta, 0.015, self.xlist[i],
                        ha='center',va='center',fontsize=9)
     for i in range(5,10):
-        self.axes.text(0.17 + i*pin_delta, 0.015, self.xlist[i],
+        self.ui.axes.text(0.17 + i*pin_delta, 0.015, self.xlist[i],
                        ha='center',va='center',fontsize=9)
         
     # Draw pin coordinates y-axis
     for i in range(5):
-        self.axes.text(0.99,0.87-i*pin_delta,self.ylist[i],
+        self.ui.axes.text(0.99,0.87-i*pin_delta,self.ylist[i],
                        ha='center',va='center',fontsize=9)
     for i in range(5,10):
-        self.axes.text(0.99,0.83-i*pin_delta,self.ylist[i],
+        self.ui.axes.text(0.99,0.83-i*pin_delta,self.ylist[i],
                        ha='center',va='center',fontsize=9)
     

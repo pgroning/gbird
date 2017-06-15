@@ -173,8 +173,8 @@ class MainWin(QtGui.QMainWindow):
         self.widgets_setenabled(False)
 
     def on_resize(self, event):
-        self.axes.set_xlim(0, 1.2)
-        self.axes.set_ylim(0, 1)
+        self.ui.axes.set_xlim(0, 1.2)
+        self.ui.axes.set_ylim(0, 1)
 
     def openFile(self):
         """Open bundle object from pickle file"""
@@ -372,7 +372,7 @@ class MainWin(QtGui.QMainWindow):
             self.settings.setValue("path_save_figure", QtCore.QString(path))
             self.settings.endGroup()
             
-            self.canvas.print_figure(filename, dpi=self.dpi)
+            self.ui.canvas.print_figure(filename, dpi=self.dpi)
             self.statusBar().showMessage('Saved to %s' % filename, 2000)
 
     def export_to_ascii(self):
@@ -488,7 +488,7 @@ class MainWin(QtGui.QMainWindow):
             for i in range(LFU.shape[0]):
                 for j in range(LFU.shape[1]):
                     if LFU[i, j] > 0:
-                        pinobj = FuePin(self.axes)
+                        pinobj = FuePin(self.ui.axes)
                         pinobj.pos = [i, j]
                         pinobj.ENR = ENR[i, j]
                         pinobj.BA = BA[i, j]
@@ -504,7 +504,7 @@ class MainWin(QtGui.QMainWindow):
             enr_ba = FUE[:, 4]
             cmap = self.get_colormap(enr_levels.size)
             for i in range(enr_levels.size):
-                enrobj = FuePin(self.axes)
+                enrobj = FuePin(self.ui.axes)
                 enrobj.facecolor = cmap[i]
                 enrobj.ENR = enr_levels[i]
                 enrobj.BA = enr_ba[i]
@@ -524,7 +524,7 @@ class MainWin(QtGui.QMainWindow):
         case_num = int(self.ui.case_cbox.currentIndex())
         ipin = self.pinselection_index  # copy attributes from selected pin
 
-        enrobj = FuePin(self.axes)
+        enrobj = FuePin(self.ui.axes)
         enrobj.facecolor = self.enrpinlist[case_num][ipin].facecolor
         enrobj.DENS = self.enr_dlg.dens
         enrobj.ENR = self.enr_dlg.enr
@@ -897,7 +897,7 @@ class MainWin(QtGui.QMainWindow):
         if self.track_maxpin.isChecked():
             self.mark_maxpins()
 
-        self.canvas.draw()
+        self.ui.canvas.draw()
         self.plot_update()
         self.report_update()
 
@@ -907,7 +907,7 @@ class MainWin(QtGui.QMainWindow):
         path = unicode(QFileDialog.getSaveFileName(self, 'Save file', '',
                                                    file_choices))
         if path:
-            self.canvas.print_figure(path, dpi=self.dpi)
+            self.ui.canvas.print_figure(path, dpi=self.dpi)
             self.statusBar().showMessage('Saved to %s' % path, 2000)
     
     def on_about(self):
@@ -1054,7 +1054,7 @@ class MainWin(QtGui.QMainWindow):
         LFU = self.clicked_pin.LFU
         self.mark_enrpin(self.enrpinlist[case_num][LFU - 1])
 
-        self.canvas.draw()
+        self.ui.canvas.draw()
         self.plot_update()
 
     def mark_enrpin(self, pin, edge_color=(0.4, 0.4, 0.4)):
@@ -1092,7 +1092,7 @@ class MainWin(QtGui.QMainWindow):
         else:
             self.enr_modify(mod, case_num)
 
-        self.canvas.draw()
+        self.ui.canvas.draw()
         self.enr_fields_update()  # Update info fields
 
     def enr_fields_update(self):
@@ -1447,7 +1447,7 @@ class MainWin(QtGui.QMainWindow):
     def fig_update(self):
         """ Redraw figure and update values"""
         
-        self.axes.clear()
+        self.ui.axes.clear()
         self.draw_fuelmap()
         self.set_pinvalues()
         self.toggle_pin_bgcolors()
@@ -1501,13 +1501,13 @@ class MainWin(QtGui.QMainWindow):
         """Setup the figure axis"""
 
         # clear the axes and redraw the plot
-        self.axes.clear()
-        self.axes.axis('equal')
+        self.ui.axes.clear()
+        self.ui.axes.axis('equal')
         
-        self.axes.set_position([0, 0, 1, 1])
-        self.axes.set_frame_on(False)
-        self.axes.get_xaxis().set_visible(False)
-        self.axes.get_yaxis().set_visible(False)
+        self.ui.axes.set_position([0, 0, 1, 1])
+        self.ui.axes.set_frame_on(False)
+        self.ui.axes.get_xaxis().set_visible(False)
+        self.ui.axes.get_yaxis().set_visible(False)
 
     def clear_project(self):
         """Clear current project"""
@@ -1546,46 +1546,46 @@ class MainWin(QtGui.QMainWindow):
             del self.pinobjects
 
         # Clear and restore figure
-        self.axes.clear()  # Clears the figure axes
-        self.fig.set_facecolor('0.75')  # set facecolor to gray
+        self.ui.axes.clear()  # Clears the figure axes
+        self.ui.fig.set_facecolor('0.75')  # set facecolor to gray
 
     def draw_fuelmap(self):
         """Draw fuel map"""
 
         #self.fig.set_facecolor((1, 1, 0.8784))  # Light yellow
-        self.fig.set_facecolor("#CFEECF")  # Tea green
+        self.ui.fig.set_facecolor("#CFEECF")  # Tea green
 
         # Draw outer rectangle
         rect = mpatches.Rectangle((0.035, 0.035), 0.935, 0.935,
                                   fc=(0.8, 0.898, 1), ec=(0.3, 0.3, 0.3))
-        self.axes.add_patch(rect)
+        self.ui.axes.add_patch(rect)
         
         # Draw control rods
         rodrect_v = mpatches.Rectangle((0.011, 0.13), 0.045, 0.77,
                                        ec=(0.3, 0.3, 0.3))
         rodrect_v.set_fill(False)
-        self.axes.add_patch(rodrect_v)
+        self.ui.axes.add_patch(rodrect_v)
         pp = [[0.011, 0.17], [0.056, 0.17]]
         poly = mpatches.Polygon(pp)
         poly.set_closed(False)
-        self.axes.add_patch(poly)
+        self.ui.axes.add_patch(poly)
         pp = [[0.011, 0.86], [0.056, 0.86]]
         poly = mpatches.Polygon(pp)
         poly.set_closed(False)
-        self.axes.add_patch(poly)
+        self.ui.axes.add_patch(poly)
 
         rodrect_h = mpatches.Rectangle((0.1, 0.95), 0.77, 0.045,
                                        ec=(0.3, 0.3, 0.3))
         rodrect_h.set_fill(False)
-        self.axes.add_patch(rodrect_h)
+        self.ui.axes.add_patch(rodrect_h)
         pp = [[0.14, 0.95], [0.14, 0.995]]
         poly = mpatches.Polygon(pp)
         poly.set_closed(False)
-        self.axes.add_patch(poly)
+        self.ui.axes.add_patch(poly)
         pp = [[0.83, 0.95], [0.83, 0.995]]
         poly = mpatches.Polygon(pp)
         poly.set_closed(False)
-        self.axes.add_patch(poly)
+        self.ui.axes.add_patch(poly)
 
         # a fancy box with round corners (pad).
         p_fancy = mpatches.FancyBboxPatch((0.12, 0.12), 0.77, 0.77,
@@ -1593,14 +1593,14 @@ class MainWin(QtGui.QMainWindow):
                                           fc=(1, 1, 1),
                                           ec=(0.3, 0.3, 0.3))
         p_fancy.set_linewidth(4.0)
-        self.axes.add_patch(p_fancy)
+        self.ui.axes.add_patch(p_fancy)
         
         # Draw diagonal symmetry line
         pp = [[0.035, 0.970], [0.970, 0.035]]
         poly = mpatches.Polygon(pp)
         poly.set_linewidth(0.5)
         poly.set_closed(False)
-        self.axes.add_patch(poly)
+        self.ui.axes.add_patch(poly)
 
         if self.bunlist[0].data.fuetype == 'OPT2':
             s96o2(self)
@@ -1641,16 +1641,16 @@ class MainWin(QtGui.QMainWindow):
 #        r = 1.0  # resolution factor
 #        self.dpi = 100 * r
 #        self.fig = Figure((6 / r, 5 / r), dpi=self.dpi)
-#        self.canvas = FigureCanvas(self.fig)
-#        self.canvas.mpl_connect('button_press_event', self.on_click)
-#        self.canvas.setParent(self.main_frame)
-#        self.canvas.setSizePolicy(QtGui.QSizePolicy.Expanding,
+#        self.ui.canvas = FigureCanvas(self.fig)
+#        self.ui.canvas.mpl_connect('button_press_event', self.on_click)
+#        self.ui.canvas.setParent(self.main_frame)
+#        self.ui.canvas.setSizePolicy(QtGui.QSizePolicy.Expanding,
 #                                  QtGui.QSizePolicy.Expanding)
-#        self.canvas.setMinimumWidth(500)
-#        self.canvas.setMinimumHeight(416)
+#        self.ui.canvas.setMinimumWidth(500)
+#        self.ui.canvas.setMinimumHeight(416)
 #        
 #        cvbox = QtGui.QVBoxLayout()
-#        cvbox.addWidget(self.canvas)
+#        cvbox.addWidget(self.ui.canvas)
 #        canvasGbox = QtGui.QGroupBox()
 #        canvasGbox.setStyleSheet("QGroupBox { background-color: rgb(200, 200,\
 #        200); border:1px solid gray; border-radius:5px;}")
@@ -1658,7 +1658,7 @@ class MainWin(QtGui.QMainWindow):
 #
 #        # Since we have only one plot, we can use add_axes instead of 
 #        # add_subplot.
-#        self.axes = self.fig.add_subplot(111)
+#        self.ui.axes = self.fig.add_subplot(111)
 #        
 #        # Other GUI controls
 #        sim_hbox = QtGui.QHBoxLayout()
@@ -2177,7 +2177,7 @@ class MainWin(QtGui.QMainWindow):
             self.colorAction.setChecked(False)
             for pin in self.pinobjects[iseg]:
                 pin.rectangle.set_alpha(0.0)
-        self.canvas.draw()
+        self.ui.canvas.draw()
 
     def toggle_maxpins(self):
         """track maxpin on/off"""
@@ -2185,7 +2185,7 @@ class MainWin(QtGui.QMainWindow):
             self.mark_maxpins()
         else:
             self.remove_maxpins()
-        self.canvas.draw()
+        self.ui.canvas.draw()
 
     def remove_maxpins(self):
         if hasattr(self, "maxpins"):

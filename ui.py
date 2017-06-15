@@ -490,17 +490,17 @@ class Ui_MainWindow(object):
         # Create the mpl Figure and FigCanvas objects.
         r = 1.0  # resolution factor
         self.dpi = 100 * r
-        parent.fig = Figure((6 / r, 5 / r), dpi=self.dpi)
-        parent.canvas = FigureCanvas(parent.fig)
-        parent.canvas.mpl_connect('button_press_event', parent.on_click)
-        parent.canvas.setParent(self.main_frame)
-        parent.canvas.setSizePolicy(QtGui.QSizePolicy.Expanding,
+        self.fig = Figure((6 / r, 5 / r), dpi=self.dpi)
+        self.canvas = FigureCanvas(self.fig)
+        self.canvas.mpl_connect('button_press_event', parent.on_click)
+        self.canvas.setParent(self.main_frame)
+        self.canvas.setSizePolicy(QtGui.QSizePolicy.Expanding,
                                   QtGui.QSizePolicy.Expanding)
-        parent.canvas.setMinimumWidth(500)
-        parent.canvas.setMinimumHeight(416)
+        self.canvas.setMinimumWidth(500)
+        self.canvas.setMinimumHeight(416)
         
         cvbox = QtGui.QVBoxLayout()
-        cvbox.addWidget(parent.canvas)
+        cvbox.addWidget(self.canvas)
         canvasGbox = QtGui.QGroupBox()
         canvasGbox.setStyleSheet("QGroupBox { background-color: rgb(200, 200,\
         200); border:1px solid gray; border-radius:5px;}")
@@ -508,7 +508,7 @@ class Ui_MainWindow(object):
 
         # Since we have only one plot, we can use add_axes instead of 
         # add_subplot.
-        parent.axes = parent.fig.add_subplot(111)
+        self.axes = self.fig.add_subplot(111)
 
         # Other GUI controls
         sim_hbox = QtGui.QHBoxLayout()
