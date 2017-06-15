@@ -485,7 +485,7 @@ class Ui_MainWindow(object):
     def create_main_frame(self):
         parent = self.parent
 
-        parent.main_frame = QtGui.QWidget()
+        self.main_frame = QtGui.QWidget()
 
         # Create the mpl Figure and FigCanvas objects.
         r = 1.0  # resolution factor
@@ -493,7 +493,7 @@ class Ui_MainWindow(object):
         parent.fig = Figure((6 / r, 5 / r), dpi=self.dpi)
         parent.canvas = FigureCanvas(parent.fig)
         parent.canvas.mpl_connect('button_press_event', parent.on_click)
-        parent.canvas.setParent(parent.main_frame)
+        parent.canvas.setParent(self.main_frame)
         parent.canvas.setSizePolicy(QtGui.QSizePolicy.Expanding,
                                   QtGui.QSizePolicy.Expanding)
         parent.canvas.setMinimumWidth(500)
@@ -519,8 +519,6 @@ class Ui_MainWindow(object):
         parent.param_cbox = QtGui.QComboBox()
         paramlist = ['ENR', 'FINT', 'EXP', 'BTF']
         parent.param_cbox.addItems(QtCore.QStringList(paramlist))
-        #for param in paramlist:
-        #    parent.param_cbox.addItem(param)
         
         param_hbox = QtGui.QHBoxLayout()
         param_hbox.addWidget(param_label)
@@ -628,7 +626,7 @@ class Ui_MainWindow(object):
         hbox.addWidget(canvasGbox)
         hbox.addWidget(tableGbox)
 
-        parent.main_frame.setLayout(hbox)
-        parent.setCentralWidget(parent.main_frame)
+        self.main_frame.setLayout(hbox)
+        parent.setCentralWidget(self.main_frame)
 
         
