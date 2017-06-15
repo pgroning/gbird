@@ -113,7 +113,7 @@ class RunC4Thread(QtCore.QThread):
             
             # update bundle attributes
             voi = None
-            chanbow = self.parent.chanbow_sbox.value() / 10  # mm -> cm
+            chanbow = self.parent.ui.chanbow_sbox.value() / 10  # mm -> cm
             nsegs = len(self.bundle.segments)
             for iseg in xrange(nsegs):
                 LFU = self.lfumap(iseg)

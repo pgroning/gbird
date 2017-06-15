@@ -210,7 +210,7 @@ class EnrichmentDialog(QtGui.QDialog):
         
         self.clear_all()
 
-        iseg = int(self.parent.case_cbox.currentIndex())
+        iseg = int(self.parent.ui.case_cbox.currentIndex())
         enrpinlist = self.parent.enrpinlist[iseg]
         
         for i, pin in enumerate(enrpinlist):
@@ -272,14 +272,14 @@ class EnrichmentDialog(QtGui.QDialog):
 
         self.get_table_data()
 
-        iseg = int(self.parent.case_cbox.currentIndex())
+        iseg = int(self.parent.ui.case_cbox.currentIndex())
 
         # Create new enrpin list
         enrpinlist = []
         nrows = len(self.data.enr)
         cmap = self.parent.get_colormap(nrows)
         for i in range(nrows):
-            enrpin = FuePin(self.parent.axes)
+            enrpin = FuePin(self.parent.ui.axes)
             enrpin.facecolor = cmap[i]
             enrpin.DENS = self.data.dens[i]
             enrpin.ENR = self.data.enr[i]
