@@ -23,9 +23,9 @@ import re
 import numpy as np
 from PyQt4 import QtGui, QtCore
 import matplotlib
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg \
-    as FigureCanvas
-from matplotlib.figure import Figure
+#from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg \
+#    as FigureCanvas
+#from matplotlib.figure import Figure
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 
