@@ -96,7 +96,8 @@ class Ui_MainWindow(object):
     def create_menu(self):
         parent = self.parent
 
-        parent.menu_actions = []
+        #parent.menu_actions = []
+        self.menu_actions = []
 
         menubar = QtGui.QMenuBar()
 
@@ -126,7 +127,7 @@ class Ui_MainWindow(object):
         args = (text, save_icon, tip, parent.saveData)
         self.save_action = self.__create_action(*args)
         file_menu.addAction(self.save_action)
-        parent.menu_actions.append(self.save_action)
+        self.menu_actions.append(self.save_action)
 
         delete_icon = "delete-icon_32x32"
         text = "&Clear project..."
@@ -134,7 +135,7 @@ class Ui_MainWindow(object):
         args = (text, delete_icon, tip, parent.clear_project)
         clear_action = self.__create_action(*args)
         file_menu.addAction(clear_action)
-        parent.menu_actions.append(clear_action)
+        self.menu_actions.append(clear_action)
 
         export_icon = "export-icon_32x32"
         text = "&Export to ascii..."
@@ -142,7 +143,7 @@ class Ui_MainWindow(object):
         args = (text, export_icon, tip, parent.export_to_ascii)
         save_file_action = self.__create_action(*args)
         file_menu.addAction(save_file_action)
-        parent.menu_actions.append(save_file_action)
+        self.menu_actions.append(save_file_action)
 
         export_icon = "export-icon_32x32"
         text = "&Export Figure..."
@@ -150,7 +151,7 @@ class Ui_MainWindow(object):
         args = (text, export_icon, tip, parent.saveFigure)
         save_figure_action = self.__create_action(*args)
         file_menu.addAction(save_figure_action)
-        parent.menu_actions.append(save_figure_action)
+        self.menu_actions.append(save_figure_action)
 
         file_menu.addSeparator()
 
@@ -179,7 +180,7 @@ class Ui_MainWindow(object):
         args = (text, back_icon, tip, parent.back_state)
         self.back_action = self.__create_action(*args)
         edit_menu.addAction(self.back_action)
-        parent.menu_actions.append(self.back_action)
+        self.menu_actions.append(self.back_action)
 
         forward_icon = "arrow-redo-icon_32x32"
         text = "Forward"
@@ -187,7 +188,7 @@ class Ui_MainWindow(object):
         args = (text, forward_icon, tip, parent.forward_state)
         self.forward_action = self.__create_action(*args)
         edit_menu.addAction(self.forward_action)
-        parent.menu_actions.append(self.forward_action)
+        self.menu_actions.append(self.forward_action)
 
         edit_menu.addSeparator()
 
@@ -198,7 +199,7 @@ class Ui_MainWindow(object):
         args = (text, plus_icon, tip, parent.enr_add, False, shortcut)
         self.increase_enr_action = self.__create_action(*args)
         edit_menu.addAction(self.increase_enr_action)
-        parent.menu_actions.append(self.increase_enr_action)
+        self.menu_actions.append(self.increase_enr_action)
         
         minus_icon = "remove-icon_32x32"
         text = "Decrease enr"
@@ -207,7 +208,7 @@ class Ui_MainWindow(object):
         args = (text, minus_icon, tip, parent.enr_sub, False, shortcut)
         self.decrease_enr_action = self.__create_action(*args)
         edit_menu.addAction(self.decrease_enr_action)
-        parent.menu_actions.append(self.decrease_enr_action)
+        self.menu_actions.append(self.decrease_enr_action)
 
         edit_menu.addSeparator()
 
@@ -217,7 +218,7 @@ class Ui_MainWindow(object):
         args = (text, layers_icon, tip, parent.open_segment_dlg)
         segment_action = self.__create_action(*args)
         edit_menu.addAction(segment_action)
-        parent.menu_actions.append(segment_action)
+        self.menu_actions.append(segment_action)
 
         icon = "table-icon_32x32"
         text = "Enrichments..."
@@ -225,7 +226,7 @@ class Ui_MainWindow(object):
         args = (text, icon, tip, parent.open_enrichment_dlg)
         enrichment_action = self.__create_action(*args)
         edit_menu.addAction(enrichment_action)
-        parent.menu_actions.append(enrichment_action)
+        self.menu_actions.append(enrichment_action)
 
         icon = "flame-red-icon_32x32"
         text = "Quick calc..."
@@ -233,7 +234,7 @@ class Ui_MainWindow(object):
         args = (text, icon, tip, parent.open_pert_dlg)
         quickcalc_action = self.__create_action(*args)
         edit_menu.addAction(quickcalc_action)
-        parent.menu_actions.append(quickcalc_action)
+        self.menu_actions.append(quickcalc_action)
 
         edit_menu.addSeparator()
 
@@ -243,7 +244,7 @@ class Ui_MainWindow(object):
         args = (text, icon, tip, parent.replace_original_design)
         replace_action = self.__create_action(*args)
         edit_menu.addAction(replace_action)
-        parent.menu_actions.append(replace_action)
+        self.menu_actions.append(replace_action)
 
         icon = "undo-icon_32x32"
         text = "Reset..."
@@ -251,7 +252,7 @@ class Ui_MainWindow(object):
         args = (text, icon, tip, parent.reset_state)
         reset_action = self.__create_action(*args)
         edit_menu.addAction(reset_action)
-        parent.menu_actions.append(reset_action)
+        self.menu_actions.append(reset_action)
 
         icon = "preferences-icon_32x32"
         text = "Preferences..."
@@ -271,7 +272,7 @@ class Ui_MainWindow(object):
         args = (text, icon, tip, parent.open_plotwin)
         self.plot_action = self.__create_action(*args)
         tools_menu.addAction(self.plot_action)
-        parent.menu_actions.append(self.plot_action)
+        self.menu_actions.append(self.plot_action)
         
         icon = "grid-icon_32x32"
         text = "CASMO..."
@@ -279,7 +280,7 @@ class Ui_MainWindow(object):
         args = (text, icon, tip, parent.open_cas_dlg)
         casmo_action = self.__create_action(*args)
         tools_menu.addAction(casmo_action)
-        parent.menu_actions.append(casmo_action)
+        self.menu_actions.append(casmo_action)
 
         icon = "write-icon_32x32"
         text = "Generate inp files"
@@ -287,7 +288,7 @@ class Ui_MainWindow(object):
         args = (text, icon, tip, parent.generate_inpfiles)
         casinp_action = self.__create_action(*args)
         tools_menu.addAction(casinp_action)
-        parent.menu_actions.append(casinp_action)
+        self.menu_actions.append(casinp_action)
 
         icon = "document-icon_32x32"
         text = "Report..."
@@ -295,7 +296,7 @@ class Ui_MainWindow(object):
         args = (text, icon, tip, parent.open_report_dlg)
         report_action = self.__create_action(*args)
         tools_menu.addAction(report_action)
-        parent.menu_actions.append(report_action)
+        self.menu_actions.append(report_action)
 
         icon = "binoculars-icon_32x32"
         text = "Find point..."
@@ -303,7 +304,7 @@ class Ui_MainWindow(object):
         args = (text, icon, tip, parent.open_findpoint_dlg)
         self.find_action = self.__create_action(*args)
         tools_menu.addAction(self.find_action)
-        parent.menu_actions.append(self.find_action)
+        self.menu_actions.append(self.find_action)
 
         icon = "letter-e-icon_32x32"
         text = "EGV..."
@@ -311,7 +312,7 @@ class Ui_MainWindow(object):
         args = (text, icon, tip, parent.open_egv_dlg)
         egv_action = self.__create_action(*args)
         tools_menu.addAction(egv_action)
-        parent.menu_actions.append(egv_action)
+        self.menu_actions.append(egv_action)
 
         icon = None
         text = "Show color map"
@@ -320,7 +321,7 @@ class Ui_MainWindow(object):
         args = (text, icon, tip, parent.toggle_pin_bgcolors, checkable)
         parent.show_cmap = self.__create_action(*args)
         tools_menu.addAction(parent.show_cmap)
-        parent.menu_actions.append(parent.show_cmap)
+        self.menu_actions.append(parent.show_cmap)
 
         icon = None
         text = "Track max pins"
@@ -329,10 +330,10 @@ class Ui_MainWindow(object):
         args = (text, icon, tip, parent.toggle_maxpins, checkable)
         parent.track_maxpin = self.__create_action(*args)
         tools_menu.addAction(parent.track_maxpin)
-        parent.menu_actions.append(parent.track_maxpin)
+        self.menu_actions.append(parent.track_maxpin)
 
         # -- Run menu ---
-        parent.run_menu = parent.menuBar().addMenu("&Run")
+        #parent.run_menu = parent.menuBar().addMenu("&Run")
         run_menu = menubar.addMenu("&Run")
 
         icon = "flame-red-icon_32x32"
@@ -340,9 +341,10 @@ class Ui_MainWindow(object):
         tip = "Run quick calc"
         shortcut = "F9"
         args = (text, icon, tip, parent.quick_calc, False, shortcut)
-        parent.quickcalc_action = self.__create_action(*args)
-        run_menu.addAction(parent.quickcalc_action)
-        parent.menu_actions.append(parent.quickcalc_action)
+        self.quickcalc_action = self.__create_action(*args)
+        self.quickcalc_action.setEnabled(False)
+        run_menu.addAction(self.quickcalc_action)
+        #self.menu_actions.append(parent.quickcalc_action)
 
         # --- Help menu ---
         #parent.help_menu = parent.menuBar().addMenu("&Help")
@@ -360,21 +362,21 @@ class Ui_MainWindow(object):
 
     def create_toolbar(self):
 
-        self.parent.toolbar_actions = []
+        #self.parent.toolbar_actions = []
 
         toolbar = QtGui.QToolBar()
 
         toolbar.addAction(self.new_action)
         toolbar.addAction(self.file_action)
         toolbar.addAction(self.save_action)
-        toolbar.addAction(self.parent.quickcalc_action)              
+        toolbar.addAction(self.quickcalc_action)              
         toolbar.addAction(self.preferences_action)
 
         color_icon = "color-icon_32x32"
         text = "Show color map"
         args = (text, color_icon, text, self.parent.toggle_cmap, True)
         self.parent.colorAction = self.__create_action(*args)
-        self.parent.toolbar_actions.append(self.parent.colorAction)
+        self.menu_actions.append(self.parent.colorAction)
         toolbar.addAction(self.parent.colorAction)
 
         toolbar.addAction(self.plot_action)

@@ -22,7 +22,7 @@ import copy
 import re
 import numpy as np
 from PyQt4 import QtGui, QtCore
-import matplotlib
+#import matplotlib
 #from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg \
 #    as FigureCanvas
 #from matplotlib.figure import Figure
@@ -317,7 +317,7 @@ class MainWin(QtGui.QMainWindow):
     def __quickcalc_setenabled(self, status=True):
         """Enable/disable quickcalc"""
         #self.calcAction.setEnabled(status)
-        self.quickcalc_action.setEnabled(status)
+        self.ui.quickcalc_action.setEnabled(status)
 
     def init_cboxes(self):
         """Initiate combo boxes"""
@@ -2227,10 +2227,10 @@ class MainWin(QtGui.QMainWindow):
         for w in widgets:
             w.setEnabled(status)
     
-        for a in self.toolbar_actions:
-            a.setEnabled(status)
-
-        for a in self.menu_actions:
+        #for a in self.toolbar_actions:
+        #    a.setEnabled(status)
+        #qtrace()
+        for a in self.ui.menu_actions:
             a.setEnabled(status)
 
     def closeEvent(self, event):
