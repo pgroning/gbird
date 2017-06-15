@@ -1,4 +1,75 @@
 from PyQt4 import QtGui, QtCore
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg \
+    as FigureCanvas
+from matplotlib.figure import Figure
+
+
+class InfoLabel(QtGui.QLabel):
+    def __init__(self, parent=None, width=100):
+        #QtGui.QDialog.__init__(self)
+        QtGui.QLabel.__init__(self)
+        self.setStyleSheet("""QLabel {background-color : rgb(245, 245, 245); 
+                              color : black;}""")
+        self.setFrameStyle(QtGui.QFrame.Panel | 
+                           QtGui.QFrame.Sunken)
+        self.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        self.setFixedHeight(20)
+        self.setFixedWidth(width)
+
+
+class PinTableWidget(QtGui.QTableWidget):
+    def __init__(self, parent=None):
+        QtGui.QTableWidget.__init__(self)
+        self.parent = parent
+        self.setup()
+
+    def setup(self):
+        self.setColumnCount(4)
+        self.setRowCount(100)
+        self.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
+        self.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
+        self.setSizePolicy(QtGui.QSizePolicy.Minimum,
+                                 QtGui.QSizePolicy.Minimum)
+        self.setMinimumWidth(180)
+        self.setHorizontalHeaderLabels(('Index', 'EXP', 'FINT', 'BTF'))
+        self.setSortingEnabled(True)
+        self.setColumnHidden(0, True)
+        verticalheader = self.verticalHeader()
+        verticalheader.setResizeMode(QtGui.QHeaderView.Fixed)
+        verticalheader.setDefaultSectionSize(25)
+
+        self.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+
+        self.connect(self.horizontalHeader(),
+                     QtCore.SIGNAL('sectionClicked(int)'),
+                     self.parent.tableHeaderSort)
+        self.connect(self.verticalHeader(),
+                     QtCore.SIGNAL('sectionClicked(int)'), 
+                     self.parent.pinSelect)
+        self.cellActivated.connect(self.parent.pinSelect)
+        self.cellClicked.connect(self.parent.pinSelect)
+        
+    def sort_items(self):
+        self.sortItems(0, QtCore.Qt.AscendingOrder)
+
+    def setpincoords(self):
+        """Update table with pin coordinates"""
+        
+        case_num = int(self.parent.case_cbox.currentIndex())
+        npin = len(self.parent.pinobjects[case_num])
+        self.setRowCount(npin)
+        
+        for i, pinobj in enumerate(self.parent.pinobjects[case_num]):
+            coord_item = QtGui.QTableWidgetItem(pinobj.coord)
+            self.setVerticalHeaderItem(i, coord_item)
+            i_item = QtGui.QTableWidgetItem()
+            i_item.setData(QtCore.Qt.EditRole, QtCore.QVariant(int(i)))
+            self.setItem(i, 0, i_item)
+
+    def selectAll(self):  # redefine built-in selectAll method
+        self.sort_items() 
+        self.setpincoords()
+
 
 
 class Ui_MainWindow(object):
@@ -14,6 +85,7 @@ class Ui_MainWindow(object):
         self.create_statusbar()
         self.create_menu()
         self.create_toolbar()
+        self.create_main_frame()
 
     def create_statusbar(self):
         status_text = QtGui.QLabel("Main window")
@@ -408,3 +480,155 @@ class Ui_MainWindow(object):
             action.setCheckable(True)
 
         return action
+
+
+    def create_main_frame(self):
+        parent = self.parent
+
+        parent.main_frame = QtGui.QWidget()
+
+        # Create the mpl Figure and FigCanvas objects.
+        r = 1.0  # resolution factor
+        self.dpi = 100 * r
+        parent.fig = Figure((6 / r, 5 / r), dpi=self.dpi)
+        parent.canvas = FigureCanvas(parent.fig)
+        parent.canvas.mpl_connect('button_press_event', parent.on_click)
+        parent.canvas.setParent(parent.main_frame)
+        parent.canvas.setSizePolicy(QtGui.QSizePolicy.Expanding,
+                                  QtGui.QSizePolicy.Expanding)
+        parent.canvas.setMinimumWidth(500)
+        parent.canvas.setMinimumHeight(416)
+        
+        cvbox = QtGui.QVBoxLayout()
+        cvbox.addWidget(parent.canvas)
+        canvasGbox = QtGui.QGroupBox()
+        canvasGbox.setStyleSheet("QGroupBox { background-color: rgb(200, 200,\
+        200); border:1px solid gray; border-radius:5px;}")
+        canvasGbox.setLayout(cvbox)
+
+        # Since we have only one plot, we can use add_axes instead of 
+        # add_subplot.
+        parent.axes = parent.fig.add_subplot(111)
+
+        # Other GUI controls
+        sim_hbox = QtGui.QHBoxLayout()
+        parent.sim_info_field = InfoLabel(width=210)
+        sim_hbox.addWidget(parent.sim_info_field)
+
+        param_label = QtGui.QLabel('Parameter:')
+        parent.param_cbox = QtGui.QComboBox()
+        paramlist = ['ENR', 'FINT', 'EXP', 'BTF']
+        parent.param_cbox.addItems(QtCore.QStringList(paramlist))
+        #for param in paramlist:
+        #    parent.param_cbox.addItem(param)
+        
+        param_hbox = QtGui.QHBoxLayout()
+        param_hbox.addWidget(param_label)
+        param_hbox.addWidget(parent.param_cbox)
+        parent.connect(parent.param_cbox,
+                     QtCore.SIGNAL('currentIndexChanged(int)'),
+                     parent.set_pinvalues)
+
+        case_label = QtGui.QLabel('Segment:')
+        parent.case_cbox = QtGui.QComboBox()
+        case_hbox = QtGui.QHBoxLayout()
+        case_hbox.addWidget(case_label)
+        case_hbox.addWidget(parent.case_cbox)
+        parent.connect(parent.case_cbox, 
+                     QtCore.SIGNAL('currentIndexChanged(int)'),
+                     parent.fig_update)
+
+        point_label = QtGui.QLabel('Point number:')
+        parent.point_sbox = QtGui.QSpinBox()
+        parent.point_sbox.setMinimum(0)
+        parent.point_sbox.setMaximum(10000)
+        point_hbox = QtGui.QHBoxLayout()
+        point_hbox.addWidget(point_label)
+        point_hbox.addWidget(parent.point_sbox)
+        parent.connect(parent.point_sbox, QtCore.SIGNAL('valueChanged(int)'),
+                     parent.set_pinvalues)
+
+        chanbow_hbox = QtGui.QHBoxLayout()
+        parent.chanbow_sbox = QtGui.QDoubleSpinBox()
+        parent.chanbow_sbox.setRange(-3, 3)
+        parent.chanbow_sbox.setSingleStep(0.25)
+        parent.chanbow_sbox.setSuffix(" mm")
+        chanbow_hbox.addWidget(QtGui.QLabel("Channel bow:"))
+        chanbow_hbox.addWidget(parent.chanbow_sbox)
+
+        # Info form layout
+        info_flo = QtGui.QFormLayout()
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum,
+                                       QtGui.QSizePolicy.Minimum)
+
+        parent.burnup_text = InfoLabel()
+        parent.burnup_text.setSizePolicy(sizePolicy)
+        info_flo.addRow("Burnup", parent.burnup_text)
+        
+        parent.kinf_text = InfoLabel()
+        parent.kinf_text.setSizePolicy(sizePolicy)
+        info_flo.addRow("Kinf", parent.kinf_text)
+
+        parent.fint_text = InfoLabel()
+        parent.fint_text.setSizePolicy(sizePolicy)
+        info_flo.addRow("Fint", parent.fint_text)
+
+        parent.btf_text = InfoLabel()
+        parent.btf_text.setSizePolicy(sizePolicy)
+        info_flo.addRow("BTF", parent.btf_text)
+
+        parent.voi_vhi_text = InfoLabel()
+        parent.voi_vhi_text.setSizePolicy(sizePolicy)
+        info_flo.addRow("VOI / VHI", parent.voi_vhi_text)
+
+        parent.tfu_tmo_text = InfoLabel()
+        parent.tfu_tmo_text.setSizePolicy(sizePolicy)
+        info_flo.addRow("TFU / TMO", parent.tfu_tmo_text)
+
+        parent.rod_types_text = InfoLabel()
+        parent.rod_types_text.setSizePolicy(sizePolicy)
+        info_flo.addRow("Rod types", parent.rod_types_text)
+
+        parent.ave_enr_text = InfoLabel()
+        parent.ave_enr_text.setSizePolicy(sizePolicy)
+        info_flo.addRow("Segment w/o U-235", parent.ave_enr_text)
+
+        parent.bundle_enr_text = InfoLabel()
+        parent.bundle_enr_text.setSizePolicy(sizePolicy)
+        info_flo.addRow("Bundle w/o U-235", parent.bundle_enr_text)
+
+        # Construct table widget instance
+        parent.table = PinTableWidget(parent)
+        
+        tvbox = QtGui.QVBoxLayout()
+        tvbox.addWidget(parent.table)
+        tableGbox = QtGui.QGroupBox()
+        tableGbox.setStyleSheet("QGroupBox { background-color: rgb(200, 200,\
+        200); border:1px solid gray; border-radius:5px;}")
+        tableGbox.setLayout(tvbox)
+        parent.table.resizeColumnsToContents()
+
+        # Layout with box sizers
+        vbox = QtGui.QVBoxLayout()
+        vbox.addLayout(sim_hbox)
+        vbox.addLayout(case_hbox)
+        vbox.addLayout(param_hbox)
+        vbox.addLayout(chanbow_hbox)
+        vbox.addStretch(1)
+        vbox.addLayout(point_hbox)
+        vbox.addLayout(info_flo)
+
+        groupbox = QtGui.QGroupBox()
+        groupbox.setStyleSheet("QGroupBox { background-color: rgb(200, 200,\
+        200); border:1px solid gray; border-radius:5px;}")
+        groupbox.setLayout(vbox)
+
+        hbox = QtGui.QHBoxLayout()
+        hbox.addWidget(groupbox)
+        hbox.addWidget(canvasGbox)
+        hbox.addWidget(tableGbox)
+
+        parent.main_frame.setLayout(hbox)
+        parent.setCentralWidget(parent.main_frame)
+
+        

@@ -165,7 +165,7 @@ class MainWin(QtGui.QMainWindow):
         
         #self.create_menu()
         #self.create_toolbar()
-        self.create_main_frame()
+        #self.create_main_frame()
         #self.create_status_bar()
 
         self.on_draw()  # Init plot
