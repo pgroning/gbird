@@ -2196,30 +2196,30 @@ class MainWin(QtGui.QMainWindow):
                 except:
                     pass
 
-    def add_actions(self, target, actions):
-        for action in actions:
-            if action is None:
-                target.addSeparator()
-            else:
-                target.addAction(action)
+#    def add_actions(self, target, actions):
+#        for action in actions:
+#            if action is None:
+#                target.addSeparator()
+#            else:
+#                target.addAction(action)
 
-    def create_action(self, text, slot=None, shortcut=None, icon=None,
-                      tip=None, checkable=False, signal="triggered()"):
-
-        action = QtGui.QAction(text, self)
-        if icon is not None:
-            action.setIcon(QtGui.QIcon(self.appdir + "icons/%s.png" % icon))
-            action.setIconVisibleInMenu(True)
-        if shortcut is not None:
-            action.setShortcut(shortcut)
-        if tip is not None:
-            action.setToolTip(tip)
-            action.setStatusTip(tip)
-        if slot is not None:
-            self.connect(action, QtCore.SIGNAL(signal), slot)
-        if checkable:
-            action.setCheckable(True)
-        return action
+#    def create_action(self, text, slot=None, shortcut=None, icon=None,
+#                      tip=None, checkable=False, signal="triggered()"):
+#
+#        action = QtGui.QAction(text, self)
+#        if icon is not None:
+#            action.setIcon(QtGui.QIcon(self.appdir + "icons/%s.png" % icon))
+#            action.setIconVisibleInMenu(True)
+#        if shortcut is not None:
+#            action.setShortcut(shortcut)
+#        if tip is not None:
+#            action.setToolTip(tip)
+#            action.setStatusTip(tip)
+#        if slot is not None:
+#            self.connect(action, QtCore.SIGNAL(signal), slot)
+#        if checkable:
+#            action.setCheckable(True)
+#        return action
 
     def widgets_setenabled(self, status=True):
 
