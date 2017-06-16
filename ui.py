@@ -440,9 +440,10 @@ class Ui_MainWindow(object):
         200); border:1px solid gray; border-radius:5px;}")
         canvasGbox.setLayout(cvbox)
 
+        self.__axes_setup()
         # Since we have only one plot, we can use add_axes instead of 
         # add_subplot.
-        self.axes = self.fig.add_subplot(111)
+        #self.axes = self.fig.add_subplot(111)
 
         # Other GUI controls
         sim_hbox = QtGui.QHBoxLayout()
@@ -562,3 +563,23 @@ class Ui_MainWindow(object):
 
         main_frame.setLayout(hbox)
         parent.setCentralWidget(main_frame)
+
+    def __axes_setup(self):
+        """Setup the figure axes"""
+        
+        # Since we have only one plot, we can use add_axes instead of 
+        # add_subplot.
+        self.axes = self.fig.add_subplot(111)
+
+        # clear the axes and redraw the plot
+        self.axes.clear()
+        self.axes.axis('equal')
+        
+        self.axes.set_position([0, 0, 1, 1])
+        self.axes.set_frame_on(False)
+        self.axes.get_xaxis().set_visible(False)
+        self.axes.get_yaxis().set_visible(False)
+
+    def on_resize(self, event):
+        self.axes.set_xlim(0, 1.2)
+        self.axes.set_ylim(0, 1)

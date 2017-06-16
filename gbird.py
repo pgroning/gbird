@@ -158,23 +158,24 @@ class MainWin(QtGui.QMainWindow):
         # self.setMinimumWidth(1100)
         # self.setMinimumHeight(610)
 
-        self.resizeEvent = self.on_resize
+        #self.resizeEvent = self.on_resize
 
+        # Setup menus and toolbars in main window
         self.ui = Ui_MainWindow()
         self.ui.setup(self)
-        
         #self.create_menu()
         #self.create_toolbar()
         #self.create_main_frame()
         #self.create_status_bar()
+        #self.on_draw()  # Init plot
 
-        self.on_draw()  # Init plot
+        self.resizeEvent = self.ui.on_resize
 
         self.widgets_setenabled(False)
 
-    def on_resize(self, event):
-        self.ui.axes.set_xlim(0, 1.2)
-        self.ui.axes.set_ylim(0, 1)
+    #def on_resize(self, event):
+    #    self.ui.axes.set_xlim(0, 1.2)
+    #    self.ui.axes.set_ylim(0, 1)
 
     def openFile(self):
         """Open bundle object from pickle file"""
@@ -1497,17 +1498,17 @@ class MainWin(QtGui.QMainWindow):
                 maxpin.set_maxpin_patch()
                 self.maxpins.append(maxpin)
 
-    def on_draw(self):
-        """Setup the figure axis"""
-
-        # clear the axes and redraw the plot
-        self.ui.axes.clear()
-        self.ui.axes.axis('equal')
-        
-        self.ui.axes.set_position([0, 0, 1, 1])
-        self.ui.axes.set_frame_on(False)
-        self.ui.axes.get_xaxis().set_visible(False)
-        self.ui.axes.get_yaxis().set_visible(False)
+#    def on_draw(self):
+#        """Setup the figure axis"""
+#
+#        # clear the axes and redraw the plot
+#        self.ui.axes.clear()
+#        self.ui.axes.axis('equal')
+#        
+#        self.ui.axes.set_position([0, 0, 1, 1])
+#        self.ui.axes.set_frame_on(False)
+#        self.ui.axes.get_xaxis().set_visible(False)
+#        self.ui.axes.get_yaxis().set_visible(False)
 
     def clear_project(self):
         """Clear current project"""
