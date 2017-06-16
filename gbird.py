@@ -41,6 +41,7 @@ from casinp import Casinp
 from progbar import ProgressBar
 from threads import ImportThread, LoadPickleThread, SavePickleThread
 from threads import QuickCalcThread, RunC4Thread
+from threads import lfu_map, fue_map
 from fuelmap import FuelMap
 
 
@@ -970,8 +971,12 @@ class MainWin(QtGui.QMainWindow):
         LFU_list = []
         FUE_list = []
         for i, segment in enumerate(bundle.segments):
-            LFU = self.__lfumap(i)
-            FUE = self.__fuemap(i)
+            pins = self.pinobjects[i]
+            enrpins = self.enrpinlist[i]
+            LFU = lfu_map(segment, pins)
+            #LFU = self.__lfumap(i)
+            FUE = fue_map(segment, enrpins)
+            #FUE = self.__fuemap(i)
             segment.ave_enr_calc(LFU, FUE)
             if not hasattr(segment.data, "ave_enr"):  # save orig. calc
                 segment.data.ave_enr = segment.ave_enr
@@ -1046,50 +1051,6 @@ class MainWin(QtGui.QMainWindow):
                 self.pinobjects[case_num][i].text.remove()
                 self.pinobjects[case_num][i].set_text(text)
 
-    def __lfumap(self, iseg):
-        """Creating LFU map from pinobjects"""
-                
-        # Initialize new LFU map and fill with zeros
-        LFU_old = self.bunlist[-1].segments[iseg].data.LFU
-        LFU = np.zeros(LFU_old.shape).astype(int)
-        
-        k = 0
-        for i in xrange(LFU.shape[0]):
-            for j in xrange(LFU.shape[1]):
-                if LFU_old[i, j] > 0:
-                    LFU[i, j] = self.pinobjects[iseg][k].LFU
-                    k += 1
-        return LFU
-
-    def __fuemap(self, iseg):
-        """Creating FUE map from enr level pins"""
-
-        FUE_old = self.bunlist[-1].segments[iseg].data.FUE
-        nfue = len(self.enrpinlist[iseg])
-        FUE = np.zeros((nfue, FUE_old.shape[1])).astype(float)
-        for i in xrange(nfue):
-            FUE[i, 0] = i + 1
-            FUE[i, 1] = self.enrpinlist[iseg][i].DENS
-            FUE[i, 2] = self.enrpinlist[iseg][i].ENR
-            FUE[i, 3] = self.enrpinlist[iseg][i].BAindex
-            FUE[i, 4] = self.enrpinlist[iseg][i].BA
-        return FUE
-
-    def __bamap(self, iseg):
-        """Creating BA map from pinobjects"""
-
-        # Initialize new BA map and fill with zeros
-        LFU = self.bunlist[-1].segments[iseg].data.LFU
-        BA = np.zeros(LFU.shape).astype(float)
-
-        k = 0
-        for i in range(BA.shape[0]):
-            for j in range(BA.shape[1]):
-                if LFU[i, j] > 0:
-                    BA[i, j] = self.pinobjects[iseg][k].BA
-                    k += 1
-        return BA
-
     def replace_original_design(self):
         """replacing original with current design"""
 
@@ -1112,8 +1073,12 @@ class MainWin(QtGui.QMainWindow):
         TIT = []
         caxfiles = []
         for i, segment in enumerate(bundle.segments):
-            LFU.append(self.__lfumap(i))
-            FUE.append(self.__fuemap(i))
+            pins = self.pinobjects[i]
+            enrpins = self.enrpinlist[i]
+            LFU.append(lfu_map(segment, pins))
+            #LFU.append(self.__lfumap(i))
+            FUE.append(fue_map(segment, enrpins))
+            #FUE.append(self.__fuemap(i))
             TIT.append(segment.data.title)
             caxfiles.append(segment.data.caxfile)
 
