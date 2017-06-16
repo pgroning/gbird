@@ -1614,25 +1614,25 @@ class MainWin(QtGui.QMainWindow):
         elif self.bunlist[0].data.fuetype == 'AT11':
             at11(self)
         
-    def startpoint(self, case_id):
-        voi_val = int(self.voi_cbox.currentText())
-        vhi_val = int(self.vhi_cbox.currentText())
-        type_val = str(self.type_cbox.currentText())
-
-        case = self.cas.cases[case_id]
-        if type_val == 'CCl':
-            idx0 = case.findpoint(tfu=293)
-            voi = case.statepts[idx0].voi
-            vhi = case.statepts[idx0].vhi
-            voi_index = [i for i, v in enumerate(self.voilist)
-                         if int(v) == voi][0]
-            vhi_index = [i for i, v in enumerate(self.vhilist)
-                         if int(v) == vhi][0]
-            self.voi_cbox.setCurrentIndex(voi_index)
-            self.vhi_cbox.setCurrentIndex(vhi_index)
-        else:
-            idx0 = case.findpoint(voi=voi_val, vhi=vhi_val)
-        return idx0
+#    def startpoint(self, case_id):
+#        voi_val = int(self.voi_cbox.currentText())
+#        vhi_val = int(self.vhi_cbox.currentText())
+#        type_val = str(self.type_cbox.currentText())
+#
+#        case = self.cas.cases[case_id]
+#        if type_val == 'CCl':
+#            idx0 = case.findpoint(tfu=293)
+#            voi = case.statepts[idx0].voi
+#            vhi = case.statepts[idx0].vhi
+#            voi_index = [i for i, v in enumerate(self.voilist)
+#                         if int(v) == voi][0]
+#            vhi_index = [i for i, v in enumerate(self.vhilist)
+#                         if int(v) == vhi][0]
+#            self.voi_cbox.setCurrentIndex(voi_index)
+#            self.vhi_cbox.setCurrentIndex(vhi_index)
+#        else:
+#            idx0 = case.findpoint(voi=voi_val, vhi=vhi_val)
+#        return idx0
 
 #    def create_main_frame(self):
 #
