@@ -27,7 +27,7 @@ from PyQt4 import QtGui, QtCore
 #    as FigureCanvas
 #from matplotlib.figure import Figure
 #import matplotlib.patches as mpatches
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 from ui import Ui_MainWindow
 from bundle import Bundle
@@ -450,29 +450,29 @@ class MainWin(QtGui.QMainWindow):
         if hasattr(self, "report_dlg"):
             self.report_dlg.update()
 
-    def get_colormap(self, npins, colormap="rainbow"):
-        if colormap == "rainbow":
-            cm = plt.cm.gist_rainbow_r(np.linspace(0, 1, npins))[:,:3]
-            cmap = cm.tolist()
-        elif colormap == "jet":
-            #cm = plt.cm.RdBu_r(np.linspace(0, 1, npins))[:,:3]
-            cm = plt.cm.jet(np.linspace(0, 1, npins))[:,:3]
-            #cm = plt.cm.Spectral_r(np.linspace(0, 1, npins))[:,:3]
-            cmap = cm.tolist()
-        elif colormap == "bmr":
-            n = npins + 1
-            v00 = np.zeros(n)
-            v11 = np.ones(n)
-            v01 = np.linspace(0, 1, n)
-            v10 = v01[::-1]  # revert array
-            # blue -> magenta
-            cm_bm = np.vstack((v01, v00, v11)).transpose()[:-1]
-            # magenta -> red
-            cm_mr = np.vstack((v11, v00, v10)).transpose()
-            cm = np.vstack((cm_bm, cm_mr))
-            ic = np.linspace(0, len(cm) - 1, npins).astype(int).tolist()
-            cmap = [cm[i] for i in ic]
-        return cmap
+#    def get_colormap(self, npins, colormap="rainbow"):
+#        if colormap == "rainbow":
+#            cm = plt.cm.gist_rainbow_r(np.linspace(0, 1, npins))[:,:3]
+#            cmap = cm.tolist()
+#        elif colormap == "jet":
+#            #cm = plt.cm.RdBu_r(np.linspace(0, 1, npins))[:,:3]
+#            cm = plt.cm.jet(np.linspace(0, 1, npins))[:,:3]
+#            #cm = plt.cm.Spectral_r(np.linspace(0, 1, npins))[:,:3]
+#            cmap = cm.tolist()
+#        elif colormap == "bmr":
+#            n = npins + 1
+#            v00 = np.zeros(n)
+#            v11 = np.ones(n)
+#            v01 = np.linspace(0, 1, n)
+#            v10 = v01[::-1]  # revert array
+#            # blue -> magenta
+#            cm_bm = np.vstack((v01, v00, v11)).transpose()[:-1]
+#            # magenta -> red
+#            cm_mr = np.vstack((v11, v00, v10)).transpose()
+#            cm = np.vstack((cm_bm, cm_mr))
+#            ic = np.linspace(0, len(cm) - 1, npins).astype(int).tolist()
+#            cmap = [cm[i] for i in ic]
+#        return cmap
 
     def init_pinobjects(self):
         self.pinobjects = []
@@ -506,7 +506,7 @@ class MainWin(QtGui.QMainWindow):
             enr_levels = FUE[:, 2]
             enr_baindex = FUE[:, 3]
             enr_ba = FUE[:, 4]
-            cmap = self.get_colormap(enr_levels.size)
+            cmap = self.fuelmap.get_colormap(enr_levels.size)
             for i in range(enr_levels.size):
                 enrobj = FuePin(self.ui.axes)
                 enrobj.facecolor = cmap[i]
@@ -615,7 +615,7 @@ class MainWin(QtGui.QMainWindow):
         enrlist = [pin.ENR for pin in self.enrpinlist[case_num]]
         isort = [i for i, e in sorted(enumerate(enrlist), key=lambda x:x[1])]
         
-        cmap = self.get_colormap(len(isort))
+        cmap = self.fuelmap.get_colormap(len(isort))
         pinlist_sorted = []
         for i, j in enumerate(isort):
             pinlist_sorted.append(self.enrpinlist[case_num][j])
@@ -797,7 +797,7 @@ class MainWin(QtGui.QMainWindow):
         
         npins = len(self.pinobjects[iseg])
         #cmap = self.get_colormap(npins, "bmr")
-        cmap = self.get_colormap(npins, "jet")
+        cmap = self.fuelmap.get_colormap(npins, "jet")
 
         if param_str == "ENR":
             v = np.array([pin.ENR for pin in self.pinobjects[iseg]])

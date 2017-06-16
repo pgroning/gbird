@@ -1,5 +1,8 @@
 from pyqt_trace import pyqt_trace as qtrace
+import numpy as np
 import matplotlib.patches as mpatches
+import matplotlib.pyplot as plt
+
 from map_s96 import s96o2
 from map_a10 import a10xm
 from map_a11 import at11
@@ -79,3 +82,26 @@ class FuelMap(object):
         elif self.bunlist[0].data.fuetype == 'AT11':
             at11(self)
 
+    def get_colormap(self, npins, colormap="rainbow"):
+        if colormap == "rainbow":
+            cm = plt.cm.gist_rainbow_r(np.linspace(0, 1, npins))[:,:3]
+            cmap = cm.tolist()
+        elif colormap == "jet":
+            #cm = plt.cm.RdBu_r(np.linspace(0, 1, npins))[:,:3]
+            cm = plt.cm.jet(np.linspace(0, 1, npins))[:,:3]
+            #cm = plt.cm.Spectral_r(np.linspace(0, 1, npins))[:,:3]
+            cmap = cm.tolist()
+        elif colormap == "bmr":
+            n = npins + 1
+            v00 = np.zeros(n)
+            v11 = np.ones(n)
+            v01 = np.linspace(0, 1, n)
+            v10 = v01[::-1]  # revert array
+            # blue -> magenta
+            cm_bm = np.vstack((v01, v00, v11)).transpose()[:-1]
+            # magenta -> red
+            cm_mr = np.vstack((v11, v00, v10)).transpose()
+            cm = np.vstack((cm_bm, cm_mr))
+            ic = np.linspace(0, len(cm) - 1, npins).astype(int).tolist()
+            cmap = [cm[i] for i in ic]
+        return cmap
