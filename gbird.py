@@ -39,7 +39,7 @@ from pin import FuePin, EnrDialog
 from pincount import PinCount
 from casinp import Casinp
 from progbar import ProgressBar
-from threads import ImportThread, LoadPickleThread
+from threads import ImportThread, LoadPickleThread, SavePickleThread
 from threads import QuickCalcThread, RunC4Thread
 from fuelmap import FuelMap
 
@@ -114,7 +114,8 @@ class MainWin(QtGui.QMainWindow):
                      self.__load_pickle_finished)
             self.thread.start()
 
-            self.statusBar().showMessage('Loading project from %s' % filename)
+            self.statusBar().showMessage('Loading project from file %s' 
+                                         % filename)
 
             # Save default path to config file
             path = os.path.split(filename)[0]
@@ -256,12 +257,16 @@ class MainWin(QtGui.QMainWindow):
             fname_split =  os.path.splitext(filename)
             if fname_split[1] != ".gbi":
                 filename = filename + ".gbi"  # add file extension
-            with open(filename, 'wb') as fp:
-                pickle.dump(self.params, fp, 1)
-                pickle.dump(self.bunlist, fp, 1)
-                if hasattr(self, "biascalc"):
-                    pickle.dump(self.biascalc, fp, 1)
-            print "Project saved to file " + filename
+            self.thread = SavePickleThread(self, filename)
+            self.connect(self.thread, QtCore.SIGNAL('finished()'), 
+                         self.__save_pickle_finished)
+            self.thread.start()
+            self.statusBar().showMessage('Saving project to file %s' 
+                                         % filename)
+            
+    def __save_pickle_finished(self):
+        print "pickle file saved"
+        self.statusBar().showMessage("Done!", 2000)
 
     def saveFigure(self):
         """Save fuel map to .png format"""

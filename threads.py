@@ -42,7 +42,6 @@ class ImportThread(QtCore.QThread):
             self.parent.biascalc = biascalc
 
 
-
 class LoadPickleThread(QtCore.QThread):
     def __init__(self, parent, filename):
         QtCore.QThread.__init__(self)
@@ -65,6 +64,26 @@ class LoadPickleThread(QtCore.QThread):
                 except EOFError:  # biascalc exists?
                     pass
             
+
+class SavePickleThread(QtCore.QThread):
+    def __init__(self, parent, filename):
+        QtCore.QThread.__init__(self)
+        self.parent = parent
+        self.filename = filename
+        self._kill = False
+
+    def __del__(self):
+        self.wait()
+
+    def run(self):
+        if not self._kill:
+            with open(self.filename, 'wb') as fp:
+                pickle.dump(self.parent.params, fp, 1)
+                pickle.dump(self.parent.bunlist, fp, 1)
+                if hasattr(self, "biascalc"):
+                    pickle.dump(self.parent.biascalc, fp, 1)
+           
+            print "Project saved to file " + self.filename
 
 class QuickCalcThread(QtCore.QThread):
     def __init__(self, parent):
