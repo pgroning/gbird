@@ -66,7 +66,6 @@ class LoadPickleThread(QtCore.QThread):
                     pass
             
 
-
 class QuickCalcThread(QtCore.QThread):
     def __init__(self, parent):
         QtCore.QThread.__init__(self)
@@ -147,9 +146,12 @@ class RunC4Thread(QtCore.QThread):
             chanbow = self.parent.ui.chanbow_sbox.value() / 10  # mm -> cm
             nsegs = len(self.bundle.segments)
             for iseg in xrange(nsegs):
-                LFU = self.lfumap(iseg)
-                FUE = self.fuemap(iseg)
-                BA = self.bamap(iseg)
+                segment = self.bundle.segments[iseg]
+                pins = self.parent.pinobjects[iseg]
+                enrpins = self.parent.enrpinlist[iseg]
+                LFU = lfu_map(segment, pins)
+                FUE = fue_map(segment, enrpins)
+                BA = ba_map(segment, pins)
                 self.bundle.segments[iseg].set_data(LFU, FUE, BA, voi, chanbow)
             
             # set calc. parameters
@@ -164,47 +166,6 @@ class RunC4Thread(QtCore.QThread):
                                  gamlib=gamlib, grid=grid, keepfiles=keepfiles)
             self.bundle.new_btf()
             self.parent.bunlist.append(self.bundle)
-
-    def lfumap(self, iseg):
-        """Creating FUE map from pinobjects"""
-
-        LFU = getattr(self.bundle.segments[iseg].data, "LFU")
-        LFU_new = np.zeros(LFU.shape).astype(int)
-        k = 0
-        for i in xrange(LFU.shape[0]):
-            for j in xrange(LFU.shape[1]):
-                if LFU[i, j] > 0:
-                    LFU_new[i, j] = getattr(self.parent.pinobjects[iseg][k], 
-                                          "LFU")
-                    k += 1
-        return LFU_new
-
-    def fuemap(self, iseg):
-        """Creating FUE map from enr level pins"""
-
-        FUE = getattr(self.bundle.segments[iseg].data, "FUE")
-        nfue = len(self.parent.enrpinlist[iseg])
-        FUE_new = np.zeros((nfue, FUE.shape[1])).astype(float)
-        for i in xrange(nfue):
-            FUE_new[i, 0] = i + 1
-            FUE_new[i, 1] = self.parent.enrpinlist[iseg][i].DENS
-            FUE_new[i, 2] = self.parent.enrpinlist[iseg][i].ENR
-            FUE_new[i, 3] = self.parent.enrpinlist[iseg][i].BAindex
-            FUE_new[i, 4] = self.parent.enrpinlist[iseg][i].BA
-        return FUE_new
-        
-    def bamap(self, iseg):
-        """Creating BA map from pinobjects"""
-
-        LFU = getattr(self.bundle.segments[iseg].data, "LFU")
-        BA = np.zeros(LFU.shape).astype(float)
-        k = 0
-        for i in xrange(BA.shape[0]):
-            for j in xrange(BA.shape[1]):
-                if LFU[i, j] > 0:
-                    BA[i, j] = getattr(self.parent.pinobjects[iseg][k], "BA")
-                    k += 1
-        return BA
 
 
 def lfu_map(segment, pins):
