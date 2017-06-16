@@ -206,3 +206,43 @@ class RunC4Thread(QtCore.QThread):
                     k += 1
         return BA
 
+
+def lfu_map(segment, pins):
+    """Creating LFU map from pinobjects"""
+    
+    LFU = getattr(segment.data, "LFU")
+    LFU_new = np.zeros(LFU.shape).astype(int)
+    k = 0
+    for i in xrange(LFU.shape[0]):
+        for j in xrange(LFU.shape[1]):
+            if LFU[i, j] > 0:
+                LFU_new[i, j] = getattr(pins[k], "LFU")
+                k += 1
+    return LFU_new
+
+def fue_map(segment, enrpins):
+    """Creating FUE map from enr level pins"""
+    
+    FUE = getattr(segment.data, "FUE")
+    nfue = len(enrpins)
+    FUE_new = np.zeros((nfue, FUE.shape[1])).astype(float)
+    for i in xrange(nfue):
+        FUE_new[i, 0] = i + 1
+        FUE_new[i, 1] = enrpins[i].DENS
+        FUE_new[i, 2] = enrpins[i].ENR
+        FUE_new[i, 3] = enrpins[i].BAindex
+        FUE_new[i, 4] = enrpins[i].BA
+    return FUE_new
+
+def ba_map(segment, pins):
+    """Creating BA map from pinobjects"""
+    
+    LFU = getattr(segment.data, "LFU")
+    BA = np.zeros(LFU.shape).astype(float)
+    k = 0
+    for i in xrange(BA.shape[0]):
+        for j in xrange(BA.shape[1]):
+            if LFU[i, j] > 0:
+                BA[i, j] = getattr(pins[k], "BA")
+                k += 1
+    return BA
