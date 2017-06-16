@@ -39,7 +39,8 @@ from pin import FuePin, EnrDialog
 from pincount import PinCount
 from casinp import Casinp
 from progbar import ProgressBar
-from threads import ImportThread, QuickCalcThread, RunC4Thread
+from threads import ImportThread, LoadPickleThread
+from threads import QuickCalcThread, RunC4Thread
 from fuelmap import FuelMap
 
 
@@ -106,38 +107,58 @@ class MainWin(QtGui.QMainWindow):
                                                              path_default,
                                                              file_choices))
         if filename:
-            self.setCursor(QtCore.Qt.WaitCursor)
+            self.clear_data()
+
+            self.thread = LoadPickleThread(self, filename)
+            self.connect(self.thread, QtCore.SIGNAL('finished()'), 
+                     self.__load_pickle_finished)
+            self.thread.start()
+
+            self.statusBar().showMessage('Load project from %s' % filename)
+            #self.setCursor(QtCore.Qt.WaitCursor)
+
             # Save default path to config file
             path = os.path.split(filename)[0]
             self.settings.beginGroup("PATH")
             self.settings.setValue("path_default", QtCore.QString(path))
             self.settings.endGroup()
 
-            filext = os.path.splitext(filename)[1]
-            self.load_pickle(filename)
-            self.chanbow_sbox_update()
-            self.widgets_setenabled()
-            self.setCursor(QtCore.Qt.ArrowCursor)
-                    
-    def load_pickle(self, filename):
-        """Load bundle object from pickle file"""
-
-        self.statusBar().showMessage('Load project from %s' % filename, 2000)
-
-        print "Loading data from file " + filename
-        self.clear_data()
-
-        with open(filename, 'rb') as fp:
-            self.params = pickle.load(fp)
-            self.bunlist = pickle.load(fp)
-            try:
-                self.biascalc = pickle.load(fp)
-            except EOFError:  # biascalc exists?
-                pass
-
+            #filext = os.path.splitext(filename)[1]
+            #self.load_pickle(filename)
+            #self.chanbow_sbox_update()
+            #self.widgets_setenabled()
+            #self.setCursor(QtCore.Qt.ArrowCursor)
+ 
+    def __load_pickle_finished(self):
+        print "load pickle finished"
         self.ibundle = len(self.bunlist) - 1
         self.init_pinobjects()
         self.init_cboxes()
+
+        self.chanbow_sbox_update()
+        self.widgets_setenabled()
+        self.__quickcalc_setenabled()
+        #self.setCursor(QtCore.Qt.ArrowCursor)
+                   
+#    def load_pickle(self, filename):
+#        """Load bundle object from pickle file"""
+#
+#        #self.statusBar().showMessage('Load project from %s' % filename, 2000)
+#
+#        #print "Loading data from file " + filename
+#        #self.clear_data()
+#
+#        with open(filename, 'rb') as fp:
+#            self.params = pickle.load(fp)
+#            self.bunlist = pickle.load(fp)
+#            try:
+#                self.biascalc = pickle.load(fp)
+#            except EOFError:  # biascalc exists?
+#                pass
+#
+#        self.ibundle = len(self.bunlist) - 1
+#        self.init_pinobjects()
+#        self.init_cboxes()
  
     def read_cax(self, filename):
         """Importing data from a single cax file"""
