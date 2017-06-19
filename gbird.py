@@ -27,23 +27,21 @@ from ui import Ui_MainWindow
 from bundle import Bundle
 from btf import Btf
 from plot import PlotWin
-from dlg_cascalc import CasDialog, CasRunDialog
-from dlg_pertcalc import PertDialog
-from dlg_bundle import BundleDialog
-from dlg_bundle import SegmentDialog
-from dlg_report import ReportDialog
-from dlg_findpoint import FindDialog
-from dlg_enrichment import EnrichmentDialog
-from dlg_egv import EgvDialog
+
+from dialogs import BundleDialog, SegmentDialog
+from dialogs import CasDialog, CasRunDialog, PertDialog
+from dialogs import ReportDialog
+from dialogs import FindDialog
+from dialogs import EgvDialog
+from dialogs import ProgressBar
+
 from pin import FuePin, EnrDialog
 from pincount import PinCount
 from casinp import Casinp
-from progbar import ProgressBar
 from threads import ImportThread, LoadPickleThread, SavePickleThread
 from threads import QuickCalcThread, RunC4Thread
 from threads import lfu_map, fue_map
 from fuelmap import FuelMap
-
 
 
 class Data(object):

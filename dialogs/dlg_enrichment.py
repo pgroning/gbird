@@ -4,6 +4,7 @@ import numpy as np
 from PyQt4 import QtGui, QtCore
 
 from pin import FuePin
+from fuelmap import FuelMap
 
 
 class Data(object):
@@ -277,7 +278,7 @@ class EnrichmentDialog(QtGui.QDialog):
         # Create new enrpin list
         enrpinlist = []
         nrows = len(self.data.enr)
-        cmap = self.parent.get_colormap(nrows)
+        cmap = FuelMap().get_colormap(nrows)
         for i in range(nrows):
             enrpin = FuePin(self.parent.ui.axes)
             enrpin.facecolor = cmap[i]

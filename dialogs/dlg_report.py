@@ -50,7 +50,7 @@ class ReportDialog(QtGui.QDialog):
     def insert_text(self):
 
         ibundle = self.parent.ibundle
-        iseg = int(self.parent.case_cbox.currentIndex())
+        iseg = int(self.parent.ui.case_cbox.currentIndex())
         bundle = self.parent.bunlist[ibundle]
         segdata = bundle.segments[iseg].data
 
