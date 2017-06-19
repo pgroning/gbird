@@ -12,12 +12,13 @@ import time
 import numpy as np
 from multiprocessing import Pool
 
-from btf_opt2 import btf_opt2
-from btf_opt3 import btf_opt3
-# from lib.btf_opt2 import btf_opt2
-from btf_a10xm import btf_a10xm
-from btf_a10b import btf_a10b
-from btf_at11 import btf_at11
+from lib import btf_a10b, btf_a10xm, btf_at11, btf_opt2, btf_opt3
+
+#from btf_opt2 import btf_opt2
+#from btf_opt3 import btf_opt3
+#from btf_a10xm import btf_a10xm
+#from btf_a10b import btf_a10b
+#from btf_at11 import btf_at11
 
 # sys.path.append('lib/')
 # import libADDC
