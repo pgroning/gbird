@@ -12,7 +12,7 @@ import re
 class opt3_defaults(object):
   """ store default-data for opt3 """
   def __init__(self,verbose = False):
-    self.def_file = os.path.dirname(__file__) + "/lib/opt3.defaults"
+    self.def_file = os.path.dirname(__file__) + "/opt3.defaults"
     self.read_defaults(verbose = verbose)
     
   def read_defaults(self,verbose=False):
