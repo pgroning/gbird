@@ -108,7 +108,8 @@ class Ui_MainWindow(object):
         new_icon = "new-icon_32x32"
         text = "&New..."
         tip = "Create new bundle"
-        args = (text, new_icon, tip, parent.open_bundle_dlg)
+        shortcut = "Ctrl+N"
+        args = (text, new_icon, tip, parent.open_bundle_dlg, shortcut)
         self.new_action = self.__create_action(*args)
         file_menu.addAction(self.new_action)
         #parent.menu_actions.append(new_action)
@@ -116,7 +117,8 @@ class Ui_MainWindow(object):
         file_icon = "open-file-icon_32x32"
         text = "&Open..."
         tip = "Open file"
-        args = (text, file_icon, tip, parent.openFile)
+        shortcut = "Ctrl+O"
+        args = (text, file_icon, tip, parent.openFile, shortcut)
         self.file_action = self.__create_action(*args)
         file_menu.addAction(self.file_action)
         #parent.menu_actions.append(file_action)
@@ -159,7 +161,7 @@ class Ui_MainWindow(object):
         text = "&Quit"
         tip = "Exit application"
         shortcut = "Ctrl+Q"
-        args = (text, quit_icon, tip, parent.close, False, shortcut)
+        args = (text, quit_icon, tip, parent.close, shortcut)
         self.quit_action = self.__create_action(*args)
         file_menu.addAction(self.quit_action)
         #parent.menu_actions.append(quit_action)
@@ -196,7 +198,7 @@ class Ui_MainWindow(object):
         text = "Increase enr"
         tip = "Increase enrichment"
         shortcut = QtCore.Qt.Key_Plus
-        args = (text, plus_icon, tip, parent.enr_add, False, shortcut)
+        args = (text, plus_icon, tip, parent.enr_add, shortcut)
         self.increase_enr_action = self.__create_action(*args)
         edit_menu.addAction(self.increase_enr_action)
         self.menu_actions.append(self.increase_enr_action)
@@ -205,7 +207,7 @@ class Ui_MainWindow(object):
         text = "Decrease enr"
         tip = "Decrease enrichment"
         shortcut = QtCore.Qt.Key_Minus
-        args = (text, minus_icon, tip, parent.enr_sub, False, shortcut)
+        args = (text, minus_icon, tip, parent.enr_sub, shortcut)
         self.decrease_enr_action = self.__create_action(*args)
         edit_menu.addAction(self.decrease_enr_action)
         self.menu_actions.append(self.decrease_enr_action)
@@ -318,7 +320,7 @@ class Ui_MainWindow(object):
         text = "Show color map"
         tip = "Show background color map"
         checkable = True
-        args = (text, icon, tip, parent.toggle_pin_bgcolors, checkable)
+        args = (text, icon, tip, parent.toggle_pin_bgcolors, None, checkable)
         parent.show_cmap = self.__create_action(*args)
         tools_menu.addAction(parent.show_cmap)
         self.menu_actions.append(parent.show_cmap)
@@ -327,7 +329,7 @@ class Ui_MainWindow(object):
         text = "Track max pins"
         tip = "Mark pins with highest value"
         checkable = True
-        args = (text, icon, tip, parent.toggle_maxpins, checkable)
+        args = (text, icon, tip, parent.toggle_maxpins, None, checkable)
         parent.track_maxpin = self.__create_action(*args)
         tools_menu.addAction(parent.track_maxpin)
         self.menu_actions.append(parent.track_maxpin)
@@ -340,7 +342,7 @@ class Ui_MainWindow(object):
         text = "&Quick calc"
         tip = "Run quick calc"
         shortcut = "F9"
-        args = (text, icon, tip, parent.quick_calc, False, shortcut)
+        args = (text, icon, tip, parent.quick_calc, shortcut)
         self.quickcalc_action = self.__create_action(*args)
         self.quickcalc_action.setEnabled(False)
         run_menu.addAction(self.quickcalc_action)
@@ -374,7 +376,7 @@ class Ui_MainWindow(object):
 
         color_icon = "color-icon_32x32"
         text = "Show color map"
-        args = (text, color_icon, text, self.parent.toggle_cmap, True)
+        args = (text, color_icon, text, self.parent.toggle_cmap, False, True)
         self.parent.colorAction = self.__create_action(*args)
         self.menu_actions.append(self.parent.colorAction)
         toolbar.addAction(self.parent.colorAction)
@@ -395,7 +397,7 @@ class Ui_MainWindow(object):
         
         
     def __create_action(self, text, icon=None, tip=None, slot=None,
-                                checkable=False, shortcut=None):
+                        shortcut=None, checkable=False):
         
         action = QtGui.QAction(text, self.parent)
         if icon is not None:
