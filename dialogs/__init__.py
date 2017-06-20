@@ -1,5 +1,5 @@
 from dlg_bundle import BundleDialog, SegmentDialog
-from dlg_enrichment import EnrichmentDialog
+from dlg_enrichment import EnrichmentDialog, EnrDialog
 from dlg_cascalc import CasDialog, CasRunDialog
 from dlg_pertcalc import PertDialog
 from dlg_report import ReportDialog

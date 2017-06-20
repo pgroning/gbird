@@ -108,22 +108,22 @@ class EnrichmentDialog(QtGui.QDialog):
         self.connect(self.reset_button, QtCore.SIGNAL('clicked()'), 
                      self.reset_action)
 
-        add_icon = self.appdir + "icons/add-icon_32x32.png"
+        add_icon = self.parent.appdir + "icons/add-icon_32x32.png"
         addRowAction = QtGui.QAction(QtGui.QIcon(add_icon),
                                       'Add row...', self)
         addRowAction.triggered.connect(self.add_row_action)
         
-        delete_icon = self.appdir + "icons/delete3-icon_32x32.png"
+        delete_icon = self.parent.appdir + "icons/delete3-icon_32x32.png"
         deleteRowAction = QtGui.QAction(QtGui.QIcon(delete_icon),
                                          'Delete row', self)
         deleteRowAction.triggered.connect(self.delete_row_action)
 
-        arrow_up_icon = self.appdir + "icons/arrow-up-icon_32x32.png"
+        arrow_up_icon = self.parent.appdir + "icons/arrow-up-icon_32x32.png"
         moveUpAction = QtGui.QAction(QtGui.QIcon(arrow_up_icon),
                                      'Move selected cells up', self)
         moveUpAction.triggered.connect(self.move_up_action)
         
-        arrow_down_icon = self.appdir + "icons/arrow-down-icon_32x32.png"
+        arrow_down_icon = self.parent.appdir + "icons/arrow-down-icon_32x32.png"
         moveDownAction = QtGui.QAction(QtGui.QIcon(arrow_down_icon),
                                        'Move selected cells down', self)
         moveDownAction.triggered.connect(self.move_down_action)
@@ -406,3 +406,68 @@ class EnrichmentDialog(QtGui.QDialog):
         nrows = self.table_view.model().rowCount()
         self.table_view.model().removeRows(0, nrows)
 
+
+
+class EnrDialog(QtGui.QDialog):
+    def __init__(self, parent, mode="edit"):
+        # QDialog.__init__(self, parent)
+        QtGui.QDialog.__init__(self)
+        self.parent = parent
+        self.mode = mode
+
+        # self.setWindowTitle("Window title")
+        # set x-pos relative to cursor position
+        # xpos = QCursor.pos().x() - 250
+        # set dialog pos relative to main window
+        xpos = parent.pos().x() + parent.size().width() / 2
+        ypos = parent.pos().y() + parent.size().height() / 2
+        self.setGeometry(QtCore.QRect(xpos, ypos, 150, 120))
+
+        case_num = int(parent.ui.case_cbox.currentIndex())
+        ipin = parent.pinselection_index
+        enr = parent.enrpinlist[case_num][ipin].ENR
+        ba = parent.enrpinlist[case_num][ipin].BA
+        ba = 0 if np.isnan(ba) else ba
+        if mode == "edit":
+            self.setWindowTitle("Edit enrichment")
+        elif mode == "add":
+            self.setWindowTitle("Add enrichment")
+        self.enr_text = QtGui.QLineEdit("%.2f" % enr)
+        dens = parent.enrpinlist[case_num][ipin].DENS
+        self.dens_text = QtGui.QLineEdit("%.3f" % dens)
+        self.ba_text = QtGui.QLineEdit("%.2f" % ba)
+        validator = QtGui.QDoubleValidator(0, 9.99, 2, self)
+        self.enr_text.setValidator(validator)
+        self.ba_text.setValidator(validator)
+        validator = QtGui.QDoubleValidator(0, 9.99, 3, self)
+        self.dens_text.setValidator(validator)
+
+        flo = QtGui.QFormLayout()
+        flo.addRow("%U-235:", self.enr_text)
+        flo.addRow("Density (g/cm-3):", self.dens_text)
+        flo.addRow("%Gd:", self.ba_text)
+
+        hbox = QtGui.QHBoxLayout()
+        self.ok_button = QtGui.QPushButton("Ok")
+        self.cancel_button = QtGui.QPushButton("Cancel")
+        hbox.addWidget(self.cancel_button)
+        hbox.addWidget(self.ok_button)
+        self.connect(self.cancel_button, QtCore.SIGNAL('clicked()'),
+                     self.close)
+        self.connect(self.ok_button, QtCore.SIGNAL('clicked()'), self.action)
+
+        vbox = QtGui.QVBoxLayout()
+        vbox.addLayout(flo)
+        vbox.addStretch()
+        vbox.addLayout(hbox)
+        self.setLayout(vbox)
+
+    def action(self):
+        self.close()
+        self.enr = self.enr_text.text().toDouble()[0]
+        self.dens = self.dens_text.text().toDouble()[0]
+        self.ba = self.ba_text.text().toDouble()[0]
+        if self.mode == "edit":
+            self.parent.enrpin_edit_callback()
+        elif self.mode == "add":
+            self.parent.enrpin_add_callback()

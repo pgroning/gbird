@@ -99,7 +99,7 @@ class EnrDialog(QtGui.QDialog):
         ypos = parent.pos().y() + parent.size().height() / 2
         self.setGeometry(QtCore.QRect(xpos, ypos, 150, 120))
 
-        case_num = int(parent.case_cbox.currentIndex())
+        case_num = int(parent.ui.case_cbox.currentIndex())
         ipin = parent.pinselection_index
         enr = parent.enrpinlist[case_num][ipin].ENR
         ba = parent.enrpinlist[case_num][ipin].BA
