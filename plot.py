@@ -35,10 +35,13 @@ class PlotWin(QtGui.QMainWindow):
         self.setWindowTitle('Plot Window')
         # self.move(600,300)
 
+        # Initial window size/pos last saved
+        wsize = parent.config.plotwin_size
+        wpos = parent.config.plotwin_pos
         self.settings = QtCore.QSettings("greenbird")
         self.settings.beginGroup("PlotWindow")
-        self.resize(self.settings.value("size", QtCore.QVariant(QtCore.QSize(800, 650))).toSize())
-        self.move(self.settings.value("pos", QtCore.QVariant(QtCore.QPoint(600, 300))).toPoint())
+        self.resize(self.settings.value("size", QtCore.QVariant(QtCore.QSize(*wsize))).toSize())
+        self.move(self.settings.value("pos", QtCore.QVariant(QtCore.QPoint(*wpos))).toPoint())
         self.settings.endGroup()
                 
         self.create_menu()

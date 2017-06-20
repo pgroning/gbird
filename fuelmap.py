@@ -12,7 +12,7 @@ from map_a11 import at11
 class FuelMap(object):
     """Draw fuel map"""
 
-    def __init__(self, parent=None):  # parent = self.ui
+    def __init__(self, parent=None):
         self.parent = parent
         
     def draw(self):
@@ -22,7 +22,9 @@ class FuelMap(object):
         self.enrpinlist = self.parent.enrpinlist
 
         # Background color
-        self.ui.fig.set_facecolor("#CFEECF")  # Tea green
+        bg_color = self.parent.config.background_color
+        self.ui.fig.set_facecolor(bg_color)
+        #self.ui.fig.set_facecolor("#CFEECF")  # Tea green
         
         # Draw outer rectangle
         rect = mpatches.Rectangle((0.035, 0.035), 0.935, 0.935,

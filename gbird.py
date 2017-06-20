@@ -27,10 +27,11 @@ from ui import Ui_MainWindow
 from bundle import Bundle
 from btf import Btf
 from plot import PlotWin
-from pin import FuePin #, EnrDialog
+from pin import FuePin
 from pincount import PinCount
 from casinp import Casinp
 from fuelmap import FuelMap
+from fileio import DefaultFileParser
 
 from dialogs import BundleDialog, SegmentDialog, CasDialog, CasRunDialog, \
     PertDialog, ReportDialog, FindDialog, EgvDialog, EnrichmentDialog, \
@@ -58,20 +59,22 @@ class MainWin(QtGui.QMainWindow):
         
         self.setWindowTitle("Greenbird v" + self.appversion)
 
-        # self.resize(1100,620)
-        # self.move(200,200)
-
         # Init empty class to hold parameters
         self.params = Data()
 
+        # Read default configuration from file
+        self.config = DefaultFileParser(self.appdir + "gb.defaults")
+
         # Initial window size/pos last saved
+        wsize = self.config.mainwin_size
+        wpos = self.config.mainwin_pos
         self.settings = QtCore.QSettings("greenbird")
         self.settings.beginGroup("MainWindow")
         self.resize(self.settings.value("size", QtCore.
-                                        QVariant(QtCore.QSize(1100, 620))).
+                                        QVariant(QtCore.QSize(*wsize))).
                     toSize())
         self.move(self.settings.value("pos", QtCore.
-                                      QVariant(QtCore.QPoint(200, 200))).
+                                      QVariant(QtCore.QPoint(*wpos))).
                   toPoint())
         self.settings.endGroup()
 

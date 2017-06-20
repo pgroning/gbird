@@ -1,5 +1,40 @@
+from pyqt_trace import pyqt_trace as qtrace
+
 import ConfigParser
 import re
+
+
+class DefaultFileParser(object):
+    def __init__(self, filename=None):
+        if filename is not None:
+            self.read(filename)
+
+    def read(self, filename):
+        self.config = ConfigParser.SafeConfigParser()
+        self.config.read(filename)
+        
+        split_str = self.config.get("WIN", "mainwin_size").split(",")
+        self.mainwin_size = map(int, split_str)
+        
+        split_str = self.config.get("WIN", "mainwin_pos").split(",")
+        self.mainwin_pos = map(int, split_str)
+
+        split_str = self.config.get("WIN", "plotwin_size").split(",")
+        self.plotwin_size = map(int, split_str)
+        
+        split_str = self.config.get("WIN", "plotwin_pos").split(",")
+        self.plotwin_pos = map(int, split_str)
+
+        self.background_color = self.config.get("FUE", "background_color")
+
+        self.c4exe = self.config.get("C4", "cmd")
+        self.libdir = self.config.get("C4", "libdir")
+        self.default_version = self.config.get("C4", "default_version")
+        self.default_neulib = self.config.get("C4", "default_neulib")
+        self.default_gamlib = self.config.get("C4", "default_gamlib")
+        self.grid_que = self.config.get("C4", "grid_que")
+
+
 
 class InpFileParser(object):
     def __init__(self, parent):

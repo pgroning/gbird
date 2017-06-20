@@ -1,12 +1,11 @@
 [WIN]
-mainwin_size = 1100, 620
+mainwin_size = 1200, 680
 mainwin_pos = 200, 200
 plotwin_size = 800, 650
 plotwin_pos = 600, 300
 
 [FUE]
-fuelist = A10XM, A10B, AT11, OPT2, OPT3
-background_color = #CFEECF
+background_color = #CFEECF  ; Tea green
 
 [C4]
 cmd = cas4 -e
@@ -14,5 +13,4 @@ libdir = /home/prog/prod/CMSCODES/CasLib/library/
 default_version = 2.10.21P_VAT_1.3
 default_neulib = j20200
 default_gamlib = galb418
-grid = all.q@wrath, all.q@envy, all.q@pride
-
+grid_que = all.q@wrath,all.q@envy,all.q@pride

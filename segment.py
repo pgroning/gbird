@@ -28,12 +28,7 @@ import uuid  # used for random generated file names
 import shlex  # used for splitting subprocess call argument string into a list
 import copy
 
-
-'''
-#from multiprocessing import Pool
-#from btf import btf
-#from pyqt_trace import pyqt_trace
-'''
+from fileio import DefaultFileParser
 
 
 class DataStruct(object):
@@ -49,6 +44,8 @@ class Segment(object):
         self.appdir = os.path.split(path)[0] + os.sep
         
         self.data = DataStruct()
+        self.config = DefaultFileParser(self.appdir + "gb.defaults")
+
         #self.states = []
         #self.states.append(DataStruct())
         # self.add_calc()
@@ -550,18 +547,21 @@ class Segment(object):
         
         c4inp = file_base_name + ".inp"
         # C4 executable
-        c4exe = "cas4 -e"
-        # c4exe = "/home/prog/prod/CMSCODES/bin/cas4 -e"
+        c4exe = self.config.c4exe
+        #c4exe = "cas4 -e"
 
-        libdir = "/home/prog/prod/CMSCODES/CasLib/library/"
+        libdir = self.config.libdir
+        #libdir = "/home/prog/prod/CMSCODES/CasLib/library/"
         
         if not c4ver:
-            c4ver = "2.10.21P_VAT_1.3"
+            c4ver = self.config.default_version
+            #c4ver = "2.10.21P_VAT_1.3"
         if not neulib:
-            #neulib = "e4lbl70"
-            neulib = "j20200"
+            neulib = self.config.default_neulib
+            #neulib = "j20200"
         if not gamlib:
-            gamlib = "galb418"
+            gamlib = self.config.default_gamlib
+            #gamlib = "galb418"
 
         outdir = os.path.split(file_base_name)[0]
         
@@ -574,7 +574,9 @@ class Segment(object):
         arglist = shlex.split('linrsh ' + c4exe + cmd)
         # specify grid que
         arglist.insert(1, '-q')
-        arglist.insert(2, 'all.q@wrath,all.q@envy,all.q@pride')
+        grid_que = self.config.grid_que
+        arglist.insert(2, grid_que)
+        #arglist.insert(2, 'all.q@wrath,all.q@envy,all.q@pride')
         # arglist[0] = 'linrsh -q all.q@wrath'
         # fout = open('c4.stdout', 'wb')
         fout = open('/dev/null', 'wb')
