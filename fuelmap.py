@@ -24,7 +24,6 @@ class FuelMap(object):
         # Background color
         bg_color = self.parent.config.background_color
         self.ui.fig.set_facecolor(bg_color)
-        #self.ui.fig.set_facecolor("#CFEECF")  # Tea green
         
         # Draw outer rectangle
         rect = mpatches.Rectangle((0.035, 0.035), 0.935, 0.935,
@@ -73,6 +72,31 @@ class FuelMap(object):
         poly.set_closed(False)
         self.ui.axes.add_patch(poly)
 
+        
+        # Draw enrichment level pins
+        case_num = int(self.ui.case_cbox.currentIndex())
+        
+        pin_radius = 0.02268
+        pin_delta = 0.063495
+
+        x = 1.06  # horizontal position of the circles
+        num_levels = len(self.enrpinlist[case_num])
+        y0 = 0.5 + (num_levels-1)/2 * pin_delta
+        for i in range(num_levels):
+            y = y0 - i*pin_delta  # vertical positions
+            # y = 0.95 - i*pin_delta  # vertical positions
+            self.enrpinlist[case_num][i].set_circle(x, y, pin_radius)
+            enr = self.enrpinlist[case_num][i].ENR
+            self.ui.axes.text(x + 0.05, y, "%.2f" % enr, fontsize=8)
+            ba = self.enrpinlist[case_num][i].BA
+            if np.isnan(ba) or ba < 0.00001:  # no BA pin
+                self.enrpinlist[case_num][i].set_text(str(i+1))
+            else:
+                self.enrpinlist[case_num][i].set_text('Ba')
+                self.ui.axes.text(x + 0.05, y - 0.025, "%.2f" % ba, fontsize=8)
+            self.ui.axes.add_patch(self.enrpinlist[case_num][i].circle)
+        
+        # ----------------------
         if self.bunlist[0].data.fuetype == 'OPT2':
             s96o2(self)
         elif self.bunlist[0].data.fuetype == 'OPT3':
