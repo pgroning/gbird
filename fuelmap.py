@@ -3,10 +3,7 @@ import numpy as np
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 
-from map_s96 import s96o2
-from map_a10 import a10xm
-from map_a11 import at11
-
+from maps import s96o2, a10xm, at11
 
 
 class FuelMap(object):
