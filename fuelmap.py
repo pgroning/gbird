@@ -72,7 +72,6 @@ class FuelMap(object):
         poly.set_closed(False)
         self.ui.axes.add_patch(poly)
 
-        
         # Draw enrichment level pins
         case_num = int(self.ui.case_cbox.currentIndex())
         
@@ -84,7 +83,6 @@ class FuelMap(object):
         y0 = 0.5 + (num_levels-1)/2 * pin_delta
         for i in range(num_levels):
             y = y0 - i*pin_delta  # vertical positions
-            # y = 0.95 - i*pin_delta  # vertical positions
             self.enrpinlist[case_num][i].set_circle(x, y, pin_radius)
             enr = self.enrpinlist[case_num][i].ENR
             self.ui.axes.text(x + 0.05, y, "%.2f" % enr, fontsize=8)

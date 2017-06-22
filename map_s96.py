@@ -1,3 +1,4 @@
+from pyqt_trace import pyqt_trace as qtrace
 import matplotlib.patches as mpatches
 import numpy as np
 
@@ -55,20 +56,21 @@ def s96o2(self):
     rect = mpatches.Rectangle((-d/2, -d/2), d, d,
                               fc=(0.8, 0.898, 1), ec=(0.3, 0.3, 0.3))
     rect.set_linewidth(2.0)
-    # 1. Translate rectangle along x-axis a distance 1/sqrt(2).
+    # 1. Translate rectangle along x-axis.
     # 2. Rotate 45 degrees
-    rot45 = mpatches.transforms.Affine2D().rotate_deg(45) + self.ui.axes.transData
-    x0 = 0.70711 + 0.0055
+    rot45 = (mpatches.transforms.Affine2D().rotate_deg(45) 
+             + self.ui.axes.transData)
+    x0 = 0.71261  # 1/sqrt(2) + 0.0055
     transrot = mpatches.transforms.Affine2D().translate(x0, 0.0) + rot45
     rect.set_transform(transrot)
 
     # List of pin coordinates
-    self.xlist = ('1','2','3','4','5','6','7','8','9','10')
-    self.ylist  = ('A','B','C','D','E','F','G','H','I','J')
-    
-    # Draw pin circles
     case_num = int(self.ui.case_cbox.currentIndex())
     npst = self.bunlist[0].segments[case_num].data.npst
+    xc = [str(i) for i in range(1, npst + 1)]
+    yc = [chr(i) for i in range(ord("A"), ord("A") + npst)]
+    
+    # Draw pin circles
     LFU = self.bunlist[0].segments[case_num].data.LFU
     # Remove water cross rows and columns
     LFU = np.delete(LFU, (5), axis=0) # Delete row 6
@@ -86,9 +88,8 @@ def s96o2(self):
             if i > 4: y -= 0.04
             if LFU[i,j] > 0:
                 self.pinobjects[case_num][k].set_circle(x, y, pin_radius,
-                                                        (1,1,1))
-                self.pinobjects[case_num][k].coord = (self.ylist[i]
-                                                      + self.xlist[j])
+                                                        (1, 1, 1))
+                self.pinobjects[case_num][k].coord = (yc[i] + xc[j])
                 self.pinobjects[case_num][k].set_text()
                 self.ui.axes.add_patch(self.pinobjects[case_num][k].rectangle)
                 self.ui.axes.add_patch(self.pinobjects[case_num][k].circle)
@@ -99,17 +100,17 @@ def s96o2(self):
                 
     # Draw pin coordinates x-axis
     for i in range(5):
-        self.ui.axes.text(0.13 + i * pin_delta, 0.015, self.xlist[i],
+        self.ui.axes.text(0.13 + i * pin_delta, 0.015, xc[i],
                        ha='center',va='center',fontsize=9)
     for i in range(5,10):
-        self.ui.axes.text(0.17 + i * pin_delta, 0.015, self.xlist[i],
+        self.ui.axes.text(0.17 + i * pin_delta, 0.015, xc[i],
                        ha='center',va='center',fontsize=9)
     
     # Draw pin coordinates y-axis
     for i in range(5):
-        self.ui.axes.text(0.99, 0.87 - i * pin_delta, self.ylist[i],
-                       ha='center',va='center',fontsize=9)
+        self.ui.axes.text(0.99, 0.87 - i * pin_delta, yc[i],
+                       ha='center', va='center', fontsize=9)
     for i in range(5,10):
-        self.ui.axes.text(0.99, 0.83 - i * pin_delta, self.ylist[i],
-                       ha='center',va='center',fontsize=9)
+        self.ui.axes.text(0.99, 0.83 - i * pin_delta, yc[i],
+                       ha='center', va='center', fontsize=9)
     
