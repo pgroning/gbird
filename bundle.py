@@ -31,8 +31,8 @@ import re
 import numpy as np
 import ConfigParser
 import copy
-
 from multiprocessing import Pool
+
 from segment import Segment, DataStruct
 from btf import Btf
 from fileio import InpFileParser

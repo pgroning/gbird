@@ -25,7 +25,6 @@ except:
 
 from ui import Ui_MainWindow
 from bundle import Bundle
-from btf import Btf
 from plot import PlotWin
 from pin import FuePin
 from pincount import PinCount
