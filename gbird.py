@@ -46,9 +46,10 @@ class Data(object):
 
 
 class MainWin(QtGui.QMainWindow):
+    """Defines the main window and core functionality"""
+
     def __init__(self, parent=None):
         super(MainWin, self).__init__(parent)
-        # QtGui.QMainWindow.__init__(self, parent)
         self.appversion = "1.0.0T"
         self.verbose = True
 
@@ -64,22 +65,17 @@ class MainWin(QtGui.QMainWindow):
         self.config = DefaultFileParser(self.appdir + "gb.defaults")
 
         # Initial window size/pos last saved
-        wsize = self.config.mainwin_size
-        wpos = self.config.mainwin_pos
+        default_size = self.config.mainwin_size
+        default_pos = self.config.mainwin_pos
         self.settings = QtCore.QSettings("greenbird")
         self.settings.beginGroup("MainWindow")
-        self.resize(self.settings.value("size", QtCore.
-                                        QVariant(QtCore.QSize(*wsize))).
-                    toSize())
-        self.move(self.settings.value("pos", QtCore.
-                                      QVariant(QtCore.QPoint(*wpos))).
-                  toPoint())
+        size = self.settings.value(
+            "size", QtCore.QVariant(QtCore.QSize(*default_size))).toSize()
+        self.resize(size)
+        pos = self.settings.value(
+            "pos", QtCore.QVariant(QtCore.QPoint(*default_pos))).toPoint()
+        self.move(pos)
         self.settings.endGroup()
-
-        # screenShape = QDesktopWidget().screenGeometry()
-        # self.resize( screenShape.width()*0.8,screenShape.width()*0.445 )
-        # self.setMinimumWidth(1100)
-        # self.setMinimumHeight(610)
 
         # Setup menus and toolbars in main window
         self.ui = Ui_MainWindow()
@@ -121,7 +117,8 @@ class MainWin(QtGui.QMainWindow):
             self.settings.endGroup()
  
     def __load_pickle_finished(self):
-        print "load pickle finished"
+        """load pickle file finished"""
+
         self.ibundle = len(self.bunlist) - 1
         self.init_pinobjects()
         self.init_cboxes()
@@ -154,8 +151,6 @@ class MainWin(QtGui.QMainWindow):
 
         self.disconnect(self.timer, QtCore.SIGNAL('timeout()'),
                         self.__progressbar_update)
-        #self.disconnect(self.thread, QtCore.SIGNAL('finished()'),
-        #                self.dataobj_finished)
         self.disconnect(self.thread, QtCore.SIGNAL('progressbar_update(int)'),
                         self.__progressbar_update)
         self.thread._kill = True
@@ -225,7 +220,7 @@ class MainWin(QtGui.QMainWindow):
 
     def __quickcalc_setenabled(self, status=True):
         """Enable/disable quickcalc"""
-        #self.calcAction.setEnabled(status)
+
         self.ui.quickcalc_action.setEnabled(status)
 
     def init_cboxes(self):
@@ -262,7 +257,8 @@ class MainWin(QtGui.QMainWindow):
                                          % filename)
             
     def __save_pickle_finished(self):
-        print "pickle file saved"
+        """pickle file saved"""
+
         self.statusBar().showMessage("Done!", 2000)
 
     def saveFigure(self):
@@ -556,9 +552,7 @@ class MainWin(QtGui.QMainWindow):
         if hasattr(self, "bunlist"):  # check that data has been imported
             if not hasattr(self, "report_dlg"):  # not already open?
                 self.report_dlg = ReportDialog(self)
-                #self.report_dlg.setModal(False)
                 self.report_dlg.show()  # Make dialog non-modal
-                #self.report_dlg.exec_()
 
     def open_findpoint_dlg(self):
         """open find statepoint dialog"""
@@ -581,7 +575,6 @@ class MainWin(QtGui.QMainWindow):
         
         voi = float(voi)
         vhi = float(vhi)
-        #statepoints = segment.get_statepoints(voi, vhi, tfu)
         statepoints = segment.get_statepoints(voi, vhi)
         if statepoints == None:
             return
@@ -630,7 +623,6 @@ class MainWin(QtGui.QMainWindow):
         
         # Sorting table column 0 in ascending order
         self.ui.table.sort_items()
-        #self.table.sortItems(0, QtCore.Qt.AscendingOrder)
         self.ui.table.clearContents()
         self.ui.table.setpincoords()
         
@@ -936,10 +928,6 @@ class MainWin(QtGui.QMainWindow):
 
     def enr_update(self, mod="add"):
         """Update pin enrichment"""
-
-        #sender = QtCore.QObject.sender(self)
-        #label = str(sender.text())
-        #LFU = int(label.replace("#", ""))
         
         case_num = int(self.ui.case_cbox.currentIndex())
         bundle = self.bunlist[self.ibundle]
@@ -970,9 +958,7 @@ class MainWin(QtGui.QMainWindow):
             pins = self.pinobjects[i]
             enrpins = self.enrpinlist[i]
             LFU = lfu_map(segment, pins)
-            #LFU = self.__lfumap(i)
             FUE = fue_map(segment, enrpins)
-            #FUE = self.__fuemap(i)
             segment.ave_enr_calc(LFU, FUE)
             if not hasattr(segment.data, "ave_enr"):  # save orig. calc
                 segment.data.ave_enr = segment.ave_enr
@@ -1072,9 +1058,7 @@ class MainWin(QtGui.QMainWindow):
             pins = self.pinobjects[i]
             enrpins = self.enrpinlist[i]
             LFU.append(lfu_map(segment, pins))
-            #LFU.append(self.__lfumap(i))
             FUE.append(fue_map(segment, enrpins))
-            #FUE.append(self.__fuemap(i))
             TIT.append(segment.data.title)
             caxfiles.append(segment.data.caxfile)
 
@@ -1458,9 +1442,6 @@ class MainWin(QtGui.QMainWindow):
         for w in widgets:
             w.setEnabled(status)
     
-        #for a in self.toolbar_actions:
-        #    a.setEnabled(status)
-        #qtrace()
         for a in self.ui.menu_actions:
             a.setEnabled(status)
 
