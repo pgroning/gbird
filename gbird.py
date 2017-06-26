@@ -40,7 +40,6 @@ from threads import ImportThread, LoadPickleThread, SavePickleThread, \
     QuickCalcThread, RunC4Thread, lfu_map, fue_map
 
 
-
 class Data(object):
     """Empty class with the purpose to organize data"""
     pass

@@ -33,7 +33,7 @@ import ConfigParser
 import copy
 from multiprocessing import Pool
 
-from segment import Segment, DataStruct
+from segment import Segment
 from btf import Btf
 from fileio import InpFileParser
 
@@ -50,12 +50,16 @@ def quickcalc_fun(tup):
     return segment
 
 
+class Data(object):
+    """Empty class with the purpose to organize data"""
+    pass
+
+
 class Bundle(object):
     """Read, save and load cases"""
 
-    #def __init__(self, parent=None):
     def __init__(self, profile=None, parent=None):
-        self.data = DataStruct()
+        self.data = Data()
 
         #self.parent = parent
         if profile:
