@@ -1,6 +1,6 @@
 """
 This is the 2D plot window
-This window embeds a matplotlib (mpl) plot into a PyQt4 GUI application
+This window embeds a matplotlib plot into a PyQt4 GUI application
 """
 
 from IPython.core.debugger import Tracer  # Set tracepoints
@@ -31,47 +31,29 @@ class PlotWin(QtGui.QMainWindow):
     def __init__(self, parent=None, plotmode=None):
         super(PlotWin, self).__init__(parent)
         self.parent = parent
-        # QMainWindow.__init__(self, parent)
         self.setWindowTitle('Plot Window')
-        # self.move(600,300)
 
         # Initial window size/pos last saved
-        wsize = parent.config.plotwin_size
-        wpos = parent.config.plotwin_pos
+        default_size = parent.config.plotwin_size
+        default_pos = parent.config.plotwin_pos
         self.settings = QtCore.QSettings("greenbird")
         self.settings.beginGroup("PlotWindow")
-        self.resize(self.settings.value("size", QtCore.QVariant(QtCore.QSize(*wsize))).toSize())
-        self.move(self.settings.value("pos", QtCore.QVariant(QtCore.QPoint(*wpos))).toPoint())
+        
+        size = self.settings.value(
+            "size", QtCore.QVariant(QtCore.QSize(*default_size))).toSize()
+        self.resize(size)
+        pos = self.settings.value(
+            "pos", QtCore.QVariant(QtCore.QPoint(*default_pos))).toPoint()
+        self.move(pos)
         self.settings.endGroup()
                 
         self.create_menu()
         self.create_main_frame()
-        #self.create_status_bar()
-        
-        # self.textbox.setText('1 2 3 4')
-        # self.data_init()
-        
+                
         if plotmode == "pin":  # plot single pin
             self.plotmode_cbox.setCurrentIndex(1)
 
-        # self.case_cbox.setCurrentIndex(0) # Set default plot case
-        # self.case_id_current = 0
         self.on_plot()  # Init plot
-
-    def get_xy(self, segment, parameter):
-        ipoint = self.parent.point_sbox.value()
-        voi = segment.statepoints[ipoint].voi
-        vhi = segment.statepoints[ipoint].vhi
-        tfu = segment.statepoints[ipoint].tfu
-        print voi, vhi, tfu
-        print " "
-        statepoints = segment.get_statepoints(voi, vhi, tfu)
-        x = [s.burnup for s in statepoints]
-        if parameter == "KINF":
-            y = [s.kinf for s in statepoints]
-        if parameter == "FINT":
-            y = [s.fint for s in statepoints]
-        return x, y
 
     def plot_xy(self, x, y, ylabel, legend, linestyle):
         self.axes.plot(x, y, label=legend, linestyle=linestyle)
@@ -192,64 +174,12 @@ class PlotWin(QtGui.QMainWindow):
     def on_about(self):
         msg = """Greenbird plot window"""
         QtGui.QMessageBox.about(self, "About the window", msg.strip())
-    
-    def on_pick(self, event):
-        # matplotlib.backend_bases.PickEvent
-        #
-        box_points = event.artist.get_bbox().get_points()
-        msg = "You've clicked on a bar with coords:\n %s" % box_points
         
-        QtGui.QMessageBox.information(self, "Click!", msg)
-    
     def on_draw(self):
-        """ Redraws the figure
-        """
-        # str = unicode(self.textbox.text())
-        # self.data = map(int, str.split())
-        # self.data = np.array(map(int, str.split()))
+        """ Redraws the figure"""
 
-        # x = range(len(self.data))
-        # x = np.arange(len(self.data))
-
-        # clear the axes and redraw the plot anew
-        #
-        # self.axes.clear()        
-        self.axes.grid(self.grid_cb.isChecked())
-
-        xmax = self.slider.value()
-        self.axes.set_xlim(0, xmax)
-
-        # self.axes.plot(x,x**2,'r')
-        # self.axes.bar(
-        #    left=x, 
-        #    height=self.data, 
-        #    width=self.slider.value() / 100.0, 
-        #    align='center', 
-        #    alpha=0.44,
-        #    picker=5)
-        
+        self.axes.grid(self.grid_cb.isChecked())        
         self.canvas.draw()
-
-    def startpoint(self, iseg, istate):
-        voi_val = int(self.voi_cbox.currentText())
-        vhi_val = int(self.vhi_cbox.currentText())
-        type_val = str(self.type_cbox.currentText())
-        
-        segment = self.parent.bunlist[istate].segments[iseg]
-        
-        if type_val == 'CCl':
-            idx0 = segment.findpoint(tfu=293)
-            voi = segment.statepts[idx0].voi
-            vhi = segment.statepts[idx0].vhi
-            voi_index = [i for i, v in enumerate(self.voilist)
-                         if int(v) == voi][0]
-            vhi_index = [i for i, v in enumerate(self.vhilist)
-                         if int(v) == vhi][0]
-            self.voi_cbox.setCurrentIndex(voi_index)
-            self.vhi_cbox.setCurrentIndex(vhi_index)
-        else:
-            idx0 = segment.findpoint(voi=voi_val, vhi=vhi_val)
-        return idx0
 
     def on_plot(self):
 
@@ -322,11 +252,10 @@ class PlotWin(QtGui.QMainWindow):
                     self.plot_btf(bundle, linestyle="--", label="original")
  
     def create_main_frame(self):
+        """Create the mpl Figure and FigCanvas objects"""
+
         self.main_frame = QtGui.QWidget()
         
-        # Create the mpl Figure and FigCanvas objects. 
-        # 5x4 inches, 100 dots-per-inch
-        #
         self.dpi = 100
         self.fig = Figure((7, 5), dpi=self.dpi)
         
@@ -335,28 +264,12 @@ class PlotWin(QtGui.QMainWindow):
         self.canvas.setSizePolicy(QtGui.QSizePolicy.Expanding, 
                                   QtGui.QSizePolicy.Expanding)
 
-        # Since we have only one plot, we can use add_axes 
-        # instead of add_subplot, but then the subplot
-        # configuration tool in the navigation toolbar wouldn't
-        # work.
-        #
         self.axes = self.fig.add_subplot(111)
         
-        # Bind the 'pick' event for clicking on one of the bars
-        #
-        # self.canvas.mpl_connect('pick_event', self.on_pick)
-        
         # Create the navigation toolbar, tied to the canvas
-        #
         self.mpl_toolbar = NavigationToolbar(self.canvas, self.main_frame)
 
-        # Other GUI controls
-        # 
-        # self.textbox = QLineEdit()
-        # self.textbox.setMinimumWidth(200)
-        # self.connect(self.textbox, SIGNAL('editingFinished ()'),
-        # self.on_draw)
-        
+        # Other GUI controls        
         self.draw_button = QtGui.QPushButton("Update")
         self.connect(self.draw_button, QtCore.SIGNAL('clicked()'), 
                      self.on_plot)
@@ -365,16 +278,7 @@ class PlotWin(QtGui.QMainWindow):
         self.grid_cb.setChecked(True)
         self.connect(self.grid_cb, QtCore.SIGNAL('stateChanged(int)'), 
                      self.on_draw)
-        
-        slider_label = QtGui.QLabel('X-max:')
-        self.slider = QtGui.QSlider(QtCore.Qt.Horizontal)
-        self.slider.setRange(1, 75)
-        self.slider.setValue(65)
-        self.slider.setTracking(True)
-        self.slider.setTickPosition(QtGui.QSlider.TicksBothSides)
-        self.connect(self.slider, QtCore.SIGNAL('valueChanged(int)'), 
-                     self.on_draw)
-        
+                
         param_label = QtGui.QLabel('Param:')
         self.param_cbox = QtGui.QComboBox()
         paramlist = ["KINF", "FINT", "BTF"]
@@ -391,7 +295,6 @@ class PlotWin(QtGui.QMainWindow):
         self.connect(self.param_cbox,
                      QtCore.SIGNAL('currentIndexChanged(int)'), self.on_plot)
         
-        # case_label = QLabel('All cases:')
         self.case_cb = QtGui.QCheckBox("Plot all seg.")
         self.case_cb.setChecked(False)
         self.connect(self.case_cb, QtCore.SIGNAL('stateChanged(int)'), 
@@ -415,105 +318,30 @@ class PlotWin(QtGui.QMainWindow):
         self.connect(self.plotmode_cbox,
                      QtCore.SIGNAL('currentIndexChanged(int)'), self.on_plot)
 
-        #type_label = QtGui.QLabel('Type:')
-        #self.type_cbox = QtGui.QComboBox()
-        #typelist = ['Hot', 'HCr', 'CCl', 'CCr']
-        #for i in typelist:
-        #    self.type_cbox.addItem(i)
-        # self.connect(self.type_cbox, SIGNAL('currentIndexChanged(int)'),
-        # self.on_index)
 
-        #voi_label = QtGui.QLabel('VOI:')
-        #self.voi_cbox = QtGui.QComboBox()
-        ## self.voilist = ['0', '40', '80']
-        #iseg = int(self.parent.case_cbox.currentIndex())
-        ##iseg = self.case_id_current
-        #self.voilist = (self.parent.bunlist[-1].segments[iseg].data.voilist)
-
-        #self.voilist = (self.parent.bundle.cases[self.case_id_current]
-        #                .states[-1].voivec)
-        # self.voilist = map(str, self.voilist)
         
-        #for v in self.voilist:
-        #    self.voi_cbox.addItem(str(v))
-        # Determine voi index
-        #voi = self.parent.bunlist[-1].segments[iseg].statepoints[0].voi
-        #voi = (self.parent.bundle.cases[self.case_id_current].states[-1]
-        #       .statepoints[0].voi)
-        # voi = self.cas.cases[self.case_id_current].statepts[0].voi
-        #voi_index = [i for i, v in enumerate(self.voilist) if int(v) == voi]
-        #voi_index = voi_index[0]
-        #self.voi_cbox.setCurrentIndex(voi_index)
-        # self.connect(self.voi_cbox, SIGNAL('currentIndexChanged(int)'),
-        # self.on_plot)
-        #vhi_label = QtGui.QLabel('VHI:')
-        #self.vhi_cbox = QtGui.QComboBox()
-        # self.vhilist = ['0', '40', '80']
-        #self.vhilist = self.voilist
-        #for v in self.vhilist:
-        #    self.vhi_cbox.addItem(str(v))
-        
-        ## Determine vhi index
-        #vhi = self.parent.bunlist[-1].segments[iseg].statepoints[0].vhi
-        #vhi = (self.parent.bundle.cases[self.case_id_current].states[-1]
-        #       .statepoints[0].vhi)
-        #vhi_index = [i for i, v in enumerate(self.vhilist) if int(v) == vhi]
-        #vhi_index = vhi_index[0]
-        #self.vhi_cbox.setCurrentIndex(vhi_index)
-        # self.connect(self.vhi_cbox, SIGNAL('currentIndexChanged(int)'),
-        # self.on_plot)
-        
-        # tfu_label = QLabel('TFU:')
-        # self.tfu_cbox = QComboBox()
-        # tfulist = ['293', '333', '372', '423', '483', '539']
-        # for i in tfulist:
-        #    self.tfu_cbox.addItem(i)
-        # Determine tfu index
-
-        # self.case_cbox.setWhatsThis("What is this?")
-        # self.connect(self.case_cbox, SIGNAL('activated(QString)'),
-        # self.on_case)
-        # self.connect(self.case_cbox, SIGNAL('currentIndexChanged(int)'),
-        # self.on_plot)
-
-        #
-        # Layout with box sizers
-        #
-
+        # Layout with sizers
         param_flo = QtGui.QFormLayout()
         param_flo.addRow("Param:", self.param_cbox)
  
         hbox = QtGui.QHBoxLayout()
         
-        # for w in [  self.textbox, self.draw_button, self.grid_cb,
-        #            slider_label, self.slider]:
-        
-        #for w in [self.draw_button, self.grid_cb, slider_label, self.slider,
-        #          self.case_cb, self.original_cb, param_label,
-        #          self.param_cbox]:
         for w in [self.grid_cb, self.case_cb, self.original_cb, 
                   self.previous_cb]:
             hbox.addWidget(w)
-            #hbox.setAlignment(w, QtCore.Qt.AlignVCenter)
-            #hbox.setAlignment(w, QtCore.Qt.AlignHCenter)
+            
         hbox.addStretch(1)
         hbox.addLayout(param_flo)
         hbox.addWidget(self.plotmode_cbox)
 
         vbox = QtGui.QVBoxLayout()
-        # vbox.addLayout(hbox)
-        # vbox.addWidget(self.canvas)
         vbox.addWidget(self.mpl_toolbar)
         vbox.addLayout(hbox)
         vbox.addWidget(self.canvas)
 
         self.main_frame.setLayout(vbox)
         self.setCentralWidget(self.main_frame)
-    
-    #def create_status_bar(self):
-    #    self.status_text = QtGui.QLabel("Plot window")
-    #    self.statusBar().addWidget(self.status_text, 1)
-        
+            
     def create_menu(self):        
         self.file_menu = self.menuBar().addMenu("&File")
         
@@ -573,7 +401,7 @@ class PlotWin(QtGui.QMainWindow):
         return action
 
     def select_outfile(self):
-        """Select file for writing"""
+        """Select a file to write data."""
 
         # Import default path from config file
         self.settings.beginGroup("PATH")
@@ -609,7 +437,6 @@ def main():
     app = QApplication(sys.argv)
     window = PlotWin()
     window.show()
-    # app.exec_()
     sys.exit(app.exec_())
 
 
