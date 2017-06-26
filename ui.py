@@ -8,7 +8,6 @@ from matplotlib.figure import Figure
 
 class InfoLabel(QtGui.QLabel):
     def __init__(self, parent=None, width=100):
-        #QtGui.QDialog.__init__(self)
         QtGui.QLabel.__init__(self)
         self.setStyleSheet("""QLabel {background-color : rgb(245, 245, 245); 
                               color : black;}""")
@@ -73,13 +72,10 @@ class PinTableWidget(QtGui.QTableWidget):
         self.setpincoords()
 
 
-
 class Ui_MainWindow(object):
     """Creates ui widgets and menus in main frame"""
 
     def __init__(self, parent=None):
-        #super(Ui, self).__init__(parent)
-        #self.parent = parent
         pass
 
     def setup(self, parent):
@@ -96,13 +92,11 @@ class Ui_MainWindow(object):
     def create_menu(self):
         parent = self.parent
 
-        #parent.menu_actions = []
         self.menu_actions = []
 
         menubar = QtGui.QMenuBar()
 
         # --- File menu ---
-        #parent.file_menu = parent.menuBar().addMenu("&File")
         file_menu = menubar.addMenu("&File")
 
         new_icon = "new-icon_32x32"
@@ -112,7 +106,6 @@ class Ui_MainWindow(object):
         args = (text, new_icon, tip, parent.open_bundle_dlg, shortcut)
         self.new_action = self.__create_action(*args)
         file_menu.addAction(self.new_action)
-        #parent.menu_actions.append(new_action)
 
         file_icon = "open-file-icon_32x32"
         text = "&Open..."
@@ -121,7 +114,6 @@ class Ui_MainWindow(object):
         args = (text, file_icon, tip, parent.openFile, shortcut)
         self.file_action = self.__create_action(*args)
         file_menu.addAction(self.file_action)
-        #parent.menu_actions.append(file_action)
 
         save_icon = "save-icon_32x32"
         text = "&Save project..."
@@ -164,16 +156,8 @@ class Ui_MainWindow(object):
         args = (text, quit_icon, tip, parent.close, shortcut)
         self.quit_action = self.__create_action(*args)
         file_menu.addAction(self.quit_action)
-        #parent.menu_actions.append(quit_action)
-
-        #for action in parent.menu_actions:
-        #    if action is None:
-        #        parent.file_menu.addSeparator()
-        #    else:
-        #        parent.file_menu.addAction(action)
 
         # --- Edit menu ---
-        #parent.edit_menu = parent.menuBar().addMenu("&Edit")
         edit_menu = menubar.addMenu("&Edit")
 
         back_icon = "arrow-undo-icon_32x32"
@@ -262,10 +246,8 @@ class Ui_MainWindow(object):
         args = (text, icon, tip)
         self.preferences_action = self.__create_action(*args)
         edit_menu.addAction(self.preferences_action)
-        #parent.menu_actions.append(self.preferences_action)
 
         # --- Tools menu ---
-        #parent.tools_menu = parent.menuBar().addMenu("&Tools")
         tools_menu = menubar.addMenu("&Tools")
 
         icon = "diagram-icon_32x32"
@@ -335,7 +317,6 @@ class Ui_MainWindow(object):
         self.menu_actions.append(parent.track_maxpin)
 
         # -- Run menu ---
-        #parent.run_menu = parent.menuBar().addMenu("&Run")
         run_menu = menubar.addMenu("&Run")
 
         icon = "flame-red-icon_32x32"
@@ -346,10 +327,8 @@ class Ui_MainWindow(object):
         self.quickcalc_action = self.__create_action(*args)
         self.quickcalc_action.setEnabled(False)
         run_menu.addAction(self.quickcalc_action)
-        #self.menu_actions.append(parent.quickcalc_action)
 
         # --- Help menu ---
-        #parent.help_menu = parent.menuBar().addMenu("&Help")
         help_menu = menubar.addMenu("&Help")
 
         icon = "help-about-icon_32x32"
@@ -358,16 +337,12 @@ class Ui_MainWindow(object):
         args = (text, icon, tip, parent.on_about)
         about_action = self.__create_action(*args)
         help_menu.addAction(about_action)
-        #parent.menu_actions.append(about_action)
         
         self.parent.setMenuBar(menubar)
 
     def create_toolbar(self):
 
-        #self.parent.toolbar_actions = []
-
         toolbar = QtGui.QToolBar()
-
         toolbar.addAction(self.new_action)
         toolbar.addAction(self.file_action)
         toolbar.addAction(self.save_action)
@@ -395,13 +370,11 @@ class Ui_MainWindow(object):
 
         self.parent.addToolBar(toolbar)
         
-        
     def __create_action(self, text, icon=None, tip=None, slot=None,
                         shortcut=None, checkable=False):
         
         action = QtGui.QAction(text, self.parent)
         if icon is not None:
-            #action.setIcon(QtGui.QIcon(icon))
             action.setIcon(QtGui.QIcon(
                     self.parent.appdir + "icons/%s.png" % icon))
             action.setIconVisibleInMenu(True)
@@ -443,9 +416,6 @@ class Ui_MainWindow(object):
         canvasGbox.setLayout(cvbox)
 
         self.__axes_setup()
-        # Since we have only one plot, we can use add_axes instead of 
-        # add_subplot.
-        #self.axes = self.fig.add_subplot(111)
 
         # Other GUI controls
         sim_hbox = QtGui.QHBoxLayout()
@@ -569,8 +539,6 @@ class Ui_MainWindow(object):
     def __axes_setup(self):
         """Setup the figure axes"""
         
-        # Since we have only one plot, we can use add_axes instead of 
-        # add_subplot.
         self.axes = self.fig.add_subplot(111)
 
         # clear the axes and redraw the plot
