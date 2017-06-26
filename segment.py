@@ -19,7 +19,6 @@ from pyqt_trace import pyqt_trace as qtrace  # Break point that works with Qt
 
 import numpy as np
 import re
-import linecache
 import os
 import sys
 import time
@@ -31,7 +30,7 @@ import copy
 from fileio import DefaultFileParser
 
 
-class DataStruct(object):
+class Data(object):
     """A class that can be used to organize data in its attributes"""
     pass
 
@@ -43,26 +42,11 @@ class Segment(object):
         path = os.path.realpath(__file__)
         self.appdir = os.path.split(path)[0] + os.sep
         
-        self.data = DataStruct()
+        self.data = Data()
         self.config = DefaultFileParser(self.appdir + "gb.defaults")
 
-        #self.states = []
-        #self.states.append(DataStruct())
-        # self.add_calc()
-        # self.states[0].refcalc = DataStruct()
-        # Tracer()()
-        '''
-        #self.data.append(DataStruct()) # Add an element to list
-        #self.data[-1]
-        #self.statepts = []
-        #self.pert = DataStruct()
-        '''
         if caxfile:
             self.readcax(caxfile, content)
-            #self.ave_enr_calc()
-            #self.data.ave_enr = self.ave_enr  # save orig. calculation
-            # self.quickcalc(refcalc=True)
-            # self.btfcalc()
 
     # -------Read cax file---------
     def __matchcontent(self, flines, regexp, opt='all'):
@@ -137,30 +121,13 @@ class Segment(object):
             return
         else:
             print "Reading file " + caxfile
-        '''
-        # Read input file up to maxlen using random access
-        #maxlen = 100000
-        #flines = []
-        #for i in range(maxlen):
-        #    flines.append(linecache.getline(caxfile,i+1).rstrip())
-        '''
+
         # Read the whole file
         with open(caxfile) as f:
-            # flines = f.readlines() # include \n
             flines = f.read().splitlines()  # exclude \n
-        '''
-        # Define regexps
-        #reS3C = re.compile('(^| )S3C')
-        #reITTL = re.compile('^\*I TTL')
-        #reREA = re.compile('REA\s+')
-        #reGPO = re.compile('GPO\s+')
-        '''
-        # Search for regexp matches
-        # self.__flines = flines
 
         # Find last index containing voids voi=vhi
         tmp_voilist = []  # temporary list of voids
-        # if read_content != 'all':
         oTIT = self.__matchcontent(flines, '^TIT', 'object')
         while True:
             try:
@@ -176,25 +143,13 @@ class Segment(object):
             tmp_voilist.append(voi)
         # Reduce to a unique list and also keep the order
         tmp = []
-        tmp_voilist = [x for x in tmp_voilist if x not in tmp and (tmp.append(x)
-                                                                   or True)]
+        tmp_voilist = [x for x in tmp_voilist 
+                       if x not in tmp and (tmp.append(x) or True)]
         voilist = map(int, map(float, tmp_voilist))
 
         if content == "filtered":
             flines = flines[:i]  # Reduce the number of lines in list
 
-        # Search for regexp matches
-        #print "Scanning file content..."
-        '''
-        # Loop through the whole file content
-        #reglist = ['^TIT','^\s*FUE\s+']
-        #self.__flines = flines
-        #n = 2
-        #p = Pool(n)
-        #ilist = p.map(self.__matchcontent, reglist)
-        #p.close()
-        #p.join()
-        '''
         iTIT = self.__matchcontent(flines, '^TIT')
         iFUE = self.__matchcontent(flines, '^\s*FUE')
         iPOW = self.__matchcontent(flines, 'POW\s+')
@@ -231,32 +186,20 @@ class Segment(object):
         # Miscellaneous compositions
         iMIx = self.__matchcontent(flines[:iLPI], '^\s*MI[1-9]')
 
-        # Read title
+        # Store geninfo
         self.data.title = flines[iTTL[0]]
-        # SIM
         self.data.sim = flines[iSIM[0]]
-        # TFU
         self.data.tfu = flines[iTFU]
-        # TMO
         self.data.tmo = flines[iTMO]
-        # VOI
         self.data.voi = flines[iVOI[0]]
-        # PDE
         self.data.pde = flines[iPDE]
-        # BWR
         self.data.bwr = flines[iBWR]
-        # SPA
         self.data.spa = flines[iSPA[0]]
-        # DEP
         self.data.dep = flines[iDEP[0]]
-        # GAM
         self.data.gam = flines[iGAM[0]]
-        # WRI
         if iWRI:
             self.data.wri = flines[iWRI]
-        # STA
         self.data.sta = flines[iSTA]
-        # CRD
         if iCRD:
             self.data.crd = flines[iCRD[0]]
         
@@ -264,9 +207,7 @@ class Segment(object):
         npst = int(flines[iBWR][5:7])
         # Read LFU map
         maplines = flines[iLFU+1:iLFU+1+npst]
-        # LFU = self.__symtrans(self.__map2mat(caxmap, npst)).astype(int)
         LFU = self.__symmap(maplines, npst, int)
-        # LFU = self.__symmetry_map(flines, iLFU, npst)
 
         # If exist, read LDX and LDY displacement maps
         if iLDX:
@@ -283,9 +224,7 @@ class Segment(object):
         
         # Read LPI map
         maplines = flines[iLPI+1:iLPI+1+npst]
-        # LPI = self.__symtrans(self.__map2mat(caxmap, npst)).astype(int)
         LPI = self.__symmap(maplines, npst, int)
-        # LPI = self.__symmetry_map(flines, iLPI, npst)
 
         # Get FUE array
         iFUE = [i for i in iFUE if i < iEND]
@@ -312,12 +251,8 @@ class Segment(object):
         if iSLA is not None:
             self.data.slaline = flines[iSLA]
 
-        # ------Step through the state points----------
-        #print "Scanning state points..."
-
-        # Nburnpts = iTIT.size
+        # ------Iterate state points----------
         Nburnpts = len(iTIT)
-        # titcrd = []
         burnup = np.zeros(Nburnpts)
         burnup.fill(np.nan)
         voi = np.zeros(Nburnpts)
@@ -340,20 +275,6 @@ class Segment(object):
         # Read title cards
         titcrd = [flines[i] for i in iTIT]
 
-        # Row vector containing burnup, voi, vhi, tfu and tmo
-        # rvec = [re.split('/',flines[i+2].strip()) for i in iTIT]
-        # rvec = [re.split('[/\s+]+', flines[i+2].strip()) for i in iTIT]
-
-        # Row containing Kinf
-        # kinfstr = [flines[i+5] for i in iPOL]
-
-        # Rows containing radial power distribution map
-        # powmap = [flines[i+2:i+2+npst] for i in iPOW]
-
-        # Rows containing XFL maps
-        # xfl1map = [flines[i+2:i+2+npst] for i in iXFL]
-        # xfl2map = [flines[i+3+npst:i+3+2*npst] for i in iXFL]
-
         for i in xrange(Nburnpts):
 
             # Read burnup, voids, tfu and tmo
@@ -363,27 +284,18 @@ class Segment(object):
             vhi[i] = rvec[2]
             tfu[i] = rvec[3]
             tmo[i] = rvec[4]
-            # burnup[i],voi[i] = re.split('\s+',rvec[i][0].strip())
-            # vhi[i],tfu[i] = re.split('\s+',rvec[i][1].strip())
-            # tmo[i] = re.split('\s+',rvec[i][2].strip())[1]
             # Read kinf
             kinfstr = flines[iPOL[i]+5]
             kinf[i] = re.split('\s+', kinfstr.strip())[0]
             # Read radial power distribution map
             powlines = flines[iPOW[i]+2:iPOW[i]+2+npst]
             POW[:, :, i] = self.__symmap(powlines, npst)
-            # POW[:, :, i] = self.__symtrans(self.__map2mat(powmap[i], npst))
             # Read XFL maps
             if iXFL:  # check if XFL exists
                 xfl1lines = flines[iXFL[i]+2:iXFL[i]+2+npst]
                 XFL1[:, :, i] = self.__symmap(xfl1lines, npst)
-                # XFL1[:, :, i] = (self.__symtrans(
-                #        self.__map2mat(xfl1map[i], npst)))
                 xfl2lines = flines[iXFL[i]+3+npst:iXFL[i]+3+2*npst]
                 XFL2[:, :, i] = self.__symmap(xfl2lines, npst)
-                # XFL2[:, :, i] = (self.__symtrans(
-                #        self.__map2mat(xfl2map[i], npst)))
-        #print "Done."
         # --------------------------------------------------------------------
         # Calculate radial burnup distributions
         EXP = self.expcalc(POW, burnup)
@@ -391,11 +303,10 @@ class Segment(object):
         fint = self.fintcalc(POW)
 
         # Append state instancies
-        #do.statepoints = []
         self.statepoints = []
         for i in range(Nburnpts):
             # append new instance to list
-            self.statepoints.append(DataStruct())
+            self.statepoints.append(Data())
             self.statepoints[i].titcrd = titcrd[i]
             self.statepoints[i].burnup = burnup[i]
             self.statepoints[i].voi = voi[i]
@@ -410,7 +321,7 @@ class Segment(object):
                 self.statepoints[i].XFL2 = XFL2[:, :, i]
             self.statepoints[i].POW = POW[:, :, i]
 
-        # Saving geninfo
+        # Store geninfo
         self.data.caxfile = caxfile
         self.data.ENR = ENR
         self.data.BA = BA
@@ -470,9 +381,7 @@ class Segment(object):
         MASS_U235 = MASS*ENR
         mass_u235 = np.sum(MASS_U235)
         ave_enr = mass_u235/mass
-        #self.data.ave_enr = ave_enr
         self.ave_enr = ave_enr
-        #return ave_enr
 
     ## -------Write cai file------------
     #def writecai(self, file_base_name):
@@ -551,17 +460,13 @@ class Segment(object):
         #c4exe = "cas4 -e"
 
         libdir = self.config.libdir
-        #libdir = "/home/prog/prod/CMSCODES/CasLib/library/"
         
         if not c4ver:
             c4ver = self.config.default_version
-            #c4ver = "2.10.21P_VAT_1.3"
         if not neulib:
             neulib = self.config.default_neulib
-            #neulib = "j20200"
         if not gamlib:
             gamlib = self.config.default_gamlib
-            #gamlib = "galb418"
 
         outdir = os.path.split(file_base_name)[0]
         
@@ -576,9 +481,6 @@ class Segment(object):
         arglist.insert(1, '-q')
         grid_que = self.config.grid_que
         arglist.insert(2, grid_que)
-        #arglist.insert(2, 'all.q@wrath,all.q@envy,all.q@pride')
-        # arglist[0] = 'linrsh -q all.q@wrath'
-        # fout = open('c4.stdout', 'wb')
         fout = open('/dev/null', 'wb')
         print "Running c4e model"
         if grid:
@@ -595,12 +497,6 @@ class Segment(object):
     
     def set_data(self, LFU=None, FUE=None, BA=None, voi=None, box_offset=0.0):
         """Append a list element to store result of new calculation"""
-
-        # limit number of states to 4
-        # 0=original, 1=reference, 2=previous, 3=current
-        #if len(self.states) > 3:
-        #    del self.states[2]
-        #self.states.append(DataStruct())  # Add an new element to list
        
         if LFU is not None:
             self.data.LFU = LFU
@@ -623,21 +519,6 @@ class Segment(object):
             self.data.voilist = [int(voi)]
         
         self.data.box_offset = box_offset
-        
-        #
-        #if voi is None:
-        #    voivec = self.states[0].voivec
-        #else:
-        #    voivec = [int(voi)]
-        #self.states[-1].voivec = voivec
-        #
-        #self.states[-1].box_offset = box_offset
-    
-    # def voivec(self):
-    #    info = self.states[0]
-    #    voids = (info.voi.split('*')[0].replace(',', ' ')
-    #              .strip().split(' ')[1:])
-    #    return voids
 
     def reduce_burnpoints(self, dep_max=None, dep_thres=None):
         """Reduce number of depletion points"""
@@ -670,66 +551,10 @@ class Segment(object):
         """Write cai file for models c3 or c4"""
         
         cinp = file_base_name + ".inp"
-        # c3inp = tempfile.NamedTemporaryFile(dir='.',
-        # prefix="c3_",suffix=".inp",delete=False)
 
         # Creating dep strings
         info = self.data
-        
-        #if voi:
-        #    voilist = [int(voi)]
-        #    #self.data.voilist = voilist
-        #else:
-        #    voilist = self.data.voilist
-        
-        #if voi is not None:
-        #    if int(voi) in voivec:
-        #        bp_voivec = [int(voi)]
-        #    else:
-        #        bp_voivec = [voivec[0]]  # get burn points from first void
-        #else:
-        #    bp_voivec = voivec
-        
-        #if voi is not None:
-        #    voivec = [int(voi)]
-        #    self.data.voivec = voivec
-
-        #if not maxdep:
-        #    maxdep = 60
-
-        #burnlist = []
-        #for v in voilist:
-        #    if depthres:
-        #        dep_points = [0, 0.001, -depthres]
-        #        dep_next = -dep_points[-1] + 10
-        #        while dep_next < maxdep:
-        #            dep_points.append(dep_next)
-        #            dep_next += 10
-        #        dep_points.append(maxdep)
-        #    else:
-        #        dep_points = [0, 0.001, -maxdep]
-        #    burnlist.append(dep_points)
-        
-        #burnlist = []
-        #for i, v in enumerate(bp_voivec):
-        #    all_points = self.burnpoints(voi=int(v))
-        #    
-        #    if maxdep:
-        #        red_points = [x for x in all_points if x <= maxdep]
-        #        burnlist.append(red_points)
-        #    elif depthres:
-        #        lo_points = [x for x in all_points if x <= depthres]
-        #        # reduce number of points by taking every 5:th step in list
-        #        up_points = [x for x in all_points if x > depthres][5::5]
-        #        # concatenate lists
-        #        red_points = sum([lo_points, up_points], [])
-        #        # make sure last point is included
-        #        if red_points[-1] < all_points[-1]:
-        #            red_points.append(all_points[-1])
-        #        burnlist.append(red_points)
-        #    else:
-        #        burnlist.append(all_points)
-        
+                
         if not hasattr(self, "burnlist"):
             self.burnlist = [self.burnpoints(voi=v) for v in self.data.voilist]
 
@@ -737,9 +562,8 @@ class Segment(object):
             burnlist = self.reduce_burnpoints(dep_max, dep_thres)
         else:
             burnlist = self.burnlist
-            
+        
         if voi is not None:
-            #if voi not in self.data.voilist:
             # set burnlist to union of all lists
             ulist = []
             for blist in burnlist:
@@ -892,14 +716,9 @@ class Segment(object):
     def runc3(self, filebasename, grid=False):
         """Running C3 perturbation model"""
         
-        # C3 input file
+        # C3 temporary file
         c3inp = filebasename + ".inp"
-        # c3inp = "./c3.inp"
-        # output file
-        # c3out = tempfile.NamedTemporaryFile(
-        # dir='.',prefix="c3_",suffix=".out",delete=False)
         c3out = filebasename + ".out"
-        # cax file
         c3cax = filebasename + ".cax"
         # C3 libs
         lib1 = self.appdir + "lib/c3/e4lbj40"
@@ -919,11 +738,7 @@ class Segment(object):
             return
 
         # Write C3 configuration file
-        # c3cfg = tempfile.NamedTemporaryFile(
-        # dir='.',prefix="c3_",suffix=".cfg",delete=False)
         c3cfg = filebasename + ".cfg"
-        # print c3cfg
-        # c3cfg = "./c3.txt"
         f = open(c3cfg, "w")
         f.write(c3inp + "\n")
         f.write(c3out + "\n")
@@ -934,18 +749,14 @@ class Segment(object):
         f.write(c3cax + "\n")
         newlines = '\n' * 7
         f.write(newlines)
-        # c3cfg.close()
         f.close()
-        # Tracer()()
+
         # Run C3 executable
-        # cmd = "linrsh " + c3exe + " " + c3cfg
-        # cmd = c3exe + " " + c3cfg
         print "Running c3 model..."
-        # args = ['linrsh', c3exe, c3cfg]
         arglist = ['linrsh', c3exe, c3cfg]
         arglist.insert(1, '-q')
         arglist.insert(2, 'all.q@wrath,all.q@envy,all.q@pride')
-        #Tracer()()
+
         if grid:
             try:  # use linrsh if available
                 call(arglist, shell=False)
@@ -959,16 +770,10 @@ class Segment(object):
             os.environ["TMPDIR"] = "/tmp"
             call(arglist[3:], shell=False)
 
-        # Remove files
-        # c3cfg.unlink(c3cfg.name)
-        os.remove(c3cfg)
-        # os.remove(c3inp)
-        # c3out.unlink(c3out.name)
-        # os.remove(c3out)
+        os.remove(c3cfg)  # Remove files
 
     def readc3cax(self, file_base_name):
 
-        # caxfile = "./c3.cax"
         caxfile = file_base_name + ".cax"
         if not os.path.isfile(caxfile):
             print "Could not open file " + caxfile
@@ -1008,7 +813,6 @@ class Segment(object):
         POW.fill(np.nan)
 
         # Row vector containing burnup, voi, vhi, tfu and tmo
-        # rvec = [re.split('/',flines[i+2].strip()) for i in iTIT]
         rvec = [re.split('[/\s+]+', flines[i+2].strip()) for i in iTIT]
 
         # Row containing Kinf
@@ -1024,13 +828,10 @@ class Segment(object):
             vhi[i] = rvec[i][2]
             tfu[i] = rvec[i][3]
             tmo[i] = rvec[i][4]
-            # burnup[i],voi[i] = re.split('\s+',rvec[i][0].strip())
-            # vhi[i],tfu[i] = re.split('\s+',rvec[i][1].strip())
-            # tmo[i] = re.split('\s+',rvec[i][2].strip())[1]
             # Read kinf
             kinf[i] = re.split('\s+', kinfstr[i].strip())[0]
             # Read radial power distribution map
-            POW[:, :, i] = self.__symtrans(self.__map2mat(powmap[i], npst))
+            POW[:, :, i] = self.__symmap(powmap[i], npst, float)
 
         # Calculate radial burnup distributions
         EXP = self.expcalc(POW, burnup)
@@ -1039,14 +840,9 @@ class Segment(object):
 
         # Append state instancies
         statepoints = []
-
-        # self.qcalc.append(DataStruct())
-        # pindex = -1 # Index of last instance
-        # self.qcalc[pindex].model = "c3"
-        # self.qcalc[pindex].statepts = []
         for i in xrange(Nburnpts):
             # append new instance to list
-            statepoints.append(DataStruct())
+            statepoints.append(Data())
             statepoints[i].burnup = burnup[i]
             statepoints[i].voi = voi[i]
             statepoints[i].vhi = vhi[i]
@@ -1056,28 +852,7 @@ class Segment(object):
             statepoints[i].fint = fint[i]
             statepoints[i].POW = POW[:, :, i]
             statepoints[i].EXP = EXP[:, :, i]
-
-        #if refcalc:
-        #    self.states[0].refcalc = DataStruct()
-        #    self.states[0].refcalc.statepoints = statepoints
-        #else:
-            # self.quickcalc_add(statepoints)
         self.statepoints = statepoints
-        
-    #def quickcalc_add(self, statepoints):
-    #    """Adds the quickcalc differencies to the initial state"""
-    #    sp0 = self.states[0].statepoints
-    #    rsp = self.states[0].refcalc.statepoints
-    #    sp1 = statepoints
-    #
-    #    N = len(sp1)
-    #    # kinf
-    #    dPOW = [sp1[i].POW - rsp[i].POW for i in range(N)]
-    #    POW = np.array([dPOW[i] + sp0[i].POW for i in range(N)]).swapaxes(0, 2)
-    #    fint = self.__fintcalc(POW)
-    #    # burnup =
-    #    # EXP = self.__expcalc(POW, burnup)
-    #    # Tracer()()
 
     def complete_calc(self, c4ver=None, neulib=None, gamlib=None, grid=False):
         """Performing a complete calculation"""
@@ -1089,12 +864,9 @@ class Segment(object):
             self.runc4(basename, c4ver=c4ver, neulib=neulib, gamlib=gamlib, 
                        grid=grid)
 
-
     def quickcalc(self, voi=None, dep_max=None, dep_thres=None, grid=False,
                   model="c3", box_offset=0.0, c4ver=None, neulib=None, 
                   gamlib=None, keepfiles=False):
-
-        #tic = time.time()
         
         file_base_name = "./tmp." + str(uuid.uuid4()).split('-')[0]
         self.writecai(file_base_name, voi, dep_max, dep_thres, box_offset, 
@@ -1109,10 +881,8 @@ class Segment(object):
             print "Perturbation model is unknown"
             return
         self.readc3cax(file_base_name)
-        #self.fill_statepoints()
         self.ave_enr_calc()
 
-        #os.remove(file_base_name + ".inp")
         os.remove(file_base_name + ".out")
         try:
             os.remove(file_base_name + ".log")
@@ -1129,11 +899,9 @@ class Segment(object):
             
             caxfile_old = file_base_name + ".cax"
             caxfile_new = "gb-" + os.path.basename(self.data.caxfile)
-            #caxfile_new = "gb-" + os.path.split(self.data.caxfile)[-1]
             os.rename(caxfile_old, caxfile_new)
 
         print "Done."
-        #print "Done in "+str(time.time()-tic)+" seconds."
 
     def __boxbow(self, box_offset=0.0):
         """Updating the BWR card to account for box bowing."""
@@ -1231,24 +999,6 @@ class Segment(object):
             fuetype = "A11"
         return fuetype
 
-    # def burnpoints(self, voi=40, stateindex=0):
-    #    """Return depletion vector for given voi (vhi=voi)"""
-    #    statepoints = self.states[stateindex].statepoints
-    #    idx0 = self.findpoint(statepoints, voi=voi, vhi=voi)
-    #    statepoints = statepoints[idx0:]
-    #    Tracer()()
-    #    burnup_old = 0.0
-    #    for idx, p in enumerate(statepoints):
-    #        print p.burnup
-    #        if p.burnup <= burnup_old:
-    #            break
-    #        burnup_old = p.burnup
-    #    Tracer()()
-    #    burnlist = [statepoints[i].burnup for i in range(idx)]
-    #    #Tracer()()
-    #    return burnlist
-
 
 if __name__ == '__main__':
-    cas = casdata(sys.argv[1])
-    cas.quickcalc()
+    s = Segment(sys.argv[1])
