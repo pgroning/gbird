@@ -14,47 +14,32 @@ from multiprocessing import Pool
 
 from lib import btf_a10b, btf_a10xm, btf_at11, btf_opt2, btf_opt3
 
-#from btf_opt2 import btf_opt2
-#from btf_opt3 import btf_opt3
-#from btf_a10xm import btf_a10xm
-#from btf_a10b import btf_a10b
-#from btf_at11 import btf_at11
-
-# sys.path.append('lib/')
-# import libADDC
-
 
 class Btf(object):
     """Calculate BTF values"""
 
     def __init__(self, bundle=None):
         self.bundle = bundle
-        # self.rfact()
-        # self.pow3d(voi=50,burnup=0)
-
+        
     def lastindex(self, segment):
         """Iterate over burnup points"""
         
-        #statepoints = self.bundle.segments[case_id].statepoints
         statepoints = segment.statepoints
-        burnup_old = 0.0
+        previous_burnup = 0.0
         for idx, p in enumerate(statepoints):
-            if p.burnup < burnup_old:
+            if p.burnup < previous_burnup:
                 break
-            burnup_old = p.burnup
+            previous_burnup = p.burnup
         return idx
 
     def intersect_points(self, segments):
         """Find intersection burnup points for segments"""
         
-        #segments = self.bundle.segments
         nsegments = len(segments)
-        #idx = self.lastindex(0)
         idx = self.lastindex(segments[0])
         x = [segments[0].statepoints[i].burnup for i in range(idx)]
         
         for j in range(1, nsegments):
-            #idx = self.lastindex(j)
             idx = self.lastindex(segments[j])
             x2 = ([segments[j].statepoints[i].burnup
                    for i in range(idx)])
@@ -73,18 +58,11 @@ class Btf(object):
             idx = self.lastindex(j)
             x = [seg.statepoints[i].burnup for i in range(idx)]
             xlist.append(x)
-        #qtrace()
 
     def pow3d(self, segments, voi, burnup, zdim):
         """Construct a 3D pin power distribution for specific void and burnup.
         Use interpolation if necessary."""
-        
-        #all_segments = self.bundle.segments
-        ##btf_zones = self.bundle.data.btf_zones
-        ##segments = [s for i, s in enumerate(all_segments) if btf_zones[i]]
-        #nodes = self.bundle.data.btf_nodes
-        #segments = [s for i, s in enumerate(all_segments) if nodes[i]]
-        
+                
         nsegments = len(segments)
         npst = segments[0].data.npst
         POW = np.zeros((nsegments, npst, npst))
@@ -112,17 +90,13 @@ class Btf(object):
         """Calculating BTF"""
         print "Calculating BTF..."
 
-        #tic = time.time()
-
         # Find the segments included in BTF calculations
         all_segments = self.bundle.segments
         nodes = self.bundle.data.btf_nodes
         segments = [s for i, s in enumerate(all_segments) if nodes[i]]
 
         x = self.intersect_points(segments)
-        #x = self.union_points()
         
-        #npst = self.bundle.segments[0].data.npst
         npst = segments[0].data.npst
         self.DOX = np.zeros((len(x), npst, npst))
         
@@ -139,7 +113,6 @@ class Btf(object):
             voi = 60
             rfact_fun = btf_a10xm
         elif fuetype == "A10B":
-            zdim = 25 
             voi = 60
             rfact_fun = btf_a10b
         elif fuetype == "AT11":
@@ -149,13 +122,10 @@ class Btf(object):
             print "Error: BTF is not implemented for this fuel type"
             return
 
-        #tic = time.time()
         POW3_list = []
         for i, burnup in enumerate(x):
             POW3 = self.pow3d(segments, voi, burnup, zdim)
             POW3_list.append(POW3)
-            #self.DOX[i, :, :] = rfact_fun(POW3)
-            ## self.DOX[i, :, :] = self.rfact(POW3)
         
         n = min(len(POW3_list), 16)  # Number of threads
         p = Pool(n)  # Make the Pool of workers
@@ -169,26 +139,7 @@ class Btf(object):
         self.burnpoints = np.array(x).astype(float)
         
         print "Done."
-        #print "Done in "+str(time.time()-tic)+" seconds."
-
-    #def rfact(self, POW3):
-    #    fuetype = self.bundle.data.fuetype
-    #    if fuetype == 'OPT2':
-    #        # print "Calculating BTF for OPT2"
-    #        DOX = btf_opt2(POW3)
-    #    elif fuetype == 'A10XM':
-    #        # print "Calculating BTF for ATXM"
-    #        DOX = btf_a10xm(POW3)
-    #    elif fuetype == 'A10B':
-    #        DOX = btf_a10b(POW3)
-    #    return DOX
 
 
     if __name__ == '__main__':
-        import bundle
-        import btf
-        inpfile = sys.argv[1]
-        bundle = bundle.Bundle(inpfile)
-        bundle.readcax()
-        b = btf.Btf(bundle)
-        b.calc_btf()
+        pass
