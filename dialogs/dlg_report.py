@@ -22,19 +22,14 @@ class ReportDialog(QtGui.QDialog):
         self.insert_text()
 
         hbox = QtGui.QHBoxLayout()
-        #self.update_button = QtGui.QPushButton("Update")
         self.close_button = QtGui.QPushButton("Close")
-        #hbox.addWidget(self.update_button)
         hbox.addStretch()
         hbox.addWidget(self.close_button)
         self.connect(self.close_button, QtCore.SIGNAL('clicked()'),
                      self.close)
-        #self.connect(self.update_button, QtCore.SIGNAL('clicked()'), 
-        #             self.update)
 
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(self.report)
-        #vbox.addStretch()
         vbox.addLayout(hbox)
         self.setLayout(vbox)
 
