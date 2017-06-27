@@ -28,10 +28,12 @@ class DefaultFileParser(object):
         self.background_color = self.config.get("FUE", "background_color")
 
         self.c4exe = self.config.get("C4", "cmd")
+        self.casdir = self.config.get("C4", "casdir")
         self.libdir = self.config.get("C4", "libdir")
         self.default_version = self.config.get("C4", "default_version")
         self.default_neulib = self.config.get("C4", "default_neulib")
         self.default_gamlib = self.config.get("C4", "default_gamlib")
+        self.default_cpu = self.config.get("C4", "default_cpu")
         self.grid_que = self.config.get("C4", "grid_que")
 
 

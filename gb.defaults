@@ -9,8 +9,10 @@ background_color = #CFEECF  ; Tea green
 
 [C4]
 cmd = cas4 -e
+casdir = /home/prog/prod/CMSCODES/C4E/
 libdir = /home/prog/prod/CMSCODES/CasLib/library/
 default_version = 2.10.21P_VAT_1.3
 default_neulib = j20200
 default_gamlib = galb418
+default_cpu = grid  ; local / grid
 grid_que = all.q@wrath,all.q@envy,all.q@pride
