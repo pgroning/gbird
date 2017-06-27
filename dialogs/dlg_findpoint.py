@@ -22,31 +22,24 @@ class FindDialog(QtGui.QDialog):
         self.vhi_cbox = QtGui.QComboBox()
         self.vhi_cbox.addItems(QtCore.QStringList(voi_list))
 
-        tfu_list = [""]
-        self.tfu_cbox = QtGui.QComboBox()
-        self.tfu_cbox.addItems(QtCore.QStringList(tfu_list))
+        # tfu_list = [""]
+        # self.tfu_cbox = QtGui.QComboBox()
+        # self.tfu_cbox.addItems(QtCore.QStringList(tfu_list))
 
-        tmo_list = [""]
-        self.tmo_cbox = QtGui.QComboBox()
-        self.tmo_cbox.addItems(QtCore.QStringList(tmo_list))
-
-        #exp_list = [""]
-        #self.exp_cbox = QtGui.QComboBox()
-        #self.exp_cbox.addItems(QtCore.QStringList(exp_list))
+        # tmo_list = [""]
+        # self.tmo_cbox = QtGui.QComboBox()
+        # self.tmo_cbox.addItems(QtCore.QStringList(tmo_list))
 
         self.exp_slider = QtGui.QSlider(QtCore.Qt.Horizontal)
         self.exp_slider.setRange(0, 100)
         self.exp_slider.setValue(0)
         self.exp_slider.setTracking(True)
         self.exp_slider.setTickPosition(QtGui.QSlider.TicksBothSides)
-        #self.connect(self.exp_slider, QtCore.SIGNAL('valueChanged(int)'), 
-        #             self.exp_slider_action)
 
         flo.addRow("VOI:", self.voi_cbox)
         flo.addRow("VHI:", self.vhi_cbox)
-        flo.addRow("TFU:", self.tfu_cbox)
-        flo.addRow("TMO:", self.tmo_cbox)
-        #flo.addRow("EXP:", self.exp_cbox)
+        # flo.addRow("TFU:", self.tfu_cbox)
+        # flo.addRow("TMO:", self.tmo_cbox)
         flo.addRow("EXP:", self.exp_slider)
 
         groupbox = QtGui.QGroupBox()
@@ -69,7 +62,6 @@ class FindDialog(QtGui.QDialog):
                      self.find_action)
 
         vbox = QtGui.QVBoxLayout()
-        #vbox.addLayout(flo)
         vbox.addLayout(grid)
         vbox.addStretch()
         vbox.addLayout(hbox)
@@ -85,8 +77,3 @@ class FindDialog(QtGui.QDialog):
         exp_pc = self.exp_slider.value()
         
         self.parent.set_point_number(voi=voi, vhi=vhi, exp_pc=exp_pc)
-
-    #def exp_slider_action(self):
-    #    svalue = self.exp_slider.value()
-    #    print "slider value = " + str(svalue)
-        
