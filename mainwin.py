@@ -48,9 +48,9 @@ class Data(object):
 class MainWin(QtGui.QMainWindow):
     """Defines the main window and core functionality"""
 
-    def __init__(self, pfile=None, parent=None):
+    def __init__(self, appver="", pfile=None, parent=None):
         super(MainWin, self).__init__(parent)
-        self.appversion = "1.0.0T"
+        self.appversion = appver
         self.verbose = True
 
         path = os.path.realpath(__file__)
