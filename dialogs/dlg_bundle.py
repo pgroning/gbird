@@ -40,13 +40,6 @@ class BundleDialog(QtGui.QDialog):
         self.setGeometry(QtCore.QRect(0.5 * xpos, 0.8 * ypos, 800, 300))
 
         self.table_view = QtGui.QTableView()
-        #self.table_view.setShowGrid(False)
-        #self.table_view.setSelectionBehavior(
-        #    QtGui.QAbstractItemView.SelectRows)
-        #self.table_view.setSelectionMode(
-        #    QtGui.QAbstractItemView.SingleSelection)
-        #self.table_view.setDragDropMode(
-        #    QtGui.QAbstractItemView.DragDrop)
 
         self.delegate = ItemDelegate()
         self.table_view.setItemDelegateForColumn(0, self.delegate)
@@ -73,31 +66,17 @@ class BundleDialog(QtGui.QDialog):
         self.fuetype_cbox.addItems(QtCore.QStringList(self.fue_list))
 
         self.content_cbox = QtGui.QComboBox()
-        #self.content_list = ["filt.", "unfilt."]
         self.content_list = ["voi=vhi", "complete"]
         self.content_cbox.addItems(QtCore.QStringList(self.content_list))
-
-        #self.height_cbox = QtGui.QComboBox()
-        #self.height_list = ["zone", "total"]
-        #self.height_cbox.addItems(QtCore.QStringList(self.height_list))
-
-        #self.save_button = QtGui.QPushButton("Save...")
-        #self.load_button = QtGui.QPushButton("Load...")
 
         flo = QtGui.QFormLayout()
         flo.addRow("Fuel:", self.fuetype_cbox)
         flo.addRow("Content:", self.content_cbox)
-        #flo.addRow("Height:", self.height_cbox)
 
         vbox = QtGui.QVBoxLayout()
         vbox.addLayout(flo)
-        #vbox.addWidget(self.fuetype_cbox)
-        #vbox.addStretch()
-        #vbox.addWidget(self.load_button)
-        #vbox.addWidget(self.save_button)
 
         groupbox = QtGui.QGroupBox()
-        #groupbox.setTitle("Bundle")
         groupbox.setStyleSheet("QGroupBox {border: 1px solid silver;\
         border-radius:5px; font: bold; subcontrol-origin: margin;\
         padding: 10px 0px 0px 0px}")
@@ -153,14 +132,9 @@ class BundleDialog(QtGui.QDialog):
 
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(toolbar)
-        #vbox.addLayout(flo)
         vbox.addLayout(grid)
-        #vbox.addStretch()
         vbox.addLayout(hbox)
         self.setLayout(vbox)
-
-    #def action(self):
-    #    self.close()
 
     def add_file_action(self):
         """Add single cax file to table cell"""
@@ -189,30 +163,22 @@ class BundleDialog(QtGui.QDialog):
     def delete_row_action(self):
         row = self.table_view.selectionModel().currentIndex().row()
         self.table_view.model().takeRow(row)
-        #self.table_view.removeRow(row)
 
     def set_table_data(self):
         """Set table cell data"""
         
         self.clear_all()
         
-        #caxfiles = self.parent.bunlist[0].data.caxfiles
         caxfiles = self.data.caxfiles
         caxfiles = caxfiles[::-1]  # make copy and reverse order
         
-        #nodes = self.parent.bunlist[0].data.nodes
         nodes = self.data.nodes[::-1]
-        #btf_nodes = self.parent.bunlist[0].data.btf_nodes
         btf_nodes = self.data.btf_nodes[::-1]
-        #content = self.parent.bunlist[0].data.content
-        #content = self.data.content
         nfiles = len(caxfiles)
         
         for i, caxfile in enumerate(caxfiles):
-            #item0 = QtGui.QStandardItem(str(nodes[i]))
             node = '{0:g}'.format(nodes[i])
             item0 = QtGui.QStandardItem(node)
-            #item1 = QtGui.QStandardItem(str(btf_nodes[i]))
             btf_node = '{0:g}'.format(btf_nodes[i])
             item1 = QtGui.QStandardItem(btf_node)
             item2 = QtGui.QStandardItem(caxfile)
@@ -221,29 +187,12 @@ class BundleDialog(QtGui.QDialog):
             self.table_view.model().setItem(i, 2, item2)
             vheader = QtGui.QStandardItem(str(nfiles - i))
             self.table_view.model().setVerticalHeaderItem(i, vheader)
-            #self.table_view.setRowHeight(i, 25)
-            #self.table_view.model().setRowHeight(i, 25)
-            #item.setCheckable(True)
-            #item.setCheckState(QtCore.Qt.Unchecked)
-            #item.setCheckState(QtCore.Qt.Checked)
-        #self.table_view.setColumnWidth(0, 80)
-        #self.table_view.setColumnWidth(1, 80)
         self.table_view.resizeColumnToContents(2)
         
-        #fuetype = self.parent.bunlist[0].data.fuetype
         fuetype = self.data.fuetype
         ifue = self.fue_list.index(fuetype)
         self.fuetype_cbox.setCurrentIndex(ifue)
-
-        #if content == "filtered":
         self.content_cbox.setCurrentIndex(0)
-        #else:
-        #    self.content_cbox.setCurrentIndex(1)
-
-        #if self.data.height == "zone":
-        #    self.height_cbox.setCurrentIndex(0)
-        #else:
-        #    self.height_cbox.setCurrentIndex(1)
 
     def import_data_action(self):
         """Import data from cax files"""
@@ -254,12 +203,8 @@ class BundleDialog(QtGui.QDialog):
         bundle.data.fuetype = self.data.fuetype
         bundle.data.caxfiles = self.data.caxfiles
 
-        #if self.height_cbox.currentIndex() == 0:
         bundle.data.nodes = self.data.nodes
         bundle.data.btf_nodes = self.data.btf_nodes
-        #elif self.height_cbox.currentIndex() == 1:  # convert to zone height
-        #    bundle.data.nodes = self.zone_height(self.data.nodes)
-        #    bundle.data.btf_nodes = self.zone_height(self.data.btf_nodes)
         
         bundle.data.content = self.data.content
         self.close()
@@ -287,21 +232,14 @@ class BundleDialog(QtGui.QDialog):
         else:
             content = "unfiltered"
 
-        #if self.height_cbox.currentIndex() == 0:
-        #    height = "zone"
-        #else:
-        #    height = "total"
-
         node_list = []
         btf_list = []
         file_list = []
         nrows = self.table_view.model().rowCount()
         for i in range(nrows):
             node_item = self.table_view.model().item(i, 0)
-            #node_list.append(int(node_item.text()))
             node_list.append(float(node_item.text()))
             btf_item = self.table_view.model().item(i, 1)
-            #btf_list.append(int(btf_item.text()))
             btf_list.append(float(btf_item.text()))
             file_item = self.table_view.model().item(i, 2)
             file_list.append(str(file_item.text()))
@@ -313,7 +251,6 @@ class BundleDialog(QtGui.QDialog):
         self.data.fuetype = fuetype
         self.data.content = content
         self.data.nodes = node_list
-        #self.data.height = height
         self.data.btf_nodes = btf_list
         self.data.caxfiles = file_list
                 
@@ -401,7 +338,6 @@ class BundleDialog(QtGui.QDialog):
         inpfile = InpFileParser(self.data)
         inpfile.read(filename)
         
-        #self.parent.read_pro(filename)
         self.set_table_data()
 
     def save_bundle_action(self):
@@ -414,27 +350,6 @@ class BundleDialog(QtGui.QDialog):
         self.get_table_data()
         inpfile = InpFileParser(self.data)
         inpfile.write(filename)
-
-        #config = ConfigParser.SafeConfigParser()
-        #config.add_section("Bundle")
-        #config.set("Bundle", "fuel", self.data.fuetype)
-
-        #file_str = "\n".join(self.data.caxfiles[::-1])  # save reverse order
-        #config.set("Bundle", "files", file_str)
-
-        #nodes = map(str, self.data.nodes[::-1])
-        #node_str = "\n".join(nodes)
-        #config.set("Bundle", "nodes", node_str)
-
-        #config.set("Bundle", "content", self.data.content)
-
-        #config.add_section("BTF")
-        #btf_nodes = map(str, self.data.btf_nodes[::-1])
-        #btf_str = "\n".join(btf_nodes)
-        #config.set("BTF", "nodes", btf_str)
-        
-        #with open(filename, "wb") as configfile:
-        #    config.write(configfile)
 
     def select_read_file(self, file_choices=None):
         """Select file for reading"""
@@ -569,9 +484,6 @@ class SegmentDialog(QtGui.QDialog):
             if connect_list[i]:
                 sim_item.setCheckState(QtCore.Qt.Checked)
             sim_item.setEditable(False)
-            #brush = QtGui.QBrush()
-            #brush.setColor(QtGui.QColor().blue())
-            #sim_item.setBackground(brush)
             self.table_view.model().setItem(i, 2, sim_item)
             vheader = QtGui.QStandardItem(str(nrows - i))
             self.table_view.model().setVerticalHeaderItem(i, vheader)
@@ -618,4 +530,3 @@ class SegmentDialog(QtGui.QDialog):
         bundle.data.segment_connect_list = self.data.segment_connect_list
             
         self.close()
-        
