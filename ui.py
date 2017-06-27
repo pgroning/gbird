@@ -240,13 +240,6 @@ class Ui_MainWindow(object):
         edit_menu.addAction(reset_action)
         self.menu_actions.append(reset_action)
 
-        icon = "preferences-icon_32x32"
-        text = "Preferences..."
-        tip = text
-        args = (text, icon, tip)
-        self.preferences_action = self.__create_action(*args)
-        edit_menu.addAction(self.preferences_action)
-
         # --- Tools menu ---
         tools_menu = menubar.addMenu("&Tools")
 
@@ -346,8 +339,7 @@ class Ui_MainWindow(object):
         toolbar.addAction(self.new_action)
         toolbar.addAction(self.file_action)
         toolbar.addAction(self.save_action)
-        toolbar.addAction(self.quickcalc_action)              
-        toolbar.addAction(self.preferences_action)
+        toolbar.addAction(self.quickcalc_action)
 
         color_icon = "color-icon_32x32"
         text = "Show color map"
