@@ -62,8 +62,7 @@ class EgvDialog(QtGui.QDialog):
 
         self.insert_table_rows()
         self.table.resizeColumnsToContents()
-        #self.table.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
-
+        
         hbox = QtGui.QHBoxLayout()
         self.run_button = QtGui.QPushButton("Run")
         self.cancel_button = QtGui.QPushButton("Close")
@@ -164,7 +163,6 @@ class EgvDialog(QtGui.QDialog):
                     fname = files[i]
                 else:
                     fname = caxfiles[i]
-                    #fname = caxfiles[i].split(os.sep)[-1]
 
                 self.table.setCellWidget(i, 0, zone_cbox)
                 item = QtGui.QTableWidgetItem(fname)
@@ -265,5 +263,4 @@ class EgvDialog(QtGui.QDialog):
                     msgBox.setText("EGV-run did not pass.\n\nSorry!")
                     msgBox.setDetailedText(QtCore.QString.fromUtf8(infotext))
                     msgBox.setIcon(QtGui.QMessageBox.Warning)
-                #msgBox.setIcon(QtGui.QMessageBox.Critical)
             status = msgBox.exec_()
