@@ -43,21 +43,9 @@ class PertDialog(QtGui.QDialog):
                 i = depthres_list.index("undef")
             self.depthres_cbox.setCurrentIndex(i)
 
-        voi_list = ["undef", "0", "40", "50", "60", "80"]
-        self.voi_cbox = QtGui.QComboBox()
-        self.voi_cbox.addItems(QtCore.QStringList(voi_list))
-        if hasattr(self.parent.params, "pert_voi"):
-            if type(self.parent.params.pert_voi) == float:
-                voi_str = str(int(self.parent.params.pert_voi))
-                i = voi_list.index(voi_str)
-            else:
-                i = voi_list.index("undef")
-            self.voi_cbox.setCurrentIndex(i)
-
         flo.addRow("Model:", self.model_cbox)
         flo.addRow("Maximum depletion:", self.depmax_cbox)
         flo.addRow("Depletion threshold:", self.depthres_cbox)
-        flo.addRow("Void:", self.voi_cbox)
 
         groupbox = QtGui.QGroupBox()
         groupbox.setTitle("Settings")
@@ -79,7 +67,6 @@ class PertDialog(QtGui.QDialog):
                      self.ok_action)
 
         vbox = QtGui.QVBoxLayout()
-        #vbox.addLayout(flo)
         vbox.addLayout(grid)
         vbox.addStretch()
         vbox.addLayout(hbox)
@@ -97,9 +84,5 @@ class PertDialog(QtGui.QDialog):
             params.pert_depthres = None
         else:
             params.pert_depthres = float(self.depthres_cbox.currentText())
-        if self.voi_cbox.currentText() == "undef":
-            params.pert_voi = None
-        else:
-            params.pert_voi = float(self.voi_cbox.currentText())
         if hasattr(self.parent, "biascalc"):
             del self.parent.biascalc  # bias calc should be updated
