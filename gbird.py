@@ -48,7 +48,7 @@ class Data(object):
 class MainWin(QtGui.QMainWindow):
     """Defines the main window and core functionality"""
 
-    def __init__(self, parent=None):
+    def __init__(self, pfile=None, parent=None):
         super(MainWin, self).__init__(parent)
         self.appversion = "1.0.0T"
         self.verbose = True
@@ -87,21 +87,25 @@ class MainWin(QtGui.QMainWindow):
 
         self.fuelmap = FuelMap(self)
         
-    def openFile(self):
-        """Open bundle object from pickle file"""
+        if pfile and os.path.splitext(pfile)[1] == ".gbi":  # open .gbi file
+            self.openFile(pfile)
 
+    def openFile(self, filename=None):
+        """Open bundle objects from pickle file"""
+        
         # Import default path from config file
         self.settings.beginGroup("PATH")
         path_default = self.settings.value("path_default",
                                            QtCore.QString("")).toString()
         self.settings.endGroup()
         file_choices = "Data files (*.gbi *.cax)"
-        filename = unicode(QtGui.QFileDialog.getOpenFileName(self, 'Open file',
-                                                             path_default,
-                                                             file_choices))
+        if not filename:
+            filename = unicode(QtGui.QFileDialog.getOpenFileName(self, 'Open file',
+                                                                 path_default,
+                                                                 file_choices))
         if filename:
             self.clear_data()
-
+            
             self.thread = LoadPickleThread(self, filename)
             self.connect(self.thread, QtCore.SIGNAL('finished()'), 
                      self.__load_pickle_finished)
