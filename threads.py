@@ -80,7 +80,7 @@ class SavePickleThread(QtCore.QThread):
             with open(self.filename, 'wb') as fp:
                 pickle.dump(self.parent.params, fp, 1)
                 pickle.dump(self.parent.bunlist, fp, 1)
-                if hasattr(self, "biascalc"):
+                if hasattr(self.parent, "biascalc"):
                     pickle.dump(self.parent.biascalc, fp, 1)
            
             print "Project saved to file " + self.filename
