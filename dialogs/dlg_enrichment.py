@@ -55,13 +55,8 @@ class EnrichmentDialog(QtGui.QDialog):
 
         self.table_view = QtGui.QTableView()
         self.table_view.setSortingEnabled(True)
-        #self.table_view.setShowGrid(False)
         self.table_view.setSelectionBehavior(
             QtGui.QAbstractItemView.SelectRows)
-        #self.table_view.setSelectionMode(
-        #    QtGui.QAbstractItemView.SingleSelection)
-        #self.table_view.setDragDropMode(
-        #    QtGui.QAbstractItemView.DragDrop)
 
         # Put constraints on user input
         self.dens_delegate = DensItemDelegate()
@@ -84,7 +79,6 @@ class EnrichmentDialog(QtGui.QDialog):
         
         horizontalheader = self.table_view.horizontalHeader()
         horizontalheader.setResizeMode(QtGui.QHeaderView.Stretch)
-        #horizontalheader.setResizeMode(2, QtGui.QHeaderView.Stretch)
 
         verticalheader = self.table_view.verticalHeader()
         verticalheader.setResizeMode(QtGui.QHeaderView.Fixed)
@@ -136,9 +130,7 @@ class EnrichmentDialog(QtGui.QDialog):
 
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(toolbar)
-        #vbox.addLayout(flo)
         vbox.addLayout(grid)
-        #vbox.addStretch()
         vbox.addLayout(hbox)
         self.setLayout(vbox)
 
@@ -146,8 +138,6 @@ class EnrichmentDialog(QtGui.QDialog):
         """Add single cax file to table cell"""
 
         i = self.table_view.model().rowCount()
-        #icur = self.table_view.selectionModel().currentIndex()
-        #i = icur.row() + 1
         empty_item = QtGui.QStandardItem("")
         self.table_view.model().insertRow(i, empty_item)
 
@@ -161,7 +151,6 @@ class EnrichmentDialog(QtGui.QDialog):
         self.table_view.model().setItem(i, 2, item2)
         self.table_view.model().setItem(i, 3, item3)
 
-        #self.table_view.clearSelection()
         self.table_view.selectionModel().clearSelection()
         select = QtGui.QItemSelectionModel.Select
         noupdate = QtGui.QItemSelectionModel.NoUpdate
@@ -174,7 +163,6 @@ class EnrichmentDialog(QtGui.QDialog):
     def delete_row_action(self):
         i = self.table_view.selectionModel().currentIndex().row()
         self.table_view.model().takeRow(i)
-        #self.table_view.removeRow(row)
 
         if i >= self.table_view.model().rowCount():
             i = self.table_view.model().rowCount() - 1
@@ -198,13 +186,6 @@ class EnrichmentDialog(QtGui.QDialog):
     def reset_action(self):
         """reset all cells"""
         self.set_table_data()
-        #msgBox = QtGui.QMessageBox()
-        #status = msgBox.information(self, "Reset",
-        #                            "Continue?",
-        #                            QtGui.QMessageBox.Yes |
-        #                            QtGui.QMessageBox.Cancel)
-        #if status == QtGui.QMessageBox.Yes:
-        #    self.set_table_data()
         
     def set_table_data(self):
         """Set table cell data"""
@@ -232,33 +213,6 @@ class EnrichmentDialog(QtGui.QDialog):
             self.table_view.model().setItem(i, 1, dens_item)
             self.table_view.model().setItem(i, 2, enr_item)
             self.table_view.model().setItem(i, 3, ba_item)
-
-            #vheader = QtGui.QStandardItem(str(nfiles - i))
-            #self.table_view.model().setVerticalHeaderItem(i, vheader)
-
-            #self.table_view.setRowHeight(i, 25)
-            #self.table_view.model().setRowHeight(i, 25)
-            #item.setCheckable(True)
-            #item.setCheckState(QtCore.Qt.Unchecked)
-            #item.setCheckState(QtCore.Qt.Checked)
-        #self.table_view.setColumnWidth(0, 80)
-        #self.table_view.setColumnWidth(1, 80)
-        #self.table_view.resizeColumnToContents(2)
-        
-        #fuetype = self.parent.bunlist[0].data.fuetype
-        #fuetype = self.data.fuetype
-        #ifue = self.fue_list.index(fuetype)
-        #self.fuetype_cbox.setCurrentIndex(ifue)
-
-        #if content == "filtered":
-        #self.content_cbox.setCurrentIndex(0)
-        #else:
-        #    self.content_cbox.setCurrentIndex(1)
-
-        #if self.data.height == "zone":
-        #    self.height_cbox.setCurrentIndex(0)
-        #else:
-        #    self.height_cbox.setCurrentIndex(1)
 
     def ok_action(self):
         """Update enrpinlist"""
@@ -407,17 +361,12 @@ class EnrichmentDialog(QtGui.QDialog):
         self.table_view.model().removeRows(0, nrows)
 
 
-
 class EnrDialog(QtGui.QDialog):
     def __init__(self, parent, mode="edit"):
-        # QDialog.__init__(self, parent)
         QtGui.QDialog.__init__(self)
         self.parent = parent
         self.mode = mode
 
-        # self.setWindowTitle("Window title")
-        # set x-pos relative to cursor position
-        # xpos = QCursor.pos().x() - 250
         # set dialog pos relative to main window
         xpos = parent.pos().x() + parent.size().width() / 2
         ypos = parent.pos().y() + parent.size().height() / 2
