@@ -32,7 +32,7 @@ from casinp import Casinp
 from fuelmap import FuelMap
 from fileio import DefaultFileParser
 
-from dialogs import BundleDialog, SegmentDialog, CasDialog, CasRunDialog, \
+from dialogs import BundleDialog, SegmentDialog, CasDialog, \
     PertDialog, ReportDialog, FindDialog, EgvDialog, EnrichmentDialog, \
     EnrDialog, ProgressBar
 
@@ -546,11 +546,6 @@ class MainWin(QtGui.QMainWindow):
         self.cas_dlg = CasDialog(self)
         self.cas_dlg.exec_()
         
-    def open_fullcalc_dlg(self):
-        """open run fullcalc dialog"""
-        self.fullcalc_dlg = CasRunDialog(self)
-        self.fullcalc_dlg.exec_()
-
     def open_report_dlg(self):
         """open fuel report dialog"""
         if hasattr(self, "bunlist"):  # check that data has been imported
