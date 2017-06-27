@@ -22,11 +22,6 @@ class ProgressBar(QtGui.QDialog):
             hbox.addWidget(self.button)
         vbox.addLayout(hbox)
         self.setLayout(vbox)
-        #main_layout = QGridLayout()
-        #main_layout.addWidget(self.progressbar, 0, 0)
-        #main_layout.addWidget(self.button, 1, 0)
-        #self.setLayout(main_layout)
-        #self.setWindowTitle("Importing data...")
         self.resize(300, 50)
         self.setMaximumHeight(50)
         self.move(500, 500)
@@ -34,6 +29,7 @@ class ProgressBar(QtGui.QDialog):
 
     def update(self,val):
         self.progressbar.setValue(val)
+
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
