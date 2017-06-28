@@ -21,10 +21,7 @@ b1.new_btf()
 '''
 
 import sys
-import os.path
-import re
 import numpy as np
-import ConfigParser
 import copy
 from multiprocessing import Pool
 
@@ -53,19 +50,19 @@ class Data(object):
 class Bundle(object):
     """Read, save and load cases"""
 
-    def __init__(self, infile=None, parent=None):
+    def __init__(self, inpfile=None, parent=None):
         self.data = Data()
 
-        if infile:
-            self.readinp(infile)
+        if inpfile:
+            self.readinp(inpfile)
         elif parent:
             self.setup(parent)
 
-    def readinp(self, cfgfile):
+    def readinp(self, inpfile):
         """Read project setup file"""
         
         pfile = InpFileParser(self.data)
-        pfile.read(cfgfile)
+        pfile.read(inpfile)
 
     def readcax(self, content="filtered"):
         """Read multiple caxfiles using multithreading.
