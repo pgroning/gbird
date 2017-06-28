@@ -12,7 +12,6 @@ except:
 from bundle import Bundle
 
 
-
 class ImportThread(QtCore.QThread):
     def __init__(self, parent):
         QtCore.QThread.__init__(self)

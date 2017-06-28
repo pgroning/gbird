@@ -18,11 +18,6 @@ import re
 import numpy as np
 from PyQt4 import QtGui, QtCore
 
-try:
-    import cPickle as pickle
-except:
-    import pickle
-
 from ui import Ui_MainWindow
 from bundle import Bundle
 from plot import PlotWin
@@ -1084,8 +1079,8 @@ class MainWin(QtGui.QMainWindow):
                                     msg, QtGui.QMessageBox.Ok)
 
     def cas_calc(self):
-        """Performing ordinary CASMO calculations..."""
-
+        """Performing CASMO calculations..."""
+        
         self.thread = RunC4Thread(self)
         self.connect(self.thread, QtCore.SIGNAL('finished()'), 
                          self.__cas_calc_finished)

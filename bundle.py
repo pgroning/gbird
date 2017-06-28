@@ -20,11 +20,6 @@ b1.new_calc()
 b1.new_btf()
 '''
 
-try:
-    import cPickle as pickle
-except:
-    import pickle
-
 import sys
 import os.path
 import re
