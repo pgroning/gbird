@@ -1,9 +1,14 @@
 # python test/test_bundle.py
 #
 # Run single test:
-# $ python test_bundle.py UnitTest.test_append_state
+# $ python test_bundle.py UnitTest.test_xyz
 # Run all tests in directory test:
 # $ python -m unittest discover test
+#
+# Output status:
+# OK (skipped=1)
+# FAILED (failures=1, skipped=1)
+# FAILED (errors=1, skipped=1)
 #
 
 from IPython.core.debugger import Tracer
@@ -23,10 +28,6 @@ class UnitTest(unittest.TestCase):
 
     def setUp(self):
         unittest.TestCase.setUp(self)
-
-        #self.testfile = "caxfiles_opt2.inp"
-        #self.bo = Bundle()
-        #self.bo.readinp(self.testfile)
 
     def tearDown(self):
         unittest.TestCase.tearDown(self)
@@ -73,7 +74,6 @@ class UnitTest(unittest.TestCase):
     #@unittest.skip("skip this test")
     def test_new_calc(self):
         testfile = "test/tosim/at11.inp"
-        #testfile = "test/topol/a10xm.inp"
         b = Bundle(testfile)
         b.readcax()
         b1 = Bundle()
@@ -104,7 +104,6 @@ class UnitTest(unittest.TestCase):
     #@unittest.skip("skip test_new_calc_c4")
     def test_new_calc_c4(self):
         testfile = "test/topol/at11.inp"
-        #testfile = "test/topol/a10xm.inp"
         b = Bundle(testfile)
         b.readcax()
         b1 = Bundle()
@@ -115,21 +114,17 @@ class UnitTest(unittest.TestCase):
 
     #@unittest.skip("skip this test")
     def test_new_ave_enr_calc(self):
-        #testfile = "test/tosim/bundle_at11.inp"
         testfile = "test/tosim/a10b.inp"
         b = Bundle(testfile)
         b.readcax()
         b1 = Bundle()
         b1.setup(b)
-        b1.new_calc(grid=True)
+        b1.new_calc(grid=False)
         for s in b1.segments:
             s.ave_enr_calc()
         bundle_enr = b1.ave_enr_calc()
         self.assertTrue(bundle_enr > 0, 
                         "bundle enrichment is invalid")
-        #b.ave_enr_calc()
-        #self.assertTrue(b.states[1].ave_enr > 0, 
-        #                "bundle enrichment is invalid")
 
     #@unittest.skip("skip this test")
     def test_btf_calc_a10xm(self):

@@ -1,10 +1,16 @@
 # python test/test_segment.py
 #
+# Run single test:
+# $ python test_segment.py UnitTest.test_xyz
+# Run all tests in directory test:
+# $ python -m unittest discover test
+#
 # Output status:
 # OK (skipped=1)
 # FAILED (failures=1, skipped=1)
 # FAILED (errors=1, skipped=1)
 #
+
 from IPython.core.debugger import Tracer
 import sys
 if sys.version_info < (2, 7):
@@ -26,8 +32,6 @@ class UnitTest(unittest.TestCase):
     def setUp(self):
         unittest.TestCase.setUp(self)
 
-        #self.seg = Segment(self.testfile)
-        #self.cas.readcax(self.testfile,0)
         self.file_base_name = "test_file_base_name"
 
     def tearDown(self):
@@ -98,17 +102,7 @@ class UnitTest(unittest.TestCase):
         bwr = s._Segment__boxbow(box_offset)  # reaching "private" method
         result = "11 1.300 13.580 0.14 0.862 0.653 1.27"
         self.assertTrue(result in bwr)
-    
-    #@unittest.skip("test_add_state")
-    #def test_add_state(self):
-    #    testfile = "test/tosim/OPT2/12g30mid/e32OPT2-390-12g30mid-cas.cax"
-    #    s = Segment(testfile)
-    #    LFU = s.states[0].LFU
-    #    FUE = s.states[0].FUE
-    #    voi = 50
-    #    s.add_state(LFU, FUE, voi)
-    #    self.assertTrue((s.states[1].LFU == LFU).all())
-    
+        
     #@unittest.skip("test_writec3cai_at11")
     def test_writecai_c3_at11(self):
         testfile = "test/tosim/AT11/14g35top/exxAT11-384-14g35top-cas.cax"
@@ -167,7 +161,7 @@ class UnitTest(unittest.TestCase):
     def test_quickcalc(self):
         testfile = "test/tosim/OPT3/11g50bot/e33OPT3-383-11g50bot-cas.cax"
         s = Segment(testfile)
-        s.quickcalc(grid=False)
+        s.cas_calc(grid=False)
         Nstatepoints = len(s.statepoints)
         self.assertEqual(147, Nstatepoints, 
                         "Number of state points is incorrect")

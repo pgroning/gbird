@@ -797,7 +797,7 @@ class Segment(object):
             self.runc4(basename, c4ver=c4ver, neulib=neulib, gamlib=gamlib, 
                        grid=grid)
 
-    def quickcalc(self, voi=None, dep_max=None, dep_thres=None, grid=False,
+    def cas_calc(self, voi=None, dep_max=None, dep_thres=None, grid=False,
                   model="c3", box_offset=0.0, c4ver=None, neulib=None, 
                   gamlib=None, keepfiles=False):
         

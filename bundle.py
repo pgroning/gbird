@@ -38,10 +38,10 @@ def readcax_fun(tup):
     return Segment(*tup)
 
 
-def quickcalc_fun(tup):
+def calc_fun(tup):
     """Wrapper function used for multithreaded quickcalc"""
     segment = tup[0]  # First arg should always be an instance of the class
-    segment.quickcalc(*tup[1:])
+    segment.cas_calc(*tup[1:])
     return segment
 
 
@@ -116,7 +116,7 @@ class Bundle(object):
         
         n = len(segments)  # Number of threads
         p = Pool(n)  # Make the Pool of workers
-        self.segments = p.map(quickcalc_fun, inlist)
+        self.segments = p.map(calc_fun, inlist)
         p.close()
         p.join()
 
