@@ -23,8 +23,6 @@ except:
         NavigationToolbar
 from matplotlib.figure import Figure
 
-from bundle import Bundle
-
 
 class PlotWin(QtGui.QMainWindow):
     def __init__(self, parent=None, plotmode=None):
