@@ -1,6 +1,3 @@
-from pyqt_trace import pyqt_trace as qtrace  # Break point that works with Qt
-
-from PyQt4 import QtGui, QtCore
 import numpy as np
 
 import matplotlib.patches as mpatches
