@@ -9,7 +9,6 @@ from pyqt_trace import pyqt_trace as qtrace
 
 import sys
 import os
-import numpy as np
 
 from PyQt4 import QtGui, QtCore
 
