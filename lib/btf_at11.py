@@ -5,24 +5,15 @@ import numpy as np
 import sys
 
 from lib.libADDC import ADDC
-# sys.path.append('lib/')
-# import libADDC
-# from addc import addc
-
 
 def rfact_axial(POW, AC):
     """Calculating axial R-factors"""
-
-    # Import addc from shared lib
-    #acObj = ADDC(fuetype)
-    #AC = acObj.ac
 
     # Define some matrix dimensions
     nside = AC.shape[0]  # Number of side pins of the assembly
     dim = nside + 2  # Pin map storage dimension
     
     Ntotrods = nside * nside  # Total number of rods for ATRIUM 11
-    #Ntotrods = 100  # Total number of rods for ATRIUM 10XM
     # Calculate number of hot rods (POW[i,j] > 0)
     Nhotrods = sum(sum(POW > 0))  # Number of hot rods
     
@@ -39,15 +30,8 @@ def rfact_axial(POW, AC):
     # Define Rod Weight factors
     WP = np.zeros((dim, dim), dtype=float)
     # Considered rod: wp = 1. wp(unheated rod) = 0.25 x wp(heated rod)
-    # WP2 = np.zeros((dim, dim), dtype=float)
     WP[1:nside+1, 1:nside+1] = (POD > 0.0001).astype(float)
     WP[1:nside+1, 1:nside+1] += 0.25 * (POD < 0.0001).astype(float)
-    # for i in range(1,nside+1):
-    #    for j in range(1,nside+1):
-    #        if POD[i-1,j-1] > 0.0001:
-    #            WP[i,j] = 1.0
-    #        else:
-    #            WP[i,j] = 0.25
 
     # Calculate pinwise R-factors for fuel-rods where POW > 0
     DOW = np.zeros((nside, nside), dtype=float)
@@ -91,8 +75,6 @@ def rfact_axial(POW, AC):
 
 
 def rfact_nodal(POW3, AC):
-#def btf_a10xm(POW3, fuetype):
-#    """Calculating BTF for A10XM"""
 
     naxial_nodes = POW3.shape[0]
     nrows = POW3.shape[1]
@@ -104,7 +86,8 @@ def rfact_nodal(POW3, AC):
     # Calculate lattice K-factors for all nodes
     # Check if old axial rfact calculation can be re-used
     for node in xrange(naxial_nodes):
-        if (node > 0) and (POW3[node, :, :] == POW3[node-1, :, :]).all():
+        if (node > 0) and \
+                (np.array_equal(POW3[node, :, :], POW3[node-1, :, :])):
             DOW[node, :, :] = DOW[node-1, :, :]
         else:  # Perform new calculation
             DOW[node, :, :] = rfact_axial(POW3[node, :, :], AC)

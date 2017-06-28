@@ -4,14 +4,7 @@ import time
 import numpy as np
 import sys
 
-# from casio import casio
-# from casdata_pts_2 import casdata
-
 from lib.libADDC import ADDC
-# from lib.libADDC import addc
-# sys.path.append('lib/')
-# import libADDC
-# from addc import addc
 
 
 def acc_weifun(x):
@@ -37,11 +30,6 @@ def node_weight(z, naxial_nodes):
 
 def rfact_axial(POW, AC):
     """Calculating axial R-factors"""
-
-    # ac_obj = addc("SVEA-96")
-    # AC = ac_obj.addc
-    # acObj = ADDC("OPT2")
-    # AC = acObj.ac
 
     # Define some matrix dimensions
     nside = AC.shape[0]  # Number of side pins of the assembly
@@ -73,14 +61,6 @@ def rfact_axial(POW, AC):
     WP = np.zeros((dim, dim), dtype=float)
     # Weighting factors for heated rods. WP(i,j) = 1.0 if POD > 0
     WP[1:nside+1, 1:nside+1] = (POD > 0.0001).astype(float)
-
-    # WP = np.zeros((dim, dim), dtype=float)
-    # WP[1:nside+1,1:nside+1] = np.ones((nside,nside))
-    # Water cross/channel
-    # for i in range(1,nside+1):
-    #    for j in range(1,nside+1):
-    #        if POD[i-1,j-1] > 0.0001:
-    #            WP[i,j] = 1.0
 
     # PLR (modeled as cold rods)
     # For cold rods the weighting factor is 0.25 of the value of heated rod
@@ -159,8 +139,6 @@ def rfact_axial(POW, AC):
     # DOW[nside-1,0] = DOW[nside-1,0]             * (1.0 + crpfact*0.5)
     # DOW[nside-1,nside-1] = DOW[nside-1,nside-1] * (1.0 + crpfact*0.5)
 
-    # Calculate the max R-factor for the assembly
-    # Rfact = DOW.max()
     return DOW
 
 
@@ -201,13 +179,6 @@ def rfact_nodal(POW3, AC):
     Raxw = np.zeros((nrows, ncols))
     MFpl = np.zeros(nsubs)
 
-    # acObj = ADDC("OPT2")
-    # AC = acObj.ac
-
-    # Total number of rods (POW3[0,i,j] > 0)
-    # Ntotrods = 96  # Total number of rods for SVEA-96
-    # Ntotrods = sum(sum(POW3[0, :, :] > 0.0001))
-
     # Calculate lattice Do-factors for all nodes
     for node in xrange(naxial_nodes):
 
@@ -231,7 +202,8 @@ def rfact_nodal(POW3, AC):
 
         # Calculate lattice Do-factors for all nodes
         # Check if old axial rfact calculation can be re-used
-        if (node > 0) and (POW3[node, :, :] == POW3[node-1, :, :]).all():
+        if (node > 0) and \
+                (np.array_equal(POW3[node, :, :], POW3[node-1, :, :])):
             DOW[node, :, :] = DOW[node-1, :, :]
         else:  # Perform new calculation
             DOW[node, :, :] = rfact_axial(POW3[node, :, :], AC)
@@ -251,25 +223,6 @@ def rfact_nodal(POW3, AC):
         MFQ = M_flr[6:, 6:] * (MF[node, 3] - 1) + 1
         DOW[node, 6:, 6:] = DOW[node, 6:, 6:] * MFQ
 
-    '''
-    for node in xrange(naxial_nodes):
-        for i in xrange(nrows):
-            for j in xrange(ncols):
-                if M_flr[i, j]:  # check if pin at position (i,j) is FLR
-                    if i < 5 and j < 5:     # North-West
-                        mf = MF[node, 0]
-                    elif i < 11 and j < 5:  # South-West
-                        mf = MF[node, 1]
-                    elif i < 5 and j < 11:  # North-East
-                        mf = MF[node, 2]
-                    elif i < 11 and j < 11: # South-East
-                        mf = MF[node, 3]
-                    DOW[node, i, j] = DOW[node, i, j] * mf
-       '''
-    # Apply axial weight function
-    # WZ[z-1] = node_weight(z,naxial_nodes)
-    # Raxw += DOW*WZ
-
     # Apply average mismatch-factor (along axial-direction) for PLRs
     MF_plr = MF.mean(0)  # Take average along axial-direction
     M_plr = M_plr1 + M_plr2
@@ -288,57 +241,25 @@ def rfact_nodal(POW3, AC):
         # South-East
         DOW[node, 6:, 6:] = DOW[node, 6:, 6:] * MFQ4
 
-    '''
-    for z in range(naxial_nodes):
-        for i in range(DOW[0][0].size):
-            for j in range(DOW[0][1].size):
-                if Mplr[i,j]:
-                    if i<5 and j<5    : mf = MFpl[0]
-                    elif i<11 and j<5 : mf = MFpl[1]
-                    elif i<5 and j<11 : mf = MFpl[2]
-                    elif i<11 and j<11: mf = MFpl[3]
-                    DOW[z,i,j] = DOW[z,i,j] * mf
-    '''
-
     # Integrate along z-direction and apply axial weight function to get
     # pinwise R-factors
-    # DOX = np.zeros(DOW[0].shape)
     frac1 = 0.425
     frac2 = 0.25
 
-    # frac1 = 0.337*naxial_nodes - naxial_nodes_plr1
-    # frac2 = 0.65*naxial_nodes - naxial_nodes_plr2
     for node in xrange(naxial_nodes):
         if node < (naxial_nodes_plr1 - 1):  # All rods present
             DOX += DOW[node, :, :] * WZ[node]
         elif node < (naxial_nodes_plr2 - 1):  # 2/3 PLR + FLR rods present
             DOX += DOW[node, :, :] * WZ[node] * (1 - M_plr1)
-            # for i in range(DOX.shape[0]):
-            #    for j in range(DOX.shape[1]):
-            #        if not Mplr1[i,j]:
-            #            DOX[i,j] += DOW[node, i, j] * WZ[node]
         else:  # only FLR rods present
             DOX += DOW[node, :, :] * WZ[node] * M_flr
-            # for i in range(DOX.shape[0]):
-            #    for j in range(DOX.shape[1]):
-            #        if Mflr[i,j]:
-            #            DOX[i,j] += DOW[z,i,j]*WZ[z]
-
         # Account for the fact that the heated length top part of PLRs is
         # within the node.
         if node == (naxial_nodes_plr1 - 1):  # 1/3 PLR is within the node
             DOX += DOW[node, :, :] * WZ[node] * M_plr1 * frac1
-            # for i in range(DOX.shape[0]):
-            #    for j in range(DOX.shape[1]):
-            #        if Mplr1[i,j]:
-            #            DOX[i,j] += DOW[z,i,j]*WZ[z]*frac1
 
         if node == (naxial_nodes_plr2 - 1):  # 2/3 PLR is within the node
             DOX += DOW[node, :, :] * WZ[node] * M_plr2 * frac2
-            # for i in range(DOX.shape[0]):
-            #    for j in range(DOX.shape[1]):
-            #        if Mplr2[i,j]:
-            #            DOX[i,j] += DOW[z,i,j]*WZ[z]*frac2
 
     return DOX
 
