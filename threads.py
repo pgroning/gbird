@@ -34,7 +34,6 @@ class ImportThread(QtCore.QThread):
             self.emit(QtCore.SIGNAL('import_data_finished()'))
 
             # Perform reference calculation
-            print "Performing reference calculation..."
             biascalc = Bundle(parent=bundle)
             biascalc.new_calc(model="C3", dep_max=None,
                               dep_thres=None, voi=None)
@@ -42,6 +41,8 @@ class ImportThread(QtCore.QThread):
 
 
 class LoadPickleThread(QtCore.QThread):
+    """Load data from pickle file"""
+
     def __init__(self, parent, filename):
         QtCore.QThread.__init__(self)
         self.parent = parent
@@ -53,8 +54,8 @@ class LoadPickleThread(QtCore.QThread):
 
     def run(self):
         if not self._kill:
-            print "Loading data from file " + self.filename
-            
+            if self.parent.verbose:
+                print "Loading data from file: " + self.filename
             with open(self.filename, 'rb') as fp:
                 self.parent.params = pickle.load(fp)
                 self.parent.bunlist = pickle.load(fp)
@@ -65,6 +66,8 @@ class LoadPickleThread(QtCore.QThread):
             
 
 class SavePickleThread(QtCore.QThread):
+    """Save project to pickle file"""
+
     def __init__(self, parent, filename):
         QtCore.QThread.__init__(self)
         self.parent = parent
@@ -81,8 +84,8 @@ class SavePickleThread(QtCore.QThread):
                 pickle.dump(self.parent.bunlist, fp, 1)
                 if hasattr(self.parent, "biascalc"):
                     pickle.dump(self.parent.biascalc, fp, 1)
-           
-            print "Project saved to file " + self.filename
+                if self.parent.verbose:
+                    print "Project saved to file: " + self.filename
 
 class QuickCalcThread(QtCore.QThread):
     def __init__(self, parent):

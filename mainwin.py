@@ -46,7 +46,7 @@ class MainWin(QtGui.QMainWindow):
     def __init__(self, appver="", pfile=None, parent=None):
         super(MainWin, self).__init__(parent)
         self.appversion = appver
-        self.verbose = True
+        self.verbose = False
 
         path = os.path.realpath(__file__)
         self.appdir = os.path.split(path)[0] + os.sep

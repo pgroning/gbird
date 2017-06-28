@@ -88,7 +88,6 @@ class Btf(object):
 
     def calc_btf(self):
         """Calculating BTF"""
-        print "Calculating BTF..."
 
         # Find the segments included in BTF calculations
         all_segments = self.bundle.segments
@@ -138,8 +137,6 @@ class Btf(object):
 
         self.burnpoints = np.array(x).astype(float)
         
-        print "Done."
-
 
     if __name__ == '__main__':
         pass

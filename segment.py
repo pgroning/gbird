@@ -38,6 +38,7 @@ class Data(object):
 class Segment(object):
 
     def __init__(self, caxfile=None, content="filtered"):
+        self.verbose = False
 
         path = os.path.realpath(__file__)
         self.appdir = os.path.split(path)[0] + os.sep
@@ -117,9 +118,9 @@ class Segment(object):
     def readcax(self, caxfile, content="filtered"):
 
         if not os.path.isfile(caxfile):
-            print "Could not open file " + caxfile
+            print "Error: Could not open file " + caxfile
             return
-        else:
+        elif self.verbose:
             print "Reading file " + caxfile
 
         # Read the whole file
@@ -176,7 +177,6 @@ class Segment(object):
             iSLA = self.__matchcontent(flines, '^\s*SLA', 'next')
         except:
             iSLA = None
-            # print "Info: Could not find SLA card"
         iWRI = self.__matchcontent(flines, '^\s*WRI', 'next')
         iSTA = self.__matchcontent(flines, '^\s*STA', 'next')
 
@@ -415,7 +415,8 @@ class Segment(object):
         grid_que = self.config.grid_que
         arglist.insert(2, grid_que)
         fout = open('/dev/null', 'wb')
-        print "Running c4e model"
+        if self.verbose:
+            print "Running C4E model"
         if grid:
             try:  # use linrsh if available
                 call(arglist, stdout=fout, stderr=STDOUT, shell=False)
@@ -667,7 +668,7 @@ class Segment(object):
             lib2 = "." + lib2
             lib3 = "." + lib3
         else:
-            print "Could not locate C3 executable"
+            print "Error: Could not locate C3 executable"
             return
 
         # Write C3 configuration file
@@ -685,7 +686,8 @@ class Segment(object):
         f.close()
 
         # Run C3 executable
-        print "Running c3 model..."
+        if self.verbose:
+            print "Running C3 model..."
         arglist = ['linrsh', c3exe, c3cfg]
         arglist.insert(1, '-q')
         arglist.insert(2, 'all.q@wrath,all.q@envy,all.q@pride')
@@ -709,11 +711,10 @@ class Segment(object):
 
         caxfile = file_base_name + ".cax"
         if not os.path.isfile(caxfile):
-            print "Could not open file " + caxfile
+            print "Error: Could not open file " + caxfile
             return
         else:
             pass
-            #print "Reading file " + caxfile
         
         # Read the whole file at once
         with open(caxfile) as f:
@@ -833,8 +834,8 @@ class Segment(object):
             caxfile_old = file_base_name + ".cax"
             caxfile_new = "gb-" + os.path.basename(self.data.caxfile)
             os.rename(caxfile_old, caxfile_new)
-
-        print "Done."
+        if self.verbose:
+            print "Done."
 
     def __boxbow(self, box_offset=0.0):
         """Updating the BWR card to account for box bowing."""

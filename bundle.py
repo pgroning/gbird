@@ -85,7 +85,8 @@ class Bundle(object):
             self.segments[i].topnode = node
 
     def read_single_cax(self, caxfile):
-        print "Reading single cax file..."
+        """Reading single cax file..."""
+
         # Init data
         self.data.caxfiles = [caxfile]
         self.data.nodes = [25]  # max node
