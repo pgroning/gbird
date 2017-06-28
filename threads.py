@@ -1,7 +1,7 @@
 from IPython.core.debugger import Tracer  # Set tracepoint (used for debugging)
 from pyqt_trace import pyqt_trace as qtrace  # Break point that works with Qt
 
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtCore
 import numpy as np
 
 try:
